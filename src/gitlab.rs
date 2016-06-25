@@ -191,7 +191,7 @@ impl Gitlab {
         Self::_comm(&mut try!(self._mkrequest(url)), |req| req.put())
     }
 
-    fn _get_paged(&self, url: &str) -> GitlabResult {
+    fn _get_paged_req(req: Request) -> GitlabResult {
         let mut page = 1;
         let per_page = 100;
         let per_page_str = &format!("{}", per_page);
@@ -199,13 +199,11 @@ impl Gitlab {
         let mut results: Vec<Value> = vec![];
 
         loop {
-            let page_str = format!("{}", page);
-            let mut req = try!(self._mkrequest(url));
+            let page_str = &format!("{}", page);
+            let mut page_req = req.clone();
+            let res = try!(Self::_get_req(page_req.param("page", &page_str)
+                                                  .param("per_page", per_page_str)));
 
-            req.param("page", &page_str)
-               .param("per_page", per_page_str);
-
-            let res = try!(Self::_get_req(&mut req));
             let arr = match res.as_array() {
                 Some(arr)   => arr,
                 None        => return Err(Error::GitlabError("invalid page type".to_owned())),
@@ -220,5 +218,9 @@ impl Gitlab {
         }
 
         Ok(Value::Array(results))
+    }
+
+    fn _get_paged(&self, url: &str) -> GitlabResult {
+        Self::_get_paged_req(try!(self._mkrequest(url)))
     }
 }
