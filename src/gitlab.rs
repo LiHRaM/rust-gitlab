@@ -23,8 +23,8 @@ pub enum Error {
 impl Error {
     fn from_gitlab(value: Value) -> Self {
         let msg = value.pointer("/message")
-                       .and_then(|s| s.as_string())
-                       .unwrap_or_else(|| "unknown error");
+            .and_then(|s| s.as_string())
+            .unwrap_or_else(|| "unknown error");
 
         Error::GitlabError(msg.to_owned())
     }
@@ -33,9 +33,9 @@ impl Error {
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match *self {
-            Error::EaseError(ref error)     => write!(f, "ease error: {:?}", error),
-            Error::UrlError(ref error)      => write!(f, "url error: {}", error),
-            Error::GitlabError(ref error)   => write!(f, "gitlab error: {}", error),
+            Error::EaseError(ref error) => write!(f, "ease error: {:?}", error),
+            Error::UrlError(ref error) => write!(f, "url error: {}", error),
+            Error::GitlabError(ref error) => write!(f, "gitlab error: {}", error),
         }
     }
 }
@@ -48,8 +48,8 @@ impl StdError for Error {
     fn cause(&self) -> Option<&StdError> {
         match *self {
             Error::EaseError(ref error) => Some(error),
-            Error::UrlError(ref error)  => Some(error),
-            _                           => None,
+            Error::UrlError(ref error) => Some(error),
+            _ => None,
         }
     }
 }
@@ -78,10 +78,10 @@ pub enum CommitStatus {
 impl Borrow<str> for CommitStatus {
     fn borrow(&self) -> &str {
         match *self {
-            CommitStatus::Pending   => "pending",
-            CommitStatus::Running   => "running",
-            CommitStatus::Success   => "success",
-            CommitStatus::Failed    => "failed",
+            CommitStatus::Pending => "pending",
+            CommitStatus::Running => "running",
+            CommitStatus::Success => "success",
+            CommitStatus::Failed => "failed",
             CommitStatus::Cancelled => "canceled",
         }
     }
@@ -99,9 +99,9 @@ pub type GitlabResult = Result<Value, Error>;
 impl Gitlab {
     pub fn new(host: &str, token: &str) -> Result<Self, Error> {
         let api = Gitlab {
-                base_url: try!(Url::parse(&format!("https://{}/api/v3/", host))),
-                token: token.to_owned(),
-            };
+            base_url: try!(Url::parse(&format!("https://{}/api/v3/", host))),
+            token: token.to_owned(),
+        };
 
         // Ensure the API is working.
         try!(api.current_user());
@@ -116,8 +116,7 @@ impl Gitlab {
     }
 
     pub fn user_by_name(&self, name: &str) -> GitlabResult {
-        Self::_get_req(try!(self._mkrequest("users"))
-                                .param("username", name))
+        Self::_get_req(try!(self._mkrequest("users")).param("username", name))
     }
 
     pub fn user(&self, id: u64) -> GitlabResult {
@@ -125,24 +124,26 @@ impl Gitlab {
     }
 
     pub fn project_by_name(&self, name: &str) -> GitlabResult {
-        self._get(&format!("projects/{}", percent_encode(name.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+        self._get(&format!("projects/{}",
+                           percent_encode(name.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
     }
 
     pub fn create_merge_request_note(&self, project: u64, id: u64, content: &str) -> GitlabResult {
         let path = &format!("projects/{}/merge_requests/{}/notes", project, id);
 
-        Self::_post_req(try!(self._mkrequest(path))
-                                 .param("body", content))
+        Self::_post_req(try!(self._mkrequest(path)).param("body", content))
     }
 
-    pub fn create_commit_status(&self, project: u64, sha: &str, state: CommitStatus, refname: &str, name: &str, description: &str) -> GitlabResult {
+    pub fn create_commit_status(&self, project: u64, sha: &str, state: CommitStatus, refname: &str,
+                                name: &str, description: &str)
+                                -> GitlabResult {
         let path = &format!("projects/{}/statuses/{}", project, sha);
 
         Self::_post_req(try!(self._mkrequest(path))
-                                 .param("state", state.borrow())
-                                 .param("ref", refname)
-                                 .param("name", name)
-                                 .param("description", description))
+            .param("state", state.borrow())
+            .param("ref", refname)
+            .param("name", name)
+            .param("description", description))
     }
 
     fn _mkrequest(&self, url: &str) -> Result<Request, Error> {
@@ -155,10 +156,11 @@ impl Gitlab {
     }
 
     fn _comm<F>(req: &mut Request, f: F) -> GitlabResult
-        where F: FnOnce(&mut Request) -> Result<Response, EaseError> {
+        where F: FnOnce(&mut Request) -> Result<Response, EaseError>
+    {
         match f(req) {
-            Ok(rsp)     => rsp.from_json().map_err(|e| Error::EaseError(e)),
-            Err(err)    => {
+            Ok(rsp) => rsp.from_json().map_err(|e| Error::EaseError(e)),
+            Err(err) => {
                 if let EaseError::UnsuccessfulResponse(rsp) = err {
                     Err(Error::from_gitlab(try!(rsp.from_json())))
                 } else {
@@ -202,8 +204,8 @@ impl Gitlab {
                                                   .param("per_page", per_page_str)));
 
             let arr = match res.as_array() {
-                Some(arr)   => arr,
-                None        => return Err(Error::GitlabError("invalid page type".to_owned())),
+                Some(arr) => arr,
+                None => return Err(Error::GitlabError("invalid page type".to_owned())),
             };
 
             results.extend(arr.into_iter().cloned());
@@ -213,7 +215,7 @@ impl Gitlab {
             // just the requested results. This can cause an infinite loop here if the number of
             // total results is exactly equal to `per_page`.
             if arr.len() != per_page {
-                break
+                break;
             }
             page += 1;
         }
