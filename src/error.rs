@@ -11,13 +11,18 @@ use std::error;
 use std::fmt::{self, Display, Formatter};
 
 #[derive(Debug)]
+/// Errors which may occur when communicating with Gitlab.
 pub enum Error {
+    /// Error occurred when communicating with Gitlab.
     EaseError(EaseError),
+    /// URL parsing error; should never occur.
     UrlError(UrlError),
+    /// Gitlab returned an error message.
     GitlabError(String),
 }
 
 impl Error {
+    /// Extract the message from a Gitlab JSON error.
     pub fn from_gitlab(value: Value) -> Self {
         let msg = value.pointer("/message")
             .and_then(|s| s.as_string())
