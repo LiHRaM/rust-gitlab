@@ -96,6 +96,8 @@ impl Gitlab {
         let full_url = try!(self.base_url.join(url));
         let mut req = Request::new(full_url);
 
+        debug!(target: "gitlab", "api call {}", url);
+
         req.header(GitlabPrivateToken(self.token.clone()));
 
         Ok(req)
