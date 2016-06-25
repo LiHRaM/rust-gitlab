@@ -98,10 +98,17 @@ pub type GitlabResult = Result<Value, Error>;
 
 impl Gitlab {
     pub fn new(host: &str, token: &str) -> Result<Self, Error> {
-        Ok(Gitlab {
-            base_url: try!(Url::parse(&format!("https://{}/api/v3/", host))),
-            token: token.to_owned(),
-        })
+        let api = Gitlab {
+                base_url: try!(Url::parse(&format!("https://{}/api/v3/", host))),
+                token: token.to_owned(),
+            };
+
+        // Ensure the API is working.
+        try!(api.current_user());
+
+        // TODO: store user information.
+
+        Ok(api)
     }
 
     pub fn current_user(&self) -> GitlabResult {
