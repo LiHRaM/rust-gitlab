@@ -116,7 +116,8 @@ impl Gitlab {
     }
 
     pub fn user_by_name(&self, name: &str) -> GitlabResult {
-        self._get(&format!("users?username={}", name))
+        Self::_get_req(try!(self._mkrequest("users"))
+                                .param("username", name))
     }
 
     pub fn user(&self, id: u64) -> GitlabResult {
@@ -127,25 +128,21 @@ impl Gitlab {
         self._get(&format!("projects/{}", percent_encode(name.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
     }
 
-    pub fn create_merge_request_note(&self, project: &str, id: &str, content: &str) -> GitlabResult {
-        let path = &format!("projects/{}/merge_requests/{}/notes", percent_encode(project.as_bytes(), PATH_SEGMENT_ENCODE_SET), id);
-        let mut req = try!(self._mkrequest(path));
+    pub fn create_merge_request_note(&self, project: u64, id: u64, content: &str) -> GitlabResult {
+        let path = &format!("projects/{}/merge_requests/{}/notes", project, id);
 
-        req.param("body", content);
-
-        Self::_post_req(&mut req)
+        Self::_post_req(try!(self._mkrequest(path))
+                                 .param("body", content))
     }
 
-    pub fn create_commit_status(&self, project: &str, sha: &str, state: CommitStatus, refname: &str, name: &str, description: &str) -> GitlabResult {
-        let path = &format!("projects/{}/statuses/{}", percent_encode(project.as_bytes(), PATH_SEGMENT_ENCODE_SET), sha);
-        let mut req = try!(self._mkrequest(path));
+    pub fn create_commit_status(&self, project: u64, sha: &str, state: CommitStatus, refname: &str, name: &str, description: &str) -> GitlabResult {
+        let path = &format!("projects/{}/statuses/{}", project, sha);
 
-        req.param("state", state.borrow());
-        req.param("ref", refname);
-        req.param("name", name);
-        req.param("description", description);
-
-        Self::_post_req(&mut req)
+        Self::_post_req(try!(self._mkrequest(path))
+                                 .param("state", state.borrow())
+                                 .param("ref", refname)
+                                 .param("name", name)
+                                 .param("description", description))
     }
 
     fn _mkrequest(&self, url: &str) -> Result<Request, Error> {
