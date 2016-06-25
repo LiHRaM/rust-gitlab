@@ -208,7 +208,11 @@ impl Gitlab {
 
             results.extend(arr.into_iter().cloned());
 
-            if arr.len() < per_page {
+            // Gitlab used to have issues returning paginated results; these have been fixed since,
+            // but if it is needed, the bug manifests as Gitlab returning *all* results instead of
+            // just the requested results. This can cause an infinite loop here if the number of
+            // total results is exactly equal to `per_page`.
+            if arr.len() != per_page {
                 break
             }
             page += 1;
