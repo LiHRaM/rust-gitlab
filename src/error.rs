@@ -2,6 +2,7 @@ extern crate ease;
 use self::ease::Error as EaseError;
 
 extern crate serde_json;
+use self::serde_json::Error as SerdeError;
 use self::serde_json::Value;
 
 extern crate url;
@@ -19,6 +20,8 @@ pub enum Error {
     UrlError(UrlError),
     /// Gitlab returned an error message.
     GitlabError(String),
+    /// Failed to deserialize a Gitlab result into a structure.
+    DeserializeError(Box<SerdeError>),
 }
 
 impl Error {
@@ -38,6 +41,7 @@ impl Display for Error {
             Error::EaseError(ref error) => write!(f, "ease error: {:?}", error),
             Error::UrlError(ref error) => write!(f, "url error: {}", error),
             Error::GitlabError(ref error) => write!(f, "gitlab error: {}", error),
+            Error::DeserializeError(ref error) => write!(f, "deserialization error: {}", error),
         }
     }
 }
@@ -51,6 +55,7 @@ impl error::Error for Error {
         match *self {
             Error::EaseError(ref error) => Some(error),
             Error::UrlError(ref error) => Some(error),
+            Error::DeserializeError(ref error) => Some(error),
             _ => None,
         }
     }
@@ -65,5 +70,11 @@ impl From<EaseError> for Error {
 impl From<UrlError> for Error {
     fn from(error: UrlError) -> Self {
         Error::UrlError(error)
+    }
+}
+
+impl From<SerdeError> for Error {
+    fn from(error: SerdeError) -> Self {
+        Error::DeserializeError(Box::new(error))
     }
 }
