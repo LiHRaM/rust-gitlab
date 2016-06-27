@@ -22,6 +22,7 @@ use std::borrow::Borrow;
 pub struct Gitlab {
     base_url: Url,
     token: String,
+    api_user: UserFull,
 }
 
 // The header Gitlab uses to authenticate the user.
@@ -35,15 +36,17 @@ impl Gitlab {
     ///
     /// Errors out if `token` is invalid.
     pub fn new(host: &str, token: &str) -> Result<Self, Error> {
-        let api = Gitlab {
-            base_url: try!(Url::parse(&format!("https://{}/api/v3/", host))),
-            token: token.to_owned(),
-        };
+        let base_url = try!(Url::parse(&format!("https://{}/api/v3/", host)));
 
         // Ensure the API is working.
-        try!(api.current_user());
+        let mut user_req = try!(Self::_mkrequest1(&base_url, token, "user"));
+        let api_user = try!(Self::_get_req(&mut user_req));
 
-        // TODO: store user information.
+        let api = Gitlab {
+            base_url: base_url,
+            token: token.to_owned(),
+            api_user: api_user,
+        };
 
         Ok(api)
     }
@@ -90,15 +93,24 @@ impl Gitlab {
     }
 
     // Create a request with the proper common metadata for authentication.
-    fn _mkrequest(&self, url: &str) -> Result<Request, Error> {
-        let full_url = try!(self.base_url.join(url));
+    //
+    // This method exists because we want to store the current user in the structure, but we don't
+    // have a `self` before we create the structure. Making it `Option<>` is a little silly and
+    // refactoring this out is worth the cleaner API.
+    fn _mkrequest1<'a>(base_url: &Url, token: &str, url: &str) -> GitlabResult<Request<'a>> {
+        let full_url = try!(base_url.join(url));
         let mut req = Request::new(full_url);
 
         debug!(target: "gitlab", "api call {}", url);
 
-        req.header(GitlabPrivateToken(self.token.clone()));
+        req.header(GitlabPrivateToken(token.to_owned()));
 
         Ok(req)
+    }
+
+    // Create a request with the proper common metadata for authentication.
+    fn _mkrequest(&self, url: &str) -> GitlabResult<Request> {
+        Self::_mkrequest1(&self.base_url, &self.token, url)
     }
 
     // Refactored code which talks to Gitlab and transforms error messages properly.
