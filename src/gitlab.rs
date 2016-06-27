@@ -9,35 +9,9 @@ extern crate url;
 use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 
 use super::error::Error;
+use super::types::*;
 
 use std::borrow::Borrow;
-
-#[derive(Clone, Copy)]
-/// States for commit statuses.
-pub enum CommitStatus {
-    /// The check is queued.
-    Pending,
-    /// The check is currently running.
-    Running,
-    /// The check succeeded.
-    Success,
-    /// The check failed.
-    Failed,
-    /// The check was cancelled.
-    Cancelled,
-}
-
-impl Borrow<str> for CommitStatus {
-    fn borrow(&self) -> &str {
-        match *self {
-            CommitStatus::Pending => "pending",
-            CommitStatus::Running => "running",
-            CommitStatus::Success => "success",
-            CommitStatus::Failed => "failed",
-            CommitStatus::Cancelled => "canceled", // [sic]
-        }
-    }
-}
 
 /// A representation of the Gitlab API for a single user.
 ///
@@ -100,7 +74,7 @@ impl Gitlab {
     }
 
     /// Create a status message for a commit.
-    pub fn create_commit_status(&self, project: u64, sha: &str, state: CommitStatus, refname: &str,
+    pub fn create_commit_status(&self, project: u64, sha: &str, state: StatusState, refname: &str,
                                 name: &str, description: &str)
                                 -> GitlabResult {
         let path = &format!("projects/{}/statuses/{}", project, sha);

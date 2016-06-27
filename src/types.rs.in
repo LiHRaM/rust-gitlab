@@ -1,0 +1,1240 @@
+extern crate chrono;
+use self::chrono::{DateTime, UTC};
+
+extern crate serde;
+
+extern crate serde_json;
+use self::serde_json::Value;
+
+use std::borrow::Borrow;
+
+// This is only used in internal API calls.
+//#[derive(Serialize, Deserialize, Debug)]
+//pub struct UserSafe {
+//    pub username: String,
+//    pub name: String,
+//}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+/// Type-safe user ID.
+pub struct UserId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+/// The states a user account can be in.
+pub enum UserState {
+    /// The user is active and may perform actions.
+    #[serde(rename="active")]
+    Active,
+    /// Blocked from logging in.
+    #[serde(rename="blocked")]
+    Blocked,
+    /// Blocked from logging in via LDAP.
+    #[serde(rename="ldap_blocked")]
+    LdapBlocked,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Basic user information.
+pub struct UserBasic {
+    /// The username.
+    pub username: String,
+    /// The display name.
+    pub name: String,
+    /// The user's ID.
+    pub id: UserId,
+    /// The state of the user account.
+    pub state: UserState,
+    /// The URL of the user's avatar.
+    pub avatar_url: String,
+    /// The URL of the user's profile page.
+    pub web_url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// More detailed information only accessible to administrators.
+pub struct User {
+    /// The username.
+    pub username: String,
+    /// The display name.
+    pub name: String,
+    /// The user's ID.
+    pub id: UserId,
+    /// The state of the user account.
+    pub state: UserState,
+    /// The URL of the user's avatar.
+    pub avatar_url: String,
+    /// The URL of the user's profile page.
+    pub web_url: String,
+    /// When the account was created.
+    pub created_at: DateTime<UTC>,
+    /// Whether the user is an administrator or not.
+    pub is_admin: bool,
+    /// Self-described biography of the user.
+    pub bio: Option<String>,
+    /// Geographic location of the user.
+    pub location: Option<String>,
+
+    /// Skype contact information.
+    pub skype: String,
+    /// LinkedIn contact information.
+    pub linkedin: String,
+    /// Twitter contact information.
+    pub twitter: String,
+    /// Custom URL for the user's website.
+    pub website_url: String,
+}
+
+impl From<User> for UserBasic {
+    fn from(user: User) -> Self {
+        UserBasic {
+            username: user.username,
+            name: user.name,
+            id: user.id,
+            state: user.state,
+            avatar_url: user.avatar_url,
+            web_url: user.web_url,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// External authentication tokens.
+pub struct Identity {
+    /// The provider of the token.
+    pub provider: String,
+    /// The UID for the provider.
+    pub extern_uid: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+/// Type-safe theme ID.
+pub struct ThemeId(u64);
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+/// Type-safe color scheme ID.
+pub struct ColorSchemeId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Full user structure information.
+pub struct UserFull {
+    /// The username.
+    pub username: String,
+    /// The display name.
+    pub name: String,
+    /// The user's ID.
+    pub id: UserId,
+    /// The state of the user account.
+    pub state: UserState,
+    /// The URL of the user's avatar.
+    pub avatar_url: String,
+    /// The URL of the user's profile page.
+    pub web_url: String,
+    /// When the account was created.
+    pub created_at: DateTime<UTC>,
+    /// Whether the user is an administrator or not.
+    pub is_admin: bool,
+    /// Self-described biography of the user.
+    pub bio: Option<String>,
+    /// Geographic location of the user.
+    pub location: Option<String>,
+
+    /// Skype contact information.
+    pub skype: String,
+    /// LinkedIn contact information.
+    pub linkedin: String,
+    /// Twitter contact information.
+    pub twitter: String,
+    /// Custom URL for the user's website.
+    pub website_url: String,
+
+    /// When the user last logged in.
+    pub last_sign_in_at: DateTime<UTC>,
+    /// When the user's account was confirmed.
+    pub confirmed_at: DateTime<UTC>,
+    /// The primary email address for the user.
+    pub email: String,
+
+    /// The theme used by the user.
+    pub theme_id: ThemeId,
+    /// The color scheme used by the user.
+    pub color_scheme_id: ColorSchemeId,
+    /// The number of projects the user may create.
+    pub projects_limit: u64,
+    /// When the user's current session started.
+    pub current_sign_in_at: DateTime<UTC>,
+
+    /// List of identities associated with the user.
+    pub identities: Vec<Identity>,
+
+    /// Whether the user can create groups.
+    pub can_create_group: bool,
+    /// Whether the user can create a new project.
+    pub can_create_project: bool,
+    /// Whether the user has two-factor authentication enabled.
+    pub two_factor_enabled: bool,
+    /// Whether the account is externally controlled.
+    pub external: bool,
+
+    // There's a `UserLogin` structure as well which contains this key too, but the API already has
+    // this token, so this is being skipped.
+    //pub private_token: String,
+}
+
+impl From<UserFull> for UserBasic {
+    fn from(user: UserFull) -> Self {
+        UserBasic {
+            username: user.username,
+            name: user.name,
+            id: user.id,
+            state: user.state,
+            avatar_url: user.avatar_url,
+            web_url: user.web_url,
+        }
+    }
+}
+
+impl From<UserFull> for User {
+    fn from(user: UserFull) -> Self {
+        User {
+            username: user.username,
+            name: user.name,
+            id: user.id,
+            state: user.state,
+            avatar_url: user.avatar_url,
+            web_url: user.web_url,
+            created_at: user.created_at,
+            is_admin: user.is_admin,
+            bio: user.bio,
+            location: user.location,
+            skype: user.skype,
+            linkedin: user.linkedin,
+            twitter: user.twitter,
+            website_url: user.website_url,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct EmailId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Email address.
+pub struct Email {
+    /// ID of the email.
+    pub id: EmailId,
+    /// The email address.
+    pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HookId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+/// A web hook to notify of events.
+pub struct Hook {
+    /// The ID of the hook.
+    pub id: HookId,
+    /// The URL to contact.
+    pub url: String,
+    /// When the hook was created.
+    pub created_at: DateTime<UTC>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// A web hook to notify of project events.
+pub struct ProjectHook {
+    /// The ID of the hook.
+    pub id: HookId,
+    /// The URL to contact.
+    pub url: String,
+    /// When the hook was created.
+    pub created_at: DateTime<UTC>,
+    /// The project associated with the hook.
+    pub project_id: ProjectId,
+    /// Whether the hook is contacted for push events.
+    pub push_events: bool,
+    /// Whether the hook is contacted for issue events.
+    pub issues_events: bool,
+    /// Whether the hook is contacted for merge request events.
+    pub merge_requests_events: bool,
+    /// Whether the hook is contacted for note events.
+    pub note_events: bool,
+    /// Whether the communication with the hook is verified using TLS certificates.
+    pub enable_ssl_verification: bool,
+}
+
+impl From<ProjectHook> for Hook {
+    fn from(hook: ProjectHook) -> Self {
+        Hook {
+            id: hook.id,
+            url: hook.url,
+            created_at: hook.created_at,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe project ID.
+pub struct ProjectId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Basic project information.
+pub struct BasicProjectDetails {
+    /// The ID of the project.
+    pub id: ProjectId,
+    /// The display name of the project.
+    pub name: String,
+    /// The display name of the project with the namespace.
+    pub name_with_namespace: String,
+    /// The path to the project's repository.
+    pub path: String,
+    /// The path to the project's repository with its namespace.
+    pub path_with_namespace: String,
+}
+
+/// Visibility levels of projects.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum VisibilityLevel {
+    Public = 20,
+    Internal = 10,
+    Private = 0,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Project information.
+pub struct Project {
+    /// The ID of the project.
+    pub id: ProjectId,
+    /// The description of the project.
+    pub description: Option<String>,
+    /// The default branch for the project.
+    pub default_branch: String,
+    /// A list of tags for the project.
+    pub tag_list: Vec<String>,
+    /// Whether the project is publicly visible or not.
+    pub public: bool,
+    /// Whether the project is archived or not.
+    pub archived: bool,
+    /// Integral value for the project's visibility.
+    pub visibility_level: u64,
+    /// The URL to clone the repository over SSH.
+    pub ssh_url_to_repo: String,
+    /// The URL to clone the repository over HTTPS.
+    pub http_url_to_repo: String,
+    /// The URL for the project's homepage.
+    pub web_url: String,
+    /// The owner of the project (`None` for a group-owned project).
+    pub owner: Option<UserBasic>,
+    /// The display name of the project.
+    pub name: String,
+    /// The display name of the project with the namespace.
+    pub name_with_namespace: String,
+    /// The path to the project's repository.
+    pub path: String,
+    /// The path to the project's repository with its namespace.
+    pub path_with_namespace: String,
+    /// Whether issues are enabled.
+    pub issues_enabled: bool,
+    /// Whether merge requests are enabled.
+    pub merge_requests_enabled: bool,
+    /// Whether project wiki is enabled.
+    pub wiki_enabled: bool,
+    /// Whether continuous integration is enabled.
+    pub builds_enabled: bool,
+    /// Whether project snippets is enabled.
+    pub snippets_enabled: bool,
+    /// Whether the continuous integration container registry is enabled.
+    pub container_registry_enabled: bool,
+    /// When the repository was created.
+    pub created_at: DateTime<UTC>,
+    /// When the last activity on the project occurred.
+    pub last_activity_at: DateTime<UTC>,
+    /// Whether continuous integration shared runners are enabled.
+    pub shared_runners_enabled: bool,
+    /// The user who created the repository.
+    pub creator_id: UserId,
+    /// The namespace the project lives in.
+    pub namespace: Namespace,
+    /// If the project is a fork, details about it.
+    pub forked_from_project: Option<BasicProjectDetails>,
+    /// The URL to the project avatar.
+    pub avatar_url: String,
+    /// The number of stars for the project.
+    pub star_count: u64,
+    /// The number of forks.
+    pub forks_count: u64,
+    /// The number of open issues (if issues are enabled).
+    pub open_issues_count: Option<u64>,
+    /// The continuous integration runner token (if enabled).
+    pub runners_token: Option<String>,
+    /// Whether builds are publicly visible.
+    pub public_builds: bool,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+/// Access levels for groups and projects.
+pub enum AccessLevel {
+    /// Guest access (can see the project).
+    Guest = 10,
+    /// Reporter access (can open issues).
+    Reporter = 20,
+    /// Developer access (can push branches, handle issues and merge requests).
+    Developer = 30,
+    /// Master access (can push to protected branches).
+    Master = 40,
+    /// Owner access (full rights).
+    Owner = 50,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// A member with extra permissions on a project.
+pub struct ProjectMember {
+    /// The username.
+    pub username: String,
+    /// The display name.
+    pub name: String,
+    /// The user's ID.
+    pub id: UserId,
+    /// The state of the user account.
+    pub state: UserState,
+    /// The URL of the user's avatar.
+    pub avatar_url: String,
+    /// The URL of the user's profile page.
+    pub web_url: String,
+    /// The access level of the user.
+    pub access_level: u64,
+}
+
+impl From<ProjectMember> for UserBasic {
+    fn from(member: ProjectMember) -> Self {
+        UserBasic {
+            username: member.username,
+            name: member.name,
+            id: member.id,
+            state: member.state,
+            avatar_url: member.avatar_url,
+            web_url: member.web_url,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe group ID.
+pub struct GroupId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Group information.
+pub struct Group {
+    /// The ID of the group.
+    pub id: GroupId,
+    /// The name of the group.
+    pub name: String,
+    /// The path to the group.
+    pub path: String,
+    /// The description of the group.
+    pub description: Option<String>,
+    /// Integral value for the group's visibility.
+    pub visibility_level: u64,
+    /// The URL to the group avatar.
+    pub avatar_url: String,
+    /// The URL to the group's profile page.
+    pub web_url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// Group information with a project listing.
+pub struct GroupDetail {
+    /// The ID of the group.
+    pub id: GroupId,
+    /// The name of the group.
+    pub name: String,
+    /// The path to the group.
+    pub path: String,
+    /// The description of the group.
+    pub description: Option<String>,
+    /// Integral value for the group's visibility.
+    pub visibility_level: u64,
+    /// The URL to the group avatar.
+    pub avatar_url: String,
+    /// The URL to the group's profile page.
+    pub web_url: String,
+    /// The projects in a group.
+    pub projects: Vec<Project>,
+}
+
+impl From<GroupDetail> for Group {
+    fn from(detail: GroupDetail) -> Self {
+        Group {
+            id: detail.id,
+            name: detail.name,
+            path: detail.path,
+            description: detail.description,
+            visibility_level: detail.visibility_level,
+            avatar_url: detail.avatar_url,
+            web_url: detail.web_url,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// A member with extra permissions to a group.
+pub struct GroupMember {
+    /// The username.
+    pub username: String,
+    /// The display name.
+    pub name: String,
+    /// The user's ID.
+    pub id: UserId,
+    /// The state of the user account.
+    pub state: UserState,
+    /// The URL of the user's avatar.
+    pub avatar_url: String,
+    /// The URL of the user's profile page.
+    pub web_url: String,
+    /// The access level of the user.
+    pub access_level: u64,
+}
+
+impl From<GroupMember> for UserBasic {
+    fn from(member: GroupMember) -> Self {
+        UserBasic {
+            username: member.username,
+            name: member.name,
+            id: member.id,
+            state: member.state,
+            avatar_url: member.avatar_url,
+            web_url: member.web_url,
+        }
+    }
+}
+
+// FIXME: Not actually in entities.rb; it's just a hash dump.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CommitIdentity {
+    pub name: String,
+    pub email: String,
+}
+
+// FIXME: Not actually in entities.rb; it's just a hash dump.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Commit {
+    pub id: ObjectId,
+    pub parents: Vec<ObjectId>,
+    pub tree: String,
+    pub message: String,
+    pub author: CommitIdentity,
+    pub committer: CommitIdentity,
+    pub authored_date: DateTime<UTC>,
+    pub committed_date: DateTime<UTC>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RepoObject {
+    pub name: String,
+    pub commit: Option<Commit>,
+    pub protected: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ObjectId(String);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum ObjectType {
+    Tree,
+    Blob,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RepoTreeObject {
+    pub id: ObjectId,
+    pub name: String,
+    #[serde(rename="type")]
+    pub type_: ObjectType,
+    pub mode: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RepoCommit {
+    pub id: ObjectId,
+    pub short_id: ObjectId,
+    pub title: String,
+    pub author_name: String,
+    pub author_email: String,
+    pub created_at: DateTime<UTC>,
+    pub message: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RepoCommitDetail {
+    pub id: ObjectId,
+    pub short_id: ObjectId,
+    pub title: String,
+    pub author_name: String,
+    pub author_email: String,
+    pub created_at: DateTime<UTC>,
+    pub message: String,
+    pub parent_ids: Vec<ObjectId>,
+    pub committed_date: DateTime<UTC>,
+    pub authored_date: DateTime<UTC>,
+    // This looks to be CI related; ignoring without better docs.
+    //pub status: PipelineStatus,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SnippetId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProjectSnippet {
+    pub id: SnippetId,
+    pub title: String,
+    pub file_name: String,
+    pub author: UserBasic,
+    pub updated_at: DateTime<UTC>,
+    pub created_at: DateTime<UTC>,
+}
+
+// This is just used as a common "base class" in Ruby.
+//#[derive(Serialize, Deserialize, Debug)]
+//pub struct ProjectEntity {
+//    pub id: ProjectEntityId,
+//    pub iid: u64,
+//    pub project_id: ProjectId,
+//    pub title: String,
+//    pub description: String,
+//    pub state: ProjectEntityState,
+//    pub created_at: DateTime<UTC>,
+//    pub updated_at: DateTime<UTC>,
+//}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RepoDiff {
+    pub old_path: String,
+    pub new_path: String,
+    pub a_mode: String,
+    pub b_mode: String,
+    pub diff: String,
+    pub new_file: bool,
+    pub renamed_file: bool,
+    pub deleted_file: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct MilestoneId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum MilestoneState {
+    Active,
+    Closed,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Milestone {
+    pub id: MilestoneId,
+    pub iid: u64,
+    pub project_id: ProjectId,
+    pub title: String,
+    pub description: String,
+    pub state: MilestoneState,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    // FIXME: This is in `%Y-%m-%d` format which chrono does not support for serialization. Skip
+    // for now.
+    //pub due_date: Option<DateTime<UTC>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct IssueId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum IssueState {
+    Opened,
+    Closed,
+    Reopened,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Issue {
+    pub id: IssueId,
+    pub iid: u64,
+    pub project_id: ProjectId,
+    pub title: String,
+    pub description: String,
+    pub state: IssueState,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub labels: Vec<String>,
+    pub milestone: Option<Milestone>,
+    pub assignee: Option<UserBasic>,
+    pub subscribed: bool,
+    pub user_notes_count: u64,
+    pub upvotes: u64,
+    pub downvotes: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ExternalIssueId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ExternalIssue {
+    pub id: ExternalIssueId,
+    pub title: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct MergeRequestId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum MergeStatus {
+    Unchecked,
+    CanBeMerged,
+    CannotBeMerged,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum MergeRequestState {
+    Opened,
+    Closed,
+    Reopened,
+    Merged,
+    Locked,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MergeRequest {
+    pub id: MergeRequestId,
+    pub iid: u64,
+    pub project_id: ProjectId,
+    pub title: String,
+    pub description: String,
+    pub state: MergeRequestState,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub target_branch: String,
+    pub source_branch: String,
+    pub upvotes: u64,
+    pub downvotes: u64,
+    pub author: UserBasic,
+    pub assignee: Option<UserBasic>,
+    pub source_project_id: ProjectId,
+    pub target_project_id: ProjectId,
+    pub labels: Vec<String>,
+    pub work_in_progress: bool,
+    pub milestone: Option<Milestone>,
+    pub merge_when_build_succeeds: bool,
+    pub merge_status: MergeStatus,
+    pub subscribed: bool,
+    pub user_notes_count: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MergeRequestChanges {
+    pub id: MergeRequestId,
+    pub iid: u64,
+    pub project_id: ProjectId,
+    pub title: String,
+    pub description: String,
+    pub state: MergeRequestState,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub target_branch: String,
+    pub source_branch: String,
+    pub upvotes: u64,
+    pub downvotes: u64,
+    pub author: UserBasic,
+    pub assignee: Option<UserBasic>,
+    pub source_project_id: ProjectId,
+    pub target_project_id: ProjectId,
+    pub labels: Vec<String>,
+    pub work_in_progress: bool,
+    pub milestone: Option<Milestone>,
+    pub merge_when_build_succeeds: bool,
+    pub merge_status: MergeStatus,
+    pub subscribed: bool,
+    pub user_notes_count: u64,
+    pub changes: Vec<RepoDiff>,
+}
+
+impl From<MergeRequestChanges> for MergeRequest {
+    fn from(mr: MergeRequestChanges) -> Self {
+        MergeRequest {
+            id: mr.id,
+            iid: mr.iid,
+            project_id: mr.project_id,
+            title: mr.title,
+            description: mr.description,
+            state: mr.state,
+            created_at: mr.created_at,
+            updated_at: mr.updated_at,
+            target_branch: mr.target_branch,
+            source_branch: mr.source_branch,
+            upvotes: mr.upvotes,
+            downvotes: mr.downvotes,
+            author: mr.author,
+            assignee: mr.assignee,
+            source_project_id: mr.source_project_id,
+            target_project_id: mr.target_project_id,
+            labels: mr.labels,
+            work_in_progress: mr.work_in_progress,
+            milestone: mr.milestone,
+            merge_when_build_succeeds: mr.merge_when_build_succeeds,
+            merge_status: mr.merge_status,
+            subscribed: mr.subscribed,
+            user_notes_count: mr.user_notes_count,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct SshKeyId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SshKey {
+    pub id: SshKeyId,
+    pub title: String,
+    pub key: String,
+    pub created_at: DateTime<UTC>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SshKeyWithUser {
+    pub id: SshKeyId,
+    pub title: String,
+    pub key: String,
+    pub created_at: DateTime<UTC>,
+    pub user: UserFull,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum NoteType {
+    Commit,
+    Issue,
+    MergeRequest,
+    Snippet,
+}
+
+pub enum NoteableId {
+    Commit(ObjectId),
+    Issue(IssueId),
+    MergeRequest(MergeRequestId),
+    Snippet(SnippetId),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct NoteId(u64);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Note {
+    pub id: NoteId,
+    pub body: String,
+    pub attachment: Option<String>,
+    pub author: UserBasic,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub system: bool,
+    pub noteable_id: Value, // Keep as JSON because its type depends on what `noteable_id` is.
+    pub noteable_type: NoteType,
+}
+
+impl Note {
+    pub fn noteable_id(&self) -> Option<NoteableId> {
+        match self.noteable_type {
+            NoteType::Commit => {
+                self.noteable_id.as_string()
+                    .map(|id| {
+                        NoteableId::Commit(ObjectId(id.to_owned()))
+                    })
+            },
+            NoteType::Issue => {
+                self.noteable_id.as_u64()
+                    .map(|id| {
+                        NoteableId::Issue(IssueId(id))
+                    })
+            },
+            NoteType::MergeRequest => {
+                self.noteable_id.as_u64()
+                    .map(|id| {
+                        NoteableId::MergeRequest(MergeRequestId(id))
+                    })
+            },
+            NoteType::Snippet => {
+                self.noteable_id.as_u64()
+                    .map(|id| {
+                        NoteableId::Snippet(SnippetId(id))
+                    })
+            },
+        }
+    }
+}
+
+// TODO
+//class AwardEmoji < Grape::Entity
+//  expose :id
+//  expose :name
+//  expose :user, using: Entities::UserBasic
+//  expose :created_at, :updated_at
+//  expose :awardable_id, :awardable_type
+//end
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum LineType {
+    New,
+    Old,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CommitNote {
+    pub note: String,
+    pub path: Option<String>,
+    pub line: Option<u64>,
+    pub line_type: Option<LineType>,
+    pub author: UserBasic,
+    pub created_at: DateTime<UTC>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct CommitStatusId(u64);
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+/// States for commit statuses.
+pub enum StatusState {
+    /// The check is queued.
+    Pending,
+    /// The check is currently running.
+    Running,
+    /// The check succeeded.
+    Success,
+    /// The check failed.
+    Failed,
+    /// The check was cancelled.
+    Cancelled,
+}
+
+impl Borrow<str> for StatusState {
+    fn borrow(&self) -> &str {
+        match *self {
+            StatusState::Pending => "pending",
+            StatusState::Running => "running",
+            StatusState::Success => "success",
+            StatusState::Failed => "failed",
+            StatusState::Cancelled => "canceled", // [sic]
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CommitStatus {
+    pub id: CommitStatusId,
+    pub sha: ObjectId,
+    #[serde(rename="ref")]
+    pub ref_: String,
+    pub status: StatusState,
+    pub name: String,
+    pub target_url: String,
+    pub description: Option<String>,
+    pub created_at: DateTime<UTC>,
+    pub started_at: Option<DateTime<UTC>>,
+    pub finished_at: Option<DateTime<UTC>>,
+    pub allow_failure: bool,
+    pub author: UserBasic,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum EventTargetType {
+    Commit,
+    Issue,
+    MergeRequest,
+    Snippet,
+    ProjectSnippet,
+}
+
+pub enum EventTargetId {
+    Commit(ObjectId),
+    Issue(IssueId),
+    MergeRequest(MergeRequestId),
+    Snippet(SnippetId),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Event {
+    pub title: Option<String>,
+    pub project_id: ProjectId,
+    pub action_name: String,
+    pub target_id: Value,
+    pub target_type: EventTargetType,
+    pub author_id: UserId,
+    pub data: Option<Value>,
+    pub target_title: String,
+    pub created_at: DateTime<UTC>,
+    pub note: Option<Note>,
+    pub author: Option<UserBasic>,
+    pub author_username: Option<String>,
+}
+
+impl Event {
+    pub fn event_target_id(&self) -> Option<EventTargetId> {
+        match self.target_type {
+            EventTargetType::Commit => {
+                self.target_id.as_string()
+                    .map(|id| {
+                        EventTargetId::Commit(ObjectId(id.to_owned()))
+                    })
+            },
+            EventTargetType::Issue => {
+                self.target_id.as_u64()
+                    .map(|id| {
+                        EventTargetId::Issue(IssueId(id))
+                    })
+            },
+            EventTargetType::MergeRequest => {
+                self.target_id.as_u64()
+                    .map(|id| {
+                        EventTargetId::MergeRequest(MergeRequestId(id))
+                    })
+            },
+            EventTargetType::Snippet => {
+                self.target_id.as_u64()
+                    .map(|id| {
+                        EventTargetId::Snippet(SnippetId(id))
+                    })
+            },
+            EventTargetType::ProjectSnippet => {
+                self.target_id.as_u64()
+                    .map(|id| {
+                        EventTargetId::Snippet(SnippetId(id))
+                    })
+            },
+        }
+    }
+}
+
+//class ProjectGroupLink < Grape::Entity
+//  expose :id, :project_id, :group_id, :group_access
+//end
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum NamespaceKind {
+    User,
+    Group,
+}
+
+pub enum NamespaceId {
+    User(UserId),
+    Group(GroupId),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Namespace {
+    pub id: u64,
+    pub path: String,
+    pub kind: NamespaceKind,
+}
+
+impl Namespace {
+    pub fn namespace_id(&self) -> NamespaceId {
+        match self.kind {
+            NamespaceKind::User => NamespaceId::User(UserId(self.id)),
+            NamespaceKind::Group => NamespaceId::Group(GroupId(self.id)),
+        }
+    }
+}
+
+//class Member < Grape::Entity
+//  expose :access_level
+//  expose :notification_level do |member, options|
+//    if member.notification_setting
+//      NotificationSetting.levels[member.notification_setting.level]
+//    end
+//  end
+//end
+
+//class ProjectAccess < Member
+//end
+
+//class GroupAccess < Member
+//end
+
+//class ProjectService < Grape::Entity
+//  expose :id, :title, :created_at, :updated_at, :active
+//  expose :push_events, :issues_events, :merge_requests_events, :tag_push_events, :note_events, :build_events
+//  # Expose serialized properties
+//  expose :properties do |service, options|
+//    field_names = service.fields.
+//      select { |field| options[:include_passwords] || field[:type] != 'password' }.
+//      map { |field| field[:name] }
+//    service.properties.slice(*field_names)
+//  end
+//end
+
+//class ProjectWithAccess < Project
+//  expose :permissions do
+//    expose :project_access, using: Entities::ProjectAccess do |project, options|
+//      project.project_members.find_by(user_id: options[:user].id)
+//    end
+
+//    expose :group_access, using: Entities::GroupAccess do |project, options|
+//      if project.group
+//        project.group.group_members.find_by(user_id: options[:user].id)
+//      end
+//    end
+//  end
+//end
+
+//class Label < Grape::Entity
+//  expose :name, :color, :description
+//  expose :open_issues_count, :closed_issues_count, :open_merge_requests_count
+
+//  expose :subscribed do |label, options|
+//    label.subscribed?(options[:current_user])
+//  end
+//end
+
+//class Compare < Grape::Entity
+//  expose :commit, using: Entities::RepoCommit do |compare, options|
+//    Commit.decorate(compare.commits, nil).last
+//  end
+
+//  expose :commits, using: Entities::RepoCommit do |compare, options|
+//    Commit.decorate(compare.commits, nil)
+//  end
+
+//  expose :diffs, using: Entities::RepoDiff do |compare, options|
+//    compare.diffs(all_diffs: true).to_a
+//  end
+
+//  expose :compare_timeout do |compare, options|
+//    compare.diffs.overflow?
+//  end
+
+//  expose :same, as: :compare_same_ref
+//end
+
+//class Contributor < Grape::Entity
+//  expose :name, :email, :commits, :additions, :deletions
+//end
+
+//class BroadcastMessage < Grape::Entity
+//  expose :message, :starts_at, :ends_at, :color, :font
+//end
+
+//class ApplicationSetting < Grape::Entity
+//  expose :id
+//  expose :default_projects_limit
+//  expose :signup_enabled
+//  expose :signin_enabled
+//  expose :gravatar_enabled
+//  expose :sign_in_text
+//  expose :after_sign_up_text
+//  expose :created_at
+//  expose :updated_at
+//  expose :home_page_url
+//  expose :default_branch_protection
+//  expose :restricted_visibility_levels
+//  expose :max_attachment_size
+//  expose :session_expire_delay
+//  expose :default_project_visibility
+//  expose :default_snippet_visibility
+//  expose :default_group_visibility
+//  expose :restricted_signup_domains
+//  expose :user_oauth_applications
+//  expose :after_sign_out_path
+//  expose :container_registry_token_expire_delay
+//end
+
+//class Release < Grape::Entity
+//  expose :tag, as: :tag_name
+//  expose :description
+//end
+
+//class RepoTag < Grape::Entity
+//  expose :name
+//  expose :message do |repo_obj, _options|
+//    if repo_obj.respond_to?(:message)
+//      repo_obj.message
+//    else
+//      nil
+//    end
+//  end
+
+//  expose :commit do |repo_obj, options|
+//    if repo_obj.respond_to?(:commit)
+//      repo_obj.commit
+//    elsif options[:project]
+//      options[:project].repository.commit(repo_obj.target)
+//    end
+//  end
+
+//  expose :release, using: Entities::Release do |repo_obj, options|
+//    if options[:project]
+//      options[:project].releases.find_by(tag: repo_obj.name)
+//    end
+//  end
+//end
+
+//class TriggerRequest < Grape::Entity
+//  expose :id, :variables
+//end
+
+//class Runner < Grape::Entity
+//  expose :id
+//  expose :description
+//  expose :active
+//  expose :is_shared
+//  expose :name
+//end
+
+//class RunnerDetails < Runner
+//  expose :tag_list
+//  expose :run_untagged
+//  expose :locked
+//  expose :version, :revision, :platform, :architecture
+//  expose :contacted_at
+//  expose :token, if: lambda { |runner, options| options[:current_user].is_admin? || !runner.is_shared? }
+//  expose :projects, with: Entities::BasicProjectDetails do |runner, options|
+//    if options[:current_user].is_admin?
+//      runner.projects
+//    else
+//      options[:current_user].authorized_projects.where(id: runner.projects)
+//    end
+//  end
+//end
+
+//class BuildArtifactFile < Grape::Entity
+//  expose :filename, :size
+//end
+
+//class Build < Grape::Entity
+//  expose :id, :status, :stage, :name, :ref, :tag, :coverage
+//  expose :created_at, :started_at, :finished_at
+//  expose :user, with: User
+//  expose :artifacts_file, using: BuildArtifactFile, if: -> (build, opts) { build.artifacts? }
+//  expose :commit, with: RepoCommit
+//  expose :runner, with: Runner
+//end
+
+//class Trigger < Grape::Entity
+//  expose :token, :created_at, :updated_at, :deleted_at, :last_used
+//end
+
+//class Variable < Grape::Entity
+//  expose :key, :value
+//end
+
+//class RepoLicense < Grape::Entity
+//  expose :key, :name, :nickname
+//  expose :featured, as: :popular
+//  expose :url, as: :html_url
+//  expose(:source_url) { |license| license.meta['source'] }
+//  expose(:description) { |license| license.meta['description'] }
+//  expose(:conditions) { |license| license.meta['conditions'] }
+//  expose(:permissions) { |license| license.meta['permissions'] }
+//  expose(:limitations) { |license| license.meta['limitations'] }
+//  expose :content
+//end
+
+//class TemplatesList < Grape::Entity
+//  expose :name
+//end
+
+//class Template < Grape::Entity
+//  expose :name, :content
+//end

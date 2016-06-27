@@ -8,11 +8,17 @@ Gitlab API client.
 """
 repository = "https://gitlab.kitware.com/utils/rust-gitlab.git"
 homepage = "https://gitlab.kitware.com/utils/rust-gitlab"
+build = "build.rs"
+
+[build-dependencies]
+serde_codegen = "*"
 
 [dependencies]
+chrono = { version = "~0.2", features = ["serde"] }
 #ease = "~0.5"
 hyper = "~0.9"
 log = "*"
+serde = "~0.7"
 serde_json = "~0.7"
 url = "~1.1"
 
