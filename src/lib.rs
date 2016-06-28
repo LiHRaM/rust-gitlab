@@ -15,3 +15,6 @@ mod types;
 pub use error::Error;
 pub use gitlab::Gitlab;
 pub use types::*;
+
+#[cfg(test)]
+mod test;
