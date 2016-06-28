@@ -2,7 +2,8 @@ extern crate chrono;
 use self::chrono::{DateTime, UTC};
 
 extern crate serde;
-use self::serde::{Deserialize, Serialize};
+use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
+use self::serde::de::Error;
 
 extern crate serde_json;
 use self::serde_json::Value;
@@ -45,18 +46,44 @@ macro_rules! impl_id {
 pub struct UserId(u64);
 impl_id!(UserId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The states a user account can be in.
 pub enum UserState {
     /// The user is active and may perform actions.
-    #[serde(rename="active")]
     Active,
     /// Blocked from logging in.
-    #[serde(rename="blocked")]
     Blocked,
     /// Blocked from logging in via LDAP.
-    #[serde(rename="ldap_blocked")]
     LdapBlocked,
+}
+
+impl Borrow<str> for UserState {
+    fn borrow(&self) -> &str {
+        match *self {
+            UserState::Active => "active",
+            UserState::Blocked => "blocked",
+            UserState::LdapBlocked => "ldap_blocked",
+        }
+    }
+}
+
+impl Serialize for UserState {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for UserState {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "active" => Ok(UserState::Active),
+            "blocked" => Ok(UserState::Blocked),
+            "ldap_blocked" => Ok(UserState::LdapBlocked),
+            _ => Err(D::Error::invalid_value("invalid user state")),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -605,10 +632,37 @@ pub struct RepoObject {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ObjectId(String);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ObjectType {
     Tree,
     Blob,
+}
+
+impl Borrow<str> for ObjectType {
+    fn borrow(&self) -> &str {
+        match *self {
+            ObjectType::Tree => "tree",
+            ObjectType::Blob => "blob",
+        }
+    }
+}
+
+impl Serialize for ObjectType {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for ObjectType {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "tree" => Ok(ObjectType::Tree),
+            "blob" => Ok(ObjectType::Blob),
+            _ => Err(D::Error::invalid_value("invalid object type")),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -690,10 +744,37 @@ pub struct RepoDiff {
 pub struct MilestoneId(u64);
 impl_id!(MilestoneId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MilestoneState {
     Active,
     Closed,
+}
+
+impl Borrow<str> for MilestoneState {
+    fn borrow(&self) -> &str {
+        match *self {
+            MilestoneState::Active => "active",
+            MilestoneState::Closed => "closed",
+        }
+    }
+}
+
+impl Serialize for MilestoneState {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for MilestoneState {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "active" => Ok(MilestoneState::Active),
+            "closed" => Ok(MilestoneState::Closed),
+            _ => Err(D::Error::invalid_value("invalid milestone state")),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -715,11 +796,40 @@ pub struct Milestone {
 pub struct IssueId(u64);
 impl_id!(IssueId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IssueState {
     Opened,
     Closed,
     Reopened,
+}
+
+impl Borrow<str> for IssueState {
+    fn borrow(&self) -> &str {
+        match *self {
+            IssueState::Opened => "opened",
+            IssueState::Closed => "closed",
+            IssueState::Reopened => "reopened",
+        }
+    }
+}
+
+impl Serialize for IssueState {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for IssueState {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "opened" => Ok(IssueState::Opened),
+            "closed" => Ok(IssueState::Closed),
+            "reopened" => Ok(IssueState::Reopened),
+            _ => Err(D::Error::invalid_value("invalid issue state")),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -754,20 +864,82 @@ pub struct ExternalIssue {
 pub struct MergeRequestId(u64);
 impl_id!(MergeRequestId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeStatus {
     Unchecked,
     CanBeMerged,
     CannotBeMerged,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+impl Borrow<str> for MergeStatus {
+    fn borrow(&self) -> &str {
+        match *self {
+            MergeStatus::Unchecked => "unchecked",
+            MergeStatus::CanBeMerged => "can_be_merged",
+            MergeStatus::CannotBeMerged => "cannot_be_merged",
+        }
+    }
+}
+
+impl Serialize for MergeStatus {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for MergeStatus {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "unchecked" => Ok(MergeStatus::Unchecked),
+            "can_be_merged" => Ok(MergeStatus::CanBeMerged),
+            "cannot_be_merged" => Ok(MergeStatus::CannotBeMerged),
+            _ => Err(D::Error::invalid_value("invalid merge status")),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestState {
     Opened,
     Closed,
     Reopened,
     Merged,
     Locked,
+}
+
+impl Borrow<str> for MergeRequestState {
+    fn borrow(&self) -> &str {
+        match *self {
+            MergeRequestState::Opened => "opened",
+            MergeRequestState::Closed => "closed",
+            MergeRequestState::Reopened => "reopened",
+            MergeRequestState::Merged => "merged",
+            MergeRequestState::Locked => "locked",
+        }
+    }
+}
+
+impl Serialize for MergeRequestState {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for MergeRequestState {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "opened" => Ok(MergeRequestState::Opened),
+            "closed" => Ok(MergeRequestState::Closed),
+            "reopened" => Ok(MergeRequestState::Reopened),
+            "merged" => Ok(MergeRequestState::Merged),
+            "locked" => Ok(MergeRequestState::Locked),
+            _ => Err(D::Error::invalid_value("invalid merge request state")),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -876,12 +1048,43 @@ pub struct SshKeyWithUser {
     pub user: UserFull,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NoteType {
     Commit,
     Issue,
     MergeRequest,
     Snippet,
+}
+
+impl Borrow<str> for NoteType {
+    fn borrow(&self) -> &str {
+        match *self {
+            NoteType::Commit => "commit",
+            NoteType::Issue => "issue",
+            NoteType::MergeRequest => "merge_request",
+            NoteType::Snippet => "snippet",
+        }
+    }
+}
+
+impl Serialize for NoteType {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for NoteType {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "commit" => Ok(NoteType::Commit),
+            "issue" => Ok(NoteType::Issue),
+            "merge_request" => Ok(NoteType::MergeRequest),
+            "snippet" => Ok(NoteType::Snippet),
+            _ => Err(D::Error::invalid_value("invalid note type")),
+        }
+    }
 }
 
 pub enum NoteableId {
@@ -948,10 +1151,37 @@ impl Note {
 //  expose :awardable_id, :awardable_type
 //end
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LineType {
     New,
     Old,
+}
+
+impl Borrow<str> for LineType {
+    fn borrow(&self) -> &str {
+        match *self {
+            LineType::New => "new",
+            LineType::Old => "old",
+        }
+    }
+}
+
+impl Serialize for LineType {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for LineType {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "new" => Ok(LineType::New),
+            "old" => Ok(LineType::Old),
+            _ => Err(D::Error::invalid_value("invalid user state")),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -968,7 +1198,7 @@ pub struct CommitNote {
 pub struct CommitStatusId(u64);
 impl_id!(CommitStatusId);
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// States for commit statuses.
 pub enum StatusState {
     /// The check is queued.
@@ -990,7 +1220,28 @@ impl Borrow<str> for StatusState {
             StatusState::Running => "running",
             StatusState::Success => "success",
             StatusState::Failed => "failed",
-            StatusState::Cancelled => "canceled", // [sic]
+            StatusState::Cancelled => "canceled",
+        }
+    }
+}
+
+impl Serialize for StatusState {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for StatusState {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "pending" => Ok(StatusState::Pending),
+            "running" => Ok(StatusState::Running),
+            "success" => Ok(StatusState::Success),
+            "failed" => Ok(StatusState::Failed),
+            "canceled" => Ok(StatusState::Cancelled),
+            _ => Err(D::Error::invalid_value("invalid status state")),
         }
     }
 }
@@ -1012,13 +1263,46 @@ pub struct CommitStatus {
     pub author: UserBasic,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EventTargetType {
     Commit,
     Issue,
     MergeRequest,
     Snippet,
     ProjectSnippet,
+}
+
+impl Borrow<str> for EventTargetType {
+    fn borrow(&self) -> &str {
+        match *self {
+            EventTargetType::Commit => "commit",
+            EventTargetType::Issue => "issue",
+            EventTargetType::MergeRequest => "merge_request",
+            EventTargetType::Snippet => "snippet",
+            EventTargetType::ProjectSnippet => "project_snippet",
+        }
+    }
+}
+
+impl Serialize for EventTargetType {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for EventTargetType {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "commit" => Ok(EventTargetType::Commit),
+            "issue" => Ok(EventTargetType::Issue),
+            "merge_request" => Ok(EventTargetType::MergeRequest),
+            "snippet" => Ok(EventTargetType::Snippet),
+            "project_snippet" => Ok(EventTargetType::ProjectSnippet),
+            _ => Err(D::Error::invalid_value("invalid event target type")),
+        }
+    }
 }
 
 pub enum EventTargetId {
@@ -1085,10 +1369,37 @@ impl Event {
 //  expose :id, :project_id, :group_id, :group_access
 //end
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NamespaceKind {
     User,
     Group,
+}
+
+impl Borrow<str> for NamespaceKind {
+    fn borrow(&self) -> &str {
+        match *self {
+            NamespaceKind::User => "user",
+            NamespaceKind::Group => "group",
+        }
+    }
+}
+
+impl Serialize for NamespaceKind {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        serializer.serialize_str(self.borrow())
+    }
+}
+
+impl Deserialize for NamespaceKind {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        match val.borrow() {
+            "user" => Ok(NamespaceKind::User),
+            "group" => Ok(NamespaceKind::Group),
+            _ => Err(D::Error::invalid_value("invalid namespace kind")),
+        }
+    }
 }
 
 pub enum NamespaceId {

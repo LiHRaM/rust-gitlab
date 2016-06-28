@@ -173,7 +173,7 @@ impl Gitlab {
         req.param("note", body)
             .param("path", path)
             .param("line", &line_str)
-            .param("line_type", "new");
+            .param("line_type", LineType::New.borrow());
 
         Self::_post_req(&mut req)
     }
