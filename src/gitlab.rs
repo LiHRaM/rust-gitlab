@@ -56,14 +56,41 @@ impl Gitlab {
         self._get("user")
     }
 
+    /// Get all user accounts
+    pub fn users<T: UserResult>(&self) -> GitlabResult<Vec<T>> {
+        self._get_paged("users")
+    }
+
+    /// Find a user by id.
+    pub fn user<T: UserResult>(&self, user: UserId) -> GitlabResult<T> {
+        self._get(&format!("users/{}", user))
+    }
+
     /// Find a user by username.
     pub fn user_by_name<T: UserResult>(&self, name: &str) -> GitlabResult<T> {
         Self::_get_req(try!(self._mkrequest("users")).param("username", name))
     }
 
-    /// Find a user by id.
-    pub fn user<T: UserResult>(&self, id: UserId) -> GitlabResult<T> {
-        self._get(&format!("users/{}", id))
+    /// Get all accessible projects.
+    pub fn projects(&self) -> GitlabResult<Vec<Project>> {
+        self._get_paged("projects")
+    }
+
+    /// Get all owned projects.
+    pub fn owned_projects(&self) -> GitlabResult<Vec<Project>> {
+        self._get_paged("projects/owned")
+    }
+
+    /// Get all projects.
+    ///
+    /// Requires administrator privileges.
+    pub fn all_projects(&self) -> GitlabResult<Vec<Project>> {
+        self._get_paged("projects/all")
+    }
+
+    /// Find a project by id.
+    pub fn project(&self, project: ProjectId) -> GitlabResult<Project> {
+        self._get(&format!("projects/{}", project))
     }
 
     /// Find a project by name.
@@ -72,24 +99,135 @@ impl Gitlab {
                            percent_encode(name.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
     }
 
-    /// Create a note on a merge request.
-    pub fn create_merge_request_note(&self, project: u64, id: u64, content: &str) -> GitlabResult<()> {
-        let path = &format!("projects/{}/merge_requests/{}/notes", project, id);
+    /// Get a project's hooks.
+    pub fn hooks(&self, project: ProjectId) -> GitlabResult<Vec<Hook>> {
+        self._get_paged(&format!("projects/{}/hooks", project))
+    }
 
-        Self::_post_req(try!(self._mkrequest(path)).param("body", content))
+    /// Get a project hook.
+    pub fn hook(&self, project: ProjectId, hook: HookId) -> GitlabResult<Hook> {
+        self._get(&format!("projects/{}/hooks/{}", project, hook))
+    }
+
+    /// Get the team members of a project.
+    pub fn members(&self, project: ProjectId) -> GitlabResult<Vec<ProjectMember>> {
+        self._get_paged(&format!("projects/{}/members", project))
+    }
+
+    /// Get a team member of a project.
+    pub fn member(&self, project: ProjectId, user: UserId) -> GitlabResult<Option<ProjectMember>> {
+        self._get(&format!("projects/{}/members/{}", project, user))
+    }
+
+    /// Get a team member of a project.
+    pub fn add_user_to_team(&self, project: ProjectId, user: UserId, access: AccessLevel) -> GitlabResult<ProjectMember> {
+        let user_str = format!("{}", user);
+        let access_str = format!("{}", access);
+
+        let mut req = try!(self._mkrequest(&format!("projects/{}/members", project)));
+
+        req.param("user", &user_str)
+            .param("access", &access_str);
+
+        Self::_post_req(&mut req)
+    }
+
+    /// Get branches for a project.
+    pub fn branches(&self, project: ProjectId) -> GitlabResult<Vec<RepoObject>> {
+        self._get_paged(&format!("projects/{}/branches", project))
+    }
+
+    /// Get a branch.
+    pub fn branch(&self, project: ProjectId, branch: &str) -> GitlabResult<Vec<RepoObject>> {
+        self._get_paged(&format!("projects/{}/repository/branches/{}",
+                                 project,
+                                 percent_encode(branch.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+    }
+
+    /// Get a commit.
+    pub fn commit(&self, project: ProjectId, commit: &str) -> GitlabResult<RepoCommitDetail> {
+        self._get(&format!("projects/{}/repository/commit/{}", project, commit))
+    }
+
+    /// Get comments on a commit.
+    pub fn commit_comments(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<CommitNote>> {
+        self._get_paged(&format!("projects/{}/repository/commit/{}/comments", project, commit))
+    }
+
+    /// Get comments on a commit.
+    pub fn create_commit_comment(&self, project: ProjectId, commit: &str, body: &str) -> GitlabResult<CommitNote> {
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment", project, commit)));
+
+        req.param("note", body);
+
+        Self::_post_req(&mut req)
+    }
+
+    /// Get comments on a commit.
+    pub fn create_commit_line_comment(&self, project: ProjectId, commit: &str, body: &str,
+                                      path: &str, line: u64) -> GitlabResult<CommitNote> {
+        let line_str = format!("{}", line);
+
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment", project, commit)));
+
+        req.param("note", body)
+            .param("path", path)
+            .param("line", &line_str)
+            .param("line_type", "new");
+
+        Self::_post_req(&mut req)
+    }
+
+    /// Get the statuses of a commit.
+    pub fn commit_statuses(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<CommitStatus>> {
+        self._get_paged(&format!("projects/{}/repository/commit/{}/statuses", project, commit))
+    }
+
+    /// Get the statuses of a commit.
+    pub fn commit_all_statuses(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<CommitStatus>> {
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/statuses", project, commit)));
+
+        req.param("all", "true");
+
+        Self::_get_paged_req(req)
     }
 
     /// Create a status message for a commit.
-    pub fn create_commit_status(&self, project: u64, sha: &str, state: StatusState, refname: &str,
-                                name: &str, description: &str)
-                                -> GitlabResult<()> {
+    pub fn create_commit_status(&self, project: ProjectId, sha: &str,
+                                state: StatusState, refname: &str,
+                                name: &str, target_url: &str,
+                                description: &str)
+                                -> GitlabResult<CommitStatus> {
         let path = &format!("projects/{}/statuses/{}", project, sha);
 
         Self::_post_req(try!(self._mkrequest(path))
             .param("state", state.borrow())
             .param("ref", refname)
             .param("name", name)
+            .param("target_url", target_url)
             .param("description", description))
+    }
+
+    /// Get the merge requests for a project.
+    pub fn merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
+        self._get_paged(&format!("projects/{}/merge_requests", project))
+    }
+
+    /// Get merge requests.
+    pub fn merge_request(&self, project: ProjectId, merge_request: MergeRequestId) -> GitlabResult<MergeRequest> {
+        self._get(&format!("projects/{}/merge_requests/{}", project, merge_request))
+    }
+
+    /// Get the notes from a merge request.
+    pub fn merge_request_notes(&self, project: ProjectId, merge_request: MergeRequestId) -> GitlabResult<Vec<Note>> {
+        self._get_paged(&format!("projects/{}/merge_requests/{}/notes", project, merge_request))
+    }
+
+    /// Create a note on a merge request.
+    pub fn create_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId, content: &str) -> GitlabResult<Note> {
+        let path = &format!("projects/{}/merge_requests/{}/notes", project, merge_request);
+
+        Self::_post_req(try!(self._mkrequest(path)).param("body", content))
     }
 
     // Create a request with the proper common metadata for authentication.
