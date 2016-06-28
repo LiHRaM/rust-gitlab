@@ -469,7 +469,7 @@ pub struct Project {
     pub permissions: Option<Permissions>,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 /// Access levels for groups and projects.
 pub enum AccessLevel {
     /// Guest access (can see the project).
@@ -1110,6 +1110,7 @@ impl Deserialize for NoteType {
     }
 }
 
+#[derive(Clone, PartialEq, Eq)]
 pub enum NoteableId {
     Commit(ObjectId),
     Issue(IssueId),
@@ -1328,6 +1329,7 @@ impl Deserialize for EventTargetType {
     }
 }
 
+#[derive(Clone, PartialEq, Eq)]
 pub enum EventTargetId {
     Commit(ObjectId),
     Issue(IssueId),
@@ -1425,6 +1427,7 @@ impl Deserialize for NamespaceKind {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum NamespaceId {
     User(UserId),
     Group(GroupId),
