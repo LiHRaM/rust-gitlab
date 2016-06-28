@@ -1209,8 +1209,8 @@ pub enum StatusState {
     Success,
     /// The check failed.
     Failed,
-    /// The check was cancelled.
-    Cancelled,
+    /// The check was canceled.
+    Canceled,
 }
 
 impl Borrow<str> for StatusState {
@@ -1220,7 +1220,7 @@ impl Borrow<str> for StatusState {
             StatusState::Running => "running",
             StatusState::Success => "success",
             StatusState::Failed => "failed",
-            StatusState::Cancelled => "canceled",
+            StatusState::Canceled => "canceled",
         }
     }
 }
@@ -1240,7 +1240,7 @@ impl Deserialize for StatusState {
             "running" => Ok(StatusState::Running),
             "success" => Ok(StatusState::Success),
             "failed" => Ok(StatusState::Failed),
-            "canceled" => Ok(StatusState::Cancelled),
+            "canceled" => Ok(StatusState::Canceled),
             _ => Err(D::Error::invalid_value("invalid status state")),
         }
     }
