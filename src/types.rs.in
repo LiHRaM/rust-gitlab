@@ -375,13 +375,29 @@ impl Display for VisibilityLevel {
     }
 }
 
+// TODO: enum for NotificationLevel
+
+#[derive(Serialize, Deserialize, Debug)]
+// Called `Member` in entities.rb, but it is just a base class for `ProjectAccess`
+// and `GroupAccess`. Combine them here.
+pub struct Access {
+    pub access_level: u64,
+    pub notification_level: Option<u64>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Permissions {
+    pub project_access: Option<Access>,
+    pub group_access: Option<Access>,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 /// Project information.
 pub struct Project {
     /// The ID of the project.
     pub id: ProjectId,
     /// The description of the project.
-    pub description: Option<String>,
+    pub description: String,
     /// The default branch for the project.
     pub default_branch: String,
     /// A list of tags for the project.
@@ -419,7 +435,10 @@ pub struct Project {
     /// Whether project snippets is enabled.
     pub snippets_enabled: bool,
     /// Whether the continuous integration container registry is enabled.
-    pub container_registry_enabled: bool,
+    ///
+    /// This is supposed to be just `bool`, but projects created before the registry was
+    /// supported appear to return `null`.
+    pub container_registry_enabled: Option<bool>,
     /// When the repository was created.
     pub created_at: DateTime<UTC>,
     /// When the last activity on the project occurred.
@@ -444,6 +463,10 @@ pub struct Project {
     pub runners_token: Option<String>,
     /// Whether builds are publicly visible.
     pub public_builds: bool,
+
+    /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
+    /// optional here.
+    pub permissions: Option<Permissions>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -1423,21 +1446,6 @@ impl Namespace {
     }
 }
 
-//class Member < Grape::Entity
-//  expose :access_level
-//  expose :notification_level do |member, options|
-//    if member.notification_setting
-//      NotificationSetting.levels[member.notification_setting.level]
-//    end
-//  end
-//end
-
-//class ProjectAccess < Member
-//end
-
-//class GroupAccess < Member
-//end
-
 //class ProjectService < Grape::Entity
 //  expose :id, :title, :created_at, :updated_at, :active
 //  expose :push_events, :issues_events, :merge_requests_events, :tag_push_events, :note_events, :build_events
@@ -1447,20 +1455,6 @@ impl Namespace {
 //      select { |field| options[:include_passwords] || field[:type] != 'password' }.
 //      map { |field| field[:name] }
 //    service.properties.slice(*field_names)
-//  end
-//end
-
-//class ProjectWithAccess < Project
-//  expose :permissions do
-//    expose :project_access, using: Entities::ProjectAccess do |project, options|
-//      project.project_members.find_by(user_id: options[:user].id)
-//    end
-
-//    expose :group_access, using: Entities::GroupAccess do |project, options|
-//      if project.group
-//        project.group.group_members.find_by(user_id: options[:user].id)
-//      end
-//    end
 //  end
 //end
 
