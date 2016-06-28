@@ -1000,10 +1000,10 @@ pub struct CommitStatus {
     pub id: CommitStatusId,
     pub sha: ObjectId,
     #[serde(rename="ref")]
-    pub ref_: String,
+    pub ref_: Option<String>,
     pub status: StatusState,
     pub name: String,
-    pub target_url: String,
+    pub target_url: Option<String>,
     pub description: Option<String>,
     pub created_at: DateTime<UTC>,
     pub started_at: Option<DateTime<UTC>>,
