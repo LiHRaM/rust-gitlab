@@ -10,7 +10,7 @@ use self::serde_json::Value;
 use std::borrow::Borrow;
 use std::fmt::{self, Display, Formatter};
 
-macro_rules! display_id {
+macro_rules! impl_id {
     ( $name:ident ) => {
         /* This bit of the macro handles the repetitive nature of creating new identifiers.
          * Unfortunately, it doesn't work with serde_codegen, so until either plugins are stable or
@@ -18,6 +18,12 @@ macro_rules! display_id {
         #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         pub struct $name(u64);
          */
+
+        impl $name {
+            pub fn new(id: u64) -> Self {
+                $name(id)
+            }
+        }
 
         impl Display for $name {
             fn fmt(&self, f: &mut Formatter) -> fmt::Result {
@@ -37,7 +43,7 @@ macro_rules! display_id {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 /// Type-safe user ID.
 pub struct UserId(u64);
-display_id!(UserId);
+impl_id!(UserId);
 
 #[derive(Serialize, Deserialize, Debug)]
 /// The states a user account can be in.
@@ -239,7 +245,7 @@ impl From<UserFull> for User {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EmailId(u64);
-display_id!(EmailId);
+impl_id!(EmailId);
 
 #[derive(Serialize, Deserialize, Debug)]
 /// Email address.
@@ -252,7 +258,7 @@ pub struct Email {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HookId(u64);
-display_id!(HookId);
+impl_id!(HookId);
 
 #[derive(Serialize, Deserialize, Debug)]
 /// A web hook to notify of events.
@@ -301,7 +307,7 @@ impl From<ProjectHook> for Hook {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe project ID.
 pub struct ProjectId(u64);
-display_id!(ProjectId);
+impl_id!(ProjectId);
 
 #[derive(Serialize, Deserialize, Debug)]
 /// Basic project information.
@@ -447,7 +453,7 @@ impl From<ProjectMember> for UserBasic {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe group ID.
 pub struct GroupId(u64);
-display_id!(GroupId);
+impl_id!(GroupId);
 
 #[derive(Serialize, Deserialize, Debug)]
 /// Group information.
@@ -609,7 +615,7 @@ pub struct RepoCommitDetail {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SnippetId(u64);
-display_id!(SnippetId);
+impl_id!(SnippetId);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProjectSnippet {
@@ -648,7 +654,7 @@ pub struct RepoDiff {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MilestoneId(u64);
-display_id!(MilestoneId);
+impl_id!(MilestoneId);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MilestoneState {
@@ -673,7 +679,7 @@ pub struct Milestone {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct IssueId(u64);
-display_id!(IssueId);
+impl_id!(IssueId);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum IssueState {
@@ -712,7 +718,7 @@ pub struct ExternalIssue {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MergeRequestId(u64);
-display_id!(MergeRequestId);
+impl_id!(MergeRequestId);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MergeStatus {
@@ -817,7 +823,7 @@ impl From<MergeRequestChanges> for MergeRequest {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SshKeyId(u64);
-display_id!(SshKeyId);
+impl_id!(SshKeyId);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SshKey {
@@ -853,7 +859,7 @@ pub enum NoteableId {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct NoteId(u64);
-display_id!(NoteId);
+impl_id!(NoteId);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Note {
@@ -926,7 +932,7 @@ pub struct CommitNote {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CommitStatusId(u64);
-display_id!(CommitStatusId);
+impl_id!(CommitStatusId);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// States for commit statuses.
