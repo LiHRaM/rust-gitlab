@@ -173,13 +173,14 @@ impl Gitlab {
     pub fn create_commit_line_comment(&self, project: ProjectId, commit: &str, body: &str,
                                       path: &str, line: u64) -> GitlabResult<CommitNote> {
         let line_str = format!("{}", line);
+        let line_type = LineType::New;
 
         let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment", project, commit)));
 
         req.param("note", body)
             .param("path", path)
             .param("line", &line_str)
-            .param("line_type", LineType::New.borrow());
+            .param("line_type", line_type.borrow());
 
         Self::_post_req(&mut req)
     }
