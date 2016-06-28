@@ -332,6 +332,22 @@ pub enum VisibilityLevel {
     Private = 0,
 }
 
+impl From<VisibilityLevel> for u64 {
+    fn from(visibility: VisibilityLevel) -> Self {
+        match visibility {
+            VisibilityLevel::Public => 20,
+            VisibilityLevel::Internal => 10,
+            VisibilityLevel::Private => 0,
+        }
+    }
+}
+
+impl Display for VisibilityLevel {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{}", Into::<u64>::into(self.clone()))
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 /// Project information.
 pub struct Project {
@@ -407,15 +423,33 @@ pub struct Project {
 /// Access levels for groups and projects.
 pub enum AccessLevel {
     /// Guest access (can see the project).
-    Guest = 10,
+    Guest,
     /// Reporter access (can open issues).
-    Reporter = 20,
+    Reporter,
     /// Developer access (can push branches, handle issues and merge requests).
-    Developer = 30,
+    Developer,
     /// Master access (can push to protected branches).
-    Master = 40,
+    Master,
     /// Owner access (full rights).
-    Owner = 50,
+    Owner,
+}
+
+impl From<AccessLevel> for u64 {
+    fn from(access: AccessLevel) -> Self {
+        match access {
+            AccessLevel::Guest => 10,
+            AccessLevel::Reporter => 20,
+            AccessLevel::Developer => 30,
+            AccessLevel::Master => 40,
+            AccessLevel::Owner => 50,
+        }
+    }
+}
+
+impl Display for AccessLevel {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{}", Into::<u64>::into(self.clone()))
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
