@@ -8,3 +8,13 @@ Gitlab API client.
 """
 repository = "https://gitlab.kitware.com/utils/rust-gitlab.git"
 homepage = "https://gitlab.kitware.com/utils/rust-gitlab"
+
+[dependencies]
+#ease = "~0.5"
+hyper = "~0.9"
+serde_json = "~0.7"
+url = "~1.1"
+
+[dependencies.ease]
+git = "https://github.com/simonpersson/ease.git"
+branch = "master"
