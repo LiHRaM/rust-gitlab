@@ -1,0 +1,10 @@
+[package]
+name = "gitlab"
+version = "0.1.0"
+authors = ["Ben Boeckel <ben.boeckel@kitware.com>"]
+license = "MIT/Apache-2.0"
+description = """
+Gitlab API client.
+"""
+repository = "https://gitlab.kitware.com/utils/rust-gitlab.git"
+homepage = "https://gitlab.kitware.com/utils/rust-gitlab"
