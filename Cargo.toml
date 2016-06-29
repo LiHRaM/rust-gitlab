@@ -8,6 +8,7 @@ Gitlab API client.
 """
 repository = "https://gitlab.kitware.com/utils/rust-gitlab.git"
 homepage = "https://gitlab.kitware.com/utils/rust-gitlab"
+readme = "README.md"
 build = "build.rs"
 
 [build-dependencies]
