@@ -134,7 +134,8 @@ impl Gitlab {
     }
 
     /// Get a team member of a project.
-    pub fn add_user_to_team(&self, project: ProjectId, user: UserId, access: AccessLevel) -> GitlabResult<ProjectMember> {
+    pub fn add_user_to_team(&self, project: ProjectId, user: UserId, access: AccessLevel)
+                            -> GitlabResult<ProjectMember> {
         let user_str = format!("{}", user);
         let access_str = format!("{}", access);
 
@@ -169,7 +170,8 @@ impl Gitlab {
     }
 
     /// Get comments on a commit.
-    pub fn create_commit_comment(&self, project: ProjectId, commit: &str, body: &str) -> GitlabResult<CommitNote> {
+    pub fn create_commit_comment(&self, project: ProjectId, commit: &str, body: &str)
+                                 -> GitlabResult<CommitNote> {
         let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment", project, commit)));
 
         req.param("note", body);
@@ -179,7 +181,8 @@ impl Gitlab {
 
     /// Get comments on a commit.
     pub fn create_commit_line_comment(&self, project: ProjectId, commit: &str, body: &str,
-                                      path: &str, line: u64) -> GitlabResult<CommitNote> {
+                                      path: &str, line: u64)
+                                      -> GitlabResult<CommitNote> {
         let line_str = format!("{}", line);
         let line_type = LineType::New;
 
@@ -194,13 +197,18 @@ impl Gitlab {
     }
 
     /// Get the statuses of a commit.
-    pub fn commit_statuses(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<CommitStatus>> {
+    pub fn commit_statuses(&self, project: ProjectId, commit: &str)
+                           -> GitlabResult<Vec<CommitStatus>> {
         self._get_paged(&format!("projects/{}/repository/commit/{}/statuses", project, commit))
     }
 
     /// Get the statuses of a commit.
-    pub fn commit_all_statuses(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<CommitStatus>> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/statuses", project, commit)));
+    pub fn commit_all_statuses(&self, project: ProjectId, commit: &str)
+                               -> GitlabResult<Vec<CommitStatus>> {
+        let mut req =
+            try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/statuses",
+                                          project,
+                                          commit)));
 
         req.param("all", "true");
 
@@ -208,10 +216,8 @@ impl Gitlab {
     }
 
     /// Create a status message for a commit.
-    pub fn create_commit_status(&self, project: ProjectId, sha: &str,
-                                state: StatusState, refname: &str,
-                                name: &str, target_url: &str,
-                                description: &str)
+    pub fn create_commit_status(&self, project: ProjectId, sha: &str, state: StatusState,
+                                refname: &str, name: &str, target_url: &str, description: &str)
                                 -> GitlabResult<CommitStatus> {
         let path = &format!("projects/{}/statuses/{}", project, sha);
 
@@ -229,18 +235,26 @@ impl Gitlab {
     }
 
     /// Get merge requests.
-    pub fn merge_request(&self, project: ProjectId, merge_request: MergeRequestId) -> GitlabResult<MergeRequest> {
+    pub fn merge_request(&self, project: ProjectId, merge_request: MergeRequestId)
+                         -> GitlabResult<MergeRequest> {
         self._get(&format!("projects/{}/merge_requests/{}", project, merge_request))
     }
 
     /// Get the notes from a merge request.
-    pub fn merge_request_notes(&self, project: ProjectId, merge_request: MergeRequestId) -> GitlabResult<Vec<Note>> {
-        self._get_paged(&format!("projects/{}/merge_requests/{}/notes", project, merge_request))
+    pub fn merge_request_notes(&self, project: ProjectId, merge_request: MergeRequestId)
+                               -> GitlabResult<Vec<Note>> {
+        self._get_paged(&format!("projects/{}/merge_requests/{}/notes",
+                                 project,
+                                 merge_request))
     }
 
     /// Create a note on a merge request.
-    pub fn create_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId, content: &str) -> GitlabResult<Note> {
-        let path = &format!("projects/{}/merge_requests/{}/notes", project, merge_request);
+    pub fn create_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId,
+                                     content: &str)
+                                     -> GitlabResult<Note> {
+        let path = &format!("projects/{}/merge_requests/{}/notes",
+                            project,
+                            merge_request);
 
         Self::_post_req(try!(self._mkrequest(path)).param("body", content))
     }
@@ -318,7 +332,7 @@ impl Gitlab {
             let page_str = &format!("{}", page_num);
             let mut page_req = req.clone();
             page_req.param("page", &page_str)
-                    .param("per_page", per_page_str);
+                .param("per_page", per_page_str);
             let page = try!(Self::_get_req::<Vec<T>>(&mut page_req));
             let page_len = page.len();
 
