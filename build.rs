@@ -10,7 +10,7 @@ pub fn main() {
         "types",
     ];
 
-    for path in paths.iter() {
+    for path in &paths {
         let src = format!("src/{}.rs.in", path);
         let dst = format!("{}.rs", path);
         let src_path = Path::new(&src);

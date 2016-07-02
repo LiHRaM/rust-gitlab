@@ -23,13 +23,13 @@ use std::fmt::{self, Display, Formatter};
 /// Errors which may occur when communicating with Gitlab.
 pub enum Error {
     /// Error occurred when communicating with Gitlab.
-    EaseError(EaseError),
+    Ease(EaseError),
     /// URL parsing error; should never occur.
-    UrlError(UrlError),
+    UrlParse(UrlError),
     /// Gitlab returned an error message.
-    GitlabError(String),
+    Gitlab(String),
     /// Failed to deserialize a Gitlab result into a structure.
-    DeserializeError(Box<SerdeError>),
+    Deserialize(Box<SerdeError>),
 }
 
 impl Error {
@@ -39,17 +39,17 @@ impl Error {
             .and_then(|s| s.as_string())
             .unwrap_or_else(|| "unknown error");
 
-        Error::GitlabError(msg.to_owned())
+        Error::Gitlab(msg.to_owned())
     }
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match *self {
-            Error::EaseError(ref error) => write!(f, "ease error: {:?}", error),
-            Error::UrlError(ref error) => write!(f, "url error: {}", error),
-            Error::GitlabError(ref error) => write!(f, "gitlab error: {}", error),
-            Error::DeserializeError(ref error) => write!(f, "deserialization error: {}", error),
+            Error::Ease(ref error) => write!(f, "ease error: {:?}", error),
+            Error::UrlParse(ref error) => write!(f, "url error: {}", error),
+            Error::Gitlab(ref error) => write!(f, "gitlab error: {}", error),
+            Error::Deserialize(ref error) => write!(f, "deserialization error: {}", error),
         }
     }
 }
@@ -61,9 +61,9 @@ impl error::Error for Error {
 
     fn cause(&self) -> Option<&error::Error> {
         match *self {
-            Error::EaseError(ref error) => Some(error),
-            Error::UrlError(ref error) => Some(error),
-            Error::DeserializeError(ref error) => Some(error),
+            Error::Ease(ref error) => Some(error),
+            Error::UrlParse(ref error) => Some(error),
+            Error::Deserialize(ref error) => Some(error),
             _ => None,
         }
     }
@@ -71,18 +71,18 @@ impl error::Error for Error {
 
 impl From<EaseError> for Error {
     fn from(error: EaseError) -> Self {
-        Error::EaseError(error)
+        Error::Ease(error)
     }
 }
 
 impl From<UrlError> for Error {
     fn from(error: UrlError) -> Self {
-        Error::UrlError(error)
+        Error::UrlParse(error)
     }
 }
 
 impl From<SerdeError> for Error {
     fn from(error: SerdeError) -> Self {
-        Error::DeserializeError(Box::new(error))
+        Error::Deserialize(Box::new(error))
     }
 }
