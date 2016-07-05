@@ -24,13 +24,13 @@ use super::types::*;
 
 use std::borrow::Borrow;
 
+#[derive(Clone)]
 /// A representation of the Gitlab API for a single user.
 ///
 /// Separate users should use separate instances of this.
 pub struct Gitlab {
     base_url: Url,
     token: String,
-    api_user: UserFull,
 }
 
 // The header Gitlab uses to authenticate the user.
@@ -38,6 +38,18 @@ header!{ (GitlabPrivateToken, "PRIVATE-TOKEN") => [String] }
 
 /// A JSON value return from Gitlab.
 pub type GitlabResult<T: Deserialize> = Result<T, Error>;
+
+/// Optional information for commit statuses.
+pub struct CommitStatusInfo<'a> {
+    /// The refname of the commit being tested.
+    pub refname: Option<&'a str>,
+    /// The name of the status (defaults to `"default"` on the Gitlab side).
+    pub name: Option<&'a str>,
+    /// A URL to associate with the status.
+    pub target_url: Option<&'a str>,
+    /// A description of the status check.
+    pub description: Option<&'a str>,
+}
 
 impl Gitlab {
     /// Create a new Gitlab API representation.
@@ -48,12 +60,11 @@ impl Gitlab {
 
         // Ensure the API is working.
         let mut user_req = try!(Self::_mkrequest1(&base_url, token, "user"));
-        let api_user = try!(Self::_get_req(&mut user_req));
+        try!(Self::_get_req(&mut user_req));
 
         let api = Gitlab {
             base_url: base_url,
             token: token.to_owned(),
-            api_user: api_user,
         };
 
         Ok(api)
@@ -217,16 +228,18 @@ impl Gitlab {
 
     /// Create a status message for a commit.
     pub fn create_commit_status(&self, project: ProjectId, sha: &str, state: StatusState,
-                                refname: &str, name: &str, target_url: &str, description: &str)
-                                -> GitlabResult<CommitStatus> {
+                                info: &CommitStatusInfo) -> GitlabResult<CommitStatus> {
         let path = &format!("projects/{}/statuses/{}", project, sha);
+        let mut req = try!(self._mkrequest(path));
 
-        Self::_post_req(try!(self._mkrequest(path))
-            .param("state", state.borrow())
-            .param("ref", refname)
-            .param("name", name)
-            .param("target_url", target_url)
-            .param("description", description))
+        req.param("state", state.borrow());
+
+        info.refname.map(|v| req.param("ref", v));
+        info.name.map(|v| req.param("name", v));
+        info.target_url.map(|v| req.param("target_url", v));
+        info.description.map(|v| req.param("description", v));
+
+        Self::_post_req(&mut req)
     }
 
     /// Get the merge requests for a project.
@@ -287,7 +300,7 @@ impl Gitlab {
     {
         match f(req) {
             Ok(rsp) => {
-                let v = try!(rsp.from_json().map_err(|e| Error::EaseError(e)));
+                let v = try!(rsp.from_json().map_err(Error::Ease));
 
                 Ok(try!(from_value::<T>(v)))
             },
@@ -295,7 +308,7 @@ impl Gitlab {
                 if let EaseError::UnsuccessfulResponse(rsp) = err {
                     Err(Error::from_gitlab(try!(rsp.from_json())))
                 } else {
-                    Err(Error::EaseError(err))
+                    Err(Error::Ease(err))
                 }
             },
         }
@@ -331,7 +344,7 @@ impl Gitlab {
         loop {
             let page_str = &format!("{}", page_num);
             let mut page_req = req.clone();
-            page_req.param("page", &page_str)
+            page_req.param("page", page_str)
                 .param("per_page", per_page_str);
             let page = try!(Self::_get_req::<Vec<T>>(&mut page_req));
             let page_len = page.len();

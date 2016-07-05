@@ -1,3 +1,11 @@
+// Copyright 2016 Kitware, Inc.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 extern crate serde_codegen;
 
 use std::env;
@@ -10,7 +18,7 @@ pub fn main() {
         "types",
     ];
 
-    for path in paths.iter() {
+    for path in &paths {
         let src = format!("src/{}.rs.in", path);
         let dst = format!("{}.rs", path);
         let src_path = Path::new(&src);
