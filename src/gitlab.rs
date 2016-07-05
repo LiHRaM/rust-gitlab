@@ -24,6 +24,7 @@ use super::types::*;
 
 use std::borrow::Borrow;
 
+#[derive(Clone)]
 /// A representation of the Gitlab API for a single user.
 ///
 /// Separate users should use separate instances of this.
