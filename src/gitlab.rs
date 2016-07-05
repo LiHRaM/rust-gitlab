@@ -30,7 +30,6 @@ use std::borrow::Borrow;
 pub struct Gitlab {
     base_url: Url,
     token: String,
-    api_user: UserFull,
 }
 
 // The header Gitlab uses to authenticate the user.
@@ -60,12 +59,11 @@ impl Gitlab {
 
         // Ensure the API is working.
         let mut user_req = try!(Self::_mkrequest1(&base_url, token, "user"));
-        let api_user = try!(Self::_get_req(&mut user_req));
+        try!(Self::_get_req(&mut user_req));
 
         let api = Gitlab {
             base_url: base_url,
             token: token.to_owned(),
-            api_user: api_user,
         };
 
         Ok(api)
