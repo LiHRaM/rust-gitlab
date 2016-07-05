@@ -18,7 +18,7 @@ extern crate log;
 
 mod error;
 mod gitlab;
-mod types;
+pub mod types;
 
 pub use error::Error;
 pub use gitlab::Gitlab;
