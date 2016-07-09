@@ -216,10 +216,9 @@ impl Gitlab {
     /// Get the statuses of a commit.
     pub fn commit_all_statuses(&self, project: ProjectId, commit: &str)
                                -> GitlabResult<Vec<CommitStatus>> {
-        let mut req =
-            try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/statuses",
-                                          project,
-                                          commit)));
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/statuses",
+                                           project,
+                                           commit)));
 
         req.param("all", "true");
 
@@ -228,7 +227,8 @@ impl Gitlab {
 
     /// Create a status message for a commit.
     pub fn create_commit_status(&self, project: ProjectId, sha: &str, state: StatusState,
-                                info: &CommitStatusInfo) -> GitlabResult<CommitStatus> {
+                                info: &CommitStatusInfo)
+                                -> GitlabResult<CommitStatus> {
         let path = &format!("projects/{}/statuses/{}", project, sha);
         let mut req = try!(self._mkrequest(path));
 
