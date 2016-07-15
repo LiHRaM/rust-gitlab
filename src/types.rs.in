@@ -862,6 +862,10 @@ enum_serialize!(MergeRequestState -> "merge request state",
     Locked => "locked"
 );
 
+fn bool_false() -> bool {
+    false
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MergeRequest {
     pub id: MergeRequestId,
@@ -887,6 +891,10 @@ pub struct MergeRequest {
     pub merge_status: MergeStatus,
     pub subscribed: bool,
     pub user_notes_count: u64,
+    #[serde(default="bool_false")]
+    pub should_remove_source_branch: bool,
+    #[serde(default="bool_false")]
+    pub force_remove_source_branch: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -915,6 +923,10 @@ pub struct MergeRequestChanges {
     pub subscribed: bool,
     pub user_notes_count: u64,
     pub changes: Vec<RepoDiff>,
+    #[serde(default="bool_false")]
+    pub should_remove_source_branch: bool,
+    #[serde(default="bool_false")]
+    pub force_remove_source_branch: bool,
 }
 
 impl From<MergeRequestChanges> for MergeRequest {
@@ -943,6 +955,8 @@ impl From<MergeRequestChanges> for MergeRequest {
             merge_status: mr.merge_status,
             subscribed: mr.subscribed,
             user_notes_count: mr.user_notes_count,
+            should_remove_source_branch: mr.should_remove_source_branch,
+            force_remove_source_branch: mr.force_remove_source_branch,
         }
     }
 }
