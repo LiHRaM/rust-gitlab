@@ -20,6 +20,11 @@ macro_rules! impl_id {
             pub fn new(id: u64) -> Self {
                 $name(id)
             }
+
+            /// The value of the id.
+            pub fn value(&self) -> u64 {
+                self.0
+            }
         }
 
         impl Display for $name {
