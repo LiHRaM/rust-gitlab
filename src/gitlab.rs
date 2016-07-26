@@ -220,8 +220,8 @@ impl Gitlab {
     pub fn commit_all_statuses(&self, project: ProjectId, commit: &str)
                                -> GitlabResult<Vec<CommitStatus>> {
         let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/statuses",
-                                           project,
-                                           commit)));
+                                                    project,
+                                                    commit)));
 
         req.param("all", "true");
 
