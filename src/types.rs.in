@@ -26,7 +26,7 @@ use std::fmt::{self, Display, Formatter};
 //    pub name: String,
 //}
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe user ID.
 pub struct UserId(u64);
 impl_id!(UserId);
@@ -123,11 +123,11 @@ pub struct Identity {
     pub extern_uid: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe theme ID.
 pub struct ThemeId(u64);
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe color scheme ID.
 pub struct ColorSchemeId(u64);
 
@@ -613,7 +613,7 @@ pub struct RepoObject {
     pub protected: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct ObjectId(String);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -701,7 +701,7 @@ pub struct RepoDiff {
     pub deleted_file: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MilestoneId(u64);
 impl_id!(MilestoneId);
 
@@ -730,7 +730,7 @@ pub struct Milestone {
     //pub due_date: Option<DateTime<UTC>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IssueId(u64);
 impl_id!(IssueId);
 
@@ -765,7 +765,7 @@ pub struct Issue {
     pub downvotes: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExternalIssueId(u64);
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -774,7 +774,7 @@ pub struct ExternalIssue {
     pub title: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MergeRequestId(u64);
 impl_id!(MergeRequestId);
 
@@ -905,7 +905,7 @@ impl From<MergeRequestChanges> for MergeRequest {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SshKeyId(u64);
 impl_id!(SshKeyId);
 
@@ -948,7 +948,7 @@ pub enum NoteableId {
     Snippet(SnippetId),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NoteId(u64);
 impl_id!(NoteId);
 
@@ -1025,7 +1025,7 @@ pub struct CommitNote {
     pub created_at: DateTime<UTC>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommitStatusId(u64);
 impl_id!(CommitStatusId);
 
