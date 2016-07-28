@@ -280,6 +280,11 @@ pub struct ProjectHook {
     pub note_events: bool,
     /// Whether the communication with the hook is verified using TLS certificates.
     pub enable_ssl_verification: bool,
+    /// Whether the hook is contacted for build events.
+    pub build_events: bool,
+    #[serde(default="bool_false")]
+    /// Whether the hook is contacted for wiki page events.
+    pub wiki_page_events: bool,
 }
 
 impl From<ProjectHook> for Hook {
