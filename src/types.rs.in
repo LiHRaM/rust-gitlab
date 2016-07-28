@@ -1316,6 +1316,11 @@ impl Namespace {
 //  expose :filename, :size
 //end
 
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe build ID.
+pub struct BuildId(u64);
+impl_id!(BuildId);
+
 //class Build < Grape::Entity
 //  expose :id, :status, :stage, :name, :ref, :tag, :coverage
 //  expose :created_at, :started_at, :finished_at
