@@ -961,7 +961,7 @@ pub struct Note {
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
     pub system: bool,
-    pub noteable_id: Value, // Keep as JSON because its type depends on what `noteable_id` is.
+    pub noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
     pub noteable_type: NoteType,
 }
 
