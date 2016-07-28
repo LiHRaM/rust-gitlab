@@ -6,27 +6,4 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![warn(missing_docs)]
-
-//! A library for communicating with Gitlab instances.
-
-#[macro_use]
-extern crate hyper;
-
-#[macro_use]
-extern crate log;
-
-mod error;
-mod gitlab;
-
-#[macro_use]
-mod macros;
-pub mod types;
-pub mod webhooks;
-
-pub use error::Error;
-pub use gitlab::Gitlab;
-pub use types::*;
-
-#[cfg(test)]
-mod test;
+include!(concat!(env!("OUT_DIR"), "/webhooks.rs"));
