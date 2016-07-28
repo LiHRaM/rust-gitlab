@@ -1,0 +1,316 @@
+// Copyright 2016 Kitware, Inc.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
+extern crate chrono;
+use self::chrono::{DateTime, UTC};
+
+extern crate serde;
+use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
+use self::serde::de::{Error, Type};
+
+extern crate serde_json;
+use self::serde_json::Value;
+
+use super::types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
+use super::webhooks::{CommitHookAttrs, ProjectHookAttrs};
+
+use std::borrow::Borrow;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ProjectEvent {
+    Create,
+    Destroy,
+    Rename,
+    Transfer,
+}
+enum_serialize!(ProjectEvent -> "project event",
+    Create => "project_create",
+    Destroy => "project_destroy",
+    Rename => "project_rename",
+    Transfer => "project_transfer"
+);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ProjectVisibility {
+    Internal,
+    Private,
+    Public,
+}
+enum_serialize!(ProjectVisibility -> "project visibility",
+    Internal => "internal",
+    Private => "private",
+    Public => "public"
+);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProjectSystemHook {
+    pub event_name: ProjectEvent,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+
+    pub name: String,
+    pub owner_email: String,
+    pub owner_name: String,
+    pub path: String,
+    pub path_with_namespace: String,
+    pub project_id: ProjectId,
+    pub project_visibility: ProjectVisibility,
+    pub old_path_with_namespace: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ProjectMemberEvent {
+    Add,
+    Remove,
+}
+enum_serialize!(ProjectMemberEvent -> "project member event",
+    Add => "user_add_to_team",
+    Remove => "user_remove_from_team"
+);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+/// Access levels for groups and projects.
+pub enum HumanAccessLevel {
+    /// Guest access (can see the project).
+    Guest,
+    /// Reporter access (can open issues).
+    Reporter,
+    /// Developer access (can push branches, handle issues and merge requests).
+    Developer,
+    /// Master access (can push to protected branches).
+    Master,
+    /// Owner access (full rights).
+    Owner,
+}
+enum_serialize!(HumanAccessLevel -> "human access level",
+    Guest => "Guest",
+    Reporter => "Reporter",
+    Developer => "Developer",
+    Master => "Master",
+    Owner => "Owner"
+);
+
+impl From<HumanAccessLevel> for AccessLevel {
+    fn from(access: HumanAccessLevel) -> Self {
+        match access {
+            HumanAccessLevel::Guest => AccessLevel::Guest,
+            HumanAccessLevel::Reporter => AccessLevel::Reporter,
+            HumanAccessLevel::Developer => AccessLevel::Developer,
+            HumanAccessLevel::Master => AccessLevel::Master,
+            HumanAccessLevel::Owner => AccessLevel::Owner,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProjectMemberSystemHook {
+    pub event_name: ProjectMemberEvent,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub project_name: String,
+    pub project_path: String,
+    pub project_path_with_namespace: String,
+    pub project_id: ProjectId,
+    pub user_username: String,
+    pub user_name: String,
+    pub user_email: String,
+    pub user_id: UserId,
+    pub access_level: HumanAccessLevel,
+    pub project_visibility: ProjectVisibility,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UserEvent {
+    Create,
+    Destroy,
+}
+enum_serialize!(UserEvent -> "user event",
+    Create => "user_create",
+    Destroy => "user_destroy"
+);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UserSystemHook {
+    pub event_name: UserEvent,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub name: String,
+    pub email: String,
+    pub user_id: UserId,
+    pub username: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KeyEvent {
+    Create,
+    Destroy,
+}
+enum_serialize!(KeyEvent -> "key event",
+    Create => "key_create",
+    Destroy => "key_destroy"
+);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct KeySystemHook {
+    pub event_name: KeyEvent,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub username: String,
+    pub key: String,
+    pub id: SshKeyId,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GroupEvent {
+    Create,
+    Destroy,
+}
+enum_serialize!(GroupEvent -> "group event",
+    Create => "group_create",
+    Destroy => "group_destroy"
+);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GroupSystemHook {
+    pub event_name: GroupEvent,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub name: String,
+    pub path: String,
+    pub group_id: GroupId,
+    pub owner_email: Option<String>,
+    pub owner_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GroupMemberEvent {
+    Add,
+    Remove,
+}
+enum_serialize!(GroupMemberEvent -> "group member event",
+    Add => "user_add_to_group",
+    Remove => "user_remove_from_group"
+);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GroupMemberSystemHook {
+    pub event_name: GroupMemberEvent,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub group_name: String,
+    pub group_path: String,
+    pub group_id: GroupId,
+    pub user_username: String,
+    pub user_name: String,
+    pub user_email: String,
+    pub user_id: UserId,
+    pub group_access: HumanAccessLevel,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PushEvent {
+    Push,
+    TagPush,
+}
+enum_serialize!(PushEvent -> "push event",
+    Push => "push",
+    TagPush => "tag_push"
+);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PushSystemHook {
+    pub event_name: PushEvent,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub before: ObjectId,
+    pub after: ObjectId,
+    #[serde(rename="ref")]
+    pub ref_: String,
+    pub checkout_sha: String,
+    pub message: String,
+    pub user_id: UserId,
+    pub user_name: String,
+    pub user_email: String,
+    pub user_avatar: String,
+    pub project_id: ProjectId,
+    pub project: ProjectHookAttrs,
+    pub commits: Vec<CommitHookAttrs>, // limited to 20 commits
+    pub total_commits_count: u64,
+}
+
+#[derive(Debug)]
+pub enum SystemHook {
+    Project(ProjectSystemHook),
+    ProjectMember(ProjectMemberSystemHook),
+    User(UserSystemHook),
+    Key(KeySystemHook),
+    Group(GroupSystemHook),
+    GroupMember(GroupMemberSystemHook),
+    Push(PushSystemHook),
+}
+
+impl Deserialize for SystemHook {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(Value::deserialize(deserializer));
+
+        let event_name = match val.pointer("/event_name") {
+            Some(mstring) => {
+                match mstring.as_string() {
+                    Some(string) => string,
+                    None => {
+                        return Err(D::Error::invalid_type(Type::String));
+                    },
+                }
+            },
+            None => {
+                return Err(D::Error::missing_field("event_name"));
+            },
+        };
+
+        match event_name {
+            "project_create" |
+            "project_destroy" |
+            "project_rename" |
+            "project_transfer" => {
+                Ok(SystemHook::Project(try!(ProjectSystemHook::deserialize(deserializer))))
+            },
+
+            "user_add_to_team" |
+            "user_remove_from_team" => {
+                Ok(SystemHook::ProjectMember(try!(ProjectMemberSystemHook::deserialize(deserializer))))
+            },
+
+            "user_create" |
+            "user_destroy" => {
+                Ok(SystemHook::User(try!(UserSystemHook::deserialize(deserializer))))
+            },
+
+            "key_create" |
+            "key_destroy" => {
+                Ok(SystemHook::Key(try!(KeySystemHook::deserialize(deserializer))))
+            },
+
+            "group_create" |
+            "group_destroy" => {
+                Ok(SystemHook::Group(try!(GroupSystemHook::deserialize(deserializer))))
+            },
+
+            "user_add_to_group" |
+            "user_remove_from_group" => {
+                Ok(SystemHook::GroupMember(try!(GroupMemberSystemHook::deserialize(deserializer))))
+            },
+
+            "push" |
+            "tag_push" => {
+                Ok(SystemHook::Push(try!(PushSystemHook::deserialize(deserializer))))
+            },
+
+            _ => Err(D::Error::invalid_value(&format!("unrecognized system event name: {}", event_name))),
+        }
+    }
+}

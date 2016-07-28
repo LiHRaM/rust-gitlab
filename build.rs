@@ -15,6 +15,7 @@ use std::path::Path;
 pub fn main() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let paths = [
+        "systemhooks",
         "types",
         "webhooks",
     ];

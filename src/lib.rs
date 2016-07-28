@@ -21,6 +21,7 @@ mod gitlab;
 
 #[macro_use]
 mod macros;
+pub mod systemhooks;
 pub mod types;
 pub mod webhooks;
 
