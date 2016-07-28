@@ -24,6 +24,9 @@ use super::types::*;
 
 use std::borrow::Borrow;
 
+// TODO: Add system hook APIs
+// TODO: Add webhook APIs
+
 #[derive(Clone)]
 /// A representation of the Gitlab API for a single user.
 ///
