@@ -313,7 +313,7 @@ pub struct BasicProjectDetails {
 }
 
 /// Visibility levels of projects.
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum VisibilityLevel {
     Public = 20,
     Internal = 10,
