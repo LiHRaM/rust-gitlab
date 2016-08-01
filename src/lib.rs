@@ -18,7 +18,13 @@ extern crate log;
 
 mod error;
 mod gitlab;
+
+#[macro_use]
+mod macros;
+pub mod systemhooks;
 pub mod types;
+pub mod webhooks;
+pub mod hooks;
 
 pub use error::Error;
 pub use gitlab::Gitlab;
