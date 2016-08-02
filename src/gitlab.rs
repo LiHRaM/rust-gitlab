@@ -167,10 +167,10 @@ impl Gitlab {
     }
 
     /// Get a branch.
-    pub fn branch(&self, project: ProjectId, branch: &str) -> GitlabResult<Vec<RepoObject>> {
-        self._get_paged(&format!("projects/{}/repository/branches/{}",
-                                 project,
-                                 percent_encode(branch.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+    pub fn branch(&self, project: ProjectId, branch: &str) -> GitlabResult<RepoObject> {
+        self._get(&format!("projects/{}/repository/branches/{}",
+                           project,
+                           percent_encode(branch.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
     }
 
     /// Get a commit.
@@ -220,8 +220,8 @@ impl Gitlab {
     pub fn commit_all_statuses(&self, project: ProjectId, commit: &str)
                                -> GitlabResult<Vec<CommitStatus>> {
         let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/statuses",
-                                           project,
-                                           commit)));
+                                                    project,
+                                                    commit)));
 
         req.param("all", "true");
 
