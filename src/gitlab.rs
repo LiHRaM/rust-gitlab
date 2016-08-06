@@ -56,17 +56,16 @@ impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
-    pub fn new(host: &str, token: &str) -> Result<Self, Error> {
+    pub fn new<T: ToString>(host: &str, token: T) -> Result<Self, Error> {
         let base_url = try!(Url::parse(&format!("https://{}/api/v3/", host)));
-
-        // Ensure the API is working.
-        let mut user_req = try!(Self::_mkrequest1(&base_url, token, "user"));
-        try!(Self::_get_req(&mut user_req));
 
         let api = Gitlab {
             base_url: base_url,
-            token: token.to_owned(),
+            token: token.to_string(),
         };
+
+        // Ensure the API is working.
+        let _: UserFull = try!(api._get("user"));
 
         Ok(api)
     }
@@ -284,7 +283,7 @@ impl Gitlab {
 
         debug!(target: "gitlab", "api call {}", url);
 
-        req.header(GitlabPrivateToken(token.to_owned()));
+        req.header(GitlabPrivateToken(token.to_string()));
 
         Ok(req)
     }

@@ -39,7 +39,7 @@ impl Error {
             .and_then(|s| s.as_string())
             .unwrap_or_else(|| "unknown error");
 
-        Error::Gitlab(msg.to_owned())
+        Error::Gitlab(msg.to_string())
     }
 }
 
