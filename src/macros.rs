@@ -37,8 +37,8 @@ macro_rules! impl_id {
 
 macro_rules! enum_serialize {
     ( $name:ident -> $desc:expr, $( $value:ident => $str:expr ),+ ) => {
-        impl Borrow<str> for $name {
-            fn borrow(&self) -> &str {
+        impl $name {
+            pub fn as_str(&self) -> &'static str {
                 match *self {
                     $( $name::$value => $str, )*
                 }
@@ -47,7 +47,7 @@ macro_rules! enum_serialize {
 
         impl Serialize for $name {
             fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
-                serializer.serialize_str(self.borrow())
+                serializer.serialize_str(self.as_str())
             }
         }
 
@@ -55,7 +55,7 @@ macro_rules! enum_serialize {
             fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
                 let val = try!(String::deserialize(deserializer));
 
-                match val.borrow() {
+                match val.as_str() {
                     $( $str => Ok($name::$value), )*
                     v => {
                         error!(target: "gitlab", concat!("unknown ", $desc, " from gitlab: {}"), v);
