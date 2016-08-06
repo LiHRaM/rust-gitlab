@@ -1125,7 +1125,7 @@ impl Event {
             EventTargetType::Commit => {
                 self.target_id.as_string()
                     .map(|id| {
-                        EventTargetId::Commit(ObjectId(id.to_owned()))
+                        EventTargetId::Commit(ObjectId(id.to_string()))
                     })
             },
             EventTargetType::Issue => {

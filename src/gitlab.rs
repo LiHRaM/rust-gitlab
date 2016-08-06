@@ -56,12 +56,12 @@ impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
-    pub fn new(host: &str, token: &str) -> Result<Self, Error> {
+    pub fn new<T: ToString>(host: &str, token: T) -> Result<Self, Error> {
         let base_url = try!(Url::parse(&format!("https://{}/api/v3/", host)));
 
         let api = Gitlab {
             base_url: base_url,
-            token: token.to_owned(),
+            token: token.to_string(),
         };
 
         // Ensure the API is working.
@@ -283,7 +283,7 @@ impl Gitlab {
 
         debug!(target: "gitlab", "api call {}", url);
 
-        req.header(GitlabPrivateToken(token.to_owned()));
+        req.header(GitlabPrivateToken(token.to_string()));
 
         Ok(req)
     }
