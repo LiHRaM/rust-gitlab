@@ -16,7 +16,6 @@ use self::serde::de::Error;
 extern crate serde_json;
 use self::serde_json::Value;
 
-use std::borrow::Borrow;
 use std::fmt::{self, Display, Formatter};
 
 // This is only used in internal API calls.

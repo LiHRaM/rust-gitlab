@@ -22,8 +22,6 @@ use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 use super::error::Error;
 use super::types::*;
 
-use std::borrow::Borrow;
-
 // TODO: Add system hook APIs
 // TODO: Add webhook APIs
 
@@ -205,7 +203,7 @@ impl Gitlab {
         req.param("note", body)
             .param("path", path)
             .param("line", &line_str)
-            .param("line_type", line_type.borrow());
+            .param("line_type", line_type.as_str());
 
         Self::_post_req(&mut req)
     }
@@ -235,7 +233,7 @@ impl Gitlab {
         let path = &format!("projects/{}/statuses/{}", project, sha);
         let mut req = try!(self._mkrequest(path));
 
-        req.param("state", state.borrow());
+        req.param("state", state.as_str());
 
         info.refname.map(|v| req.param("ref", v));
         info.name.map(|v| req.param("name", v));
