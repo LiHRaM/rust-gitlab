@@ -59,14 +59,13 @@ impl Gitlab {
     pub fn new(host: &str, token: &str) -> Result<Self, Error> {
         let base_url = try!(Url::parse(&format!("https://{}/api/v3/", host)));
 
-        // Ensure the API is working.
-        let mut user_req = try!(Self::_mkrequest1(&base_url, token, "user"));
-        try!(Self::_get_req(&mut user_req));
-
         let api = Gitlab {
             base_url: base_url,
             token: token.to_owned(),
         };
+
+        // Ensure the API is working.
+        let _: UserFull = try!(api._get("user"));
 
         Ok(api)
     }
