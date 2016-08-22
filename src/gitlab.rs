@@ -155,7 +155,7 @@ impl Gitlab {
         req.param("user", &user_str)
             .param("access", &access_str);
 
-        Self::_post_req(&mut req)
+        Self::_post_req(req)
     }
 
     /// Get branches for a project.
@@ -187,7 +187,7 @@ impl Gitlab {
 
         req.param("note", body);
 
-        Self::_post_req(&mut req)
+        Self::_post_req(req)
     }
 
     /// Get comments on a commit.
@@ -204,7 +204,7 @@ impl Gitlab {
             .param("line", &line_str)
             .param("line_type", line_type.as_str());
 
-        Self::_post_req(&mut req)
+        Self::_post_req(req)
     }
 
     /// Get the statuses of a commit.
@@ -239,7 +239,7 @@ impl Gitlab {
         info.target_url.map(|v| req.param("target_url", v));
         info.description.map(|v| req.param("description", v));
 
-        Self::_post_req(&mut req)
+        Self::_post_req(req)
     }
 
     /// Get the issues for a project.
@@ -299,7 +299,11 @@ impl Gitlab {
                             project,
                             merge_request);
 
-        Self::_post_req(try!(self._mkrequest(path)).param("body", content))
+        let mut req = try!(self._mkrequest(path));
+
+        req.param("body", content);
+
+        Self::_post_req(req)
     }
 
     // Create a request with the proper common metadata for authentication.
@@ -324,8 +328,8 @@ impl Gitlab {
     }
 
     // Refactored code which talks to Gitlab and transforms error messages properly.
-    fn _comm<F, T>(req: &mut Request, f: F) -> GitlabResult<T>
-        where F: FnOnce(&mut Request) -> Result<Response, EaseError>,
+    fn _comm<F, T>(req: Request, f: F) -> GitlabResult<T>
+        where F: FnOnce(Request) -> Result<Response, EaseError>,
               T: Deserialize
     {
         match f(req) {
@@ -344,24 +348,24 @@ impl Gitlab {
         }
     }
 
-    fn _get_req<T: Deserialize>(req: &mut Request) -> GitlabResult<T> {
-        Self::_comm(req, |req| req.get())
+    fn _get_req<T: Deserialize>(req: Request) -> GitlabResult<T> {
+        Self::_comm(req, |mut req| req.get())
     }
 
     fn _get<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
-        Self::_get_req(&mut try!(self._mkrequest(url)))
+        Self::_get_req(try!(self._mkrequest(url)))
     }
 
-    fn _post_req<T: Deserialize>(req: &mut Request) -> GitlabResult<T> {
-        Self::_comm(req, |req| req.post())
+    fn _post_req<T: Deserialize>(req: Request) -> GitlabResult<T> {
+        Self::_comm(req, |mut req| req.post())
     }
 
     fn _post<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
-        Self::_post_req(&mut try!(self._mkrequest(url)))
+        Self::_post_req(try!(self._mkrequest(url)))
     }
 
     fn _put<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
-        Self::_comm(&mut try!(self._mkrequest(url)), |req| req.put())
+        Self::_comm(try!(self._mkrequest(url)), |mut req| req.put())
     }
 
     fn _get_paged_req<T: Deserialize>(req: Request) -> GitlabResult<Vec<T>> {
@@ -376,7 +380,7 @@ impl Gitlab {
             let mut page_req = req.clone();
             page_req.param("page", page_str)
                 .param("per_page", per_page_str);
-            let page = try!(Self::_get_req::<Vec<T>>(&mut page_req));
+            let page = try!(Self::_get_req::<Vec<T>>(page_req));
             let page_len = page.len();
 
             results.extend(page.into_iter());
