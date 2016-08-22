@@ -14,7 +14,7 @@ use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use self::serde::de::{Error, Type};
 
 extern crate serde_json;
-use self::serde_json::Value;
+use self::serde_json::{from_value, Value};
 
 use super::types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
 use super::webhooks::{CommitHookAttrs, ProjectHookAttrs};
@@ -257,58 +257,73 @@ impl Deserialize for SystemHook {
         let val = try!(Value::deserialize(deserializer));
 
         let event_name = match val.pointer("/event_name") {
-            Some(mstring) => {
-                match mstring.as_string() {
-                    Some(string) => string,
-                    None => {
-                        return Err(D::Error::invalid_type(Type::String));
-                    },
-                }
-            },
-            None => {
-                return Err(D::Error::missing_field("event_name"));
-            },
-        };
+                Some(mstring) => {
+                    match mstring.as_string() {
+                        Some(string) => string,
+                        None => {
+                            return Err(D::Error::invalid_type(Type::String));
+                        },
+                    }
+                },
+                None => {
+                    return Err(D::Error::missing_field("event_name"));
+                },
+            }
+            .to_string();
 
-        match event_name {
-            "project_create" |
-            "project_destroy" |
-            "project_rename" |
-            "project_transfer" => {
-                Ok(SystemHook::Project(try!(ProjectSystemHook::deserialize(deserializer))))
-            },
+        let hook_res = match event_name.as_str() {
+                "project_create" |
+                "project_destroy" |
+                "project_rename" |
+                "project_transfer" => {
+                    from_value(val)
+                        .map(SystemHook::Project)
+                },
 
-            "user_add_to_team" |
-            "user_remove_from_team" => {
-                Ok(SystemHook::ProjectMember(try!(ProjectMemberSystemHook::deserialize(deserializer))))
-            },
+                "user_add_to_team" |
+                "user_remove_from_team" => {
+                    from_value(val)
+                        .map(SystemHook::ProjectMember)
+                    Ok(SystemHook::ProjectMember(try!(ProjectMemberSystemHook::deserialize(deserializer))))
+                },
 
-            "user_create" |
-            "user_destroy" => {
-                Ok(SystemHook::User(try!(UserSystemHook::deserialize(deserializer))))
-            },
+                "user_create" |
+                "user_destroy" => {
+                    from_value(val)
+                        .map(SystemHook::User)
+                },
 
-            "key_create" |
-            "key_destroy" => {
-                Ok(SystemHook::Key(try!(KeySystemHook::deserialize(deserializer))))
-            },
+                "key_create" |
+                "key_destroy" => {
+                    from_value(val)
+                        .map(SystemHook::Key)
+                },
 
-            "group_create" |
-            "group_destroy" => {
-                Ok(SystemHook::Group(try!(GroupSystemHook::deserialize(deserializer))))
-            },
+                "group_create" |
+                "group_destroy" => {
+                    from_value(val)
+                        .map(SystemHook::Group)
+                },
 
-            "user_add_to_group" |
-            "user_remove_from_group" => {
-                Ok(SystemHook::GroupMember(try!(GroupMemberSystemHook::deserialize(deserializer))))
-            },
+                "user_add_to_group" |
+                "user_remove_from_group" => {
+                    from_value(val)
+                        .map(SystemHook::GroupMember)
+                },
 
-            "push" |
-            "tag_push" => {
-                Ok(SystemHook::Push(try!(PushSystemHook::deserialize(deserializer))))
-            },
+                "push" |
+                "tag_push" => {
+                    from_value(val)
+                        .map(SystemHook::Push)
+                },
 
-            _ => Err(D::Error::invalid_value(&format!("unrecognized system event name: {}", event_name))),
-        }
+                _ => {
+                    return Err(D::Error::invalid_value(&format!("unrecognized system event name: {}", event_name)));
+                },
+            };
+
+        hook_res.map_err(|err| {
+                D::Error::invalid_value(&format!("{:?}", err))
+            })
     }
 }

@@ -14,7 +14,7 @@ use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use self::serde::de::{Error, Type};
 
 extern crate serde_json;
-use self::serde_json::Value;
+use self::serde_json::{from_value, Value};
 
 use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus, MilestoneId, NoteId, NoteType, ObjectId, ProjectId, UserId};
 
@@ -369,43 +369,55 @@ impl Deserialize for WebHook {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
         let val = try!(Value::deserialize(deserializer));
 
-        let event_name = match val.pointer("/object_kind") {
-            Some(mstring) => {
-                match mstring.as_string() {
-                    Some(string) => string,
-                    None => {
-                        return Err(D::Error::invalid_type(Type::String));
-                    },
-                }
-            },
-            None => {
-                return Err(D::Error::missing_field("object_kind"));
-            },
-        };
+        let object_kind = match val.pointer("/object_kind") {
+                Some(mstring) => {
+                    match mstring.as_string() {
+                        Some(string) => string,
+                        None => {
+                            return Err(D::Error::invalid_type(Type::String));
+                        },
+                    }
+                },
+                None => {
+                    return Err(D::Error::missing_field("object_kind"));
+                },
+            }
+            .to_string();
 
-        match event_name {
-            "push" |
-            "tag_push" => {
-                Ok(WebHook::Push(try!(PushHook::deserialize(deserializer))))
-            },
+        let hook_res = match object_kind.as_str() {
+                "push" |
+                "tag_push" => {
+                    from_value(val)
+                        .map(WebHook::Push)
+                },
 
-            "issue" => {
-                Ok(WebHook::Issue(try!(IssueHook::deserialize(deserializer))))
-            },
+                "issue" => {
+                    from_value(val)
+                        .map(WebHook::Issue)
+                },
 
-            "merge_request" => {
-                Ok(WebHook::MergeRequest(try!(MergeRequestHook::deserialize(deserializer))))
-            },
+                "merge_request" => {
+                    from_value(val)
+                        .map(WebHook::MergeRequest)
+                },
 
-            "note" => {
-                Ok(WebHook::Note(try!(NoteHook::deserialize(deserializer))))
-            },
+                "note" => {
+                    from_value(val)
+                        .map(WebHook::Note)
+                },
 
-            "build" => {
-                Ok(WebHook::Build(try!(BuildHook::deserialize(deserializer))))
-            },
+                "build" => {
+                    from_value(val)
+                        .map(WebHook::Build)
+                },
 
-            _ => Err(D::Error::invalid_value(&format!("unrecognized system object kind: {}", event_name))),
-        }
+                _ => {
+                    return Err(D::Error::invalid_value(&format!("unrecognized webhook object kind: {}", object_kind)));
+                },
+            };
+
+        hook_res.map_err(|err| {
+                D::Error::invalid_value(&format!("{:?}", err))
+            })
     }
 }
