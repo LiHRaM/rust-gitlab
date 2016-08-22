@@ -56,7 +56,7 @@ impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
-    pub fn new<T: ToString>(host: &str, token: T) -> Result<Self, Error> {
+    pub fn new<T: ToString>(host: &str, token: T) -> GitlabResult<Self> {
         let base_url = try!(Url::parse(&format!("https://{}/api/v3/", host)));
 
         let api = Gitlab {
