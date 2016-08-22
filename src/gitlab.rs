@@ -269,7 +269,11 @@ impl Gitlab {
                             project,
                             issue);
 
-        Self::_post_req(try!(self._mkrequest(path)).param("body", content))
+        let mut req = try!(self._mkrequest(path));
+
+        req.param("body", content);
+
+        Self::_post_req(req)
     }
 
     /// Get the merge requests for a project.
@@ -364,8 +368,12 @@ impl Gitlab {
         Self::_post_req(try!(self._mkrequest(url)))
     }
 
+    fn _put_req<T: Deserialize>(req: Request) -> GitlabResult<T> {
+        Self::_comm(req, |mut req| req.put())
+    }
+
     fn _put<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
-        Self::_comm(try!(self._mkrequest(url)), |mut req| req.put())
+        Self::_put_req(try!(self._mkrequest(url)))
     }
 
     fn _get_paged_req<T: Deserialize>(req: Request) -> GitlabResult<Vec<T>> {
