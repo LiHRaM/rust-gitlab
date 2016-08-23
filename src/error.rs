@@ -19,17 +19,33 @@ use self::url::ParseError as UrlError;
 use std::error;
 use std::fmt::{self, Display, Formatter};
 
-#[derive(Debug)]
-/// Errors which may occur when communicating with Gitlab.
-pub enum Error {
-    /// Error occurred when communicating with Gitlab.
-    Ease(EaseError),
-    /// URL parsing error; should never occur.
-    UrlParse(UrlError),
-    /// Gitlab returned an error message.
-    Gitlab(String),
-    /// Failed to deserialize a Gitlab result into a structure.
-    Deserialize(Box<SerdeError>),
+quick_error! {
+    #[derive(Debug)]
+    /// Errors which may occur when communicating with Gitlab.
+    pub enum Error {
+        /// Error occurred when communicating with Gitlab.
+        Ease(err: EaseError) {
+            cause(err)
+            display("ease error: {:?}", err)
+            from()
+        }
+        /// URL parsing error; should never occur.
+        UrlParse(err: UrlError) {
+            cause(err)
+            display("url error: {:?}", err)
+            from()
+        }
+        /// Gitlab returned an error message.
+        Gitlab(err: String) {
+            display("gitlab error: {:?}", err)
+        }
+        /// Failed to deserialize a Gitlab result into a structure.
+        Deserialize(err: Box<SerdeError>) {
+            cause(err)
+            display("deserialization error: {:?}", err)
+            from()
+        }
+    }
 }
 
 impl Error {
@@ -40,44 +56,6 @@ impl Error {
             .unwrap_or_else(|| "unknown error");
 
         Error::Gitlab(msg.to_string())
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match *self {
-            Error::Ease(ref error) => write!(f, "ease error: {:?}", error),
-            Error::UrlParse(ref error) => write!(f, "url error: {}", error),
-            Error::Gitlab(ref error) => write!(f, "gitlab error: {}", error),
-            Error::Deserialize(ref error) => write!(f, "deserialization error: {}", error),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        "GitLab API error"
-    }
-
-    fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            Error::Ease(ref error) => Some(error),
-            Error::UrlParse(ref error) => Some(error),
-            Error::Deserialize(ref error) => Some(error),
-            _ => None,
-        }
-    }
-}
-
-impl From<EaseError> for Error {
-    fn from(error: EaseError) -> Self {
-        Error::Ease(error)
-    }
-}
-
-impl From<UrlError> for Error {
-    fn from(error: UrlError) -> Self {
-        Error::UrlParse(error)
     }
 }
 
