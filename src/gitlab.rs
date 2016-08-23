@@ -242,6 +242,36 @@ impl Gitlab {
         Self::_post_req(&mut req)
     }
 
+    /// Get the issues for a project.
+    pub fn issues(&self, project: ProjectId) -> GitlabResult<Vec<Issue>> {
+        self._get_paged(&format!("projects/{}/issues", project))
+    }
+
+    /// Get issues.
+    pub fn issue(&self, project: ProjectId, issue: IssueId)
+                         -> GitlabResult<Issue> {
+        self._get(&format!("projects/{}/issues/{}", project, issue))
+    }
+
+    /// Get the notes from a issue.
+    pub fn issue_notes(&self, project: ProjectId, issue: IssueId)
+                       -> GitlabResult<Vec<Note>> {
+        self._get_paged(&format!("projects/{}/issues/{}/notes",
+                                 project,
+                                 issue))
+    }
+
+    /// Create a note on a issue.
+    pub fn create_issue_note(&self, project: ProjectId, issue: IssueId,
+                             content: &str)
+                             -> GitlabResult<Note> {
+        let path = &format!("projects/{}/issues/{}/notes",
+                            project,
+                            issue);
+
+        Self::_post_req(try!(self._mkrequest(path)).param("body", content))
+    }
+
     /// Get the merge requests for a project.
     pub fn merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
         self._get_paged(&format!("projects/{}/merge_requests", project))
