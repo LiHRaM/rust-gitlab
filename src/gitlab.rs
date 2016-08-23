@@ -135,18 +135,18 @@ impl Gitlab {
     }
 
     /// Get the team members of a project.
-    pub fn members(&self, project: ProjectId) -> GitlabResult<Vec<ProjectMember>> {
+    pub fn members(&self, project: ProjectId) -> GitlabResult<Vec<Member>> {
         self._get_paged(&format!("projects/{}/members", project))
     }
 
     /// Get a team member of a project.
-    pub fn member(&self, project: ProjectId, user: UserId) -> GitlabResult<Option<ProjectMember>> {
+    pub fn member(&self, project: ProjectId, user: UserId) -> GitlabResult<Option<Member>> {
         self._get(&format!("projects/{}/members/{}", project, user))
     }
 
     /// Get a team member of a project.
     pub fn add_user_to_team(&self, project: ProjectId, user: UserId, access: AccessLevel)
-                            -> GitlabResult<ProjectMember> {
+                            -> GitlabResult<Member> {
         let user_str = format!("{}", user);
         let access_str = format!("{}", access);
 
@@ -159,12 +159,12 @@ impl Gitlab {
     }
 
     /// Get branches for a project.
-    pub fn branches(&self, project: ProjectId) -> GitlabResult<Vec<RepoObject>> {
+    pub fn branches(&self, project: ProjectId) -> GitlabResult<Vec<RepoBranch>> {
         self._get_paged(&format!("projects/{}/branches", project))
     }
 
     /// Get a branch.
-    pub fn branch(&self, project: ProjectId, branch: &str) -> GitlabResult<RepoObject> {
+    pub fn branch(&self, project: ProjectId, branch: &str) -> GitlabResult<RepoBranch> {
         self._get(&format!("projects/{}/repository/branches/{}",
                            project,
                            percent_encode(branch.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
