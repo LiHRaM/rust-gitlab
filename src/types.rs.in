@@ -7,7 +7,7 @@
 // except according to those terms.
 
 extern crate chrono;
-use self::chrono::{DateTime, UTC};
+use self::chrono::{DateTime, NaiveDate, UTC};
 
 extern crate serde;
 use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -281,6 +281,8 @@ pub struct ProjectHook {
     pub enable_ssl_verification: bool,
     /// Whether the hook is contacted for build events.
     pub build_events: bool,
+    /// Whether the hook is contacted for pipeline events.
+    pub pipeline_events: bool,
     #[serde(default="bool_false")]
     /// Whether the hook is contacted for wiki page events.
     pub wiki_page_events: bool,
@@ -314,6 +316,8 @@ pub struct BasicProjectDetails {
     pub path: String,
     /// The path to the project's repository with its namespace.
     pub path_with_namespace: String,
+    pub http_url_to_repo: String,
+    pub web_url: String,
 }
 
 /// Visibility levels of projects.
@@ -343,17 +347,24 @@ impl Display for VisibilityLevel {
 // TODO: enum for NotificationLevel
 
 #[derive(Serialize, Deserialize, Debug)]
-// Called `Member` in entities.rb, but it is just a base class for `ProjectAccess`
-// and `GroupAccess`. Combine them here.
-pub struct Access {
+pub struct SharedGroup {
+    pub group_id: GroupId,
+    pub group_name: String,
+    pub group_access_level: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+// Called `MemberAccess` in entities.rb, but it is just a base class for `ProjectAccess` and
+// `GroupAccess`. Combine them here.
+pub struct MemberAccess {
     pub access_level: u64,
     pub notification_level: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Permissions {
-    pub project_access: Option<Access>,
-    pub group_access: Option<Access>,
+    pub project_access: Option<MemberAccess>,
+    pub group_access: Option<MemberAccess>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -428,6 +439,7 @@ pub struct Project {
     pub runners_token: Option<String>,
     /// Whether builds are publicly visible.
     pub public_builds: bool,
+    pub shared_with_groups: Vec<SharedGroup>,
 
     /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
     /// optional here.
@@ -469,7 +481,7 @@ impl Display for AccessLevel {
 
 #[derive(Serialize, Deserialize, Debug)]
 /// A member with extra permissions on a project.
-pub struct ProjectMember {
+pub struct Member {
     /// The username.
     pub username: String,
     /// The display name.
@@ -484,10 +496,42 @@ pub struct ProjectMember {
     pub web_url: String,
     /// The access level of the user.
     pub access_level: u64,
+    pub expires_at: DateTime<UTC>,
 }
 
-impl From<ProjectMember> for UserBasic {
-    fn from(member: ProjectMember) -> Self {
+impl From<Member> for UserBasic {
+    fn from(member: Member) -> Self {
+        UserBasic {
+            username: member.username,
+            name: member.name,
+            id: member.id,
+            state: member.state,
+            avatar_url: member.avatar_url,
+            web_url: member.web_url,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+/// A member with extra permissions on a project.
+pub struct AccessRequester {
+    /// The username.
+    pub username: String,
+    /// The display name.
+    pub name: String,
+    /// The user's ID.
+    pub id: UserId,
+    /// The state of the user account.
+    pub state: UserState,
+    /// The URL of the user's avatar.
+    pub avatar_url: String,
+    /// The URL of the user's profile page.
+    pub web_url: String,
+    pub requested_at: DateTime<UTC>,
+}
+
+impl From<AccessRequester> for UserBasic {
+    fn from(member: AccessRequester) -> Self {
         UserBasic {
             username: member.username,
             name: member.name,
@@ -542,6 +586,7 @@ pub struct GroupDetail {
     pub web_url: String,
     /// The projects in a group.
     pub projects: Vec<Project>,
+    pub shared_projects: Vec<Project>,
 }
 
 impl From<GroupDetail> for Group {
@@ -554,38 +599,6 @@ impl From<GroupDetail> for Group {
             visibility_level: detail.visibility_level,
             avatar_url: detail.avatar_url,
             web_url: detail.web_url,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-/// A member with extra permissions to a group.
-pub struct GroupMember {
-    /// The username.
-    pub username: String,
-    /// The display name.
-    pub name: String,
-    /// The user's ID.
-    pub id: UserId,
-    /// The state of the user account.
-    pub state: UserState,
-    /// The URL of the user's avatar.
-    pub avatar_url: String,
-    /// The URL of the user's profile page.
-    pub web_url: String,
-    /// The access level of the user.
-    pub access_level: u64,
-}
-
-impl From<GroupMember> for UserBasic {
-    fn from(member: GroupMember) -> Self {
-        UserBasic {
-            username: member.username,
-            name: member.name,
-            id: member.id,
-            state: member.state,
-            avatar_url: member.avatar_url,
-            web_url: member.web_url,
         }
     }
 }
@@ -611,10 +624,12 @@ pub struct Commit {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct RepoObject {
+pub struct RepoBranch {
     pub name: String,
     pub commit: Option<Commit>,
     pub protected: Option<bool>,
+    pub developers_can_push: Option<bool>,
+    pub developers_can_merge: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -658,6 +673,13 @@ pub struct RepoCommit {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct RepoCommitStats {
+    pub additions: u64,
+    pub deletions: u64,
+    pub total: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RepoCommitDetail {
     pub id: ObjectId,
     pub short_id: ObjectId,
@@ -669,6 +691,7 @@ pub struct RepoCommitDetail {
     pub parent_ids: Vec<ObjectId>,
     pub committed_date: DateTime<UTC>,
     pub authored_date: DateTime<UTC>,
+    pub stats: RepoCommitStats,
     // This looks to be CI related; ignoring without better docs.
     //pub status: PipelineStatus,
 }
@@ -736,9 +759,7 @@ pub struct Milestone {
     pub state: MilestoneState,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
-    // FIXME: This is in `%Y-%m-%d` format which chrono does not support for serialization. Skip
-    // for now.
-    //pub due_date: Option<DateTime<UTC>>,
+    pub due_date: Option<NaiveDate>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -774,6 +795,7 @@ pub struct Issue {
     pub user_notes_count: u64,
     pub upvotes: u64,
     pub downvotes: u64,
+    pub due_date: Option<NaiveDate>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -846,9 +868,7 @@ pub struct MergeRequest {
     pub merge_status: MergeStatus,
     pub subscribed: bool,
     pub user_notes_count: u64,
-    #[serde(default="bool_false")]
     pub should_remove_source_branch: bool,
-    #[serde(default="bool_false")]
     pub force_remove_source_branch: bool,
 }
 
@@ -878,9 +898,7 @@ pub struct MergeRequestChanges {
     pub subscribed: bool,
     pub user_notes_count: u64,
     pub changes: Vec<RepoDiff>,
-    #[serde(default="bool_false")]
     pub should_remove_source_branch: bool,
-    #[serde(default="bool_false")]
     pub force_remove_source_branch: bool,
 }
 
@@ -1194,7 +1212,8 @@ impl Namespace {
 
 //class ProjectService < Grape::Entity
 //  expose :id, :title, :created_at, :updated_at, :active
-//  expose :push_events, :issues_events, :merge_requests_events, :tag_push_events, :note_events, :build_events
+//  expose :push_events, :issues_events, :merge_requests_events
+//  expose :tag_push_events, :note_events, :build_events, :pipeline_events
 //  # Expose serialized properties
 //  expose :properties do |service, options|
 //    field_names = service.fields.
@@ -1259,10 +1278,13 @@ impl Namespace {
 //  expose :default_project_visibility
 //  expose :default_snippet_visibility
 //  expose :default_group_visibility
-//  expose :restricted_signup_domains
+//  expose :domain_whitelist
+//  expose :domain_blacklist_enabled
+//  expose :domain_blacklist
 //  expose :user_oauth_applications
 //  expose :after_sign_out_path
 //  expose :container_registry_token_expire_delay
+//  expose :repository_storage
 //end
 
 //class Release < Grape::Entity
@@ -1271,27 +1293,14 @@ impl Namespace {
 //end
 
 //class RepoTag < Grape::Entity
-//  expose :name
-//  expose :message do |repo_obj, _options|
-//    if repo_obj.respond_to?(:message)
-//      repo_obj.message
-//    else
-//      nil
-//    end
+//  expose :name, :message
+
+//  expose :commit do |repo_tag, options|
+//    options[:project].repository.commit(repo_tag.target)
 //  end
 
-//  expose :commit do |repo_obj, options|
-//    if repo_obj.respond_to?(:commit)
-//      repo_obj.commit
-//    elsif options[:project]
-//      options[:project].repository.commit(repo_obj.target)
-//    end
-//  end
-
-//  expose :release, using: Entities::Release do |repo_obj, options|
-//    if options[:project]
-//      options[:project].releases.find_by(tag: repo_obj.name)
-//    end
+//  expose :release, using: Entities::Release do |repo_tag, options|
+//    options[:project].releases.find_by(tag: repo_tag.name)
 //  end
 //end
 
@@ -1349,6 +1358,22 @@ impl_id!(BuildId);
 //  expose :key, :value
 //end
 
+//class Environment < Grape::Entity
+//  expose :id, :name, :external_url
+//  expose :project, using: Entities::Project
+//end
+
+//class EnvironmentBasic < Grape::Entity
+//  expose :id, :name, :external_url
+//end
+
+//class Deployment < Grape::Entity
+//  expose :id, :iid, :ref, :sha, :created_at
+//  expose :user,        using: Entities::UserBasic
+//  expose :environment, using: Entities::EnvironmentBasic
+//  expose :deployable,  using: Entities::Build
+//end
+
 //class RepoLicense < Grape::Entity
 //  expose :key, :name, :nickname
 //  expose :featured, as: :popular
@@ -1367,4 +1392,37 @@ impl_id!(BuildId);
 
 //class Template < Grape::Entity
 //  expose :name, :content
+//end
+
+//class Todo < Grape::Entity
+//  expose :id
+//  expose :project, using: Entities::BasicProjectDetails
+//  expose :author, using: Entities::UserBasic
+//  expose :action_name
+//  expose :target_type
+
+//  expose :target do |todo, options|
+//    Entities.const_get(todo.target_type).represent(todo.target, options)
+//  end
+
+//  expose :target_url do |todo, options|
+//    target_type   = todo.target_type.underscore
+//    target_url    = "namespace_project_#{target_type}_url"
+//    target_anchor = "note_#{todo.note_id}" if todo.note_id?
+
+//    Gitlab::Application.routes.url_helpers.public_send(target_url,
+//      todo.project.namespace, todo.project, todo.target, anchor: target_anchor)
+//  end
+
+//  expose :body
+//  expose :state
+//  expose :created_at
+//end
+
+//class Pipeline < Grape::Entity
+//  expose :id, :status, :ref, :sha, :before_sha, :tag, :yaml_errors
+
+//  expose :user, with: Entities::UserBasic
+//  expose :created_at, :updated_at, :started_at, :finished_at, :committed_at
+//  expose :duration
 //end

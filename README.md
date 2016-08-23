@@ -3,7 +3,7 @@
 This library implements an interface to communicate with a Gitlab instance. Not
 all API endpoints are implemented, but patches are welcome.
 
-The API is based off of the 8.10.0 API and will likely aggressively track new
+The API is based off of the 8.11.0 API and will likely aggressively track new
 API additions, so the newest release may not support talking to older releases
 where fields have been added..
 
