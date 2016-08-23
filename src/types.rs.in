@@ -7,7 +7,7 @@
 // except according to those terms.
 
 extern crate chrono;
-use self::chrono::{DateTime, UTC};
+use self::chrono::{DateTime, NaiveDate, UTC};
 
 extern crate serde;
 use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -736,9 +736,7 @@ pub struct Milestone {
     pub state: MilestoneState,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
-    // FIXME: This is in `%Y-%m-%d` format which chrono does not support for serialization. Skip
-    // for now.
-    //pub due_date: Option<DateTime<UTC>>,
+    pub due_date: Option<NaiveDate>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
