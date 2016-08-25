@@ -86,11 +86,11 @@ pub struct CommitHookAttrs {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PushHook {
     pub object_kind: String,
-    pub before: String,
-    pub after: String,
+    pub before: ObjectId,
+    pub after: ObjectId,
     #[serde(rename="ref")]
     pub ref_: String,
-    pub checkout_sha: String,
+    pub checkout_sha: Option<ObjectId>,
     pub message: String,
     pub user_id: UserId,
     pub user_name: String,
@@ -267,7 +267,7 @@ pub struct NoteHookAttrs {
     pub project_id: ProjectId,
     pub attachment: Option<String>,
     pub line_code: Option<String>, // TODO: This is some internal format.
-    pub commit_id: String,
+    pub commit_id: ObjectId,
     pub noteable_id: u64,
     pub system: bool,
     pub st_diff: Option<DiffHookAttrs>,
