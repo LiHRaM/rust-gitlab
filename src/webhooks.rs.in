@@ -7,7 +7,7 @@
 // except according to those terms.
 
 extern crate chrono;
-use self::chrono::{DateTime, NaiveDate, UTC};
+use self::chrono::{DateTime, NaiveDate, TimeZone, UTC};
 
 extern crate serde;
 use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -17,6 +17,33 @@ extern crate serde_json;
 use self::serde_json::{from_value, Value};
 
 use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus, MilestoneId, NoteableId, NoteId, ObjectId, ProjectId, SnippetId, UserId};
+
+#[derive(Debug)]
+pub struct HookDate(DateTime<UTC>);
+
+impl Serialize for HookDate {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        self.0.serialize(serializer)
+    }
+}
+
+impl Deserialize for HookDate {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        UTC.datetime_from_str(&val, "%Y-%m-%d %H:%M:%S UTC")
+            .or_else(|_| {
+                DateTime::parse_from_str(&val, "%Y-%m-%d %H:%M:%S %z")
+                    .map_err(|err| {
+                        D::Error::invalid_value(&format!("{:?}", err))
+                    })
+                    .map(|dt| {
+                        dt.with_timezone(&UTC)
+                    })
+            })
+            .map(HookDate)
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 /// Project information exposed in hooks.
@@ -140,9 +167,9 @@ pub struct IssueHookAttrs {
     pub assignee_id: Option<UserId>,
     pub author_id: UserId,
     pub project_id: ProjectId,
-    pub created_at: DateTime<UTC>,
-    pub updated_at: DateTime<UTC>,
-    pub deleted_at: Option<DateTime<UTC>>,
+    pub created_at: HookDate,
+    pub updated_at: HookDate,
+    pub deleted_at: Option<HookDate>,
     pub due_date: Option<NaiveDate>,
     pub position: u64,
     pub branch_name: Option<String>,
@@ -219,10 +246,10 @@ pub struct MergeRequestHookAttrs {
     pub author_id: UserId,
     pub assignee_id: Option<UserId>,
     pub title: String,
-    pub created_at: DateTime<UTC>,
-    pub updated_at: DateTime<UTC>,
-    pub deleted_at: Option<DateTime<UTC>>,
-    pub locked_at: Option<DateTime<UTC>>,
+    pub created_at: HookDate,
+    pub updated_at: HookDate,
+    pub deleted_at: Option<HookDate>,
+    pub locked_at: Option<HookDate>,
     pub updated_by_id: Option<UserId>,
     pub merge_commit_sha: Option<ObjectId>,
     pub merge_error: Option<Value>, // String?
@@ -270,8 +297,8 @@ pub struct SnippetHookAttrs {
     pub content: String,
     pub author_id: UserId,
     pub project_id: Option<ProjectId>,
-    pub created_at: DateTime<UTC>,
-    pub updated_at: DateTime<UTC>,
+    pub created_at: HookDate,
+    pub updated_at: HookDate,
     pub file_name: String,
     #[serde(rename="type")]
     pub type_: SnippetType,
@@ -333,8 +360,8 @@ pub struct NoteHookAttrs {
     pub note: String,
     pub noteable_type: NoteHookType,
     pub author_id: UserId,
-    pub created_at: DateTime<UTC>,
-    pub updated_at: DateTime<UTC>,
+    pub created_at: HookDate,
+    pub updated_at: HookDate,
     pub updated_by_id: Option<UserId>,
     pub project_id: ProjectId,
     pub attachment: Option<String>,
@@ -413,8 +440,8 @@ pub struct BuildCommitHookAttrs {
     pub author_email: String,
     pub status: String,
     pub duration: u64,
-    pub started_at: Option<DateTime<UTC>>,
-    pub finished_at: Option<DateTime<UTC>>,
+    pub started_at: Option<HookDate>,
+    pub finished_at: Option<HookDate>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -448,8 +475,8 @@ pub struct BuildHook {
     pub build_id: BuildId,
     pub build_name: String,
     pub build_stage: String,
-    pub build_started_at: Option<DateTime<UTC>>,
-    pub build_finished_at: Option<DateTime<UTC>>,
+    pub build_started_at: Option<HookDate>,
+    pub build_finished_at: Option<HookDate>,
     pub build_duration: Option<u64>,
     pub build_allow_failure: bool,
     pub project_id: ProjectId,
