@@ -171,6 +171,8 @@ pub struct IssueHookAttrs {
     pub updated_at: HookDate,
     pub deleted_at: Option<HookDate>,
     pub due_date: Option<NaiveDate>,
+    pub updated_by_id: Option<UserId>,
+    pub moved_to_id: Option<Value>, // ???
     pub position: u64,
     pub branch_name: Option<String>,
     pub description: String,
@@ -237,6 +239,7 @@ pub struct MergeRequestHookAttrs {
     pub target: ProjectHookAttrs,
     pub last_commit: Option<CommitHookAttrs>,
     pub work_in_progress: bool,
+    pub in_progress_merge_commit_sha: Option<ObjectId>,
 
     pub id: MergeRequestId,
     pub target_branch: String,
@@ -340,6 +343,20 @@ pub struct DiffHookAttrs {
     pub too_large: bool,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+// FIXME: This can apparently be a string sometimes.
+// https://gitlab.com/gitlab-org/gitlab-ce/issues/21467
+pub struct PositionHookAttrs {
+    pub base_sha: ObjectId,
+    pub head_sha: ObjectId,
+    pub start_sha: ObjectId,
+    pub old_line: Option<u64>,
+    pub old_path: String,
+    pub new_line: Option<u64>,
+    pub new_path: String,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NoteHookType {
     Commit,
@@ -359,6 +376,8 @@ pub struct NoteHookAttrs {
     pub id: NoteId,
     pub note: String,
     pub noteable_type: NoteHookType,
+    pub original_position: Option<PositionHookAttrs>,
+    pub position: Option<PositionHookAttrs>,
     pub author_id: UserId,
     pub created_at: HookDate,
     pub updated_at: HookDate,
@@ -371,10 +390,10 @@ pub struct NoteHookAttrs {
     pub system: bool,
     pub st_diff: Option<DiffHookAttrs>,
     pub url: String,
-    pub is_award: bool,
 
     #[serde(rename="type")]
     pub type_: Option<String>, // ???
+    //pub is_award: bool, // seems to have been removed?
 }
 
 impl NoteHookAttrs {
