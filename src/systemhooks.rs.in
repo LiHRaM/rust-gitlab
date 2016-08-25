@@ -230,7 +230,7 @@ pub struct PushSystemHook {
     #[serde(rename="ref")]
     pub ref_: String,
     pub checkout_sha: ObjectId,
-    pub message: String,
+    pub message: Option<String>,
     pub user_id: UserId,
     pub user_name: String,
     pub user_email: String,

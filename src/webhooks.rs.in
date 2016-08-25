@@ -28,7 +28,7 @@ pub struct ProjectHookAttrs {
     /// The URL for the project's homepage.
     pub web_url: String,
     /// The URL to the project avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL to clone the repository over SSH.
     pub git_ssh_url: String,
     /// The URL to clone the repository over HTTPS.
@@ -78,9 +78,9 @@ pub struct CommitHookAttrs {
     pub timestamp: DateTime<UTC>,
     pub url: String,
     pub author: HookCommitIdentity,
-    pub added: Vec<String>,
-    pub modified: Vec<String>,
-    pub removed: Vec<String>,
+    pub added: Option<Vec<String>>,
+    pub modified: Option<Vec<String>>,
+    pub removed: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -91,7 +91,7 @@ pub struct PushHook {
     #[serde(rename="ref")]
     pub ref_: String,
     pub checkout_sha: Option<ObjectId>,
-    pub message: String,
+    pub message: Option<String>,
     pub user_id: UserId,
     pub user_name: String,
     pub user_email: String,
@@ -177,6 +177,7 @@ pub struct MergeRequestHookAttrs {
     pub title: String,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
+    pub deleted_at: Option<DateTime<UTC>>,
     // st_commits
     // st_diffs
     pub milestone_id: Option<MilestoneId>,
@@ -267,7 +268,7 @@ pub struct NoteHookAttrs {
     pub project_id: ProjectId,
     pub attachment: Option<String>,
     pub line_code: Option<String>, // TODO: This is some internal format.
-    pub commit_id: ObjectId,
+    pub commit_id: Option<ObjectId>,
     pub noteable_id: u64,
     pub system: bool,
     pub st_diff: Option<DiffHookAttrs>,
