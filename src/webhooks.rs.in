@@ -41,6 +41,20 @@ pub struct ProjectHookAttrs {
     pub path_with_namespace: String,
     /// The default branch for the project.
     pub default_branch: String,
+
+    // Deprecated.
+    pub http_url: String,
+    pub ssh_url: String,
+    pub url: String,
+    pub homepage: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RepositoryHookAttrs {
+    pub description: String,
+    pub homepage: String,
+    pub name: String,
+    pub url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -100,6 +114,10 @@ pub struct PushHook {
     pub project: ProjectHookAttrs,
     pub commits: Vec<CommitHookAttrs>, // limited to 20 commits
     pub total_commits_count: u64,
+
+    // Deprecated.
+    pub repository: BuildProjectHookAttrs,
+    pub event_name: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -197,6 +215,9 @@ pub struct MergeRequestHook {
     pub project: ProjectHookAttrs,
     pub object_attributes: MergeRequestHookAttrs,
     pub assignee: Option<UserHookAttrs>,
+
+    // Deprecated.
+    pub repository: RepositoryHookAttrs,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -286,6 +307,9 @@ pub struct NoteHook {
     pub issue: Option<IssueHookAttrs>,
     pub merge_request: Option<MergeRequestHookAttrs>,
     pub snippet: Option<SnippetHookAttrs>,
+
+    // Deprecated.
+    pub repository: RepositoryHookAttrs,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -313,7 +337,6 @@ pub struct BuildCommitHookAttrs {
 pub struct BuildProjectHookAttrs {
     /// The display name of the project.
     pub name: String,
-    pub url: String,
     /// The description of the project.
     pub description: String,
     /// The URL for the project's homepage.
@@ -324,6 +347,9 @@ pub struct BuildProjectHookAttrs {
     pub git_ssh_url: String,
     /// Integral value for the project's visibility.
     pub visibility_level: u64,
+
+    // Deprecated.
+    pub url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
