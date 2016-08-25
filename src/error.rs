@@ -16,9 +16,6 @@ use self::serde_json::Value;
 extern crate url;
 use self::url::ParseError as UrlError;
 
-use std::error;
-use std::fmt::{self, Display, Formatter};
-
 quick_error! {
     #[derive(Debug)]
     /// Errors which may occur when communicating with Gitlab.
