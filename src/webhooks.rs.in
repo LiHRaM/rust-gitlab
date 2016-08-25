@@ -181,8 +181,9 @@ pub struct IssueHookAttrs {
     pub iid: u64,
     pub confidential: bool,
 
-    pub url: String,
-    pub action: IssueAction,
+    // It seems that notes miss these properties?
+    pub url: Option<String>,
+    pub action: Option<IssueAction>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -268,8 +269,9 @@ pub struct MergeRequestHookAttrs {
     pub iid: u64,
     pub description: String,
 
-    pub url: String,
-    pub action: MergeRequestAction,
+    // It seems that notes miss these properties?
+    pub url: Option<String>,
+    pub action: Option<MergeRequestAction>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
