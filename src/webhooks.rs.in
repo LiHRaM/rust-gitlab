@@ -264,6 +264,7 @@ pub struct MergeRequestHookAttrs {
     // st_commits
     // st_diffs
     pub milestone_id: Option<MilestoneId>,
+    pub oldrev: Option<ObjectId>,
     pub state: MergeRequestState,
     pub merge_status: MergeStatus,
     pub iid: u64,
@@ -384,10 +385,14 @@ pub struct NoteHookAttrs {
     pub created_at: HookDate,
     pub updated_at: HookDate,
     pub updated_by_id: Option<UserId>,
+    pub resolved_at: Option<HookDate>,
+    pub resolved_by_id: Option<UserId>,
     pub project_id: ProjectId,
     pub attachment: Option<String>,
     pub line_code: Option<String>, // TODO: This is some internal format.
-    pub commit_id: Option<ObjectId>,
+    pub commit_id: Option<ObjectId>, // XXX(8.11): apparently can be an empty string?
+    pub discussion_id: ObjectId,
+    pub original_discussion_id: Option<ObjectId>,
     pub noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
     pub system: bool,
     pub st_diff: Option<DiffHookAttrs>,
