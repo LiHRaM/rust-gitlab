@@ -636,6 +636,11 @@ pub struct RepoBranch {
 pub struct ObjectId(String);
 
 impl ObjectId {
+    /// Construct a new `ObjectId`
+    pub fn new<O: ToString>(oid: O) -> Self {
+        ObjectId(oid.to_string())
+    }
+
     /// The value of the id.
     pub fn value(&self) -> &String {
         &self.0
@@ -1000,25 +1005,25 @@ impl Note {
             NoteType::Commit => {
                 self.noteable_id.as_string()
                     .map(|id| {
-                        NoteableId::Commit(ObjectId(id.to_owned()))
+                        NoteableId::Commit(ObjectId::new(id))
                     })
             },
             NoteType::Issue => {
                 self.noteable_id.as_u64()
                     .map(|id| {
-                        NoteableId::Issue(IssueId(id))
+                        NoteableId::Issue(IssueId::new(id))
                     })
             },
             NoteType::MergeRequest => {
                 self.noteable_id.as_u64()
                     .map(|id| {
-                        NoteableId::MergeRequest(MergeRequestId(id))
+                        NoteableId::MergeRequest(MergeRequestId::new(id))
                     })
             },
             NoteType::Snippet => {
                 self.noteable_id.as_u64()
                     .map(|id| {
-                        NoteableId::Snippet(SnippetId(id))
+                        NoteableId::Snippet(SnippetId::new(id))
                     })
             },
         }

@@ -7,16 +7,43 @@
 // except according to those terms.
 
 extern crate chrono;
-use self::chrono::{DateTime, UTC};
+use self::chrono::{DateTime, NaiveDate, TimeZone, UTC};
 
 extern crate serde;
 use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use self::serde::de::{Error, Type};
 
 extern crate serde_json;
-use self::serde_json::Value;
+use self::serde_json::{from_value, Value};
 
-use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus, MilestoneId, NoteId, NoteType, ObjectId, ProjectId, UserId};
+use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus, MilestoneId, NoteableId, NoteId, ObjectId, ProjectId, SnippetId, UserId};
+
+#[derive(Debug)]
+pub struct HookDate(DateTime<UTC>);
+
+impl Serialize for HookDate {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        self.0.serialize(serializer)
+    }
+}
+
+impl Deserialize for HookDate {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(String::deserialize(deserializer));
+
+        UTC.datetime_from_str(&val, "%Y-%m-%d %H:%M:%S UTC")
+            .or_else(|_| {
+                DateTime::parse_from_str(&val, "%Y-%m-%d %H:%M:%S %z")
+                    .map_err(|err| {
+                        D::Error::invalid_value(&format!("{:?}", err))
+                    })
+                    .map(|dt| {
+                        dt.with_timezone(&UTC)
+                    })
+            })
+            .map(HookDate)
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 /// Project information exposed in hooks.
@@ -28,7 +55,7 @@ pub struct ProjectHookAttrs {
     /// The URL for the project's homepage.
     pub web_url: String,
     /// The URL to the project avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL to clone the repository over SSH.
     pub git_ssh_url: String,
     /// The URL to clone the repository over HTTPS.
@@ -41,6 +68,20 @@ pub struct ProjectHookAttrs {
     pub path_with_namespace: String,
     /// The default branch for the project.
     pub default_branch: String,
+
+    // Deprecated.
+    pub http_url: String,
+    pub ssh_url: String,
+    pub url: String,
+    pub homepage: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RepositoryHookAttrs {
+    pub description: String,
+    pub homepage: String,
+    pub name: String,
+    pub url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -78,20 +119,20 @@ pub struct CommitHookAttrs {
     pub timestamp: DateTime<UTC>,
     pub url: String,
     pub author: HookCommitIdentity,
-    pub added: Vec<String>,
-    pub modified: Vec<String>,
-    pub removed: Vec<String>,
+    pub added: Option<Vec<String>>,
+    pub modified: Option<Vec<String>>,
+    pub removed: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PushHook {
     pub object_kind: String,
-    pub before: String,
-    pub after: String,
+    pub before: ObjectId,
+    pub after: ObjectId,
     #[serde(rename="ref")]
     pub ref_: String,
-    pub checkout_sha: String,
-    pub message: String,
+    pub checkout_sha: Option<ObjectId>,
+    pub message: Option<String>,
     pub user_id: UserId,
     pub user_name: String,
     pub user_email: String,
@@ -100,6 +141,10 @@ pub struct PushHook {
     pub project: ProjectHookAttrs,
     pub commits: Vec<CommitHookAttrs>, // limited to 20 commits
     pub total_commits_count: u64,
+
+    // Deprecated.
+    pub repository: BuildProjectHookAttrs,
+    pub event_name: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -122,17 +167,23 @@ pub struct IssueHookAttrs {
     pub assignee_id: Option<UserId>,
     pub author_id: UserId,
     pub project_id: ProjectId,
-    pub created_at: DateTime<UTC>,
-    pub updated_at: DateTime<UTC>,
+    pub created_at: HookDate,
+    pub updated_at: HookDate,
+    pub deleted_at: Option<HookDate>,
+    pub due_date: Option<NaiveDate>,
+    pub updated_by_id: Option<UserId>,
+    pub moved_to_id: Option<Value>, // ???
     pub position: u64,
     pub branch_name: Option<String>,
     pub description: String,
     pub milestone_id: Option<MilestoneId>,
     pub state: IssueState,
     pub iid: u64,
+    pub confidential: bool,
 
-    pub url: String,
-    pub action: IssueAction,
+    // It seems that notes miss these properties?
+    pub url: Option<String>,
+    pub action: Option<IssueAction>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -161,11 +212,35 @@ enum_serialize!(MergeRequestAction -> "merge request action",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct MergeRequestParams {
+    pub force_remove_source_branch: Option<Value>, // sigh
+}
+
+impl MergeRequestParams {
+    // https://gitlab.com/gitlab-org/gitlab-ce/issues/20880
+    pub fn force_remove_source_branch(&self) -> bool {
+        self.force_remove_source_branch.as_ref().map(|val| {
+                if let Some(as_str) = val.as_string() {
+                    as_str == "1"
+                } else if let Some(as_bool) = val.as_boolean() {
+                    as_bool
+                } else {
+                    error!(target: "gitlab",
+                           "unknown value for force_remove_source_branch: {}", val);
+                    false
+                }
+            })
+            .unwrap_or(false)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct MergeRequestHookAttrs {
     pub source: ProjectHookAttrs,
     pub target: ProjectHookAttrs,
     pub last_commit: Option<CommitHookAttrs>,
     pub work_in_progress: bool,
+    pub in_progress_merge_commit_sha: Option<ObjectId>,
 
     pub id: MergeRequestId,
     pub target_branch: String,
@@ -175,8 +250,17 @@ pub struct MergeRequestHookAttrs {
     pub author_id: UserId,
     pub assignee_id: Option<UserId>,
     pub title: String,
-    pub created_at: DateTime<UTC>,
-    pub updated_at: DateTime<UTC>,
+    pub created_at: HookDate,
+    pub updated_at: HookDate,
+    pub deleted_at: Option<HookDate>,
+    pub locked_at: Option<HookDate>,
+    pub updated_by_id: Option<UserId>,
+    pub merge_commit_sha: Option<ObjectId>,
+    pub merge_error: Option<Value>, // String?
+    pub merge_params: MergeRequestParams,
+    pub merge_user_id: Option<UserId>,
+    pub merge_when_build_succeeds: bool,
+    pub position: u64, // ???
     // st_commits
     // st_diffs
     pub milestone_id: Option<MilestoneId>,
@@ -185,8 +269,9 @@ pub struct MergeRequestHookAttrs {
     pub iid: u64,
     pub description: String,
 
-    pub url: String,
-    pub action: MergeRequestAction,
+    // It seems that notes miss these properties?
+    pub url: Option<String>,
+    pub action: Option<MergeRequestAction>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -196,6 +281,9 @@ pub struct MergeRequestHook {
     pub project: ProjectHookAttrs,
     pub object_attributes: MergeRequestHookAttrs,
     pub assignee: Option<UserHookAttrs>,
+
+    // Deprecated.
+    pub repository: RepositoryHookAttrs,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -214,8 +302,8 @@ pub struct SnippetHookAttrs {
     pub content: String,
     pub author_id: UserId,
     pub project_id: Option<ProjectId>,
-    pub created_at: DateTime<UTC>,
-    pub updated_at: DateTime<UTC>,
+    pub created_at: HookDate,
+    pub updated_at: HookDate,
     pub file_name: String,
     #[serde(rename="type")]
     pub type_: SnippetType,
@@ -253,25 +341,92 @@ pub struct DiffHookAttrs {
     pub b_mode: String, // TODO: Create a mode type.
     pub new_file: bool,
     pub renamed_file: bool,
-    pub deleted_file: bool
+    pub deleted_file: bool,
+    pub too_large: bool,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+// FIXME: This can apparently be a string sometimes.
+// https://gitlab.com/gitlab-org/gitlab-ce/issues/21467
+pub struct PositionHookAttrs {
+    pub base_sha: ObjectId,
+    pub head_sha: ObjectId,
+    pub start_sha: ObjectId,
+    pub old_line: Option<u64>,
+    pub old_path: String,
+    pub new_line: Option<u64>,
+    pub new_path: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NoteHookType {
+    Commit,
+    Issue,
+    MergeRequest,
+    Snippet
+}
+enum_serialize!(NoteHookType -> "note hook type",
+    Commit => "Commit",
+    Issue => "Issue",
+    MergeRequest => "MergeRequest",
+    Snippet => "Snippet"
+);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NoteHookAttrs {
     pub id: NoteId,
     pub note: String,
-    pub noteable_type: NoteType,
+    pub noteable_type: NoteHookType,
+    pub original_position: Option<PositionHookAttrs>,
+    pub position: Option<PositionHookAttrs>,
     pub author_id: UserId,
-    pub created_at: DateTime<UTC>,
-    pub updated_at: DateTime<UTC>,
+    pub created_at: HookDate,
+    pub updated_at: HookDate,
+    pub updated_by_id: Option<UserId>,
     pub project_id: ProjectId,
     pub attachment: Option<String>,
     pub line_code: Option<String>, // TODO: This is some internal format.
-    pub commit_id: String,
-    pub noteable_id: u64,
+    pub commit_id: Option<ObjectId>,
+    pub noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
     pub system: bool,
     pub st_diff: Option<DiffHookAttrs>,
     pub url: String,
+
+    #[serde(rename="type")]
+    pub type_: Option<String>, // ???
+    //pub is_award: bool, // seems to have been removed?
+}
+
+impl NoteHookAttrs {
+    pub fn noteable_id(&self) -> Option<NoteableId> {
+        match self.noteable_type {
+            NoteHookType::Commit => {
+                self.noteable_id.as_string()
+                    .map(|id| {
+                        NoteableId::Commit(ObjectId::new(id))
+                    })
+            },
+            NoteHookType::Issue => {
+                self.noteable_id.as_u64()
+                    .map(|id| {
+                        NoteableId::Issue(IssueId::new(id))
+                    })
+            },
+            NoteHookType::MergeRequest => {
+                self.noteable_id.as_u64()
+                    .map(|id| {
+                        NoteableId::MergeRequest(MergeRequestId::new(id))
+                    })
+            },
+            NoteHookType::Snippet => {
+                self.noteable_id.as_u64()
+                    .map(|id| {
+                        NoteableId::Snippet(SnippetId::new(id))
+                    })
+            },
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -285,6 +440,9 @@ pub struct NoteHook {
     pub issue: Option<IssueHookAttrs>,
     pub merge_request: Option<MergeRequestHookAttrs>,
     pub snippet: Option<SnippetHookAttrs>,
+
+    // Deprecated.
+    pub repository: RepositoryHookAttrs,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -303,8 +461,8 @@ pub struct BuildCommitHookAttrs {
     pub author_email: String,
     pub status: String,
     pub duration: u64,
-    pub started_at: Option<DateTime<UTC>>,
-    pub finished_at: Option<DateTime<UTC>>,
+    pub started_at: Option<HookDate>,
+    pub finished_at: Option<HookDate>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -312,7 +470,6 @@ pub struct BuildCommitHookAttrs {
 pub struct BuildProjectHookAttrs {
     /// The display name of the project.
     pub name: String,
-    pub url: String,
     /// The description of the project.
     pub description: String,
     /// The URL for the project's homepage.
@@ -323,6 +480,9 @@ pub struct BuildProjectHookAttrs {
     pub git_ssh_url: String,
     /// Integral value for the project's visibility.
     pub visibility_level: u64,
+
+    // Deprecated.
+    pub url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -336,8 +496,8 @@ pub struct BuildHook {
     pub build_id: BuildId,
     pub build_name: String,
     pub build_stage: String,
-    pub build_started_at: Option<DateTime<UTC>>,
-    pub build_finished_at: Option<DateTime<UTC>>,
+    pub build_started_at: Option<HookDate>,
+    pub build_finished_at: Option<HookDate>,
     pub build_duration: Option<u64>,
     pub build_allow_failure: bool,
     pub project_id: ProjectId,
@@ -369,43 +529,55 @@ impl Deserialize for WebHook {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
         let val = try!(Value::deserialize(deserializer));
 
-        let event_name = match val.pointer("/object_kind") {
-            Some(mstring) => {
-                match mstring.as_string() {
-                    Some(string) => string,
-                    None => {
-                        return Err(D::Error::invalid_type(Type::String));
-                    },
-                }
-            },
-            None => {
-                return Err(D::Error::missing_field("object_kind"));
-            },
-        };
+        let object_kind = match val.pointer("/object_kind") {
+                Some(mstring) => {
+                    match mstring.as_string() {
+                        Some(string) => string,
+                        None => {
+                            return Err(D::Error::invalid_type(Type::String));
+                        },
+                    }
+                },
+                None => {
+                    return Err(D::Error::missing_field("object_kind"));
+                },
+            }
+            .to_string();
 
-        match event_name {
-            "push" |
-            "tag_push" => {
-                Ok(WebHook::Push(try!(PushHook::deserialize(deserializer))))
-            },
+        let hook_res = match object_kind.as_str() {
+                "push" |
+                "tag_push" => {
+                    from_value(val)
+                        .map(WebHook::Push)
+                },
 
-            "issue" => {
-                Ok(WebHook::Issue(try!(IssueHook::deserialize(deserializer))))
-            },
+                "issue" => {
+                    from_value(val)
+                        .map(WebHook::Issue)
+                },
 
-            "merge_request" => {
-                Ok(WebHook::MergeRequest(try!(MergeRequestHook::deserialize(deserializer))))
-            },
+                "merge_request" => {
+                    from_value(val)
+                        .map(WebHook::MergeRequest)
+                },
 
-            "note" => {
-                Ok(WebHook::Note(try!(NoteHook::deserialize(deserializer))))
-            },
+                "note" => {
+                    from_value(val)
+                        .map(WebHook::Note)
+                },
 
-            "build" => {
-                Ok(WebHook::Build(try!(BuildHook::deserialize(deserializer))))
-            },
+                "build" => {
+                    from_value(val)
+                        .map(WebHook::Build)
+                },
 
-            _ => Err(D::Error::invalid_value(&format!("unrecognized system object kind: {}", event_name))),
-        }
+                _ => {
+                    return Err(D::Error::invalid_value(&format!("unrecognized webhook object kind: {}", object_kind)));
+                },
+            };
+
+        hook_res.map_err(|err| {
+                D::Error::invalid_value(&format!("{:?}", err))
+            })
     }
 }
