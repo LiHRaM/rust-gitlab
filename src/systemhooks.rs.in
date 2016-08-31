@@ -30,7 +30,7 @@ enum_serialize!(ProjectEvent -> "project event",
     Create => "project_create",
     Destroy => "project_destroy",
     Rename => "project_rename",
-    Transfer => "project_transfer"
+    Transfer => "project_transfer",
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -42,7 +42,7 @@ pub enum ProjectVisibility {
 enum_serialize!(ProjectVisibility -> "project visibility",
     Internal => "internal",
     Private => "private",
-    Public => "public"
+    Public => "public",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -68,7 +68,7 @@ pub enum ProjectMemberEvent {
 }
 enum_serialize!(ProjectMemberEvent -> "project member event",
     Add => "user_add_to_team",
-    Remove => "user_remove_from_team"
+    Remove => "user_remove_from_team",
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -90,7 +90,7 @@ enum_serialize!(HumanAccessLevel -> "human access level",
     Reporter => "Reporter",
     Developer => "Developer",
     Master => "Master",
-    Owner => "Owner"
+    Owner => "Owner",
 );
 
 impl From<HumanAccessLevel> for AccessLevel {
@@ -129,7 +129,7 @@ pub enum UserEvent {
 }
 enum_serialize!(UserEvent -> "user event",
     Create => "user_create",
-    Destroy => "user_destroy"
+    Destroy => "user_destroy",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -150,7 +150,7 @@ pub enum KeyEvent {
 }
 enum_serialize!(KeyEvent -> "key event",
     Create => "key_create",
-    Destroy => "key_destroy"
+    Destroy => "key_destroy",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -170,7 +170,7 @@ pub enum GroupEvent {
 }
 enum_serialize!(GroupEvent -> "group event",
     Create => "group_create",
-    Destroy => "group_destroy"
+    Destroy => "group_destroy",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -192,7 +192,7 @@ pub enum GroupMemberEvent {
 }
 enum_serialize!(GroupMemberEvent -> "group member event",
     Add => "user_add_to_group",
-    Remove => "user_remove_from_group"
+    Remove => "user_remove_from_group",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -217,7 +217,7 @@ pub enum PushEvent {
 }
 enum_serialize!(PushEvent -> "push event",
     Push => "push",
-    TagPush => "tag_push"
+    TagPush => "tag_push",
 );
 
 #[derive(Serialize, Deserialize, Debug)]

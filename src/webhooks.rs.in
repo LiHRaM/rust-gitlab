@@ -157,7 +157,7 @@ pub enum IssueAction {
     Update => "update",
     Open => "open",
     Close => "close",
-    Reopen => "reopen"
+    Reopen => "reopen",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -208,7 +208,7 @@ enum_serialize!(MergeRequestAction -> "merge request action",
     Open => "open",
     Close => "close",
     Reopen => "reopen",
-    Merge => "merge"
+    Merge => "merge",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -294,7 +294,7 @@ pub enum SnippetType {
 }
 enum_serialize!(SnippetType -> "snippet type",
     Project => "ProjectSnippet",
-    Personal => "PersonalSnippet"
+    Personal => "PersonalSnippet",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -318,7 +318,7 @@ pub enum WikiPageAction {
 }
 enum_serialize!(WikiPageAction -> "wiki page action",
     Create => "create",
-    Update => "update"
+    Update => "update",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -371,7 +371,7 @@ enum_serialize!(NoteHookType -> "note hook type",
     Commit => "Commit",
     Issue => "Issue",
     MergeRequest => "MergeRequest",
-    Snippet => "Snippet"
+    Snippet => "Snippet",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
