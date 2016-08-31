@@ -43,7 +43,7 @@ pub enum UserState {
 enum_serialize!(UserState -> "user state",
     Active => "active",
     Blocked => "blocked",
-    LdapBlocked => "ldap_blocked"
+    LdapBlocked => "ldap_blocked",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -654,7 +654,7 @@ pub enum ObjectType {
 }
 enum_serialize!(ObjectType -> "object type",
     Tree => "tree",
-    Blob => "blob"
+    Blob => "blob",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -751,7 +751,7 @@ pub enum MilestoneState {
 }
 enum_serialize!(MilestoneState -> "milestone type",
     Active => "active",
-    Closed => "closed"
+    Closed => "closed",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -780,7 +780,7 @@ pub enum IssueState {
 enum_serialize!(IssueState -> "issue type",
     Opened => "opened",
     Closed => "closed",
-    Reopened => "reopened"
+    Reopened => "reopened",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -825,7 +825,7 @@ pub enum MergeStatus {
 enum_serialize!(MergeStatus -> "merge status",
     Unchecked => "unchecked",
     CanBeMerged => "can_be_merged",
-    CannotBeMerged => "cannot_be_merged"
+    CannotBeMerged => "cannot_be_merged",
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -841,7 +841,7 @@ enum_serialize!(MergeRequestState -> "merge request state",
     Closed => "closed",
     Reopened => "reopened",
     Merged => "merged",
-    Locked => "locked"
+    Locked => "locked",
 );
 
 fn bool_false() -> bool {
@@ -971,7 +971,7 @@ enum_serialize!(NoteType -> "note type",
     Commit => "commit",
     Issue => "issue",
     MergeRequest => "merge_request",
-    Snippet => "snippet"
+    Snippet => "snippet",
 );
 
 #[derive(Clone, PartialEq, Eq)]
@@ -1046,7 +1046,7 @@ pub enum LineType {
 }
 enum_serialize!(LineType -> "line type",
     New => "new",
-    Old => "old"
+    Old => "old",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -1082,7 +1082,7 @@ enum_serialize!(StatusState -> "status state",
     Running => "running",
     Success => "success",
     Failed => "failed",
-    Canceled => "canceled"
+    Canceled => "canceled",
 );
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -1115,7 +1115,7 @@ enum_serialize!(EventTargetType -> "event target type",
     Issue => "issue",
     MergeRequest => "merge_request",
     Snippet => "snippet",
-    ProjectSnippet => "project_snippet"
+    ProjectSnippet => "project_snippet",
 );
 
 #[derive(Clone, PartialEq, Eq)]
@@ -1190,7 +1190,7 @@ pub enum NamespaceKind {
 }
 enum_serialize!(NamespaceKind -> "namespace kind",
     User => "user",
-    Group => "group"
+    Group => "group",
 );
 
 #[derive(Clone, Copy, PartialEq, Eq)]
