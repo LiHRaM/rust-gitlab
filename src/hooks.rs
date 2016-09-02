@@ -29,14 +29,14 @@ impl Deserialize for GitlabHook {
         // Look for `object_kind` first because some web hooks also have `event_name` which would
         // cause a false match here.
         let hook_res = if let Some(_) = val.pointer("/object_kind") {
-            from_value(val)
-                .map(GitlabHook::Web)
-        } else if let Some(_) = val.pointer("/event_name") {
-            from_value(val)
-                .map(GitlabHook::System)
-        } else {
-            return Err(D::Error::missing_field("either object_kind or event_name"));
-        };
+                from_value(val)
+                    .map(GitlabHook::Web)
+            } else if let Some(_) = val.pointer("/event_name") {
+                from_value(val)
+                    .map(GitlabHook::System)
+            } else {
+                return Err(D::Error::missing_field("either object_kind or event_name"));
+            };
 
         hook_res.map_err(|err| {
                 D::Error::invalid_value(&format!("{:?}", err))
