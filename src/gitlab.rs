@@ -287,6 +287,14 @@ impl Gitlab {
         self._get(&format!("projects/{}/merge_requests/{}", project, merge_request))
     }
 
+    /// Get the issues that will be closed when a merge request is merged.
+    pub fn merge_request_closes_issues(&self, project: ProjectId, merge_request: MergeRequestId)
+                                       -> GitlabResult<Vec<IssueReference>> {
+        self._get_paged(&format!("projects/{}/merge_requests/{}/closes_issues",
+                                 project,
+                                 merge_request))
+    }
+
     /// Get the notes from a merge request.
     pub fn merge_request_notes(&self, project: ProjectId, merge_request: MergeRequestId)
                                -> GitlabResult<Vec<Note>> {

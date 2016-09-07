@@ -14,7 +14,7 @@ use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use self::serde::de::Error;
 
 extern crate serde_json;
-use self::serde_json::Value;
+use self::serde_json::{from_value, Value};
 
 use std::fmt::{self, Display, Formatter};
 
@@ -810,6 +810,36 @@ pub struct ExternalIssueId(u64);
 pub struct ExternalIssue {
     pub id: ExternalIssueId,
     pub title: String,
+}
+
+pub enum IssueReference {
+    Internal(Issue),
+    External(ExternalIssue),
+}
+
+impl Serialize for IssueReference {
+    fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+        match *self {
+            IssueReference::Internal(ref issue) => issue.serialize(serializer),
+            IssueReference::External(ref issue) => issue.serialize(serializer),
+        }
+    }
+}
+
+impl Deserialize for IssueReference {
+    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+        let val = try!(Value::deserialize(deserializer));
+
+        from_value::<Issue>(val.clone())
+            .map(IssueReference::Internal)
+            .or_else(|_| {
+                    from_value::<ExternalIssue>(val)
+                        .map(IssueReference::External)
+                })
+            .map_err(|err| {
+                D::Error::invalid_value(&format!("{:?}", err))
+            })
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
