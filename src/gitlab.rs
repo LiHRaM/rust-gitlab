@@ -289,8 +289,7 @@ impl Gitlab {
 
     /// Get the issues that will be closed when a merge request is merged.
     pub fn merge_request_closes_issues(&self, project: ProjectId, merge_request: MergeRequestId)
-                                       -> GitlabResult<Vec<Issue>> {
-        // FIXME: this will fail with external issue references (ExternalIssue).
+                                       -> GitlabResult<Vec<IssueReference>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/closes_issues",
                                  project,
                                  merge_request))
