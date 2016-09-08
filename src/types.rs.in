@@ -63,8 +63,8 @@ pub struct UserBasic {
     pub web_url: String,
 }
 
-pub trait UserResult : Serialize + Deserialize { }
-impl<T: Serialize + Deserialize + Into<UserBasic>> UserResult for T { }
+pub trait UserResult: Serialize + Deserialize {}
+impl<T: Serialize + Deserialize + Into<UserBasic>> UserResult for T {}
 
 #[derive(Serialize, Deserialize, Debug)]
 /// More detailed information only accessible to administrators.
@@ -832,13 +832,8 @@ impl Deserialize for IssueReference {
 
         from_value::<Issue>(val.clone())
             .map(IssueReference::Internal)
-            .or_else(|_| {
-                    from_value::<ExternalIssue>(val)
-                        .map(IssueReference::External)
-                })
-            .map_err(|err| {
-                D::Error::invalid_value(&format!("{:?}", err))
-            })
+            .or_else(|_| from_value::<ExternalIssue>(val).map(IssueReference::External))
+            .map_err(|err| D::Error::invalid_value(&format!("{:?}", err)))
     }
 }
 
@@ -1033,28 +1028,24 @@ impl Note {
     pub fn noteable_id(&self) -> Option<NoteableId> {
         match self.noteable_type {
             NoteType::Commit => {
-                self.noteable_id.as_string()
-                    .map(|id| {
-                        NoteableId::Commit(ObjectId::new(id))
-                    })
+                self.noteable_id
+                    .as_string()
+                    .map(|id| NoteableId::Commit(ObjectId::new(id)))
             },
             NoteType::Issue => {
-                self.noteable_id.as_u64()
-                    .map(|id| {
-                        NoteableId::Issue(IssueId::new(id))
-                    })
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::Issue(IssueId::new(id)))
             },
             NoteType::MergeRequest => {
-                self.noteable_id.as_u64()
-                    .map(|id| {
-                        NoteableId::MergeRequest(MergeRequestId::new(id))
-                    })
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::MergeRequest(MergeRequestId::new(id)))
             },
             NoteType::Snippet => {
-                self.noteable_id.as_u64()
-                    .map(|id| {
-                        NoteableId::Snippet(SnippetId::new(id))
-                    })
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::Snippet(SnippetId::new(id)))
             },
         }
     }
@@ -1176,34 +1167,29 @@ impl Event {
     pub fn event_target_id(&self) -> Option<EventTargetId> {
         match self.target_type {
             EventTargetType::Commit => {
-                self.target_id.as_string()
-                    .map(|id| {
-                        EventTargetId::Commit(ObjectId(id.to_string()))
-                    })
+                self.target_id
+                    .as_string()
+                    .map(|id| EventTargetId::Commit(ObjectId(id.to_string())))
             },
             EventTargetType::Issue => {
-                self.target_id.as_u64()
-                    .map(|id| {
-                        EventTargetId::Issue(IssueId(id))
-                    })
+                self.target_id
+                    .as_u64()
+                    .map(|id| EventTargetId::Issue(IssueId(id)))
             },
             EventTargetType::MergeRequest => {
-                self.target_id.as_u64()
-                    .map(|id| {
-                        EventTargetId::MergeRequest(MergeRequestId(id))
-                    })
+                self.target_id
+                    .as_u64()
+                    .map(|id| EventTargetId::MergeRequest(MergeRequestId(id)))
             },
             EventTargetType::Snippet => {
-                self.target_id.as_u64()
-                    .map(|id| {
-                        EventTargetId::Snippet(SnippetId(id))
-                    })
+                self.target_id
+                    .as_u64()
+                    .map(|id| EventTargetId::Snippet(SnippetId(id)))
             },
             EventTargetType::ProjectSnippet => {
-                self.target_id.as_u64()
-                    .map(|id| {
-                        EventTargetId::Snippet(SnippetId(id))
-                    })
+                self.target_id
+                    .as_u64()
+                    .map(|id| EventTargetId::Snippet(SnippetId(id)))
             },
         }
     }

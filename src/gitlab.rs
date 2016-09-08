@@ -176,14 +176,17 @@ impl Gitlab {
     }
 
     /// Get comments on a commit.
-    pub fn commit_comments(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<CommitNote>> {
+    pub fn commit_comments(&self, project: ProjectId, commit: &str)
+                           -> GitlabResult<Vec<CommitNote>> {
         self._get_paged(&format!("projects/{}/repository/commit/{}/comments", project, commit))
     }
 
     /// Get comments on a commit.
     pub fn create_commit_comment(&self, project: ProjectId, commit: &str, body: &str)
                                  -> GitlabResult<CommitNote> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment", project, commit)));
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment",
+                                                    project,
+                                                    commit)));
 
         req.param("note", body);
 
@@ -197,7 +200,9 @@ impl Gitlab {
         let line_str = format!("{}", line);
         let line_type = LineType::New;
 
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment", project, commit)));
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment",
+                                                    project,
+                                                    commit)));
 
         req.param("note", body)
             .param("path", path)
@@ -248,26 +253,19 @@ impl Gitlab {
     }
 
     /// Get issues.
-    pub fn issue(&self, project: ProjectId, issue: IssueId)
-                         -> GitlabResult<Issue> {
+    pub fn issue(&self, project: ProjectId, issue: IssueId) -> GitlabResult<Issue> {
         self._get(&format!("projects/{}/issues/{}", project, issue))
     }
 
     /// Get the notes from a issue.
-    pub fn issue_notes(&self, project: ProjectId, issue: IssueId)
-                       -> GitlabResult<Vec<Note>> {
-        self._get_paged(&format!("projects/{}/issues/{}/notes",
-                                 project,
-                                 issue))
+    pub fn issue_notes(&self, project: ProjectId, issue: IssueId) -> GitlabResult<Vec<Note>> {
+        self._get_paged(&format!("projects/{}/issues/{}/notes", project, issue))
     }
 
     /// Create a note on a issue.
-    pub fn create_issue_note(&self, project: ProjectId, issue: IssueId,
-                             content: &str)
+    pub fn create_issue_note(&self, project: ProjectId, issue: IssueId, content: &str)
                              -> GitlabResult<Note> {
-        let path = &format!("projects/{}/issues/{}/notes",
-                            project,
-                            issue);
+        let path = &format!("projects/{}/issues/{}/notes", project, issue);
 
         let mut req = try!(self._mkrequest(path));
 
