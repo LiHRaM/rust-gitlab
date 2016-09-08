@@ -16,7 +16,8 @@ use self::serde::de::{Error, Type};
 extern crate serde_json;
 use self::serde_json::{from_value, Value};
 
-use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus, MilestoneId, NoteableId, NoteId, ObjectId, ProjectId, SnippetId, UserId};
+use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus,
+                   MilestoneId, NoteableId, NoteId, ObjectId, ProjectId, SnippetId, UserId};
 
 #[derive(Debug)]
 pub struct HookDate(DateTime<UTC>);
@@ -34,12 +35,8 @@ impl Deserialize for HookDate {
         UTC.datetime_from_str(&val, "%Y-%m-%d %H:%M:%S UTC")
             .or_else(|_| {
                 DateTime::parse_from_str(&val, "%Y-%m-%d %H:%M:%S %z")
-                    .map_err(|err| {
-                        D::Error::invalid_value(&format!("{:?}", err))
-                    })
-                    .map(|dt| {
-                        dt.with_timezone(&UTC)
-                    })
+                    .map_err(|err| D::Error::invalid_value(&format!("{:?}", err)))
+                    .map(|dt| dt.with_timezone(&UTC))
             })
             .map(HookDate)
     }
@@ -153,7 +150,8 @@ pub enum IssueAction {
     Open,
     Close,
     Reopen,
-}enum_serialize!(IssueAction -> "issue action",
+}
+enum_serialize!(IssueAction -> "issue action",
     Update => "update",
     Open => "open",
     Close => "close",
@@ -219,7 +217,9 @@ pub struct MergeRequestParams {
 impl MergeRequestParams {
     // https://gitlab.com/gitlab-org/gitlab-ce/issues/20880
     pub fn force_remove_source_branch(&self) -> bool {
-        self.force_remove_source_branch.as_ref().map(|val| {
+        self.force_remove_source_branch
+            .as_ref()
+            .map(|val| {
                 if let Some(as_str) = val.as_string() {
                     as_str == "1"
                 } else if let Some(as_bool) = val.as_boolean() {
@@ -365,7 +365,7 @@ pub enum NoteHookType {
     Commit,
     Issue,
     MergeRequest,
-    Snippet
+    Snippet,
 }
 enum_serialize!(NoteHookType -> "note hook type",
     Commit => "Commit",
@@ -407,28 +407,24 @@ impl NoteHookAttrs {
     pub fn noteable_id(&self) -> Option<NoteableId> {
         match self.noteable_type {
             NoteHookType::Commit => {
-                self.noteable_id.as_string()
-                    .map(|id| {
-                        NoteableId::Commit(ObjectId::new(id))
-                    })
+                self.noteable_id
+                    .as_string()
+                    .map(|id| NoteableId::Commit(ObjectId::new(id)))
             },
             NoteHookType::Issue => {
-                self.noteable_id.as_u64()
-                    .map(|id| {
-                        NoteableId::Issue(IssueId::new(id))
-                    })
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::Issue(IssueId::new(id)))
             },
             NoteHookType::MergeRequest => {
-                self.noteable_id.as_u64()
-                    .map(|id| {
-                        NoteableId::MergeRequest(MergeRequestId::new(id))
-                    })
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::MergeRequest(MergeRequestId::new(id)))
             },
             NoteHookType::Snippet => {
-                self.noteable_id.as_u64()
-                    .map(|id| {
-                        NoteableId::Snippet(SnippetId::new(id))
-                    })
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::Snippet(SnippetId::new(id)))
             },
         }
     }
@@ -552,37 +548,31 @@ impl Deserialize for WebHook {
         let hook_res = match object_kind.as_str() {
                 "push" |
                 "tag_push" => {
-                    from_value(val)
-                        .map(WebHook::Push)
+                    from_value(val).map(WebHook::Push)
                 },
 
                 "issue" => {
-                    from_value(val)
-                        .map(WebHook::Issue)
+                    from_value(val).map(WebHook::Issue)
                 },
 
                 "merge_request" => {
-                    from_value(val)
-                        .map(WebHook::MergeRequest)
+                    from_value(val).map(WebHook::MergeRequest)
                 },
 
                 "note" => {
-                    from_value(val)
-                        .map(WebHook::Note)
+                    from_value(val).map(WebHook::Note)
                 },
 
                 "build" => {
-                    from_value(val)
-                        .map(WebHook::Build)
+                    from_value(val).map(WebHook::Build)
                 },
 
                 _ => {
-                    return Err(D::Error::invalid_value(&format!("unrecognized webhook object kind: {}", object_kind)));
+                    return Err(D::Error::invalid_value(&format!("unrecognized webhook object kind: {}",
+                                                                object_kind)));
                 },
             };
 
-        hook_res.map_err(|err| {
-                D::Error::invalid_value(&format!("{:?}", err))
-            })
+        hook_res.map_err(|err| D::Error::invalid_value(&format!("{:?}", err)))
     }
 }
