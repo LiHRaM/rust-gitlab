@@ -140,7 +140,7 @@ impl Gitlab {
     }
 
     /// Get a team member of a group.
-    pub fn group_member(&self, group: GroupId, user: UserId) -> GitlabResult<Option<Member>> {
+    pub fn group_member(&self, group: GroupId, user: UserId) -> GitlabResult<Member> {
         self._get(&format!("groups/{}/members/{}", group, user))
     }
 
@@ -150,7 +150,7 @@ impl Gitlab {
     }
 
     /// Get a team member of a project.
-    pub fn project_member(&self, project: ProjectId, user: UserId) -> GitlabResult<Option<Member>> {
+    pub fn project_member(&self, project: ProjectId, user: UserId) -> GitlabResult<Member> {
         self._get(&format!("projects/{}/members/{}", project, user))
     }
 
