@@ -531,13 +531,9 @@ impl Deserialize for WebHook {
         let val = try!(Value::deserialize(deserializer));
 
         let object_kind = match val.pointer("/object_kind") {
-                Some(mstring) => {
-                    match mstring.as_string() {
-                        Some(string) => string,
-                        None => {
-                            return Err(D::Error::invalid_type(Type::String));
-                        },
-                    }
+                Some(&Value::String(ref kind)) => kind,
+                Some(_) => {
+                    return Err(D::Error::invalid_type(Type::String));
                 },
                 None => {
                     return Err(D::Error::missing_field("object_kind"));
