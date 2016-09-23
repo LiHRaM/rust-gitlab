@@ -261,14 +261,10 @@ impl Deserialize for SystemHook {
         let val = try!(Value::deserialize(deserializer));
 
         let event_name = match val.pointer("/event_name") {
-                Some(mstring) => {
-                    match mstring.as_string() {
-                        Some(string) => string,
-                        None => {
-                            return Err(D::Error::invalid_type(Type::String));
-                        },
-                    }
-                },
+                Some(&Value::String(ref name)) => name,
+                Some(_) => {
+                    return Err(D::Error::invalid_type(Type::String));
+                }
                 None => {
                     return Err(D::Error::missing_field("event_name"));
                 },
