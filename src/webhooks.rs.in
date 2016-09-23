@@ -42,6 +42,12 @@ impl Deserialize for HookDate {
     }
 }
 
+impl AsRef<DateTime<UTC>> for HookDate {
+    fn as_ref(&self) -> &DateTime<UTC> {
+        &self.0
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 /// Project information exposed in hooks.
 pub struct ProjectHookAttrs {
