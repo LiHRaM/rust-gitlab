@@ -340,7 +340,7 @@ impl Gitlab {
     // Refactored code which talks to Gitlab and transforms error messages properly.
     fn _comm<F, T>(req: Request, f: F) -> GitlabResult<T>
         where F: FnOnce(Request) -> Result<Response, EaseError>,
-              T: Deserialize
+              T: Deserialize,
     {
         match f(req) {
             Ok(rsp) => {
