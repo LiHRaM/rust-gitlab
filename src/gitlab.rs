@@ -145,12 +145,12 @@ impl Gitlab {
     }
 
     /// Get the team members of a project.
-    pub fn members(&self, project: ProjectId) -> GitlabResult<Vec<Member>> {
+    pub fn project_members(&self, project: ProjectId) -> GitlabResult<Vec<Member>> {
         self._get_paged(&format!("projects/{}/members", project))
     }
 
     /// Get a team member of a project.
-    pub fn member(&self, project: ProjectId, user: UserId) -> GitlabResult<Option<Member>> {
+    pub fn project_member(&self, project: ProjectId, user: UserId) -> GitlabResult<Option<Member>> {
         self._get(&format!("projects/{}/members/{}", project, user))
     }
 
