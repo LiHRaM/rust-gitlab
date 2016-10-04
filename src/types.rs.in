@@ -297,6 +297,47 @@ impl From<ProjectHook> for Hook {
     }
 }
 
+#[derive(Default)]
+pub struct WebhookEvents {
+    build: bool,
+    issues: bool,
+    merge_requests: bool,
+    note: bool,
+    pipeline: bool,
+    push: bool,
+    wiki_page: bool,
+}
+
+impl WebhookEvents {
+    fn new() -> Self {
+        WebhookEvents {
+            build: false,
+            issues: false,
+            merge_requests: false,
+            note: false,
+            pipeline: false,
+            push: false,
+            wiki_page: false,
+        }
+    }
+
+    with_event!{with_build, build}
+    with_event!{with_issues, issues}
+    with_event!{with_merge_requests, merge_requests}
+    with_event!{with_note, note}
+    with_event!{with_pipeline, pipeline}
+    with_event!{with_push, push}
+    with_event!{with_wiki_page, wiki_page}
+
+    get_event!{build}
+    get_event!{issues}
+    get_event!{merge_requests}
+    get_event!{note}
+    get_event!{pipeline}
+    get_event!{push}
+    get_event!{wiki_page}
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe project ID.
 pub struct ProjectId(u64);

@@ -147,6 +147,33 @@ impl Gitlab {
         self._get(&format!("projects/{}/hooks/{}", project, hook))
     }
 
+    fn bool_param_value(value: bool) -> &'static str {
+        if value {
+            "true"
+        } else {
+            "false"
+        }
+    }
+
+    fn set_event_flags(request: &mut Request, events: WebhookEvents) {
+        request
+            .param("build_events", Self::bool_param_value(events.build()))
+            .param("issues_events", Self::bool_param_value(events.issues()))
+            .param("merge_requests_events", Self::bool_param_value(events.merge_requests()))
+            .param("note_events", Self::bool_param_value(events.note()))
+            .param("pipeline_events", Self::bool_param_value(events.pipeline()))
+            .param("push_events", Self::bool_param_value(events.push()))
+            .param("wiki_page_events", Self::bool_param_value(events.wiki_page()));
+    }
+
+    /// Add a project hook.
+    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents) -> GitlabResult<Hook> {
+        let mut req = try!(self._mkrequest(&format!("projects/{}/hooks", project)));
+        Self::set_event_flags(&mut req, events);
+
+        self._post(&format!("projects/{}/hooks", project))
+    }
+
     /// Get the team members of a group.
     pub fn group_members(&self, group: GroupId) -> GitlabResult<Vec<Member>> {
         self._get_paged(&format!("groups/{}/members", group))
