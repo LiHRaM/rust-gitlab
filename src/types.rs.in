@@ -309,7 +309,7 @@ pub struct WebhookEvents {
 }
 
 impl WebhookEvents {
-    fn new() -> Self {
+    pub fn new() -> Self {
         WebhookEvents {
             build: false,
             issues: false,
