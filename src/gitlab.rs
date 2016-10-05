@@ -171,6 +171,8 @@ impl Gitlab {
         let mut req = try!(self._mkrequest(&format!("projects/{}/hooks", project)));
         Self::set_event_flags(&mut req, events);
 
+        req.param("url", url);
+
         self._post(&format!("projects/{}/hooks", project))
     }
 
