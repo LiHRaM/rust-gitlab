@@ -495,6 +495,8 @@ pub struct Project {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 /// Access levels for groups and projects.
 pub enum AccessLevel {
+    /// Anonymous access.
+    Anonymous,
     /// Guest access (can see the project).
     Guest,
     /// Reporter access (can open issues).
@@ -510,6 +512,7 @@ pub enum AccessLevel {
 impl From<AccessLevel> for u64 {
     fn from(access: AccessLevel) -> Self {
         match access {
+            AccessLevel::Anonymous => 0,
             AccessLevel::Guest => 10,
             AccessLevel::Reporter => 20,
             AccessLevel::Developer => 30,
