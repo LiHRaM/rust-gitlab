@@ -522,6 +522,24 @@ impl From<AccessLevel> for u64 {
     }
 }
 
+impl From<u64> for AccessLevel {
+    fn from(access: u64) -> Self {
+        if access >= 50 {
+            AccessLevel::Owner
+        } else if access >= 40 {
+            AccessLevel::Master
+        } else if access >= 30 {
+            AccessLevel::Developer
+        } else if access >= 20 {
+            AccessLevel::Reporter
+        } else if access >= 10 {
+            AccessLevel::Guest
+        } else {
+            AccessLevel::Anonymous
+        }
+    }
+}
+
 impl Display for AccessLevel {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{}", Into::<u64>::into(self.clone()))
