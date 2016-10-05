@@ -154,9 +154,9 @@ impl Gitlab {
         self._get(&format!("projects/{}/members/{}", project, user))
     }
 
-    /// Get a team member of a project.
-    pub fn add_user_to_team(&self, project: ProjectId, user: UserId, access: AccessLevel)
-                            -> GitlabResult<Member> {
+    /// Add a user to a project.
+    pub fn add_user_to_project(&self, project: ProjectId, user: UserId, access: AccessLevel)
+                               -> GitlabResult<Member> {
         let user_str = format!("{}", user);
         let access_str = format!("{}", access);
 
