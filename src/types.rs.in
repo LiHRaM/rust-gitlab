@@ -542,7 +542,7 @@ pub struct Member {
     pub web_url: String,
     /// The access level of the user.
     pub access_level: u64,
-    pub expires_at: DateTime<UTC>,
+    pub expires_at: Option<DateTime<UTC>>,
 }
 
 impl From<Member> for UserBasic {
