@@ -1110,7 +1110,7 @@ impl Note {
         match self.noteable_type {
             NoteType::Commit => {
                 self.noteable_id
-                    .as_string()
+                    .as_str()
                     .map(|id| NoteableId::Commit(ObjectId::new(id)))
             },
             NoteType::Issue => {
@@ -1249,7 +1249,7 @@ impl Event {
         match self.target_type {
             EventTargetType::Commit => {
                 self.target_id
-                    .as_string()
+                    .as_str()
                     .map(|id| EventTargetId::Commit(ObjectId(id.to_string())))
             },
             EventTargetType::Issue => {

@@ -373,7 +373,7 @@ impl Gitlab {
     // This method exists because we want to store the current user in the structure, but we don't
     // have a `self` before we create the structure. Making it `Option<>` is a little silly and
     // refactoring this out is worth the cleaner API.
-    fn _mkrequest1<'a>(base_url: &Url, token: &str, url: &str) -> GitlabResult<Request<'a>> {
+    fn _mkrequest1(base_url: &Url, token: &str, url: &str) -> GitlabResult<Request> {
         let full_url = try!(base_url.join(url));
         let mut req = Request::new(full_url);
 

@@ -227,9 +227,9 @@ impl MergeRequestParams {
         self.force_remove_source_branch
             .as_ref()
             .map(|val| {
-                if let Some(as_str) = val.as_string() {
+                if let Some(as_str) = val.as_str() {
                     as_str == "1"
-                } else if let Some(as_bool) = val.as_boolean() {
+                } else if let Some(as_bool) = val.as_bool() {
                     as_bool
                 } else {
                     error!(target: "gitlab",
@@ -416,7 +416,7 @@ impl NoteHookAttrs {
         match self.noteable_type {
             NoteHookType::Commit => {
                 self.noteable_id
-                    .as_string()
+                    .as_str()
                     .map(|id| NoteableId::Commit(ObjectId::new(id)))
             },
             NoteHookType::Issue => {
