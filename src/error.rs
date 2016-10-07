@@ -49,7 +49,7 @@ impl Error {
     /// Extract the message from a Gitlab JSON error.
     pub fn from_gitlab(value: Value) -> Self {
         let msg = value.pointer("/message")
-            .and_then(|s| s.as_string())
+            .and_then(|s| s.as_str())
             .unwrap_or_else(|| "unknown error");
 
         Error::Gitlab(msg.to_string())
