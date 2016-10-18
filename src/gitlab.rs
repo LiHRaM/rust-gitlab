@@ -99,14 +99,15 @@ impl Gitlab {
     }
 
     /// Find a user by username.
-    pub fn user_by_name<T: UserResult>(&self, name: &str) -> GitlabResult<Option<T>> {
+    pub fn user_by_name<T: UserResult>(&self, name: &str) -> GitlabResult<T> {
         let mut req = try!(self._mkrequest("users"));
 
         req.param("username", name);
 
         let mut users = try!(Self::_get_paged_req(req));
 
-        Ok(users.pop())
+        users.pop()
+            .ok_or_else(|| Error::Gitlab("no such_user".to_string()))
     }
 
     /// Get all accessible projects.
