@@ -107,7 +107,7 @@ impl Gitlab {
         let mut users = try!(Self::_get_paged_req(req));
 
         users.pop()
-            .ok_or_else(|| Error::Gitlab("no such_user".to_string()))
+            .ok_or_else(|| Error::Gitlab("no such user".to_string()))
     }
 
     /// Get all accessible projects.
