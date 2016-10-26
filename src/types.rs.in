@@ -408,6 +408,37 @@ pub struct Permissions {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct ProjectNamespaceAvatar {
+    pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProjectNamespace {
+    pub name: String,
+    pub path: String,
+    pub description: String,
+    pub id: u64,
+    pub owner_id: Option<UserId>,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub deleted_at: Option<DateTime<UTC>>,
+    pub visibility_level: u64,
+    pub avatar: Option<ProjectNamespaceAvatar>,
+    pub lfs_enabled: Option<bool>,
+    pub request_access_enabled: bool,
+    pub share_with_group_lock: bool,
+}
+
+impl ProjectNamespace {
+    pub fn namespace_id(&self) -> NamespaceId {
+        match self.owner_id {
+            Some(_) => NamespaceId::User(UserId(self.id)),
+            None => NamespaceId::Group(GroupId(self.id)),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 /// Project information.
 pub struct Project {
     /// The ID of the project.
@@ -456,7 +487,7 @@ pub struct Project {
     /// The user who created the repository.
     pub creator_id: UserId,
     /// The namespace the project lives in.
-    pub namespace: Namespace,
+    pub namespace: ProjectNamespace,
     /// If the project is a fork, details about it.
     pub forked_from_project: Option<BasicProjectDetails>,
     /// The URL to the project avatar.
