@@ -174,7 +174,7 @@ impl Gitlab {
 
         req.param("url", url);
 
-        self._post(&format!("projects/{}/hooks", project))
+        Self::_post_req(req)
     }
 
     /// Get the team members of a group.
