@@ -164,7 +164,7 @@ pub struct UserFull {
     pub website_url: String,
 
     /// When the user last logged in.
-    pub last_sign_in_at: DateTime<UTC>,
+    pub last_sign_in_at: Option<DateTime<UTC>>,
     /// When the user's account was confirmed.
     pub confirmed_at: DateTime<UTC>,
     /// The primary email address for the user.
@@ -177,7 +177,7 @@ pub struct UserFull {
     /// The number of projects the user may create.
     pub projects_limit: u64,
     /// When the user's current session started.
-    pub current_sign_in_at: DateTime<UTC>,
+    pub current_sign_in_at: Option<DateTime<UTC>>,
 
     /// List of identities associated with the user.
     pub identities: Vec<Identity>,
@@ -413,9 +413,9 @@ pub struct Project {
     /// The ID of the project.
     pub id: ProjectId,
     /// The description of the project.
-    pub description: String,
+    pub description: Option<String>,
     /// The default branch for the project.
-    pub default_branch: String,
+    pub default_branch: Option<String>,
     /// A list of tags for the project.
     pub tag_list: Vec<String>,
     /// Whether the project is publicly visible or not.
@@ -460,7 +460,7 @@ pub struct Project {
     /// If the project is a fork, details about it.
     pub forked_from_project: Option<BasicProjectDetails>,
     /// The URL to the project avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The number of stars for the project.
     pub star_count: u64,
     /// The number of forks.
