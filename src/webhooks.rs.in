@@ -54,7 +54,7 @@ pub struct ProjectHookAttrs {
     /// The display name of the project.
     pub name: String,
     /// The description of the project.
-    pub description: String,
+    pub description: Option<String>,
     /// The URL for the project's homepage.
     pub web_url: String,
     /// The URL to the project avatar.
@@ -81,7 +81,7 @@ pub struct ProjectHookAttrs {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RepositoryHookAttrs {
-    pub description: String,
+    pub description: Option<String>,
     pub homepage: String,
     pub name: String,
     pub url: String,
@@ -275,7 +275,7 @@ pub struct MergeRequestHookAttrs {
     pub state: MergeRequestState,
     pub merge_status: MergeStatus,
     pub iid: u64,
-    pub description: String,
+    pub description: Option<String>,
     pub lock_version: u64,
 
     // It seems that notes miss these properties?
