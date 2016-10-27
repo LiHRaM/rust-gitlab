@@ -709,21 +709,15 @@ impl From<GroupDetail> for Group {
 
 // FIXME: Not actually in entities.rb; it's just a hash dump.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct CommitIdentity {
-    pub name: String,
-    pub email: String,
-}
-
-// FIXME: Not actually in entities.rb; it's just a hash dump.
-#[derive(Serialize, Deserialize, Debug)]
 pub struct Commit {
     pub id: ObjectId,
-    pub parents: Vec<ObjectId>,
-    pub tree: String,
+    pub parent_ids: Vec<ObjectId>,
     pub message: String,
-    pub author: CommitIdentity,
-    pub committer: CommitIdentity,
+    pub author_name: String,
+    pub author_email: String,
     pub authored_date: DateTime<UTC>,
+    pub committer_name: String,
+    pub committer_email: String,
     pub committed_date: DateTime<UTC>,
 }
 
