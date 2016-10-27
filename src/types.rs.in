@@ -1099,10 +1099,10 @@ pub enum NoteType {
     Snippet,
 }
 enum_serialize!(NoteType -> "note type",
-    Commit => "commit",
-    Issue => "issue",
-    MergeRequest => "merge_request",
-    Snippet => "snippet",
+    Commit => "Commit",
+    Issue => "Issue",
+    MergeRequest => "MergeRequest",
+    Snippet => "Snippet",
 );
 
 #[derive(Clone, PartialEq, Eq)]

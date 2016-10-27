@@ -17,7 +17,8 @@ extern crate serde_json;
 use self::serde_json::{from_value, Value};
 
 use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus,
-                   MilestoneId, NoteableId, NoteId, ObjectId, ProjectId, SnippetId, UserId};
+                   MilestoneId, NoteableId, NoteId, NoteType, ObjectId, ProjectId, SnippetId,
+                   UserId};
 
 #[derive(Debug)]
 pub struct HookDate(DateTime<UTC>);
@@ -368,25 +369,11 @@ pub struct PositionHookAttrs {
     pub new_path: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum NoteHookType {
-    Commit,
-    Issue,
-    MergeRequest,
-    Snippet,
-}
-enum_serialize!(NoteHookType -> "note hook type",
-    Commit => "Commit",
-    Issue => "Issue",
-    MergeRequest => "MergeRequest",
-    Snippet => "Snippet",
-);
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NoteHookAttrs {
     pub id: NoteId,
     pub note: String,
-    pub noteable_type: NoteHookType,
+    pub noteable_type: NoteType,
     pub original_position: Option<PositionHookAttrs>,
     pub position: Option<PositionHookAttrs>,
     pub author_id: UserId,
@@ -409,33 +396,6 @@ pub struct NoteHookAttrs {
     #[serde(rename="type")]
     pub type_: Option<String>, // ???
     //pub is_award: bool, // seems to have been removed?
-}
-
-impl NoteHookAttrs {
-    pub fn noteable_id(&self) -> Option<NoteableId> {
-        match self.noteable_type {
-            NoteHookType::Commit => {
-                self.noteable_id
-                    .as_str()
-                    .map(|id| NoteableId::Commit(ObjectId::new(id)))
-            },
-            NoteHookType::Issue => {
-                self.noteable_id
-                    .as_u64()
-                    .map(|id| NoteableId::Issue(IssueId::new(id)))
-            },
-            NoteHookType::MergeRequest => {
-                self.noteable_id
-                    .as_u64()
-                    .map(|id| NoteableId::MergeRequest(MergeRequestId::new(id)))
-            },
-            NoteHookType::Snippet => {
-                self.noteable_id
-                    .as_u64()
-                    .map(|id| NoteableId::Snippet(SnippetId::new(id)))
-            },
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
