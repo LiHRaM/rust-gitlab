@@ -17,7 +17,8 @@ extern crate serde_json;
 use self::serde_json::{from_value, Value};
 
 use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus,
-                   MilestoneId, NoteableId, NoteId, ObjectId, ProjectId, SnippetId, UserId};
+                   MilestoneId, NoteableId, NoteId, NoteType, ObjectId, ProjectId, SnippetId,
+                   UserId};
 
 #[derive(Debug)]
 pub struct HookDate(DateTime<UTC>);
@@ -54,7 +55,7 @@ pub struct ProjectHookAttrs {
     /// The display name of the project.
     pub name: String,
     /// The description of the project.
-    pub description: String,
+    pub description: Option<String>,
     /// The URL for the project's homepage.
     pub web_url: String,
     /// The URL to the project avatar.
@@ -81,7 +82,7 @@ pub struct ProjectHookAttrs {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RepositoryHookAttrs {
-    pub description: String,
+    pub description: Option<String>,
     pub homepage: String,
     pub name: String,
     pub url: String,
@@ -275,7 +276,7 @@ pub struct MergeRequestHookAttrs {
     pub state: MergeRequestState,
     pub merge_status: MergeStatus,
     pub iid: u64,
-    pub description: String,
+    pub description: Option<String>,
     pub lock_version: u64,
 
     // It seems that notes miss these properties?
@@ -368,25 +369,11 @@ pub struct PositionHookAttrs {
     pub new_path: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum NoteHookType {
-    Commit,
-    Issue,
-    MergeRequest,
-    Snippet,
-}
-enum_serialize!(NoteHookType -> "note hook type",
-    Commit => "Commit",
-    Issue => "Issue",
-    MergeRequest => "MergeRequest",
-    Snippet => "Snippet",
-);
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NoteHookAttrs {
     pub id: NoteId,
     pub note: String,
-    pub noteable_type: NoteHookType,
+    pub noteable_type: NoteType,
     pub original_position: Option<PositionHookAttrs>,
     pub position: Option<PositionHookAttrs>,
     pub author_id: UserId,
@@ -409,33 +396,6 @@ pub struct NoteHookAttrs {
     #[serde(rename="type")]
     pub type_: Option<String>, // ???
     //pub is_award: bool, // seems to have been removed?
-}
-
-impl NoteHookAttrs {
-    pub fn noteable_id(&self) -> Option<NoteableId> {
-        match self.noteable_type {
-            NoteHookType::Commit => {
-                self.noteable_id
-                    .as_str()
-                    .map(|id| NoteableId::Commit(ObjectId::new(id)))
-            },
-            NoteHookType::Issue => {
-                self.noteable_id
-                    .as_u64()
-                    .map(|id| NoteableId::Issue(IssueId::new(id)))
-            },
-            NoteHookType::MergeRequest => {
-                self.noteable_id
-                    .as_u64()
-                    .map(|id| NoteableId::MergeRequest(MergeRequestId::new(id)))
-            },
-            NoteHookType::Snippet => {
-                self.noteable_id
-                    .as_u64()
-                    .map(|id| NoteableId::Snippet(SnippetId::new(id)))
-            },
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

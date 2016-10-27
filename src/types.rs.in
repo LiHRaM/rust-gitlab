@@ -164,7 +164,7 @@ pub struct UserFull {
     pub website_url: String,
 
     /// When the user last logged in.
-    pub last_sign_in_at: DateTime<UTC>,
+    pub last_sign_in_at: Option<DateTime<UTC>>,
     /// When the user's account was confirmed.
     pub confirmed_at: DateTime<UTC>,
     /// The primary email address for the user.
@@ -177,7 +177,7 @@ pub struct UserFull {
     /// The number of projects the user may create.
     pub projects_limit: u64,
     /// When the user's current session started.
-    pub current_sign_in_at: DateTime<UTC>,
+    pub current_sign_in_at: Option<DateTime<UTC>>,
 
     /// List of identities associated with the user.
     pub identities: Vec<Identity>,
@@ -408,14 +408,45 @@ pub struct Permissions {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct ProjectNamespaceAvatar {
+    pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProjectNamespace {
+    pub name: String,
+    pub path: String,
+    pub description: String,
+    pub id: u64,
+    pub owner_id: Option<UserId>,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub deleted_at: Option<DateTime<UTC>>,
+    pub visibility_level: u64,
+    pub avatar: Option<ProjectNamespaceAvatar>,
+    pub lfs_enabled: Option<bool>,
+    pub request_access_enabled: bool,
+    pub share_with_group_lock: bool,
+}
+
+impl ProjectNamespace {
+    pub fn namespace_id(&self) -> NamespaceId {
+        match self.owner_id {
+            Some(_) => NamespaceId::User(UserId(self.id)),
+            None => NamespaceId::Group(GroupId(self.id)),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 /// Project information.
 pub struct Project {
     /// The ID of the project.
     pub id: ProjectId,
     /// The description of the project.
-    pub description: String,
+    pub description: Option<String>,
     /// The default branch for the project.
-    pub default_branch: String,
+    pub default_branch: Option<String>,
     /// A list of tags for the project.
     pub tag_list: Vec<String>,
     /// Whether the project is publicly visible or not.
@@ -456,11 +487,11 @@ pub struct Project {
     /// The user who created the repository.
     pub creator_id: UserId,
     /// The namespace the project lives in.
-    pub namespace: Namespace,
+    pub namespace: ProjectNamespace,
     /// If the project is a fork, details about it.
     pub forked_from_project: Option<BasicProjectDetails>,
     /// The URL to the project avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The number of stars for the project.
     pub star_count: u64,
     /// The number of forks.
@@ -678,21 +709,15 @@ impl From<GroupDetail> for Group {
 
 // FIXME: Not actually in entities.rb; it's just a hash dump.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct CommitIdentity {
-    pub name: String,
-    pub email: String,
-}
-
-// FIXME: Not actually in entities.rb; it's just a hash dump.
-#[derive(Serialize, Deserialize, Debug)]
 pub struct Commit {
     pub id: ObjectId,
-    pub parents: Vec<ObjectId>,
-    pub tree: String,
+    pub parent_ids: Vec<ObjectId>,
     pub message: String,
-    pub author: CommitIdentity,
-    pub committer: CommitIdentity,
+    pub author_name: String,
+    pub author_email: String,
     pub authored_date: DateTime<UTC>,
+    pub committer_name: String,
+    pub committer_email: String,
     pub committed_date: DateTime<UTC>,
 }
 
@@ -951,7 +976,7 @@ pub struct MergeRequest {
     pub iid: u64,
     pub project_id: ProjectId,
     pub title: String,
-    pub description: String,
+    pub description: Option<String>,
     pub state: MergeRequestState,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
@@ -968,7 +993,7 @@ pub struct MergeRequest {
     pub milestone: Option<Milestone>,
     pub merge_when_build_succeeds: bool,
     pub merge_status: MergeStatus,
-    pub diff_head_sha: ObjectId,
+    pub sha: ObjectId,
     pub merge_commit_sha: Option<ObjectId>,
     pub subscribed: bool,
     pub user_notes_count: u64,
@@ -983,7 +1008,7 @@ pub struct MergeRequestChanges {
     pub iid: u64,
     pub project_id: ProjectId,
     pub title: String,
-    pub description: String,
+    pub description: Option<String>,
     pub state: MergeRequestState,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
@@ -1000,7 +1025,7 @@ pub struct MergeRequestChanges {
     pub milestone: Option<Milestone>,
     pub merge_when_build_succeeds: bool,
     pub merge_status: MergeStatus,
-    pub diff_head_sha: ObjectId,
+    pub sha: ObjectId,
     pub merge_commit_sha: Option<ObjectId>,
     pub subscribed: bool,
     pub user_notes_count: u64,
@@ -1034,7 +1059,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             milestone: mr.milestone,
             merge_when_build_succeeds: mr.merge_when_build_succeeds,
             merge_status: mr.merge_status,
-            diff_head_sha: mr.diff_head_sha,
+            sha: mr.sha,
             merge_commit_sha: mr.merge_commit_sha,
             subscribed: mr.subscribed,
             user_notes_count: mr.user_notes_count,
@@ -1074,10 +1099,10 @@ pub enum NoteType {
     Snippet,
 }
 enum_serialize!(NoteType -> "note type",
-    Commit => "commit",
-    Issue => "issue",
-    MergeRequest => "merge_request",
-    Snippet => "snippet",
+    Commit => "Commit",
+    Issue => "Issue",
+    MergeRequest => "MergeRequest",
+    Snippet => "Snippet",
 );
 
 #[derive(Clone, PartialEq, Eq)]
