@@ -225,19 +225,19 @@ impl Gitlab {
 
     /// Get a commit.
     pub fn commit(&self, project: ProjectId, commit: &str) -> GitlabResult<RepoCommitDetail> {
-        self._get(&format!("projects/{}/repository/commit/{}", project, commit))
+        self._get(&format!("projects/{}/repository/commits/{}", project, commit))
     }
 
     /// Get comments on a commit.
     pub fn commit_comments(&self, project: ProjectId, commit: &str)
                            -> GitlabResult<Vec<CommitNote>> {
-        self._get_paged(&format!("projects/{}/repository/commit/{}/comments", project, commit))
+        self._get_paged(&format!("projects/{}/repository/commits/{}/comments", project, commit))
     }
 
     /// Get comments on a commit.
     pub fn create_commit_comment(&self, project: ProjectId, commit: &str, body: &str)
                                  -> GitlabResult<CommitNote> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment",
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/comment",
                                                     project,
                                                     commit)));
 
@@ -253,7 +253,7 @@ impl Gitlab {
         let line_str = format!("{}", line);
         let line_type = LineType::New;
 
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/comment",
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/comment",
                                                     project,
                                                     commit)));
 
@@ -268,13 +268,13 @@ impl Gitlab {
     /// Get the statuses of a commit.
     pub fn commit_statuses(&self, project: ProjectId, commit: &str)
                            -> GitlabResult<Vec<CommitStatus>> {
-        self._get_paged(&format!("projects/{}/repository/commit/{}/statuses", project, commit))
+        self._get_paged(&format!("projects/{}/repository/commits/{}/statuses", project, commit))
     }
 
     /// Get the statuses of a commit.
     pub fn commit_all_statuses(&self, project: ProjectId, commit: &str)
                                -> GitlabResult<Vec<CommitStatus>> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commit/{}/statuses",
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/statuses",
                                                     project,
                                                     commit)));
 
