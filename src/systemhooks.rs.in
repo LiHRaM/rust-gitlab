@@ -17,7 +17,7 @@ extern crate serde_json;
 use self::serde_json::{from_value, Value};
 
 use super::types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
-use super::webhooks::{BuildProjectHookAttrs, CommitHookAttrs, ProjectHookAttrs};
+use super::webhooks::{CommitHookAttrs, ProjectHookAttrs};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectEvent {
@@ -239,10 +239,6 @@ pub struct PushSystemHook {
     pub project: ProjectHookAttrs,
     pub commits: Vec<CommitHookAttrs>, // limited to 20 commits
     pub total_commits_count: u64,
-
-    // Deprecated.
-    pub repository: BuildProjectHookAttrs,
-    pub object_kind: String,
 }
 
 #[derive(Debug)]
