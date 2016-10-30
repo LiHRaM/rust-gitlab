@@ -444,7 +444,7 @@ pub struct BuildProjectHookAttrs {
     /// The display name of the project.
     pub name: String,
     /// The description of the project.
-    pub description: String,
+    pub description: Option<String>,
     /// The URL for the project's homepage.
     pub homepage: String,
     /// The URL to clone the repository over HTTPS.
