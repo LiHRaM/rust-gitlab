@@ -366,6 +366,15 @@ impl Gitlab {
         Self::_post_req(req)
     }
 
+    /// Get the awards for a merge request note.
+    pub fn merge_request_note_awards(&self, project: ProjectId, merge_request: MergeRequestId,
+                                     note: NoteId) -> GitlabResult<Vec<AwardEmoji>> {
+        self._get_paged(&format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
+                                 project,
+                                 merge_request,
+                                 note))
+    }
+
     /// Create a note on a merge request.
     pub fn create_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId,
                                      content: &str)
