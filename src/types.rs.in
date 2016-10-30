@@ -506,18 +506,6 @@ pub struct Project {
     pub only_allow_merge_if_build_succeeds: bool,
     pub request_access_enabled: bool,
 
-    // Deprecated.
-    /// Whether issues are enabled.
-    pub issues_enabled: bool,
-    /// Whether merge requests are enabled.
-    pub merge_requests_enabled: bool,
-    /// Whether project wiki is enabled.
-    pub wiki_enabled: bool,
-    /// Whether continuous integration is enabled.
-    pub builds_enabled: bool,
-    /// Whether project snippets is enabled.
-    pub snippets_enabled: bool,
-
     /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
     /// optional here.
     pub permissions: Option<Permissions>,
