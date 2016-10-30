@@ -57,21 +57,19 @@ impl Gitlab {
     ///
     /// Errors out if `token` is invalid.
     pub fn new<T: ToString>(host: &str, token: T) -> GitlabResult<Self> {
-        let base_url = try!(Url::parse(&format!("https://{}/api/v3/", host)));
-
-        Self::_new(host, token.to_string(), base_url)
+        Self::_new("https", host, token.to_string())
     }
 
     /// Create a new non-SSL Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
     pub fn new_insecure<T: ToString>(host: &str, token: T) -> GitlabResult<Self> {
-        let base_url = try!(Url::parse(&format!("http://{}/api/v3/", host)));
-
-        Self::_new(host, token.to_string(), base_url)
+        Self::_new("http", host, token.to_string())
     }
 
-    fn _new(host: &str, token: String, base_url: Url) -> GitlabResult<Self> {
+    fn _new(protocol: &str, host: &str, token: String) -> GitlabResult<Self> {
+        let base_url = try!(Url::parse(&format!("{}://{}/api/v3/", protocol, host)));
+
         let api = Gitlab {
             base_url: base_url,
             token: token,
