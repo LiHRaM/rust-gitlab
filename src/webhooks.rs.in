@@ -367,7 +367,7 @@ pub struct NoteHookAttrs {
     pub commit_id: Option<ObjectId>, // XXX(8.11): apparently can be an empty string?
     pub discussion_id: ObjectId,
     pub original_discussion_id: Option<ObjectId>,
-    pub noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
+    noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
     pub system: bool,
     pub st_diff: Option<DiffHookAttrs>,
     pub url: String,
@@ -375,6 +375,34 @@ pub struct NoteHookAttrs {
     #[serde(rename="type")]
     pub type_: Option<String>, // ???
     //pub is_award: bool, // seems to have been removed?
+}
+
+impl NoteHookAttrs {
+    /// The ID of the object the note is for.
+    pub fn noteable_id(&self) -> Option<NoteableId> {
+        match self.noteable_type {
+            NoteType::Commit => {
+                self.noteable_id
+                    .as_str()
+                    .map(|id| NoteableId::Commit(ObjectId::new(id)))
+            },
+            NoteType::Issue => {
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::Issue(IssueId::new(id)))
+            },
+            NoteType::MergeRequest => {
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::MergeRequest(MergeRequestId::new(id)))
+            },
+            NoteType::Snippet => {
+                self.noteable_id
+                    .as_u64()
+                    .map(|id| NoteableId::Snippet(SnippetId::new(id)))
+            },
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

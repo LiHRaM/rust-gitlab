@@ -418,7 +418,7 @@ pub struct ProjectNamespace {
     pub path: String,
     pub description: String,
     pub id: u64,
-    pub owner_id: Option<UserId>,
+    owner_id: Option<u64>,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
     pub deleted_at: Option<DateTime<UTC>>,
@@ -430,7 +430,7 @@ pub struct ProjectNamespace {
 }
 
 impl ProjectNamespace {
-    pub fn namespace_id(&self) -> NamespaceId {
+    pub fn owner_id(&self) -> NamespaceId {
         match self.owner_id {
             Some(_) => NamespaceId::User(UserId(self.id)),
             None => NamespaceId::Group(GroupId(self.id)),
@@ -1126,7 +1126,7 @@ pub struct Note {
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
     pub system: bool,
-    pub noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
+    noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
     pub noteable_type: NoteType,
 }
 
@@ -1191,7 +1191,7 @@ pub struct AwardEmoji {
     pub user: UserBasic,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
-    pub awardable_id: u64,
+    awardable_id: u64,
     pub awardable_type: AwardableType,
 }
 
@@ -1298,7 +1298,7 @@ pub struct Event {
     pub title: Option<String>,
     pub project_id: ProjectId,
     pub action_name: String,
-    pub target_id: Value,
+    target_id: Value,
     pub target_type: EventTargetType,
     pub author_id: UserId,
     pub data: Option<Value>,
@@ -1310,7 +1310,7 @@ pub struct Event {
 }
 
 impl Event {
-    pub fn event_target_id(&self) -> Option<EventTargetId> {
+    pub fn target_id(&self) -> Option<EventTargetId> {
         match self.target_type {
             EventTargetType::Commit => {
                 self.target_id
@@ -1363,13 +1363,13 @@ pub enum NamespaceId {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Namespace {
-    pub id: u64,
+    id: u64,
     pub path: String,
     pub kind: NamespaceKind,
 }
 
 impl Namespace {
-    pub fn namespace_id(&self) -> NamespaceId {
+    pub fn id(&self) -> NamespaceId {
         match self.kind {
             NamespaceKind::User => NamespaceId::User(UserId(self.id)),
             NamespaceKind::Group => NamespaceId::Group(GroupId(self.id)),
