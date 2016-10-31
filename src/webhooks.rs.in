@@ -14,10 +14,10 @@ use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use self::serde::de::{Error, Type};
 
 extern crate serde_json;
-use self::serde_json::{from_value, Value};
+use self::serde_json::Value;
 
 use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus,
-                   MilestoneId, NoteableId, NoteId, NoteType, ObjectId, ProjectId, SnippetId,
+                   MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId, SnippetId,
                    UserId};
 
 #[derive(Debug)]
@@ -511,21 +511,21 @@ impl Deserialize for WebHook {
             .to_string();
 
         let hook_res = match object_kind.as_str() {
-                "push" | "tag_push" => from_value(val).map(WebHook::Push),
+            "push" | "tag_push" => serde_json::from_value(val).map(WebHook::Push),
 
-                "issue" => from_value(val).map(WebHook::Issue),
+            "issue" => serde_json::from_value(val).map(WebHook::Issue),
 
-                "merge_request" => from_value(val).map(WebHook::MergeRequest),
+            "merge_request" => serde_json::from_value(val).map(WebHook::MergeRequest),
 
-                "note" => from_value(val).map(WebHook::Note),
+            "note" => serde_json::from_value(val).map(WebHook::Note),
 
-                "build" => from_value(val).map(WebHook::Build),
+            "build" => serde_json::from_value(val).map(WebHook::Build),
 
-                _ => {
-                    return Err(D::Error::invalid_value(&format!("unrecognized webhook object kind: {}",
-                                                                object_kind)));
-                },
-            };
+            _ => {
+                return Err(D::Error::invalid_value(&format!("unrecognized webhook object kind: {}",
+                                                            object_kind)));
+            },
+        };
 
         hook_res.map_err(|err| D::Error::invalid_value(&format!("{:?}", err)))
     }

@@ -14,7 +14,6 @@ extern crate serde;
 use self::serde::Deserialize;
 
 extern crate serde_json;
-use self::serde_json::from_value;
 
 extern crate url;
 use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
@@ -158,15 +157,18 @@ impl Gitlab {
         request
             .param("build_events", Self::bool_param_value(events.build()))
             .param("issues_events", Self::bool_param_value(events.issues()))
-            .param("merge_requests_events", Self::bool_param_value(events.merge_requests()))
+            .param("merge_requests_events",
+                   Self::bool_param_value(events.merge_requests()))
             .param("note_events", Self::bool_param_value(events.note()))
             .param("pipeline_events", Self::bool_param_value(events.pipeline()))
             .param("push_events", Self::bool_param_value(events.push()))
-            .param("wiki_page_events", Self::bool_param_value(events.wiki_page()));
+            .param("wiki_page_events",
+                   Self::bool_param_value(events.wiki_page()));
     }
 
     /// Add a project hook.
-    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents) -> GitlabResult<Hook> {
+    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents)
+                    -> GitlabResult<Hook> {
         let mut req = try!(self._mkrequest(&format!("projects/{}/hooks", project)));
         Self::set_event_flags(&mut req, events);
 
@@ -229,7 +231,9 @@ impl Gitlab {
     /// Get comments on a commit.
     pub fn commit_comments(&self, project: ProjectId, commit: &str)
                            -> GitlabResult<Vec<CommitNote>> {
-        self._get_paged(&format!("projects/{}/repository/commits/{}/comments", project, commit))
+        self._get_paged(&format!("projects/{}/repository/commits/{}/comments",
+                                 project,
+                                 commit))
     }
 
     /// Get comments on a commit.
@@ -266,7 +270,9 @@ impl Gitlab {
     /// Get the statuses of a commit.
     pub fn commit_statuses(&self, project: ProjectId, commit: &str)
                            -> GitlabResult<Vec<CommitStatus>> {
-        self._get_paged(&format!("projects/{}/repository/commits/{}/statuses", project, commit))
+        self._get_paged(&format!("projects/{}/repository/commits/{}/statuses",
+                                 project,
+                                 commit))
     }
 
     /// Get the statuses of a commit.
@@ -354,9 +360,12 @@ impl Gitlab {
 
     /// Award a merge request note with an award.
     pub fn award_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId,
-                                    note: NoteId, award: &str) -> GitlabResult<AwardEmoji> {
+                                    note: NoteId, award: &str)
+                                    -> GitlabResult<AwardEmoji> {
         let path = &format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
-                            project, merge_request, note);
+                            project,
+                            merge_request,
+                            note);
         let mut req = try!(self._mkrequest(path));
 
         req.param("name", award);
@@ -366,7 +375,8 @@ impl Gitlab {
 
     /// Get the awards for a merge request note.
     pub fn merge_request_note_awards(&self, project: ProjectId, merge_request: MergeRequestId,
-                                     note: NoteId) -> GitlabResult<Vec<AwardEmoji>> {
+                                     note: NoteId)
+                                     -> GitlabResult<Vec<AwardEmoji>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
                                  project,
                                  merge_request,
@@ -418,7 +428,7 @@ impl Gitlab {
             Ok(rsp) => {
                 let v = try!(rsp.from_json().map_err(Error::Ease));
 
-                Ok(try!(from_value::<T>(v)))
+                Ok(try!(serde_json::from_value::<T>(v)))
             },
             Err(err) => {
                 if let EaseError::UnsuccessfulResponse(rsp) = err {

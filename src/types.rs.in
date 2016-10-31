@@ -14,7 +14,7 @@ use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use self::serde::de::Error;
 
 extern crate serde_json;
-use self::serde_json::{from_value, Value};
+use self::serde_json::Value;
 
 use std::fmt::{self, Display, Formatter};
 
@@ -919,9 +919,9 @@ impl Deserialize for IssueReference {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
         let val = try!(Value::deserialize(deserializer));
 
-        from_value::<Issue>(val.clone())
+        serde_json::from_value::<Issue>(val.clone())
             .map(IssueReference::Internal)
-            .or_else(|_| from_value::<ExternalIssue>(val).map(IssueReference::External))
+            .or_else(|_| serde_json::from_value::<ExternalIssue>(val).map(IssueReference::External))
             .map_err(|err| D::Error::invalid_value(&format!("{:?}", err)))
     }
 }
@@ -1187,7 +1187,9 @@ impl AwardEmoji {
     pub fn awardable_id(&self) -> AwardableId {
         match self.awardable_type {
             AwardableType::Issue => AwardableId::Issue(IssueId::new(self.awardable_id)),
-            AwardableType::MergeRequest => AwardableId::MergeRequest(MergeRequestId::new(self.awardable_id)),
+            AwardableType::MergeRequest => {
+                AwardableId::MergeRequest(MergeRequestId::new(self.awardable_id))
+            },
             AwardableType::Snippet => AwardableId::Snippet(SnippetId::new(self.awardable_id)),
             AwardableType::Note => AwardableId::Note(NoteId::new(self.awardable_id)),
         }
