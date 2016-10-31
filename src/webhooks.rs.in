@@ -20,7 +20,7 @@ use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestSta
                    MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId, SnippetId,
                    UserId};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct HookDate(DateTime<UTC>);
 
 impl Serialize for HookDate {

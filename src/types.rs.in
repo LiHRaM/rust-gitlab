@@ -297,7 +297,7 @@ impl From<ProjectHook> for Hook {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct WebhookEvents {
     build: bool,
     issues: bool,
@@ -393,7 +393,7 @@ pub struct SharedGroup {
     pub group_access_level: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 // Called `MemberAccess` in entities.rb, but it is just a base class for `ProjectAccess` and
 // `GroupAccess`. Combine them here.
 pub struct MemberAccess {
@@ -401,7 +401,7 @@ pub struct MemberAccess {
     pub notification_level: Option<u64>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct Permissions {
     pub project_access: Option<MemberAccess>,
     pub group_access: Option<MemberAccess>,
@@ -763,7 +763,7 @@ pub struct RepoCommit {
     pub message: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct RepoCommitStats {
     pub additions: u64,
     pub deletions: u64,
@@ -901,6 +901,7 @@ pub struct ExternalIssue {
     pub title: String,
 }
 
+#[derive(Debug)]
 pub enum IssueReference {
     Internal(Issue),
     External(ExternalIssue),
@@ -1093,7 +1094,7 @@ enum_serialize!(NoteType -> "note type",
     Snippet => "Snippet",
 );
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NoteableId {
     Commit(ObjectId),
     Issue(IssueId),
@@ -1150,7 +1151,7 @@ impl Note {
 pub struct AwardId(u64);
 impl_id!(AwardId);
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AwardableId {
     Issue(IssueId),
     MergeRequest(MergeRequestId),
@@ -1275,7 +1276,7 @@ enum_serialize!(EventTargetType -> "event target type",
     ProjectSnippet => "project_snippet",
 );
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EventTargetId {
     Commit(ObjectId),
     Issue(IssueId),
@@ -1345,7 +1346,7 @@ enum_serialize!(NamespaceKind -> "namespace kind",
     Group => "group",
 );
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NamespaceId {
     User(UserId),
     Group(GroupId),

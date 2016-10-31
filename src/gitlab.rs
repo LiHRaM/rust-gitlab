@@ -21,6 +21,8 @@ use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 use super::error::Error;
 use super::types::*;
 
+use std::fmt::{self, Debug};
+
 // TODO: Add system hook APIs
 // TODO: Add webhook APIs
 
@@ -33,12 +35,19 @@ pub struct Gitlab {
     token: String,
 }
 
+impl Debug for Gitlab {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "Gitlab {{ {} }}", self.base_url)
+    }
+}
+
 // The header Gitlab uses to authenticate the user.
 header!{ (GitlabPrivateToken, "PRIVATE-TOKEN") => [String] }
 
 /// A JSON value return from Gitlab.
 pub type GitlabResult<T: Deserialize> = Result<T, Error>;
 
+#[derive(Debug)]
 /// Optional information for commit statuses.
 pub struct CommitStatusInfo<'a> {
     /// The refname of the commit being tested.
