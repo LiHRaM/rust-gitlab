@@ -14,13 +14,14 @@ extern crate serde;
 use self::serde::Deserialize;
 
 extern crate serde_json;
-use self::serde_json::from_value;
 
 extern crate url;
 use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 
 use super::error::Error;
 use super::types::*;
+
+use std::fmt::{self, Debug};
 
 // TODO: Add system hook APIs
 // TODO: Add webhook APIs
@@ -34,12 +35,19 @@ pub struct Gitlab {
     token: String,
 }
 
+impl Debug for Gitlab {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "Gitlab {{ {} }}", self.base_url)
+    }
+}
+
 // The header Gitlab uses to authenticate the user.
 header!{ (GitlabPrivateToken, "PRIVATE-TOKEN") => [String] }
 
 /// A JSON value return from Gitlab.
 pub type GitlabResult<T: Deserialize> = Result<T, Error>;
 
+#[derive(Debug)]
 /// Optional information for commit statuses.
 pub struct CommitStatusInfo<'a> {
     /// The refname of the commit being tested.
@@ -57,21 +65,19 @@ impl Gitlab {
     ///
     /// Errors out if `token` is invalid.
     pub fn new<T: ToString>(host: &str, token: T) -> GitlabResult<Self> {
-        let base_url = try!(Url::parse(&format!("https://{}/api/v3/", host)));
-
-        Self::_new(host, token.to_string(), base_url)
+        Self::_new("https", host, token.to_string())
     }
 
     /// Create a new non-SSL Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
     pub fn new_insecure<T: ToString>(host: &str, token: T) -> GitlabResult<Self> {
-        let base_url = try!(Url::parse(&format!("http://{}/api/v3/", host)));
-
-        Self::_new(host, token.to_string(), base_url)
+        Self::_new("http", host, token.to_string())
     }
 
-    fn _new(host: &str, token: String, base_url: Url) -> GitlabResult<Self> {
+    fn _new(protocol: &str, host: &str, token: String) -> GitlabResult<Self> {
+        let base_url = try!(Url::parse(&format!("{}://{}/api/v3/", protocol, host)));
+
         let api = Gitlab {
             base_url: base_url,
             token: token,
@@ -160,15 +166,18 @@ impl Gitlab {
         request
             .param("build_events", Self::bool_param_value(events.build()))
             .param("issues_events", Self::bool_param_value(events.issues()))
-            .param("merge_requests_events", Self::bool_param_value(events.merge_requests()))
+            .param("merge_requests_events",
+                   Self::bool_param_value(events.merge_requests()))
             .param("note_events", Self::bool_param_value(events.note()))
             .param("pipeline_events", Self::bool_param_value(events.pipeline()))
             .param("push_events", Self::bool_param_value(events.push()))
-            .param("wiki_page_events", Self::bool_param_value(events.wiki_page()));
+            .param("wiki_page_events",
+                   Self::bool_param_value(events.wiki_page()));
     }
 
     /// Add a project hook.
-    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents) -> GitlabResult<Hook> {
+    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents)
+                    -> GitlabResult<Hook> {
         let mut req = try!(self._mkrequest(&format!("projects/{}/hooks", project)));
         Self::set_event_flags(&mut req, events);
 
@@ -231,7 +240,9 @@ impl Gitlab {
     /// Get comments on a commit.
     pub fn commit_comments(&self, project: ProjectId, commit: &str)
                            -> GitlabResult<Vec<CommitNote>> {
-        self._get_paged(&format!("projects/{}/repository/commits/{}/comments", project, commit))
+        self._get_paged(&format!("projects/{}/repository/commits/{}/comments",
+                                 project,
+                                 commit))
     }
 
     /// Get comments on a commit.
@@ -268,7 +279,9 @@ impl Gitlab {
     /// Get the statuses of a commit.
     pub fn commit_statuses(&self, project: ProjectId, commit: &str)
                            -> GitlabResult<Vec<CommitStatus>> {
-        self._get_paged(&format!("projects/{}/repository/commits/{}/statuses", project, commit))
+        self._get_paged(&format!("projects/{}/repository/commits/{}/statuses",
+                                 project,
+                                 commit))
     }
 
     /// Get the statuses of a commit.
@@ -356,9 +369,12 @@ impl Gitlab {
 
     /// Award a merge request note with an award.
     pub fn award_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId,
-                                    note: NoteId, award: &str) -> GitlabResult<AwardEmoji> {
+                                    note: NoteId, award: &str)
+                                    -> GitlabResult<AwardEmoji> {
         let path = &format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
-                            project, merge_request, note);
+                            project,
+                            merge_request,
+                            note);
         let mut req = try!(self._mkrequest(path));
 
         req.param("name", award);
@@ -368,7 +384,8 @@ impl Gitlab {
 
     /// Get the awards for a merge request note.
     pub fn merge_request_note_awards(&self, project: ProjectId, merge_request: MergeRequestId,
-                                     note: NoteId) -> GitlabResult<Vec<AwardEmoji>> {
+                                     note: NoteId)
+                                     -> GitlabResult<Vec<AwardEmoji>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
                                  project,
                                  merge_request,
@@ -420,7 +437,7 @@ impl Gitlab {
             Ok(rsp) => {
                 let v = try!(rsp.from_json().map_err(Error::Ease));
 
-                Ok(try!(from_value::<T>(v)))
+                Ok(try!(serde_json::from_value::<T>(v)))
             },
             Err(err) => {
                 if let EaseError::UnsuccessfulResponse(rsp) = err {

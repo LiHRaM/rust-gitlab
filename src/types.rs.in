@@ -14,7 +14,7 @@ use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use self::serde::de::Error;
 
 extern crate serde_json;
-use self::serde_json::{from_value, Value};
+use self::serde_json::Value;
 
 use std::fmt::{self, Display, Formatter};
 
@@ -297,7 +297,7 @@ impl From<ProjectHook> for Hook {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct WebhookEvents {
     build: bool,
     issues: bool,
@@ -393,7 +393,7 @@ pub struct SharedGroup {
     pub group_access_level: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 // Called `MemberAccess` in entities.rb, but it is just a base class for `ProjectAccess` and
 // `GroupAccess`. Combine them here.
 pub struct MemberAccess {
@@ -401,7 +401,7 @@ pub struct MemberAccess {
     pub notification_level: Option<u64>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct Permissions {
     pub project_access: Option<MemberAccess>,
     pub group_access: Option<MemberAccess>,
@@ -418,7 +418,7 @@ pub struct ProjectNamespace {
     pub path: String,
     pub description: String,
     pub id: u64,
-    pub owner_id: Option<UserId>,
+    owner_id: Option<u64>,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
     pub deleted_at: Option<DateTime<UTC>>,
@@ -430,7 +430,7 @@ pub struct ProjectNamespace {
 }
 
 impl ProjectNamespace {
-    pub fn namespace_id(&self) -> NamespaceId {
+    pub fn owner_id(&self) -> NamespaceId {
         match self.owner_id {
             Some(_) => NamespaceId::User(UserId(self.id)),
             None => NamespaceId::Group(GroupId(self.id)),
@@ -505,18 +505,6 @@ pub struct Project {
     pub shared_with_groups: Vec<SharedGroup>,
     pub only_allow_merge_if_build_succeeds: bool,
     pub request_access_enabled: bool,
-
-    // Deprecated.
-    /// Whether issues are enabled.
-    pub issues_enabled: bool,
-    /// Whether merge requests are enabled.
-    pub merge_requests_enabled: bool,
-    /// Whether project wiki is enabled.
-    pub wiki_enabled: bool,
-    /// Whether continuous integration is enabled.
-    pub builds_enabled: bool,
-    /// Whether project snippets is enabled.
-    pub snippets_enabled: bool,
 
     /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
     /// optional here.
@@ -775,7 +763,7 @@ pub struct RepoCommit {
     pub message: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct RepoCommitStats {
     pub additions: u64,
     pub deletions: u64,
@@ -913,6 +901,7 @@ pub struct ExternalIssue {
     pub title: String,
 }
 
+#[derive(Debug)]
 pub enum IssueReference {
     Internal(Issue),
     External(ExternalIssue),
@@ -931,9 +920,9 @@ impl Deserialize for IssueReference {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
         let val = try!(Value::deserialize(deserializer));
 
-        from_value::<Issue>(val.clone())
+        serde_json::from_value::<Issue>(val.clone())
             .map(IssueReference::Internal)
-            .or_else(|_| from_value::<ExternalIssue>(val).map(IssueReference::External))
+            .or_else(|_| serde_json::from_value::<ExternalIssue>(val).map(IssueReference::External))
             .map_err(|err| D::Error::invalid_value(&format!("{:?}", err)))
     }
 }
@@ -1105,7 +1094,7 @@ enum_serialize!(NoteType -> "note type",
     Snippet => "Snippet",
 );
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NoteableId {
     Commit(ObjectId),
     Issue(IssueId),
@@ -1126,7 +1115,7 @@ pub struct Note {
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
     pub system: bool,
-    pub noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
+    noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
     pub noteable_type: NoteType,
 }
 
@@ -1162,7 +1151,7 @@ impl Note {
 pub struct AwardId(u64);
 impl_id!(AwardId);
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AwardableId {
     Issue(IssueId),
     MergeRequest(MergeRequestId),
@@ -1191,7 +1180,7 @@ pub struct AwardEmoji {
     pub user: UserBasic,
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
-    pub awardable_id: u64,
+    awardable_id: u64,
     pub awardable_type: AwardableType,
 }
 
@@ -1199,7 +1188,9 @@ impl AwardEmoji {
     pub fn awardable_id(&self) -> AwardableId {
         match self.awardable_type {
             AwardableType::Issue => AwardableId::Issue(IssueId::new(self.awardable_id)),
-            AwardableType::MergeRequest => AwardableId::MergeRequest(MergeRequestId::new(self.awardable_id)),
+            AwardableType::MergeRequest => {
+                AwardableId::MergeRequest(MergeRequestId::new(self.awardable_id))
+            },
             AwardableType::Snippet => AwardableId::Snippet(SnippetId::new(self.awardable_id)),
             AwardableType::Note => AwardableId::Note(NoteId::new(self.awardable_id)),
         }
@@ -1285,7 +1276,7 @@ enum_serialize!(EventTargetType -> "event target type",
     ProjectSnippet => "project_snippet",
 );
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EventTargetId {
     Commit(ObjectId),
     Issue(IssueId),
@@ -1298,7 +1289,7 @@ pub struct Event {
     pub title: Option<String>,
     pub project_id: ProjectId,
     pub action_name: String,
-    pub target_id: Value,
+    target_id: Value,
     pub target_type: EventTargetType,
     pub author_id: UserId,
     pub data: Option<Value>,
@@ -1310,7 +1301,7 @@ pub struct Event {
 }
 
 impl Event {
-    pub fn event_target_id(&self) -> Option<EventTargetId> {
+    pub fn target_id(&self) -> Option<EventTargetId> {
         match self.target_type {
             EventTargetType::Commit => {
                 self.target_id
@@ -1355,7 +1346,7 @@ enum_serialize!(NamespaceKind -> "namespace kind",
     Group => "group",
 );
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NamespaceId {
     User(UserId),
     Group(GroupId),
@@ -1363,13 +1354,13 @@ pub enum NamespaceId {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Namespace {
-    pub id: u64,
+    id: u64,
     pub path: String,
     pub kind: NamespaceKind,
 }
 
 impl Namespace {
-    pub fn namespace_id(&self) -> NamespaceId {
+    pub fn id(&self) -> NamespaceId {
         match self.kind {
             NamespaceKind::User => NamespaceId::User(UserId(self.id)),
             NamespaceKind::Group => NamespaceId::Group(GroupId(self.id)),

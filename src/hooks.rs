@@ -11,7 +11,7 @@ use self::serde::{Deserialize, Deserializer};
 use self::serde::de::Error;
 
 extern crate serde_json;
-use self::serde_json::{from_value, Value};
+use self::serde_json::Value;
 
 use super::systemhooks::SystemHook;
 use super::webhooks::WebHook;
@@ -28,13 +28,13 @@ impl Deserialize for GitlabHook {
 
         // Look for `object_kind` first because some web hooks also have `event_name` which would
         // cause a false match here.
-        let hook_res = if let Some(_) = val.pointer("/object_kind") {
-                from_value(val).map(GitlabHook::Web)
-            } else if let Some(_) = val.pointer("/event_name") {
-                from_value(val).map(GitlabHook::System)
-            } else {
-                return Err(D::Error::missing_field("either object_kind or event_name"));
-            };
+        let hook_res = if val.pointer("/object_kind").is_some() {
+            serde_json::from_value(val).map(GitlabHook::Web)
+        } else if val.pointer("/event_name").is_some() {
+            serde_json::from_value(val).map(GitlabHook::System)
+        } else {
+            return Err(D::Error::missing_field("either object_kind or event_name"));
+        };
 
         hook_res.map_err(|err| D::Error::invalid_value(&format!("{:?}", err)))
     }
