@@ -1157,14 +1157,54 @@ impl Note {
     }
 }
 
-// TODO
-//class AwardEmoji < Grape::Entity
-//  expose :id
-//  expose :name
-//  expose :user, using: Entities::UserBasic
-//  expose :created_at, :updated_at
-//  expose :awardable_id, :awardable_type
-//end
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe award ID.
+pub struct AwardId(u64);
+impl_id!(AwardId);
+
+#[derive(Clone, PartialEq, Eq)]
+pub enum AwardableId {
+    Issue(IssueId),
+    MergeRequest(MergeRequestId),
+    Snippet(SnippetId),
+    Note(NoteId),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AwardableType {
+    Issue,
+    MergeRequest,
+    Snippet,
+    Note,
+}
+enum_serialize!(AwardableType -> "awardable type",
+    Issue => "Issue",
+    MergeRequest => "MergeRequest",
+    Snippet => "Snippet",
+    Note => "Note",
+);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct AwardEmoji {
+    pub id: AwardId,
+    pub name: String,
+    pub user: UserBasic,
+    pub created_at: DateTime<UTC>,
+    pub updated_at: DateTime<UTC>,
+    pub awardable_id: u64,
+    pub awardable_type: AwardableType,
+}
+
+impl AwardEmoji {
+    pub fn awardable_id(&self) -> AwardableId {
+        match self.awardable_type {
+            AwardableType::Issue => AwardableId::Issue(IssueId::new(self.awardable_id)),
+            AwardableType::MergeRequest => AwardableId::MergeRequest(MergeRequestId::new(self.awardable_id)),
+            AwardableType::Snippet => AwardableId::Snippet(SnippetId::new(self.awardable_id)),
+            AwardableType::Note => AwardableId::Note(NoteId::new(self.awardable_id)),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LineType {
