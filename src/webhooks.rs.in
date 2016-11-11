@@ -201,7 +201,7 @@ enum_serialize!(MergeRequestAction -> "merge request action",
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MergeRequestParams {
-    pub force_remove_source_branch: Option<Value>, // sigh
+    force_remove_source_branch: Option<Value>, // sigh
 }
 
 impl MergeRequestParams {
