@@ -293,6 +293,22 @@ impl Gitlab {
         Self::_get_paged_req(req)
     }
 
+    /// Get the builds of a commit.
+    pub fn commit_builds(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<Build>> {
+        self._get_paged(&format!("projects/{}/repository/commits/{}/builds", project, commit))
+    }
+
+    /// Get the builds of a commit.
+    pub fn commit_all_builds(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<Build>> {
+        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/builds",
+                                                    project,
+                                                    commit)));
+
+        req.param("all", "true");
+
+        Self::_get_paged_req(req)
+    }
+
     /// Create a status message for a commit.
     pub fn create_commit_status(&self, project: ProjectId, sha: &str, state: StatusState,
                                 info: &CommitStatusInfo)

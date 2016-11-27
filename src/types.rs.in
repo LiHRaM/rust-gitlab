@@ -1533,13 +1533,18 @@ impl Namespace {
 //  expose :id, :variables
 //end
 
-//class Runner < Grape::Entity
-//  expose :id
-//  expose :description
-//  expose :active
-//  expose :is_shared
-//  expose :name
-//end
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RunnerId(u64);
+impl_id!(RunnerId);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Runner {
+    pub id: RunnerId,
+    pub description: Option<String>,
+    pub active: bool,
+    pub is_shared: bool,
+    pub name: Option<String>
+}
 
 //class RunnerDetails < Runner
 //  expose :tag_list
@@ -1557,24 +1562,36 @@ impl Namespace {
 //  end
 //end
 
-//class BuildArtifactFile < Grape::Entity
-//  expose :filename, :size
-//end
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BuildArtifactFile {
+    pub filename: String,
+    pub size: usize,
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe build ID.
 pub struct BuildId(u64);
 impl_id!(BuildId);
 
-//class Build < Grape::Entity
-//  expose :id, :status, :stage, :name, :ref, :tag, :coverage
-//  expose :created_at, :started_at, :finished_at
-//  expose :user, with: User
-//  expose :artifacts_file, using: BuildArtifactFile, if: -> (build, opts) { build.artifacts? }
-//  expose :commit, with: RepoCommit
-//  expose :runner, with: Runner
-//  expose :pipeline, with: PipelineBasic
-//end
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Build {
+    pub id: BuildId,
+    pub status: StatusState,
+    pub stage: String,
+    pub name: String,
+    #[serde(rename="ref")]
+    pub ref_: Option<String>,
+    pub tag: bool,
+    pub coverage: Option<f32>,
+    pub created_at: DateTime<UTC>,
+    pub started_at: Option<DateTime<UTC>>,
+    pub finished_at: Option<DateTime<UTC>>,
+    pub user: Option<User>,
+    pub artifacts_file: Option<BuildArtifactFile>,
+    pub commit: RepoCommit,
+    pub runner: Option<Runner>,
+    pub pipeline: PipelineBasic,
+}
 
 //class Trigger < Grape::Entity
 //  expose :token, :created_at, :updated_at, :deleted_at, :last_used
@@ -1649,9 +1666,19 @@ impl_id!(BuildId);
 //  expose :created_at
 //end
 
-//class PipelineBasic < Grape::Entity
-//  expose :id, :ref, :sha, :status
-//end
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe pipeline ID.
+pub struct PipelineId(u64);
+impl_id!(PipelineId);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PipelineBasic {
+    pub id: PipelineId,
+    #[serde(rename="ref")]
+    pub ref_: Option<String>,
+    pub sha: ObjectId,
+    pub status: StatusState,
+}
 
 //class Pipeline < Grape::Entity
 //  expose :before_sha, :tag, :yaml_errors
