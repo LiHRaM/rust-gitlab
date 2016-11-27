@@ -358,6 +358,33 @@ impl Gitlab {
         self._get_paged(&format!("projects/{}/merge_requests", project))
     }
 
+    /// Get the opened/reopened merge requests for a project.
+    pub fn opened_merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
+        let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
+
+        req.param("state", "opened");
+
+        Self::_get_paged_req(req)
+    }
+
+    /// Get the closed merge requests for a project.
+    pub fn closed_merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
+        let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
+
+        req.param("state", "closed");
+
+        Self::_get_paged_req(req)
+    }
+
+    /// Get the merged merge requests for a project.
+    pub fn merged_merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
+        let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
+
+        req.param("state", "merged");
+
+        Self::_get_paged_req(req)
+    }
+
     /// Get merge requests.
     pub fn merge_request(&self, project: ProjectId, merge_request: MergeRequestId)
                          -> GitlabResult<MergeRequest> {
