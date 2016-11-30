@@ -6,8 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-extern crate ease;
-use self::ease::Error as EaseError;
+extern crate reqwest;
+use self::reqwest::Error as ReqwestError;
 
 extern crate serde_json;
 use self::serde_json::Error as SerdeError;
@@ -21,9 +21,9 @@ quick_error! {
     /// Errors which may occur when communicating with Gitlab.
     pub enum Error {
         /// Error occurred when communicating with Gitlab.
-        Ease(err: EaseError) {
+        Reqwest(err: ReqwestError) {
             cause(err)
-            display("ease error: {:?}", err)
+            display("reqwest error: {:?}", err)
             from()
         }
         /// URL parsing error; should never occur.
