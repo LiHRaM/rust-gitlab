@@ -7,7 +7,7 @@ The API is based off of the 8.13.0 API and will likely aggressively track new
 API additions, so the newest release may not support talking to older releases
 where fields have been added..
 
-All API types should be implemnted in the [types](src/types.rs.in) module.
+All API types should be implemented in the [types](src/types.rs.in) module.
 These types should generally be implemented based on the `lib/api/entities.rb`
 module in the Gitlab repository. However, in the interest of usability,
 entities may be combined using `Option` to handle the differences. Generally,
@@ -28,14 +28,3 @@ to the structure are easier to track.
 Sometimes, the API will return `null` for fields that have been added after the
 entry was created. In these cases, mark the field as an `Option` with a comment
 describing why it is so.
-
-# SSL
-
-This library enforces HTTPS communication because the private API token should
-not be sent over the wire in plain text.
-
-# Testing
-
-When building the tests, set the `GITLAB_TEST_HOST` environment variable. The
-tests also read the `GITLAB_TEST_TOKEN` environment during runtime so that the
-binary does not have the user token embedded in the binary.
