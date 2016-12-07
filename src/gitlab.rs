@@ -42,7 +42,7 @@ impl Debug for Gitlab {
 header!{ (GitlabPrivateToken, "PRIVATE-TOKEN") => [String] }
 
 /// A JSON value return from Gitlab.
-pub type GitlabResult<T: Deserialize> = Result<T, Error>;
+pub type GitlabResult<T> = Result<T, Error>;
 
 #[derive(Debug)]
 /// Optional information for commit statuses.
