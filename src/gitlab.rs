@@ -442,6 +442,10 @@ impl Gitlab {
             Ok(rsp) => {
                 let v = try!(rsp.from_json().map_err(Error::Ease));
 
+                debug!(target: "gitlab",
+                       "received data: {}",
+                       v);
+
                 Ok(try!(serde_json::from_value::<T>(v)))
             },
             Err(err) => {
