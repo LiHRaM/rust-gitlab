@@ -127,10 +127,12 @@ pub struct Identity {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe theme ID.
 pub struct ThemeId(u64);
+impl_id!(ThemeId);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe color scheme ID.
 pub struct ColorSchemeId(u64);
+impl_id!(ColorSchemeId);
 
 #[derive(Serialize, Deserialize, Debug)]
 /// Full user structure information.
@@ -425,7 +427,7 @@ pub struct Permissions {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProjectNamespaceAvatar {
-    pub url: String,
+    pub url: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -519,8 +521,14 @@ pub struct Project {
     /// Whether builds are publicly visible.
     pub public_builds: bool,
     pub shared_with_groups: Vec<SharedGroup>,
-    pub only_allow_merge_if_build_succeeds: bool,
+    pub only_allow_merge_if_build_succeeds: Option<bool>,
+    pub only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
     pub request_access_enabled: bool,
+    pub builds_enabled: bool,
+    pub issues_enabled: bool,
+    pub merge_requests_enabled: bool,
+    pub snippets_enabled: bool,
+    pub wiki_enabled: bool,
 
     /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
     /// optional here.
@@ -729,6 +737,7 @@ pub struct Commit {
 pub struct RepoBranch {
     pub name: String,
     pub commit: Option<Commit>,
+    pub merged: Option<bool>,
     pub protected: Option<bool>,
     pub developers_can_push: Option<bool>,
     pub developers_can_merge: Option<bool>,
@@ -765,6 +774,7 @@ pub struct RepoTreeObject {
     pub name: String,
     #[serde(rename="type")]
     pub type_: ObjectType,
+    pub path: String,
     pub mode: String,
 }
 
@@ -776,6 +786,8 @@ pub struct RepoCommit {
     pub author_name: String,
     pub author_email: String,
     pub created_at: DateTime<UTC>,
+    pub committer_name: String,
+    pub committer_email: String,
     pub message: String,
 }
 
@@ -868,6 +880,7 @@ pub struct Milestone {
     pub created_at: DateTime<UTC>,
     pub updated_at: DateTime<UTC>,
     pub due_date: Option<NaiveDate>,
+    pub start_date: DateTime<UTC>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -898,6 +911,7 @@ pub struct Issue {
     pub updated_at: DateTime<UTC>,
     pub labels: Vec<String>,
     pub milestone: Option<Milestone>,
+    pub author: UserBasic,
     pub assignee: Option<UserBasic>,
     pub subscribed: bool,
     pub user_notes_count: u64,
@@ -1645,6 +1659,7 @@ impl_id!(BuildId);
 //  expose :user, with: Entities::UserBasic
 //  expose :created_at, :updated_at, :started_at, :finished_at, :committed_at
 //  expose :duration
+//  expose :coverage
 //end
 
 //class MergeRequestDiff < Grape::Entity
