@@ -293,12 +293,12 @@ impl Gitlab {
         Self::_get_paged_req(req)
     }
 
-    /// Get the builds of a commit.
-    pub fn commit_builds(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<Build>> {
+    /// Get the latest builds of a commit.
+    pub fn commit_latest_builds(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<Build>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/builds", project, commit))
     }
 
-    /// Get the builds of a commit.
+    /// Get the all builds of a commit.
     pub fn commit_all_builds(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<Build>> {
         let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/builds",
                                                     project,
