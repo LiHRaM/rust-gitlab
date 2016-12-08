@@ -31,6 +31,7 @@ pub mod hooks;
 
 pub use error::Error;
 pub use gitlab::CommitStatusInfo;
+pub use gitlab::MergeRequestStateFilter;
 pub use gitlab::Gitlab;
 pub use gitlab::GitlabResult;
 pub use types::*;

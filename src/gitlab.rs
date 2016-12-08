@@ -57,6 +57,27 @@ pub struct CommitStatusInfo<'a> {
     pub description: Option<&'a str>,
 }
 
+#[derive(Debug)]
+/// Optional information for merge requests.
+pub enum MergeRequestStateFilter {
+    /// Get the opened/reopened merge requests.
+    Opened,
+    /// Get the closes merge requests.
+    Closed,
+    /// Get the merged merge requests.
+    Merged,
+}
+impl MergeRequestStateFilter {
+    fn as_str(&self) -> &str {
+        use self::MergeRequestStateFilter::*;
+        match *self {
+            Opened => "opened",
+            Closed => "closed",
+            Merged => "merged",
+        }
+    }
+}
+
 impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
@@ -358,29 +379,11 @@ impl Gitlab {
         self._get_paged(&format!("projects/{}/merge_requests", project))
     }
 
-    /// Get the opened/reopened merge requests for a project.
-    pub fn opened_merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
+    /// Get the merge requests with a given state.
+    pub fn merge_requests_with_state(&self, project: ProjectId, state: MergeRequestStateFilter) -> GitlabResult<Vec<MergeRequest>> {
         let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
 
-        req.param("state", "opened");
-
-        Self::_get_paged_req(req)
-    }
-
-    /// Get the closed merge requests for a project.
-    pub fn closed_merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
-
-        req.param("state", "closed");
-
-        Self::_get_paged_req(req)
-    }
-
-    /// Get the merged merge requests for a project.
-    pub fn merged_merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
-
-        req.param("state", "merged");
+        req.param("state", state.as_str());
 
         Self::_get_paged_req(req)
     }
