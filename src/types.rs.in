@@ -786,8 +786,6 @@ pub struct RepoCommit {
     pub author_name: String,
     pub author_email: String,
     pub created_at: DateTime<UTC>,
-    pub committer_name: String,
-    pub committer_email: String,
     pub message: String,
 }
 
