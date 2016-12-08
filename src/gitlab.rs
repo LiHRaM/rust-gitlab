@@ -11,7 +11,8 @@ use self::ease::Error as EaseError;
 use self::ease::{Request, Response, Url};
 
 extern crate serde;
-use self::serde::Deserialize;
+use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
+use self::serde::de::Error as SerdeError;
 
 extern crate serde_json;
 
@@ -56,6 +57,23 @@ pub struct CommitStatusInfo<'a> {
     /// A description of the status check.
     pub description: Option<&'a str>,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Optional information for merge requests.
+pub enum MergeRequestStateFilter {
+    /// Get the opened/reopened merge requests.
+    Opened,
+    /// Get the closes merge requests.
+    Closed,
+    /// Get the merged merge requests.
+    Merged,
+}
+
+enum_serialize!(MergeRequestStateFilter -> "state",
+    Opened => "opened",
+    Closed => "closed",
+    Merged => "merged",
+);
 
 impl Gitlab {
     /// Create a new Gitlab API representation.
@@ -356,6 +374,15 @@ impl Gitlab {
     /// Get the merge requests for a project.
     pub fn merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
         self._get_paged(&format!("projects/{}/merge_requests", project))
+    }
+
+    /// Get the merge requests with a given state.
+    pub fn merge_requests_with_state(&self, project: ProjectId, state: MergeRequestStateFilter) -> GitlabResult<Vec<MergeRequest>> {
+        let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
+
+        req.param("state", state.as_str());
+
+        Self::_get_paged_req(req)
     }
 
     /// Get merge requests.
