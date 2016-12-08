@@ -259,7 +259,6 @@ pub struct MergeRequestHookAttrs {
     pub merge_status: MergeStatus,
     pub iid: u64,
     pub description: Option<String>,
-    pub lock_version: u64,
 
     // It seems that notes miss these properties?
     pub url: Option<String>,
