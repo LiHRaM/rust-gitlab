@@ -11,7 +11,8 @@ use self::ease::Error as EaseError;
 use self::ease::{Request, Response, Url};
 
 extern crate serde;
-use self::serde::Deserialize;
+use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
+use self::serde::de::Error as SerdeError;
 
 extern crate serde_json;
 
@@ -57,7 +58,7 @@ pub struct CommitStatusInfo<'a> {
     pub description: Option<&'a str>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Optional information for merge requests.
 pub enum MergeRequestStateFilter {
     /// Get the opened/reopened merge requests.
@@ -67,16 +68,12 @@ pub enum MergeRequestStateFilter {
     /// Get the merged merge requests.
     Merged,
 }
-impl MergeRequestStateFilter {
-    fn as_str(&self) -> &str {
-        use self::MergeRequestStateFilter::*;
-        match *self {
-            Opened => "opened",
-            Closed => "closed",
-            Merged => "merged",
-        }
-    }
-}
+
+enum_serialize!(MergeRequestStateFilter -> "state",
+    Opened => "opened",
+    Closed => "closed",
+    Merged => "merged",
+);
 
 impl Gitlab {
     /// Create a new Gitlab API representation.

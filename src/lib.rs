@@ -20,10 +20,10 @@ extern crate log;
 extern crate quick_error;
 
 mod error;
-mod gitlab;
-
 #[macro_use]
 mod macros;
+mod gitlab;
+
 pub mod systemhooks;
 pub mod types;
 pub mod webhooks;
