@@ -293,7 +293,7 @@ impl Gitlab {
 
     /// Get the latest statuses of a commit.
     pub fn commit_latest_statuses(&self, project: ProjectId, commit: &str)
-                           -> GitlabResult<Vec<CommitStatus>> {
+                                  -> GitlabResult<Vec<CommitStatus>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/statuses",
                                  project,
                                  commit))
@@ -312,7 +312,8 @@ impl Gitlab {
     }
 
     /// Get the latest builds of a commit.
-    pub fn commit_latest_builds(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<Build>> {
+    pub fn commit_latest_builds(&self, project: ProjectId, commit: &str)
+                                -> GitlabResult<Vec<Build>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/builds", project, commit))
     }
 
@@ -377,7 +378,8 @@ impl Gitlab {
     }
 
     /// Get the merge requests with a given state.
-    pub fn merge_requests_with_state(&self, project: ProjectId, state: MergeRequestStateFilter) -> GitlabResult<Vec<MergeRequest>> {
+    pub fn merge_requests_with_state(&self, project: ProjectId, state: MergeRequestStateFilter)
+                                     -> GitlabResult<Vec<MergeRequest>> {
         let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
 
         req.param("state", state.as_str());
