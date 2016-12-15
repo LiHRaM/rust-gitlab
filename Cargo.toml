@@ -19,7 +19,7 @@ chrono = { version = "~0.2", features = ["serde"] }
 hyper = { version = "~0.9", default-features = false }
 log = "~0.3"
 quick-error = "~1.1"
-reqwest = "~0.1"
+reqwest = "~0.2"
 serde = "~0.8"
 serde_json = "~0.8"
 url = "~1.2"
