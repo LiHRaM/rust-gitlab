@@ -6,9 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-extern crate ease;
-use self::ease::Error as EaseError;
-use self::ease::{Request, Response, Url};
+extern crate reqwest;
+use self::reqwest::{Client, RequestBuilder, Url};
 
 extern crate serde;
 use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -22,13 +21,14 @@ use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 use super::error::Error;
 use super::types::*;
 
+use std::borrow::Borrow;
 use std::fmt::{self, Debug};
 
-#[derive(Clone)]
 /// A representation of the Gitlab API for a single user.
 ///
 /// Separate users should use separate instances of this.
 pub struct Gitlab {
+    client: Client,
     base_url: Url,
     token: String,
 }
@@ -94,6 +94,7 @@ impl Gitlab {
         let base_url = try!(Url::parse(&format!("{}://{}/api/v3/", protocol, host)));
 
         let api = Gitlab {
+            client: try!(Client::new()),
             base_url: base_url,
             token: token,
         };
@@ -121,12 +122,7 @@ impl Gitlab {
 
     /// Find a user by username.
     pub fn user_by_name<T: UserResult>(&self, name: &str) -> GitlabResult<T> {
-        let mut req = try!(self._mkrequest("users"));
-
-        req.param("username", name);
-
-        let mut users = try!(Self::_get_paged_req(req));
-
+        let mut users = try!(self._get_paged_with_param("users", &[("username", name)]));
         users.pop()
             .ok_or_else(|| Error::Gitlab("no such user".to_string()))
     }
@@ -177,28 +173,23 @@ impl Gitlab {
         }
     }
 
-    fn set_event_flags(request: &mut Request, events: WebhookEvents) {
-        request
-            .param("build_events", Self::bool_param_value(events.build()))
-            .param("issues_events", Self::bool_param_value(events.issues()))
-            .param("merge_requests_events",
-                   Self::bool_param_value(events.merge_requests()))
-            .param("note_events", Self::bool_param_value(events.note()))
-            .param("pipeline_events", Self::bool_param_value(events.pipeline()))
-            .param("push_events", Self::bool_param_value(events.push()))
-            .param("wiki_page_events",
-                   Self::bool_param_value(events.wiki_page()));
+    fn event_flags(events: WebhookEvents) -> Vec<(&'static str, &'static str)> {
+        vec![("build_events", Self::bool_param_value(events.build())),
+             ("issues_events", Self::bool_param_value(events.issues())),
+             ("merge_requests_events", Self::bool_param_value(events.merge_requests())),
+             ("note_events", Self::bool_param_value(events.note())),
+             ("pipeline_events", Self::bool_param_value(events.pipeline())),
+             ("push_events", Self::bool_param_value(events.push())),
+             ("wiki_page_events", Self::bool_param_value(events.wiki_page()))]
     }
 
     /// Add a project hook.
     pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents)
                     -> GitlabResult<Hook> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/hooks", project)));
-        Self::set_event_flags(&mut req, events);
+        let mut flags = Self::event_flags(events);
+        flags.push(("url", url));
 
-        req.param("url", url);
-
-        Self::_post_req(req)
+        self._post_with_param(&format!("projects/{}/hooks", project), &flags)
     }
 
     /// Get the team members of a group.
@@ -227,12 +218,8 @@ impl Gitlab {
         let user_str = format!("{}", user);
         let access_str = format!("{}", access);
 
-        let mut req = try!(self._mkrequest(&format!("projects/{}/members", project)));
-
-        req.param("user", &user_str)
-            .param("access", &access_str);
-
-        Self::_post_req(req)
+        self._post_with_param(&format!("projects/{}/members", project),
+                              &[("user", &user_str), ("access", &access_str)])
     }
 
     /// Get branches for a project.
@@ -263,13 +250,10 @@ impl Gitlab {
     /// Get comments on a commit.
     pub fn create_commit_comment(&self, project: ProjectId, commit: &str, body: &str)
                                  -> GitlabResult<CommitNote> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/comment",
-                                                    project,
-                                                    commit)));
-
-        req.param("note", body);
-
-        Self::_post_req(req)
+        self._post_with_param(&format!("projects/{}/repository/commits/{}/comment",
+                                       project,
+                                       commit),
+                              &[("note", body)])
     }
 
     /// Get comments on a commit.
@@ -279,16 +263,13 @@ impl Gitlab {
         let line_str = format!("{}", line);
         let line_type = LineType::New;
 
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/comment",
-                                                    project,
-                                                    commit)));
-
-        req.param("note", body)
-            .param("path", path)
-            .param("line", &line_str)
-            .param("line_type", line_type.as_str());
-
-        Self::_post_req(req)
+        self._post_with_param(&format!("projects/{}/repository/commits/{}/comment",
+                                       project,
+                                       commit),
+                              &[("note", body),
+                                ("path", path),
+                                ("line", &line_str),
+                                ("line_type", line_type.as_str())])
     }
 
     /// Get the latest statuses of a commit.
@@ -302,13 +283,10 @@ impl Gitlab {
     /// Get the all statuses of a commit.
     pub fn commit_all_statuses(&self, project: ProjectId, commit: &str)
                                -> GitlabResult<Vec<CommitStatus>> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/statuses",
-                                                    project,
-                                                    commit)));
-
-        req.param("all", "true");
-
-        Self::_get_paged_req(req)
+        self._get_paged_with_param(&format!("projects/{}/repository/commits/{}/statuses",
+                                            project,
+                                            commit),
+                                   &[("all", "true")])
     }
 
     /// Get the latest builds of a commit.
@@ -319,13 +297,10 @@ impl Gitlab {
 
     /// Get the all builds of a commit.
     pub fn commit_all_builds(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<Build>> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/repository/commits/{}/builds",
-                                                    project,
-                                                    commit)));
-
-        req.param("all", "true");
-
-        Self::_get_paged_req(req)
+        self._get_paged_with_param(&format!("projects/{}/repository/commits/{}/builds",
+                                            project,
+                                            commit),
+                                   &[("all", "true")])
     }
 
     /// Create a status message for a commit.
@@ -333,16 +308,15 @@ impl Gitlab {
                                 info: &CommitStatusInfo)
                                 -> GitlabResult<CommitStatus> {
         let path = &format!("projects/{}/statuses/{}", project, sha);
-        let mut req = try!(self._mkrequest(path));
 
-        req.param("state", state.as_str());
+        let mut params = vec![("state", state.as_str())];
 
-        info.refname.map(|v| req.param("ref", v));
-        info.name.map(|v| req.param("name", v));
-        info.target_url.map(|v| req.param("target_url", v));
-        info.description.map(|v| req.param("description", v));
+        info.refname.map(|v| params.push(("ref", v)));
+        info.name.map(|v| params.push(("name", v)));
+        info.target_url.map(|v| params.push(("target_url", v)));
+        info.description.map(|v| params.push(("description", v)));
 
-        Self::_post_req(req)
+        self._post_with_param(path, &params)
     }
 
     /// Get the issues for a project.
@@ -365,11 +339,7 @@ impl Gitlab {
                              -> GitlabResult<Note> {
         let path = &format!("projects/{}/issues/{}/notes", project, issue);
 
-        let mut req = try!(self._mkrequest(path));
-
-        req.param("body", content);
-
-        Self::_post_req(req)
+        self._post_with_param(path, &[("body", content)])
     }
 
     /// Get the merge requests for a project.
@@ -380,11 +350,8 @@ impl Gitlab {
     /// Get the merge requests with a given state.
     pub fn merge_requests_with_state(&self, project: ProjectId, state: MergeRequestStateFilter)
                                      -> GitlabResult<Vec<MergeRequest>> {
-        let mut req = try!(self._mkrequest(&format!("projects/{}/merge_requests", project)));
-
-        req.param("state", state.as_str());
-
-        Self::_get_paged_req(req)
+        self._get_paged_with_param(&format!("projects/{}/merge_requests", project),
+                                   &[("state", state.as_str())])
     }
 
     /// Get merge requests.
@@ -417,11 +384,7 @@ impl Gitlab {
                             project,
                             merge_request,
                             note);
-        let mut req = try!(self._mkrequest(path));
-
-        req.param("name", award);
-
-        Self::_post_req(req)
+        self._post_with_param(path, &[("name", award)])
     }
 
     /// Get the awards for a merge request.
@@ -449,100 +412,105 @@ impl Gitlab {
         let path = &format!("projects/{}/merge_requests/{}/notes",
                             project,
                             merge_request);
-
-        let mut req = try!(self._mkrequest(path));
-
-        req.param("body", content);
-
-        Self::_post_req(req)
+        self._post_with_param(path, &[("body", content)])
     }
 
-    // Create a request with the proper common metadata for authentication.
-    //
-    // This method exists because we want to store the current user in the structure, but we don't
-    // have a `self` before we create the structure. Making it `Option<>` is a little silly and
-    // refactoring this out is worth the cleaner API.
-    fn _mkrequest1(base_url: &Url, token: &str, url: &str) -> GitlabResult<Request> {
-        let full_url = try!(base_url.join(url));
-        let mut req = Request::new(full_url);
-
+    fn _mk_url(&self, url: &str) -> GitlabResult<Url> {
         debug!(target: "gitlab", "api call {}", url);
-
-        req.header(GitlabPrivateToken(token.to_string()));
-
-        Ok(req)
+        Ok(try!(self.base_url.join(url)))
     }
 
-    // Create a request with the proper common metadata for authentication.
-    fn _mkrequest(&self, url: &str) -> GitlabResult<Request> {
-        Self::_mkrequest1(&self.base_url, &self.token, url)
+    fn _mk_url_with_param<I, K, V>(&self, url: &str, param: I) -> GitlabResult<Url>
+        where I: IntoIterator,
+              I::Item: Borrow<(K, V)>,
+              K: AsRef<str>,
+              V: AsRef<str>,
+    {
+        let mut full_url = try!(self._mk_url(url));
+        full_url.query_pairs_mut().extend_pairs(param);
+        Ok(full_url)
     }
 
     // Refactored code which talks to Gitlab and transforms error messages properly.
-    fn _comm<F, T>(req: Request, f: F) -> GitlabResult<T>
-        where F: FnOnce(Request) -> Result<Response, EaseError>,
-              T: Deserialize,
+    fn _comm<T>(&self, req: RequestBuilder) -> GitlabResult<T>
+        where T: Deserialize,
     {
-        match f(req) {
-            Ok(rsp) => {
-                let v = try!(rsp.from_json().map_err(Error::Ease));
-
-                debug!(target: "gitlab",
-                       "received data: {}",
-                       v);
-
-                Ok(try!(serde_json::from_value::<T>(v)))
-            },
-            Err(err) => {
-                if let EaseError::UnsuccessfulResponse(rsp) = err {
-                    Err(Error::from_gitlab(try!(rsp.from_json())))
-                } else {
-                    Err(Error::Ease(err))
-                }
-            },
+        let req = req.header(GitlabPrivateToken(self.token.to_string()));
+        let rsp = try!(req.send());
+        if !rsp.status().is_success() {
+            let v = try!(serde_json::from_reader(rsp));
+            return Err(Error::from_gitlab(v));
         }
-    }
 
-    fn _get_req<T: Deserialize>(req: Request) -> GitlabResult<T> {
-        Self::_comm(req, |mut req| req.get())
+        let v = try!(serde_json::from_reader(rsp));
+        debug!(target: "gitlab",
+               "received data: {:?}",
+               v);
+        Ok(try!(serde_json::from_value::<T>(v)))
     }
 
     fn _get<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
-        Self::_get_req(try!(self._mkrequest(url)))
+        let param: &[(&str, &str)] = &[];
+        self._get_with_param(url, param)
     }
 
-    fn _post_req<T: Deserialize>(req: Request) -> GitlabResult<T> {
-        Self::_comm(req, |mut req| req.post())
+    fn _get_with_param<T, I, K, V>(&self, url: &str, param: I) -> GitlabResult<T>
+        where T: Deserialize,
+              I: IntoIterator,
+              I::Item: Borrow<(K, V)>,
+              K: AsRef<str>,
+              V: AsRef<str>,
+    {
+        let full_url = try!(self._mk_url_with_param(url, param));
+        let req = self.client.get(full_url);
+        self._comm(req)
     }
 
     fn _post<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
-        Self::_post_req(try!(self._mkrequest(url)))
+        let param: &[(&str, &str)] = &[];
+        self._post_with_param(url, param)
     }
 
-    fn _put_req<T: Deserialize>(req: Request) -> GitlabResult<T> {
-        Self::_comm(req, |mut req| req.put())
+    fn _post_with_param<T, U>(&self, url: &str, param: U) -> GitlabResult<T>
+        where T: Deserialize,
+              U: Serialize,
+    {
+        let full_url = try!(self._mk_url(url));
+        let req = self.client.post(full_url).form(&param);
+        self._comm(req)
     }
 
-    fn _put<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
-        Self::_put_req(try!(self._mkrequest(url)))
+    // Handle paginated queries. Returns all results.
+    fn _get_paged<T: Deserialize>(&self, url: &str) -> GitlabResult<Vec<T>> {
+        let param: &[(&str, &str)] = &[];
+        self._get_paged_with_param(url, param)
     }
 
-    fn _get_paged_req<T: Deserialize>(req: Request) -> GitlabResult<Vec<T>> {
+    fn _get_paged_with_param<T, I, K, V>(&self, url: &str, param: I) -> GitlabResult<Vec<T>>
+        where T: Deserialize,
+              I: IntoIterator,
+              I::Item: Borrow<(K, V)>,
+              K: AsRef<str>,
+              V: AsRef<str>,
+    {
         let mut page_num = 1;
         let per_page = 100;
         let per_page_str = &format!("{}", per_page);
+
+        let full_url = try!(self._mk_url_with_param(url, param));
 
         let mut results: Vec<T> = vec![];
 
         loop {
             let page_str = &format!("{}", page_num);
-            let mut page_req = req.clone();
-            page_req.param("page", page_str)
-                .param("per_page", per_page_str);
-            let page = try!(Self::_get_req::<Vec<T>>(page_req));
-            let page_len = page.len();
+            let mut page_url = full_url.clone();
+            page_url.query_pairs_mut()
+                .extend_pairs(&[("page", page_str), ("per_page", per_page_str)]);
+            let req = self.client.get(page_url);
 
-            results.extend(page.into_iter());
+            let page: Vec<T> = try!(self._comm(req));
+            let page_len = page.len();
+            results.extend(page);
 
             // Gitlab used to have issues returning paginated results; these have been fixed since,
             // but if it is needed, the bug manifests as Gitlab returning *all* results instead of
@@ -555,10 +523,5 @@ impl Gitlab {
         }
 
         Ok(results)
-    }
-
-    // Handle paginated queries. Returns all results.
-    fn _get_paged<T: Deserialize>(&self, url: &str) -> GitlabResult<Vec<T>> {
-        Self::_get_paged_req(try!(self._mkrequest(url)))
     }
 }
