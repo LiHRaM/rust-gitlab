@@ -6,4 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Web hook structures
+//!
+//! These hooks are received from Gitlab when registered as a web hook within a project.
+//!
+//! Gitlab does not have consistent structures for its hooks, so they often change from
+//! version to version.
+
 include!(concat!(env!("OUT_DIR"), "/webhooks.rs"));
