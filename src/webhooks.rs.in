@@ -499,15 +499,14 @@ impl Deserialize for WebHook {
         let val = try!(Value::deserialize(deserializer));
 
         let object_kind = match val.pointer("/object_kind") {
-                Some(&Value::String(ref kind)) => kind,
-                Some(_) => {
-                    return Err(D::Error::invalid_type(Type::String));
-                },
-                None => {
-                    return Err(D::Error::missing_field("object_kind"));
-                },
-            }
-            .to_string();
+            Some(&Value::String(ref kind)) => kind.to_string(),
+            Some(_) => {
+                return Err(D::Error::invalid_type(Type::String));
+            },
+            None => {
+                return Err(D::Error::missing_field("object_kind"));
+            },
+        };
 
         let hook_res = match object_kind.as_str() {
             "push" | "tag_push" => serde_json::from_value(val).map(WebHook::Push),
@@ -521,7 +520,8 @@ impl Deserialize for WebHook {
             "build" => serde_json::from_value(val).map(WebHook::Build),
 
             _ => {
-                return Err(D::Error::invalid_value(&format!("unrecognized webhook object kind: {}",
+                return Err(D::Error::invalid_value(&format!("unrecognized webhook object kind: \
+                                                             {}",
                                                             object_kind)));
             },
         };
