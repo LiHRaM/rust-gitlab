@@ -63,8 +63,8 @@ pub struct UserBasic {
     pub web_url: String,
 }
 
-pub trait UserResult: Serialize + Deserialize {}
-impl<T: Serialize + Deserialize + Into<UserBasic>> UserResult for T {}
+pub trait UserResult: Deserialize {}
+impl<T: Deserialize + Into<UserBasic>> UserResult for T {}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// More detailed information only accessible to administrators.
