@@ -427,7 +427,7 @@ pub struct BuildUserHookAttrs {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildCommitHookAttrs {
     pub id: String,
-    pub sha: String,
+    pub sha: ObjectId,
     pub message: String,
     pub author_name: String,
     pub author_email: String,
