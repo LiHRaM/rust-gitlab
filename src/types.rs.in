@@ -1541,7 +1541,7 @@ pub struct Runner {
     pub description: Option<String>,
     pub active: bool,
     pub is_shared: bool,
-    pub name: Option<String>
+    pub name: Option<String>,
 }
 
 //class RunnerDetails < Runner
