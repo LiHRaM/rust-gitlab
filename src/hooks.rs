@@ -16,7 +16,7 @@ use self::serde_json::Value;
 use super::systemhooks::SystemHook;
 use super::webhooks::WebHook;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum GitlabHook {
     System(SystemHook),
     Web(WebHook),

@@ -49,7 +49,7 @@ impl AsRef<DateTime<UTC>> for HookDate {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information exposed in hooks.
 pub struct ProjectHookAttrs {
     /// The display name of the project.
@@ -74,7 +74,7 @@ pub struct ProjectHookAttrs {
     pub default_branch: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Wiki project information exposed in hooks.
 pub struct ProjectWikiHookAttrs {
     /// The URL for the project's homepage.
@@ -89,20 +89,20 @@ pub struct ProjectWikiHookAttrs {
     pub default_branch: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserHookAttrs {
     pub name: String,
     pub username: String,
     pub avatar_url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HookCommitIdentity {
     pub name: String,
     pub email: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CommitHookAttrs {
     pub id: ObjectId,
     pub message: String,
@@ -114,7 +114,7 @@ pub struct CommitHookAttrs {
     pub removed: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PushHook {
     pub object_kind: String,
     pub before: ObjectId,
@@ -147,7 +147,7 @@ enum_serialize!(IssueAction -> "issue action",
     Reopen => "reopen",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct IssueHookAttrs {
     pub id: IssueId,
     pub title: String,
@@ -174,7 +174,7 @@ pub struct IssueHookAttrs {
     pub action: Option<IssueAction>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct IssueHook {
     pub object_kind: String,
     pub user: UserHookAttrs,
@@ -199,7 +199,7 @@ enum_serialize!(MergeRequestAction -> "merge request action",
     Merge => "merge",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestParams {
     force_remove_source_branch: Option<Value>, // sigh
 }
@@ -224,7 +224,7 @@ impl MergeRequestParams {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestHookAttrs {
     pub source: ProjectHookAttrs,
     pub target: ProjectHookAttrs,
@@ -265,7 +265,7 @@ pub struct MergeRequestHookAttrs {
     pub action: Option<MergeRequestAction>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestHook {
     pub object_kind: String,
     pub user: UserHookAttrs,
@@ -284,7 +284,7 @@ enum_serialize!(SnippetType -> "snippet type",
     Personal => "PersonalSnippet",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SnippetHookAttrs {
     pub title: String,
     pub content: String,
@@ -308,7 +308,7 @@ enum_serialize!(WikiPageAction -> "wiki page action",
     Update => "update",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WikiPageHookAttrs {
     pub title: String,
     pub content: String,
@@ -320,7 +320,7 @@ pub struct WikiPageHookAttrs {
     pub action: WikiPageAction,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DiffHookAttrs {
     pub diff: String,
     pub new_path: String,
@@ -333,7 +333,7 @@ pub struct DiffHookAttrs {
     pub too_large: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
 // FIXME: This can apparently be a string sometimes.
 // https://gitlab.com/gitlab-org/gitlab-ce/issues/21467
@@ -347,7 +347,7 @@ pub struct PositionHookAttrs {
     pub new_path: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NoteHookAttrs {
     pub id: NoteId,
     pub note: String,
@@ -404,7 +404,7 @@ impl NoteHookAttrs {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NoteHook {
     pub object_kind: String,
     pub user: UserHookAttrs,
@@ -417,14 +417,14 @@ pub struct NoteHook {
     pub snippet: Option<SnippetHookAttrs>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildUserHookAttrs {
     pub id: Option<UserId>,
     pub name: Option<String>,
     pub email: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildCommitHookAttrs {
     pub id: String,
     pub sha: String,
@@ -437,7 +437,7 @@ pub struct BuildCommitHookAttrs {
     pub finished_at: Option<HookDate>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information exposed in build hooks.
 pub struct BuildProjectHookAttrs {
     /// The display name of the project.
@@ -454,7 +454,7 @@ pub struct BuildProjectHookAttrs {
     pub visibility_level: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildHook {
     pub object_kind: String,
     #[serde(rename="ref")]
@@ -475,7 +475,7 @@ pub struct BuildHook {
     pub repository: BuildProjectHookAttrs,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WikiPageHook {
     pub object_kind: String,
     pub user: UserHookAttrs,
@@ -484,7 +484,7 @@ pub struct WikiPageHook {
     pub object_attributes: WikiPageHookAttrs,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum WebHook {
     Push(PushHook),
     Issue(IssueHook),
