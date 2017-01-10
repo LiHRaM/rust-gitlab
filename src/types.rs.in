@@ -19,7 +19,7 @@ use self::serde_json::Value;
 use std::fmt::{self, Display, Formatter};
 
 // This is only used in internal API calls.
-//#[derive(Serialize, Deserialize, Debug)]
+//#[derive(Serialize, Deserialize, Debug, Clone)]
 //pub struct UserSafe {
 //    pub username: String,
 //    pub name: String,
@@ -46,7 +46,7 @@ enum_serialize!(UserState -> "user state",
     LdapBlocked => "ldap_blocked",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Basic user information.
 pub struct UserBasic {
     /// The username.
@@ -66,7 +66,7 @@ pub struct UserBasic {
 pub trait UserResult: Serialize + Deserialize {}
 impl<T: Serialize + Deserialize + Into<UserBasic>> UserResult for T {}
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// More detailed information only accessible to administrators.
 pub struct User {
     /// The username.
@@ -115,7 +115,7 @@ impl From<User> for UserBasic {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// External authentication tokens.
 pub struct Identity {
     /// The provider of the token.
@@ -134,7 +134,7 @@ impl_id!(ThemeId);
 pub struct ColorSchemeId(u64);
 impl_id!(ColorSchemeId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Full user structure information.
 pub struct UserFull {
     /// The username.
@@ -241,7 +241,7 @@ impl From<UserFull> for User {
 pub struct EmailId(u64);
 impl_id!(EmailId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Email address.
 pub struct Email {
     /// ID of the email.
@@ -254,7 +254,7 @@ pub struct Email {
 pub struct HookId(u64);
 impl_id!(HookId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A web hook to notify of events.
 pub struct Hook {
     /// The ID of the hook.
@@ -271,7 +271,7 @@ pub struct Hook {
     pub enable_ssl_verification: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A web hook to notify of project events.
 pub struct ProjectHook {
     /// The ID of the hook.
@@ -361,7 +361,7 @@ impl WebhookEvents {
 pub struct ProjectId(u64);
 impl_id!(ProjectId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Basic project information.
 pub struct BasicProjectDetails {
     /// The ID of the project.
@@ -404,7 +404,7 @@ impl Display for VisibilityLevel {
 
 // TODO: enum for NotificationLevel
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SharedGroup {
     pub group_id: GroupId,
     pub group_name: String,
@@ -425,12 +425,12 @@ pub struct Permissions {
     pub group_access: Option<MemberAccess>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectNamespaceAvatar {
     pub url: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectNamespace {
     pub name: String,
     pub path: String,
@@ -456,7 +456,7 @@ impl ProjectNamespace {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information.
 pub struct Project {
     /// The ID of the project.
@@ -589,7 +589,7 @@ impl Display for AccessLevel {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A member with extra permissions on a project.
 pub struct Member {
     /// The username.
@@ -622,7 +622,7 @@ impl From<Member> for UserBasic {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A member with extra permissions on a project.
 pub struct AccessRequester {
     /// The username.
@@ -658,7 +658,7 @@ impl From<AccessRequester> for UserBasic {
 pub struct GroupId(u64);
 impl_id!(GroupId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Group information.
 pub struct Group {
     /// The ID of the group.
@@ -679,7 +679,7 @@ pub struct Group {
     pub request_access_enabled: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Group information with a project listing.
 pub struct GroupDetail {
     /// The ID of the group.
@@ -720,7 +720,7 @@ impl From<GroupDetail> for Group {
 }
 
 // FIXME: Not actually in entities.rb; it's just a hash dump.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Commit {
     pub id: ObjectId,
     pub parent_ids: Vec<ObjectId>,
@@ -733,7 +733,7 @@ pub struct Commit {
     pub committed_date: DateTime<UTC>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoBranch {
     pub name: String,
     pub commit: Option<Commit>,
@@ -768,7 +768,7 @@ enum_serialize!(ObjectType -> "object type",
     Blob => "blob",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoTreeObject {
     pub id: ObjectId,
     pub name: String,
@@ -778,7 +778,7 @@ pub struct RepoTreeObject {
     pub mode: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoCommit {
     pub id: ObjectId,
     pub short_id: ObjectId,
@@ -796,7 +796,7 @@ pub struct RepoCommitStats {
     pub total: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoCommitDetail {
     pub id: ObjectId,
     pub short_id: ObjectId,
@@ -817,7 +817,7 @@ pub struct RepoCommitDetail {
 pub struct SnippetId(u64);
 impl_id!(SnippetId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectSnippet {
     pub id: SnippetId,
     pub title: String,
@@ -829,7 +829,7 @@ pub struct ProjectSnippet {
 }
 
 // This is just used as a common "base class" in Ruby.
-//#[derive(Serialize, Deserialize, Debug)]
+//#[derive(Serialize, Deserialize, Debug, Clone)]
 //pub struct ProjectEntity {
 //    pub id: ProjectEntityId,
 //    pub iid: u64,
@@ -841,7 +841,7 @@ pub struct ProjectSnippet {
 //    pub updated_at: DateTime<UTC>,
 //}
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoDiff {
     pub old_path: String,
     pub new_path: String,
@@ -867,7 +867,7 @@ enum_serialize!(MilestoneState -> "milestone type",
     Closed => "closed",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Milestone {
     pub id: MilestoneId,
     pub iid: u64,
@@ -897,7 +897,7 @@ enum_serialize!(IssueState -> "issue type",
     Reopened => "reopened",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Issue {
     pub id: IssueId,
     pub iid: u64,
@@ -923,13 +923,13 @@ pub struct Issue {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExternalIssueId(u64);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ExternalIssue {
     pub id: ExternalIssueId,
     pub title: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum IssueReference {
     Internal(Issue),
     External(ExternalIssue),
@@ -987,7 +987,7 @@ enum_serialize!(MergeRequestState -> "merge request state",
     Locked => "locked",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequest {
     pub id: MergeRequestId,
     pub iid: u64,
@@ -1019,7 +1019,7 @@ pub struct MergeRequest {
     pub web_url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestChanges {
     pub id: MergeRequestId,
     pub iid: u64,
@@ -1091,7 +1091,7 @@ impl From<MergeRequestChanges> for MergeRequest {
 pub struct SshKeyId(u64);
 impl_id!(SshKeyId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SshKey {
     pub id: SshKeyId,
     pub title: String,
@@ -1099,7 +1099,7 @@ pub struct SshKey {
     pub created_at: DateTime<UTC>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SshKeyWithUser {
     pub id: SshKeyId,
     pub title: String,
@@ -1134,7 +1134,7 @@ pub enum NoteableId {
 pub struct NoteId(u64);
 impl_id!(NoteId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Note {
     pub id: NoteId,
     pub body: String,
@@ -1201,7 +1201,7 @@ enum_serialize!(AwardableType -> "awardable type",
     Note => "Note",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AwardEmoji {
     pub id: AwardId,
     pub name: String,
@@ -1235,7 +1235,7 @@ enum_serialize!(LineType -> "line type",
     Old => "old",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CommitNote {
     pub note: String,
     pub path: Option<String>,
@@ -1271,7 +1271,7 @@ enum_serialize!(StatusState -> "status state",
     Canceled => "canceled",
 );
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CommitStatus {
     pub id: CommitStatusId,
     pub sha: ObjectId,
@@ -1312,7 +1312,7 @@ pub enum EventTargetId {
     Snippet(SnippetId),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Event {
     pub title: Option<String>,
     pub project_id: ProjectId,
@@ -1380,7 +1380,7 @@ pub enum NamespaceId {
     Group(GroupId),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Namespace {
     id: u64,
     pub path: String,
@@ -1535,7 +1535,7 @@ impl Namespace {
 pub struct RunnerId(u64);
 impl_id!(RunnerId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Runner {
     pub id: RunnerId,
     pub description: Option<String>,
@@ -1560,7 +1560,7 @@ pub struct Runner {
 //  end
 //end
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildArtifactFile {
     pub filename: String,
     pub size: usize,
@@ -1571,7 +1571,7 @@ pub struct BuildArtifactFile {
 pub struct BuildId(u64);
 impl_id!(BuildId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Build {
     pub id: BuildId,
     pub status: StatusState,
@@ -1669,7 +1669,7 @@ pub struct Build {
 pub struct PipelineId(u64);
 impl_id!(PipelineId);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PipelineBasic {
     pub id: PipelineId,
     #[serde(rename="ref")]
