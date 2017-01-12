@@ -28,7 +28,6 @@ use std::fmt::{self, Debug};
 ///
 /// Separate users should use separate instances of this.
 pub struct Gitlab {
-    client: Client,
     base_url: Url,
     token: String,
 }
@@ -94,7 +93,6 @@ impl Gitlab {
         let base_url = try!(Url::parse(&format!("{}://{}/api/v3/", protocol, host)));
 
         let api = Gitlab {
-            client: try!(Client::new()),
             base_url: base_url,
             token: token,
         };
@@ -462,7 +460,7 @@ impl Gitlab {
               V: AsRef<str>,
     {
         let full_url = try!(self._mk_url_with_param(url, param));
-        let req = self.client.get(full_url);
+        let req = try!(Client::new()).get(full_url);
         self._comm(req)
     }
 
@@ -476,7 +474,7 @@ impl Gitlab {
               U: Serialize,
     {
         let full_url = try!(self._mk_url(url));
-        let req = self.client.post(full_url).form(&param);
+        let req = try!(Client::new()).post(full_url).form(&param);
         self._comm(req)
     }
 
@@ -506,7 +504,7 @@ impl Gitlab {
             let mut page_url = full_url.clone();
             page_url.query_pairs_mut()
                 .extend_pairs(&[("page", page_str), ("per_page", per_page_str)]);
-            let req = self.client.get(page_url);
+            let req = try!(Client::new()).get(page_url);
 
             let page: Vec<T> = try!(self._comm(req));
             let page_len = page.len();
