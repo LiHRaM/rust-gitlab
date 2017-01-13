@@ -18,7 +18,7 @@ extern crate serde_json;
 extern crate url;
 use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 
-use super::error::Error;
+use super::error::*;
 use super::types::*;
 
 use std::borrow::Borrow;
@@ -33,16 +33,13 @@ pub struct Gitlab {
 }
 
 impl Debug for Gitlab {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Gitlab {{ {} }}", self.base_url)
     }
 }
 
 // The header Gitlab uses to authenticate the user.
 header!{ (GitlabPrivateToken, "PRIVATE-TOKEN") => [String] }
-
-/// A JSON value return from Gitlab.
-pub type GitlabResult<T> = Result<T, Error>;
 
 #[derive(Debug)]
 /// Optional information for commit statuses.
@@ -78,19 +75,20 @@ impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
-    pub fn new<T: ToString>(host: &str, token: T) -> GitlabResult<Self> {
+    pub fn new<T: ToString>(host: &str, token: T) -> Result<Self> {
         Self::_new("https", host, token.to_string())
     }
 
     /// Create a new non-SSL Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
-    pub fn new_insecure<T: ToString>(host: &str, token: T) -> GitlabResult<Self> {
+    pub fn new_insecure<T: ToString>(host: &str, token: T) -> Result<Self> {
         Self::_new("http", host, token.to_string())
     }
 
-    fn _new(protocol: &str, host: &str, token: String) -> GitlabResult<Self> {
-        let base_url = try!(Url::parse(&format!("{}://{}/api/v3/", protocol, host)));
+    fn _new(protocol: &str, host: &str, token: String) -> Result<Self> {
+        let base_url = try!(Url::parse(&format!("{}://{}/api/v3/", protocol, host))
+            .chain_err(|| ErrorKind::UrlParse));
 
         let api = Gitlab {
             base_url: base_url,
@@ -104,62 +102,62 @@ impl Gitlab {
     }
 
     /// The user the API is acting as.
-    pub fn current_user(&self) -> GitlabResult<UserFull> {
+    pub fn current_user(&self) -> Result<UserFull> {
         self._get("user")
     }
 
     /// Get all user accounts
-    pub fn users<T: UserResult>(&self) -> GitlabResult<Vec<T>> {
+    pub fn users<T: UserResult>(&self) -> Result<Vec<T>> {
         self._get_paged("users")
     }
 
     /// Find a user by id.
-    pub fn user<T: UserResult>(&self, user: UserId) -> GitlabResult<T> {
+    pub fn user<T: UserResult>(&self, user: UserId) -> Result<T> {
         self._get(&format!("users/{}", user))
     }
 
     /// Find a user by username.
-    pub fn user_by_name<T: UserResult>(&self, name: &str) -> GitlabResult<T> {
+    pub fn user_by_name<T: UserResult>(&self, name: &str) -> Result<T> {
         let mut users = try!(self._get_paged_with_param("users", &[("username", name)]));
         users.pop()
-            .ok_or_else(|| Error::Gitlab("no such user".to_string()))
+            .ok_or_else(|| Error::from_kind(ErrorKind::Gitlab("no such user".to_string())))
     }
 
     /// Get all accessible projects.
-    pub fn projects(&self) -> GitlabResult<Vec<Project>> {
+    pub fn projects(&self) -> Result<Vec<Project>> {
         self._get_paged("projects")
     }
 
     /// Get all owned projects.
-    pub fn owned_projects(&self) -> GitlabResult<Vec<Project>> {
+    pub fn owned_projects(&self) -> Result<Vec<Project>> {
         self._get_paged("projects/owned")
     }
 
     /// Get all projects.
     ///
     /// Requires administrator privileges.
-    pub fn all_projects(&self) -> GitlabResult<Vec<Project>> {
+    pub fn all_projects(&self) -> Result<Vec<Project>> {
         self._get_paged("projects/all")
     }
 
     /// Find a project by id.
-    pub fn project(&self, project: ProjectId) -> GitlabResult<Project> {
+    pub fn project(&self, project: ProjectId) -> Result<Project> {
         self._get(&format!("projects/{}", project))
     }
 
     /// Find a project by name.
-    pub fn project_by_name(&self, name: &str) -> GitlabResult<Project> {
+    pub fn project_by_name(&self, name: &str) -> Result<Project> {
         self._get(&format!("projects/{}",
                            percent_encode(name.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
     }
 
     /// Get a project's hooks.
-    pub fn hooks(&self, project: ProjectId) -> GitlabResult<Vec<Hook>> {
+    pub fn hooks(&self, project: ProjectId) -> Result<Vec<Hook>> {
         self._get_paged(&format!("projects/{}/hooks", project))
     }
 
     /// Get a project hook.
-    pub fn hook(&self, project: ProjectId, hook: HookId) -> GitlabResult<Hook> {
+    pub fn hook(&self, project: ProjectId, hook: HookId) -> Result<Hook> {
         self._get(&format!("projects/{}/hooks/{}", project, hook))
     }
 
@@ -183,7 +181,7 @@ impl Gitlab {
 
     /// Add a project hook.
     pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents)
-                    -> GitlabResult<Hook> {
+                    -> Result<Hook> {
         let mut flags = Self::event_flags(events);
         flags.push(("url", url));
 
@@ -191,28 +189,28 @@ impl Gitlab {
     }
 
     /// Get the team members of a group.
-    pub fn group_members(&self, group: GroupId) -> GitlabResult<Vec<Member>> {
+    pub fn group_members(&self, group: GroupId) -> Result<Vec<Member>> {
         self._get_paged(&format!("groups/{}/members", group))
     }
 
     /// Get a team member of a group.
-    pub fn group_member(&self, group: GroupId, user: UserId) -> GitlabResult<Member> {
+    pub fn group_member(&self, group: GroupId, user: UserId) -> Result<Member> {
         self._get(&format!("groups/{}/members/{}", group, user))
     }
 
     /// Get the team members of a project.
-    pub fn project_members(&self, project: ProjectId) -> GitlabResult<Vec<Member>> {
+    pub fn project_members(&self, project: ProjectId) -> Result<Vec<Member>> {
         self._get_paged(&format!("projects/{}/members", project))
     }
 
     /// Get a team member of a project.
-    pub fn project_member(&self, project: ProjectId, user: UserId) -> GitlabResult<Member> {
+    pub fn project_member(&self, project: ProjectId, user: UserId) -> Result<Member> {
         self._get(&format!("projects/{}/members/{}", project, user))
     }
 
     /// Add a user to a project.
     pub fn add_user_to_project(&self, project: ProjectId, user: UserId, access: AccessLevel)
-                               -> GitlabResult<Member> {
+                               -> Result<Member> {
         let user_str = format!("{}", user);
         let access_str = format!("{}", access);
 
@@ -221,25 +219,25 @@ impl Gitlab {
     }
 
     /// Get branches for a project.
-    pub fn branches(&self, project: ProjectId) -> GitlabResult<Vec<RepoBranch>> {
+    pub fn branches(&self, project: ProjectId) -> Result<Vec<RepoBranch>> {
         self._get_paged(&format!("projects/{}/branches", project))
     }
 
     /// Get a branch.
-    pub fn branch(&self, project: ProjectId, branch: &str) -> GitlabResult<RepoBranch> {
+    pub fn branch(&self, project: ProjectId, branch: &str) -> Result<RepoBranch> {
         self._get(&format!("projects/{}/repository/branches/{}",
                            project,
                            percent_encode(branch.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
     }
 
     /// Get a commit.
-    pub fn commit(&self, project: ProjectId, commit: &str) -> GitlabResult<RepoCommitDetail> {
+    pub fn commit(&self, project: ProjectId, commit: &str) -> Result<RepoCommitDetail> {
         self._get(&format!("projects/{}/repository/commits/{}", project, commit))
     }
 
     /// Get comments on a commit.
     pub fn commit_comments(&self, project: ProjectId, commit: &str)
-                           -> GitlabResult<Vec<CommitNote>> {
+                           -> Result<Vec<CommitNote>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/comments",
                                  project,
                                  commit))
@@ -247,7 +245,7 @@ impl Gitlab {
 
     /// Get comments on a commit.
     pub fn create_commit_comment(&self, project: ProjectId, commit: &str, body: &str)
-                                 -> GitlabResult<CommitNote> {
+                                 -> Result<CommitNote> {
         self._post_with_param(&format!("projects/{}/repository/commits/{}/comment",
                                        project,
                                        commit),
@@ -257,7 +255,7 @@ impl Gitlab {
     /// Get comments on a commit.
     pub fn create_commit_line_comment(&self, project: ProjectId, commit: &str, body: &str,
                                       path: &str, line: u64)
-                                      -> GitlabResult<CommitNote> {
+                                      -> Result<CommitNote> {
         let line_str = format!("{}", line);
         let line_type = LineType::New;
 
@@ -272,7 +270,7 @@ impl Gitlab {
 
     /// Get the latest statuses of a commit.
     pub fn commit_latest_statuses(&self, project: ProjectId, commit: &str)
-                                  -> GitlabResult<Vec<CommitStatus>> {
+                                  -> Result<Vec<CommitStatus>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/statuses",
                                  project,
                                  commit))
@@ -280,7 +278,7 @@ impl Gitlab {
 
     /// Get the all statuses of a commit.
     pub fn commit_all_statuses(&self, project: ProjectId, commit: &str)
-                               -> GitlabResult<Vec<CommitStatus>> {
+                               -> Result<Vec<CommitStatus>> {
         self._get_paged_with_param(&format!("projects/{}/repository/commits/{}/statuses",
                                             project,
                                             commit),
@@ -289,12 +287,12 @@ impl Gitlab {
 
     /// Get the latest builds of a commit.
     pub fn commit_latest_builds(&self, project: ProjectId, commit: &str)
-                                -> GitlabResult<Vec<Build>> {
+                                -> Result<Vec<Build>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/builds", project, commit))
     }
 
     /// Get the all builds of a commit.
-    pub fn commit_all_builds(&self, project: ProjectId, commit: &str) -> GitlabResult<Vec<Build>> {
+    pub fn commit_all_builds(&self, project: ProjectId, commit: &str) -> Result<Vec<Build>> {
         self._get_paged_with_param(&format!("projects/{}/repository/commits/{}/builds",
                                             project,
                                             commit),
@@ -304,7 +302,7 @@ impl Gitlab {
     /// Create a status message for a commit.
     pub fn create_commit_status(&self, project: ProjectId, sha: &str, state: StatusState,
                                 info: &CommitStatusInfo)
-                                -> GitlabResult<CommitStatus> {
+                                -> Result<CommitStatus> {
         let path = &format!("projects/{}/statuses/{}", project, sha);
 
         let mut params = vec![("state", state.as_str())];
@@ -318,49 +316,49 @@ impl Gitlab {
     }
 
     /// Get the issues for a project.
-    pub fn issues(&self, project: ProjectId) -> GitlabResult<Vec<Issue>> {
+    pub fn issues(&self, project: ProjectId) -> Result<Vec<Issue>> {
         self._get_paged(&format!("projects/{}/issues", project))
     }
 
     /// Get issues.
-    pub fn issue(&self, project: ProjectId, issue: IssueId) -> GitlabResult<Issue> {
+    pub fn issue(&self, project: ProjectId, issue: IssueId) -> Result<Issue> {
         self._get(&format!("projects/{}/issues/{}", project, issue))
     }
 
     /// Get the notes from a issue.
-    pub fn issue_notes(&self, project: ProjectId, issue: IssueId) -> GitlabResult<Vec<Note>> {
+    pub fn issue_notes(&self, project: ProjectId, issue: IssueId) -> Result<Vec<Note>> {
         self._get_paged(&format!("projects/{}/issues/{}/notes", project, issue))
     }
 
     /// Create a note on a issue.
     pub fn create_issue_note(&self, project: ProjectId, issue: IssueId, content: &str)
-                             -> GitlabResult<Note> {
+                             -> Result<Note> {
         let path = &format!("projects/{}/issues/{}/notes", project, issue);
 
         self._post_with_param(path, &[("body", content)])
     }
 
     /// Get the merge requests for a project.
-    pub fn merge_requests(&self, project: ProjectId) -> GitlabResult<Vec<MergeRequest>> {
+    pub fn merge_requests(&self, project: ProjectId) -> Result<Vec<MergeRequest>> {
         self._get_paged(&format!("projects/{}/merge_requests", project))
     }
 
     /// Get the merge requests with a given state.
     pub fn merge_requests_with_state(&self, project: ProjectId, state: MergeRequestStateFilter)
-                                     -> GitlabResult<Vec<MergeRequest>> {
+                                     -> Result<Vec<MergeRequest>> {
         self._get_paged_with_param(&format!("projects/{}/merge_requests", project),
                                    &[("state", state.as_str())])
     }
 
     /// Get merge requests.
     pub fn merge_request(&self, project: ProjectId, merge_request: MergeRequestId)
-                         -> GitlabResult<MergeRequest> {
+                         -> Result<MergeRequest> {
         self._get(&format!("projects/{}/merge_requests/{}", project, merge_request))
     }
 
     /// Get the issues that will be closed when a merge request is merged.
     pub fn merge_request_closes_issues(&self, project: ProjectId, merge_request: MergeRequestId)
-                                       -> GitlabResult<Vec<IssueReference>> {
+                                       -> Result<Vec<IssueReference>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/closes_issues",
                                  project,
                                  merge_request))
@@ -368,7 +366,7 @@ impl Gitlab {
 
     /// Get the notes from a merge request.
     pub fn merge_request_notes(&self, project: ProjectId, merge_request: MergeRequestId)
-                               -> GitlabResult<Vec<Note>> {
+                               -> Result<Vec<Note>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/notes",
                                  project,
                                  merge_request))
@@ -377,7 +375,7 @@ impl Gitlab {
     /// Award a merge request note with an award.
     pub fn award_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId,
                                     note: NoteId, award: &str)
-                                    -> GitlabResult<AwardEmoji> {
+                                    -> Result<AwardEmoji> {
         let path = &format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
                             project,
                             merge_request,
@@ -387,7 +385,7 @@ impl Gitlab {
 
     /// Get the awards for a merge request.
     pub fn merge_request_awards(&self, project: ProjectId, merge_request: MergeRequestId)
-                                -> GitlabResult<Vec<AwardEmoji>> {
+                                -> Result<Vec<AwardEmoji>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/award_emoji",
                                  project,
                                  merge_request))
@@ -396,7 +394,7 @@ impl Gitlab {
     /// Get the awards for a merge request note.
     pub fn merge_request_note_awards(&self, project: ProjectId, merge_request: MergeRequestId,
                                      note: NoteId)
-                                     -> GitlabResult<Vec<AwardEmoji>> {
+                                     -> Result<Vec<AwardEmoji>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
                                  project,
                                  merge_request,
@@ -406,19 +404,19 @@ impl Gitlab {
     /// Create a note on a merge request.
     pub fn create_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId,
                                      content: &str)
-                                     -> GitlabResult<Note> {
+                                     -> Result<Note> {
         let path = &format!("projects/{}/merge_requests/{}/notes",
                             project,
                             merge_request);
         self._post_with_param(path, &[("body", content)])
     }
 
-    fn _mk_url(&self, url: &str) -> GitlabResult<Url> {
+    fn _mk_url(&self, url: &str) -> Result<Url> {
         debug!(target: "gitlab", "api call {}", url);
-        Ok(try!(self.base_url.join(url)))
+        Ok(try!(self.base_url.join(url).chain_err(|| ErrorKind::UrlParse)))
     }
 
-    fn _mk_url_with_param<I, K, V>(&self, url: &str, param: I) -> GitlabResult<Url>
+    fn _mk_url_with_param<I, K, V>(&self, url: &str, param: I) -> Result<Url>
         where I: IntoIterator,
               I::Item: Borrow<(K, V)>,
               K: AsRef<str>,
@@ -430,29 +428,29 @@ impl Gitlab {
     }
 
     // Refactored code which talks to Gitlab and transforms error messages properly.
-    fn _comm<T>(&self, req: RequestBuilder) -> GitlabResult<T>
+    fn _comm<T>(&self, req: RequestBuilder) -> Result<T>
         where T: Deserialize,
     {
         let req = req.header(GitlabPrivateToken(self.token.to_string()));
-        let rsp = try!(req.send());
+        let rsp = try!(req.send().chain_err(|| ErrorKind::Communication));
         if !rsp.status().is_success() {
-            let v = try!(serde_json::from_reader(rsp));
+            let v = try!(serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize));
             return Err(Error::from_gitlab(v));
         }
 
-        let v = try!(serde_json::from_reader(rsp));
+        let v = try!(serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize));
         debug!(target: "gitlab",
                "received data: {:?}",
                v);
-        Ok(try!(serde_json::from_value::<T>(v)))
+        Ok(try!(serde_json::from_value::<T>(v).chain_err(|| ErrorKind::Deserialize)))
     }
 
-    fn _get<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
+    fn _get<T: Deserialize>(&self, url: &str) -> Result<T> {
         let param: &[(&str, &str)] = &[];
         self._get_with_param(url, param)
     }
 
-    fn _get_with_param<T, I, K, V>(&self, url: &str, param: I) -> GitlabResult<T>
+    fn _get_with_param<T, I, K, V>(&self, url: &str, param: I) -> Result<T>
         where T: Deserialize,
               I: IntoIterator,
               I::Item: Borrow<(K, V)>,
@@ -460,31 +458,31 @@ impl Gitlab {
               V: AsRef<str>,
     {
         let full_url = try!(self._mk_url_with_param(url, param));
-        let req = try!(Client::new()).get(full_url);
+        let req = try!(Client::new().chain_err(|| ErrorKind::Communication)).get(full_url);
         self._comm(req)
     }
 
-    fn _post<T: Deserialize>(&self, url: &str) -> GitlabResult<T> {
+    fn _post<T: Deserialize>(&self, url: &str) -> Result<T> {
         let param: &[(&str, &str)] = &[];
         self._post_with_param(url, param)
     }
 
-    fn _post_with_param<T, U>(&self, url: &str, param: U) -> GitlabResult<T>
+    fn _post_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
         where T: Deserialize,
               U: Serialize,
     {
         let full_url = try!(self._mk_url(url));
-        let req = try!(Client::new()).post(full_url).form(&param);
+        let req = try!(Client::new().chain_err(|| ErrorKind::Communication)).post(full_url).form(&param);
         self._comm(req)
     }
 
     // Handle paginated queries. Returns all results.
-    fn _get_paged<T: Deserialize>(&self, url: &str) -> GitlabResult<Vec<T>> {
+    fn _get_paged<T: Deserialize>(&self, url: &str) -> Result<Vec<T>> {
         let param: &[(&str, &str)] = &[];
         self._get_paged_with_param(url, param)
     }
 
-    fn _get_paged_with_param<T, I, K, V>(&self, url: &str, param: I) -> GitlabResult<Vec<T>>
+    fn _get_paged_with_param<T, I, K, V>(&self, url: &str, param: I) -> Result<Vec<T>>
         where T: Deserialize,
               I: IntoIterator,
               I::Item: Borrow<(K, V)>,
@@ -504,7 +502,7 @@ impl Gitlab {
             let mut page_url = full_url.clone();
             page_url.query_pairs_mut()
                 .extend_pairs(&[("page", page_str), ("per_page", per_page_str)]);
-            let req = try!(Client::new()).get(page_url);
+            let req = try!(Client::new().chain_err(|| ErrorKind::Communication)).get(page_url);
 
             let page: Vec<T> = try!(self._comm(req));
             let page_len = page.len();
