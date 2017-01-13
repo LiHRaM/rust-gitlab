@@ -38,6 +38,7 @@ macro_rules! impl_id {
 macro_rules! enum_serialize {
     ( $name:ident -> $desc:expr, $( $value:ident => $str:expr, )+ ) => {
         impl $name {
+            /// String representation of the variant.
             pub fn as_str(&self) -> &'static str {
                 match *self {
                     $( $name::$value => $str, )*

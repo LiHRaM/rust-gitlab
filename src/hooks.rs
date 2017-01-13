@@ -6,6 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Hook structures
+//!
+//! Hooks are received from Gitlab when registered as a system or web hook listener.
+//!
+//! Gitlab does not have consistent structures for its hooks, so they often change from
+//! version to version.
+
 extern crate serde;
 use self::serde::{Deserialize, Deserializer};
 use self::serde::de::Error;
@@ -17,8 +24,11 @@ use super::systemhooks::SystemHook;
 use super::webhooks::WebHook;
 
 #[derive(Debug, Clone)]
+/// A deserializable structure for all Gitlab hooks.
 pub enum GitlabHook {
+    /// A system hook.
     System(SystemHook),
+    /// A web hook from a specific project.
     Web(WebHook),
 }
 

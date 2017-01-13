@@ -6,4 +6,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! System hook structures
+//!
+//! These hooks are received from Gitlab when registered as a system hook in the administrator
+//! settings. Only administrators may create such hooks.
+//!
+//! Gitlab does not have consistent structures for its hooks, so they often change from
+//! version to version.
+
 include!(concat!(env!("OUT_DIR"), "/systemhooks.rs"));

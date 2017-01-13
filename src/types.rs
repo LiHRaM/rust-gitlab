@@ -6,4 +6,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! API entities
+//!
+//! These entities are exposed by Gitlab via its API.
+//!
+//! There are some places where Gitlab does not completely specify its types. This causes
+//! problems when the types and names change inside of those. If found, issues should be filed
+//! upstream.
+
 include!(concat!(env!("OUT_DIR"), "/types.rs"));

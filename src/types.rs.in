@@ -63,8 +63,13 @@ pub struct UserBasic {
     pub web_url: String,
 }
 
-pub trait UserResult: Serialize + Deserialize {}
-impl<T: Serialize + Deserialize + Into<UserBasic>> UserResult for T {}
+/// A unifying trait for all user types.
+///
+/// This is used to allow (direct) user queries to return the right information because
+/// administrator users receive additional information for all user queries versus
+/// non-administrator users.
+pub trait UserResult: Deserialize {}
+impl<T: Deserialize + Into<UserBasic>> UserResult for T {}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// More detailed information only accessible to administrators.
@@ -238,6 +243,7 @@ impl From<UserFull> for User {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe email ID.
 pub struct EmailId(u64);
 impl_id!(EmailId);
 
@@ -251,6 +257,7 @@ pub struct Email {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe hook ID.
 pub struct HookId(u64);
 impl_id!(HookId);
 
@@ -316,17 +323,26 @@ impl From<ProjectHook> for Hook {
 }
 
 #[derive(Debug, Default, Clone, Copy)]
+/// The events a webhook listener may receive.
 pub struct WebhookEvents {
+    /// Whether to receive build events of not.
     build: bool,
+    /// Whether to receive issue events of not.
     issues: bool,
+    /// Whether to receive merge request events of not.
     merge_requests: bool,
+    /// Whether to receive note (comment) events of not.
     note: bool,
+    /// Whether to receive pipeline events of not.
     pipeline: bool,
+    /// Whether to receive push events of not.
     push: bool,
+    /// Whether to receive wiki events of not.
     wiki_page: bool,
 }
 
 impl WebhookEvents {
+    /// Create a new, empty webhook event set.
     pub fn new() -> Self {
         WebhookEvents {
             build: false,
@@ -374,15 +390,20 @@ pub struct BasicProjectDetails {
     pub path: String,
     /// The path to the project's repository with its namespace.
     pub path_with_namespace: String,
+    /// The URL to the main page of the repository.
     pub http_url_to_repo: String,
+    /// The URL to the main page of the repository.
     pub web_url: String,
 }
 
 /// Visibility levels of projects.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum VisibilityLevel {
+    /// The project is visible to anonymous users.
     Public = 20,
+    /// The project is visible to logged in users.
     Internal = 10,
+    /// The project is visible only to users with explicit access.
     Private = 0,
 }
 
@@ -405,49 +426,77 @@ impl Display for VisibilityLevel {
 // TODO: enum for NotificationLevel
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// Structure for a group a project has been shared with.
 pub struct SharedGroup {
+    /// The ID of the group.
     pub group_id: GroupId,
+    /// The name of the group.
     pub group_name: String,
+    /// The access level of the group.
     pub group_access_level: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+/// Access information to a project.
 // Called `MemberAccess` in entities.rb, but it is just a base class for `ProjectAccess` and
 // `GroupAccess`. Combine them here.
 pub struct MemberAccess {
+    /// The access level of the membership (see `VisibilityLevel`).
     pub access_level: u64,
+    /// The notification level of the current user.
     pub notification_level: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+/// Permissions granted to the current user to a project.
 pub struct Permissions {
+    /// The access granted by the project to the current user.
     pub project_access: Option<MemberAccess>,
+    /// The access granted by the group to the current user.
     pub group_access: Option<MemberAccess>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// The avatar of a project's namespace.
 pub struct ProjectNamespaceAvatar {
+    /// The URL of the namespace avatar.
     pub url: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// Data about a project's namespace (group or user).
+///
+/// NOTE: This is an ad-hoc entity in Gitlab.
 pub struct ProjectNamespace {
+    /// The name of the namespace.
     pub name: String,
+    /// The URL path of the namespace.
     pub path: String,
+    /// The description of the namespace.
     pub description: String,
+    /// The ID of the namespace.
     pub id: u64,
     owner_id: Option<u64>,
+    /// When the namespace was created.
     pub created_at: DateTime<UTC>,
+    /// When the namespace was last updated.
     pub updated_at: DateTime<UTC>,
+    /// When the namespace was deleted.
     pub deleted_at: Option<DateTime<UTC>>,
+    /// The visibility of the namespace.
     pub visibility_level: u64,
+    /// The avatar of the namespace.
     pub avatar: Option<ProjectNamespaceAvatar>,
+    /// Whether LFS is enabled for the namespace or not.
     pub lfs_enabled: Option<bool>,
+    /// Whether access to the namespace may be requested.
     pub request_access_enabled: bool,
+    /// FIXME: Probably internal.
     pub share_with_group_lock: bool,
 }
 
 impl ProjectNamespace {
+    /// The owner of the namespace.
     pub fn owner_id(&self) -> NamespaceId {
         match self.owner_id {
             Some(_) => NamespaceId::User(UserId(self.id)),
@@ -520,14 +569,23 @@ pub struct Project {
     pub runners_token: Option<String>,
     /// Whether builds are publicly visible.
     pub public_builds: bool,
+    /// Groups the project is shared with.
     pub shared_with_groups: Vec<SharedGroup>,
+    /// Whether the project only enables the merge button if all builds are passing.
     pub only_allow_merge_if_build_succeeds: Option<bool>,
+    /// Whether the project only enables the merge button if all discussions are resolved.
     pub only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
+    /// Whether access to the project may be requested.
     pub request_access_enabled: bool,
+    /// Whether builds are enabled or not.
     pub builds_enabled: bool,
+    /// Whether issues are enabled or not.
     pub issues_enabled: bool,
+    /// Whether merge requests are enabled or not.
     pub merge_requests_enabled: bool,
+    /// Whether snippets are enabled or not.
     pub snippets_enabled: bool,
+    /// Whether the project wiki is enabled or not.
     pub wiki_enabled: bool,
 
     /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
@@ -606,6 +664,7 @@ pub struct Member {
     pub web_url: String,
     /// The access level of the user.
     pub access_level: u64,
+    /// When the membership expires.
     pub expires_at: Option<DateTime<UTC>>,
 }
 
@@ -637,6 +696,7 @@ pub struct AccessRequester {
     pub avatar_url: String,
     /// The URL of the user's profile page.
     pub web_url: String,
+    /// When the membership request was created.
     pub requested_at: DateTime<UTC>,
 }
 
@@ -671,11 +731,13 @@ pub struct Group {
     pub description: Option<String>,
     /// Integral value for the group's visibility.
     pub visibility_level: u64,
+    /// Whether LFS is enabled for the group.
     pub lfs_enabled: bool,
     /// The URL to the group avatar.
     pub avatar_url: String,
     /// The URL to the group's profile page.
     pub web_url: String,
+    /// Whether membership requests are allowed for the group.
     pub request_access_enabled: bool,
 }
 
@@ -692,6 +754,7 @@ pub struct GroupDetail {
     pub description: Option<String>,
     /// Integral value for the group's visibility.
     pub visibility_level: u64,
+    /// Whether LFS is enabled for the group.
     pub lfs_enabled: bool,
     /// The URL to the group avatar.
     pub avatar_url: String,
@@ -699,7 +762,9 @@ pub struct GroupDetail {
     pub web_url: String,
     /// The projects in a group.
     pub projects: Vec<Project>,
+    /// Projects the group shares with other groups or users.
     pub shared_projects: Vec<Project>,
+    /// Whether membership requests are allowed for the group.
     pub request_access_enabled: bool,
 }
 
@@ -719,31 +784,50 @@ impl From<GroupDetail> for Group {
     }
 }
 
-// FIXME: Not actually in entities.rb; it's just a hash dump.
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A commit on at the head of a branch.
+///
+/// NOTE: This is an ad-hoc entity in Gitlab.
 pub struct Commit {
+    /// The object ID of the commit.
     pub id: ObjectId,
+    /// The object IDs of the commit's parents.
     pub parent_ids: Vec<ObjectId>,
+    /// The commit message.
     pub message: String,
+    /// The commit's author's name.
     pub author_name: String,
+    /// The commit's author's email address.
     pub author_email: String,
+    /// The commit's authorship date.
     pub authored_date: DateTime<UTC>,
+    /// The committer's name.
     pub committer_name: String,
+    /// The committer's email address.
     pub committer_email: String,
+    /// The commit's commit date.
     pub committed_date: DateTime<UTC>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A branch on a repository.
 pub struct RepoBranch {
+    /// The name of the branch.
     pub name: String,
+    /// The commit of the branch.
     pub commit: Option<Commit>,
+    /// Whether the branch is merged into the main branch or not.
     pub merged: Option<bool>,
+    /// Whether the branch is protected or not.
     pub protected: Option<bool>,
+    /// Whether the developers can push directly to the branch or not.
     pub developers_can_push: Option<bool>,
+    /// Whether the developers can merge into the branch or not.
     pub developers_can_merge: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+/// The ID of a git object.
 pub struct ObjectId(String);
 
 impl ObjectId {
@@ -759,8 +843,11 @@ impl ObjectId {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The kinds of objects Gitlab can return.
 pub enum ObjectType {
+    /// A `tree` object.
     Tree,
+    /// A `blob` object.
     Blob,
 }
 enum_serialize!(ObjectType -> "object type",
@@ -769,62 +856,99 @@ enum_serialize!(ObjectType -> "object type",
 );
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An object inside of a repository.
 pub struct RepoTreeObject {
+    /// The ID of the object.
     pub id: ObjectId,
+    /// The name of the object.
     pub name: String,
     #[serde(rename="type")]
+    /// The type of the object.
     pub type_: ObjectType,
+    /// The path to the object inside of the repository.
     pub path: String,
+    /// The mode of the object.
     pub mode: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A commit in a project.
 pub struct RepoCommit {
+    /// The ID of the commit.
     pub id: ObjectId,
+    /// The short ID of the commit.
     pub short_id: ObjectId,
+    /// The summary of the commit.
     pub title: String,
+    /// The commit author's name.
     pub author_name: String,
+    /// The commit author's email address.
     pub author_email: String,
     pub created_at: DateTime<UTC>,
+    /// The full commit message.
     pub message: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+/// Stats about a commit.
 pub struct RepoCommitStats {
+    /// The number of lines added by the commit.
     pub additions: u64,
+    /// The number of lines deleted by the commit.
     pub deletions: u64,
+    /// The number of lines changed by the commit.
     pub total: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A commit in a project with statistics.
 pub struct RepoCommitDetail {
+    /// The ID of the commit.
     pub id: ObjectId,
+    /// The short ID of the commit.
     pub short_id: ObjectId,
+    /// The summary of the commit.
     pub title: String,
+    /// The commit author's name.
     pub author_name: String,
+    /// The commit author's email address.
     pub author_email: String,
     pub created_at: DateTime<UTC>,
+    /// The full commit message.
     pub message: String,
+    /// The commit ID of the parents of the commit.
     pub parent_ids: Vec<ObjectId>,
+    /// The commit's commit date.
     pub committed_date: DateTime<UTC>,
+    /// The commit's authorship date.
     pub authored_date: DateTime<UTC>,
+    /// Statistics about the commit.
     pub stats: RepoCommitStats,
     // This looks to be CI related; ignoring without better docs.
     //pub status: PipelineStatus,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe snippet ID.
 pub struct SnippetId(u64);
 impl_id!(SnippetId);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A project-specific snippet.
 pub struct ProjectSnippet {
+    /// The ID of the snippet.
     pub id: SnippetId,
+    /// The title of the snippet.
     pub title: String,
+    /// The name of the snippet.
     pub file_name: String,
+    /// The author of the snippet.
     pub author: UserBasic,
+    /// When the snippet was last updated.
     pub updated_at: DateTime<UTC>,
+    /// When the snippet was created.
     pub created_at: DateTime<UTC>,
+    /// The URL of the snippet.
     pub web_url: String,
 }
 
@@ -842,24 +966,36 @@ pub struct ProjectSnippet {
 //}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A diff within a repository.
 pub struct RepoDiff {
+    /// The path on the old side of the diff.
     pub old_path: String,
+    /// The path on the new side of the diff.
     pub new_path: String,
+    /// The mode on the old side of the diff.
     pub a_mode: String,
+    /// The mode on the new side of the diff.
     pub b_mode: String,
     pub diff: String,
+    /// Whether the diff indicates the addition of a file.
     pub new_file: bool,
+    /// Whether the diff indicates the rename of a file.
     pub renamed_file: bool,
+    /// Whether the diff indicates the deletion of a file.
     pub deleted_file: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe milestone ID.
 pub struct MilestoneId(u64);
 impl_id!(MilestoneId);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The states a milestone may be in.
 pub enum MilestoneState {
+    /// The milestone is active.
     Active,
+    /// The milestone has been closed.
     Closed,
 }
 enum_serialize!(MilestoneState -> "milestone type",
@@ -868,27 +1004,43 @@ enum_serialize!(MilestoneState -> "milestone type",
 );
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A milestone in a project.
 pub struct Milestone {
+    /// The ID of the milestone.
     pub id: MilestoneId,
+    /// The user-visible ID of the milestone.
     pub iid: u64,
+    /// The ID of the project.
     pub project_id: ProjectId,
+    /// The title of the milestone.
     pub title: String,
+    /// The description of the milestone.
     pub description: String,
+    /// The state of the milestone.
     pub state: MilestoneState,
+    /// When the milestone was created.
     pub created_at: DateTime<UTC>,
+    /// When the milestone was last updated.
     pub updated_at: DateTime<UTC>,
+    /// When the milestone is due.
     pub due_date: Option<NaiveDate>,
+    /// When the milestone was started.
     pub start_date: DateTime<UTC>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe issue ID.
 pub struct IssueId(u64);
 impl_id!(IssueId);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The states an issue may be in.
 pub enum IssueState {
+    /// The issue is open.
     Opened,
+    /// The issue has been closed.
     Closed,
+    /// The issue has been opened after being closed.
     Reopened,
 }
 enum_serialize!(IssueState -> "issue type",
@@ -898,40 +1050,67 @@ enum_serialize!(IssueState -> "issue type",
 );
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An issue on a project.
 pub struct Issue {
+    /// The ID of the issue.
     pub id: IssueId,
+    /// The user-visible ID of the issue.
     pub iid: u64,
+    /// The ID of the project.
     pub project_id: ProjectId,
+    /// The title of the issue.
     pub title: String,
+    /// The description of the issue.
     pub description: String,
+    /// The state of the issue.
     pub state: IssueState,
+    /// When the issue was created.
     pub created_at: DateTime<UTC>,
+    /// When the issue was last updated.
     pub updated_at: DateTime<UTC>,
+    /// The labels attached to the issue.
     pub labels: Vec<String>,
+    /// The milestone of the issue.
     pub milestone: Option<Milestone>,
+    /// The author of the issue.
     pub author: UserBasic,
+    /// The assignee of the issue.
     pub assignee: Option<UserBasic>,
+    /// Whether the current user is subscribed or not.
     pub subscribed: bool,
+    /// The number of comments on the issue.
     pub user_notes_count: u64,
+    /// The number of upvotes for the issue.
     pub upvotes: u64,
+    /// The number of downvotes against the issue.
     pub downvotes: u64,
+    /// When the issue is due.
     pub due_date: Option<NaiveDate>,
+    /// Whether the issue is confidential or not.
     pub confidential: bool,
+    /// The URL of the issue.
     pub web_url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe external issue ID.
 pub struct ExternalIssueId(u64);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An external issue reference.
 pub struct ExternalIssue {
+    /// The ID of the issue.
     pub id: ExternalIssueId,
+    /// The title of the issue.
     pub title: String,
 }
 
 #[derive(Debug, Clone)]
+/// A reference to an issue.
 pub enum IssueReference {
+    /// A reference to an issue on the same Gitlab host.
     Internal(Issue),
+    /// An external issue reference.
     External(ExternalIssue),
 }
 
@@ -956,13 +1135,18 @@ impl Deserialize for IssueReference {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe merge request ID.
 pub struct MergeRequestId(u64);
 impl_id!(MergeRequestId);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The status of the possible merge for a merge request.
 pub enum MergeStatus {
+    /// The merge request has not been checked yet.
     Unchecked,
+    /// The merge request may be merged.
     CanBeMerged,
+    /// The merge request may not be merged yet.
     CannotBeMerged,
 }
 enum_serialize!(MergeStatus -> "merge status",
@@ -972,11 +1156,17 @@ enum_serialize!(MergeStatus -> "merge status",
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The states a merge request may be in.
 pub enum MergeRequestState {
+    /// The merge request is open.
     Opened,
+    /// The merge request has been closed before merging.
     Closed,
+    /// The merge request has been opened after closing.
     Reopened,
+    /// The merge request has been merged.
     Merged,
+    /// The merge request is locked from further discussion or updates.
     Locked,
 }
 enum_serialize!(MergeRequestState -> "merge request state",
@@ -988,68 +1178,126 @@ enum_serialize!(MergeRequestState -> "merge request state",
 );
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A merge request.
 pub struct MergeRequest {
+    /// The ID of the merge request.
     pub id: MergeRequestId,
+    /// The user-visible ID of the merge request.
     pub iid: u64,
+    /// The ID of the project.
     pub project_id: ProjectId,
+    /// The title of the merge request.
     pub title: String,
+    /// The description of the merge request.
     pub description: Option<String>,
+    /// The state of the merge request.
     pub state: MergeRequestState,
+    /// When the merge request was created.
     pub created_at: DateTime<UTC>,
+    /// When the merge request was last updated.
     pub updated_at: DateTime<UTC>,
+    /// The target branch of the merge request.
     pub target_branch: String,
+    /// The source branch of the merge request.
     pub source_branch: String,
+    /// The number of upvotes for the merge request.
     pub upvotes: u64,
+    /// The number of downvotes against the merge request.
     pub downvotes: u64,
+    /// The author of the merge request.
     pub author: UserBasic,
+    /// The assignee of the merge request.
     pub assignee: Option<UserBasic>,
+    /// The ID of the project hosting the source branch.
     pub source_project_id: ProjectId,
+    /// The ID of the project hosting the target branch.
     pub target_project_id: ProjectId,
+    /// The labels attached to the merge request.
     pub labels: Vec<String>,
+    /// Whether the merge request is a work-in-progress or not.
     pub work_in_progress: bool,
+    /// The milestone of the merge request.
     pub milestone: Option<Milestone>,
+    /// Whether the merge request will be merged once all builds succeed or not.
     pub merge_when_build_succeeds: bool,
+    /// The status of the merge request.
     pub merge_status: MergeStatus,
+    /// The object ID of the head of the source branch.
     pub sha: ObjectId,
+    /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
+    /// Whether the current user is subscribed or not.
     pub subscribed: bool,
+    /// The number of comments on the merge request.
     pub user_notes_count: u64,
+    /// Whether the merge request should be deleted or not (set by the merger).
     pub should_remove_source_branch: Option<bool>,
+    /// Whether the merge request should be deleted or not (set by the author).
     pub force_remove_source_branch: Option<bool>,
+    /// The URL of the merge request.
     pub web_url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A merge request with changes.
 pub struct MergeRequestChanges {
+    /// The ID of the merge request.
     pub id: MergeRequestId,
+    /// The user-visible ID of the merge request.
     pub iid: u64,
+    /// The ID of the project.
     pub project_id: ProjectId,
+    /// The title of the merge request.
     pub title: String,
+    /// The description of the merge request.
     pub description: Option<String>,
+    /// The state of the merge request.
     pub state: MergeRequestState,
+    /// When the merge request was created.
     pub created_at: DateTime<UTC>,
+    /// When the merge request was last updated.
     pub updated_at: DateTime<UTC>,
+    /// The target branch of the merge request.
     pub target_branch: String,
+    /// The source branch of the merge request.
     pub source_branch: String,
+    /// The number of upvotes for the merge request.
     pub upvotes: u64,
+    /// The number of downvotes against the merge request.
     pub downvotes: u64,
+    /// The author of the merge request.
     pub author: UserBasic,
+    /// The assignee of the merge request.
     pub assignee: Option<UserBasic>,
+    /// The ID of the project hosting the source branch.
     pub source_project_id: ProjectId,
+    /// The ID of the project hosting the target branch.
     pub target_project_id: ProjectId,
+    /// The labels attached to the merge request.
     pub labels: Vec<String>,
+    /// Whether the merge request is a work-in-progress or not.
     pub work_in_progress: bool,
+    /// The milestone of the merge request.
     pub milestone: Option<Milestone>,
+    /// Whether the merge request will be merged once all builds succeed or not.
     pub merge_when_build_succeeds: bool,
+    /// The status of the merge request.
     pub merge_status: MergeStatus,
+    /// The object ID of the head of the source branch.
     pub sha: ObjectId,
+    /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
+    /// Whether the current user is subscribed or not.
     pub subscribed: bool,
+    /// The number of comments on the merge request.
     pub user_notes_count: u64,
-    pub changes: Vec<RepoDiff>,
+    /// Whether the merge request should be deleted or not (set by the merger).
     pub should_remove_source_branch: Option<bool>,
+    /// Whether the merge request should be deleted or not (set by the author).
     pub force_remove_source_branch: Option<bool>,
+    /// The URL of the merge request.
     pub web_url: String,
+    pub changes: Vec<RepoDiff>,
 }
 
 impl From<MergeRequestChanges> for MergeRequest {
@@ -1088,31 +1336,48 @@ impl From<MergeRequestChanges> for MergeRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe SSH key ID.
 pub struct SshKeyId(u64);
 impl_id!(SshKeyId);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An uploaded SSH key.
 pub struct SshKey {
+    /// The ID of the SSH key.
     pub id: SshKeyId,
+    /// The title of the key.
     pub title: String,
+    /// The public half of the SSH key.
     pub key: String,
+    /// When the key was created.
     pub created_at: DateTime<UTC>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An uploaded SSH key with its owner.
 pub struct SshKeyWithUser {
+    /// The ID of the SSH key.
     pub id: SshKeyId,
+    /// The title of the key.
     pub title: String,
+    /// The public half of the SSH key.
     pub key: String,
+    /// When the key was created.
     pub created_at: DateTime<UTC>,
+    /// The user associated with the SSH key.
     pub user: UserFull,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The entities a note may be added to.
 pub enum NoteType {
+    /// A note on a commit.
     Commit,
+    /// A note on an issue.
     Issue,
+    /// A note on a merge request.
     MergeRequest,
+    /// A note on a snippet.
     Snippet,
 }
 enum_serialize!(NoteType -> "note type",
@@ -1123,31 +1388,51 @@ enum_serialize!(NoteType -> "note type",
 );
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// The ID of an entity a note is attached to.
 pub enum NoteableId {
+    /// The ID of the commit for a commit note.
     Commit(ObjectId),
+    /// The ID of the issue for an issue note.
     Issue(IssueId),
+    /// The ID of the merge request for a merge request note.
     MergeRequest(MergeRequestId),
+    /// The ID of the snippet for a snippet note.
     Snippet(SnippetId),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe note (comment) ID.
 pub struct NoteId(u64);
 impl_id!(NoteId);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A comment on an entity.
 pub struct Note {
+    /// The ID of the note.
     pub id: NoteId,
+    /// The content of the note.
     pub body: String,
+    /// The URL of an attachment to the note.
     pub attachment: Option<String>,
+    /// The author of the note.
     pub author: UserBasic,
+    /// When the note was created.
     pub created_at: DateTime<UTC>,
+    /// When the note was last updated.
     pub updated_at: DateTime<UTC>,
+    /// Whether the note was created by a user or in response to an external action.
+    ///
+    /// System notes include indications that the commit, issue, etc. was referenced elsewhere, a
+    /// milestone, assignee, or label change, status chages, and so on.
     pub system: bool,
-    noteable_id: Value, // Keep as JSON because its type depends on what `noteable_type` is.
+    // Keep as JSON because its type depends on what `noteable_type` is.
+    noteable_id: Value,
+    /// The type of entity the note is attached to.
     pub noteable_type: NoteType,
 }
 
 impl Note {
+    /// The ID of the entity the note is attached to.
     pub fn noteable_id(&self) -> Option<NoteableId> {
         match self.noteable_type {
             NoteType::Commit => {
@@ -1180,18 +1465,28 @@ pub struct AwardId(u64);
 impl_id!(AwardId);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// An ID of an entity which may receive an award.
 pub enum AwardableId {
+    /// The ID of an awarded issue.
     Issue(IssueId),
+    /// The ID of an awarded merge request.
     MergeRequest(MergeRequestId),
+    /// The ID of an awarded snippet.
     Snippet(SnippetId),
+    /// The ID of an awarded note.
     Note(NoteId),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The entities which may be awarded.
 pub enum AwardableType {
+    /// An award on an issue.
     Issue,
+    /// An award on a merge request.
     MergeRequest,
+    /// An award on a snippet.
     Snippet,
+    /// An award on a note.
     Note,
 }
 enum_serialize!(AwardableType -> "awardable type",
@@ -1202,17 +1497,25 @@ enum_serialize!(AwardableType -> "awardable type",
 );
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An awarded emoji on an entity.
 pub struct AwardEmoji {
+    /// The ID of the award.
     pub id: AwardId,
+    /// The name of the awarded emoji.
     pub name: String,
+    /// The user which created the award.
     pub user: UserBasic,
+    /// When the award was created.
     pub created_at: DateTime<UTC>,
+    /// When the award was last updated.
     pub updated_at: DateTime<UTC>,
     awardable_id: u64,
+    /// The type of entity that is awarded.
     pub awardable_type: AwardableType,
 }
 
 impl AwardEmoji {
+    /// The ID of the entity the award is attached to.
     pub fn awardable_id(&self) -> AwardableId {
         match self.awardable_type {
             AwardableType::Issue => AwardableId::Issue(IssueId::new(self.awardable_id)),
@@ -1226,8 +1529,11 @@ impl AwardEmoji {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The type of line commented on.
 pub enum LineType {
+    /// An added line was commented on.
     New,
+    /// An deleted line was commented on.
     Old,
 }
 enum_serialize!(LineType -> "line type",
@@ -1236,16 +1542,24 @@ enum_serialize!(LineType -> "line type",
 );
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A note on a commit diff.
 pub struct CommitNote {
+    /// The content of the note.
     pub note: String,
+    /// The path of the file commented on.
     pub path: Option<String>,
+    /// The line of the file commented on.
     pub line: Option<u64>,
+    /// The type of the line commented on.
     pub line_type: Option<LineType>,
+    /// The author of the note.
     pub author: UserBasic,
+    /// When the note was created.
     pub created_at: DateTime<UTC>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe commit status ID.
 pub struct CommitStatusId(u64);
 impl_id!(CommitStatusId);
 
@@ -1272,28 +1586,47 @@ enum_serialize!(StatusState -> "status state",
 );
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A status of a commit.
 pub struct CommitStatus {
+    /// The ID of the commit status.
     pub id: CommitStatusId,
+    /// The object ID of the commit this status is for.
     pub sha: ObjectId,
     #[serde(rename="ref")]
+    /// The name of the reference the status was created for.
     pub ref_: Option<String>,
+    /// The state of the commit status.
     pub status: StatusState,
+    /// The name of the commit status.
     pub name: String,
+    /// The URL associated with the commit status.
     pub target_url: Option<String>,
+    /// The description of the commit status.
     pub description: Option<String>,
+    /// When the commit status was created.
     pub created_at: DateTime<UTC>,
+    /// When the commit status started.
     pub started_at: Option<DateTime<UTC>>,
+    /// When the commit status completed.
     pub finished_at: Option<DateTime<UTC>>,
+    /// Whether the commit status is allowed to fail.
     pub allow_failure: bool,
+    /// The author of the commit status.
     pub author: UserBasic,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The target of an event.
 pub enum EventTargetType {
+    /// An event targeted a commit.
     Commit,
+    /// An event targeted an issue.
     Issue,
+    /// An event targeted a merge request.
     MergeRequest,
+    /// An event targeted a snippet.
     Snippet,
+    /// An event targeted a project snippet.
     ProjectSnippet,
 }
 enum_serialize!(EventTargetType -> "event target type",
@@ -1305,30 +1638,47 @@ enum_serialize!(EventTargetType -> "event target type",
 );
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// The ID of an event target.
 pub enum EventTargetId {
+    /// The object ID of a commit event target.
     Commit(ObjectId),
+    /// The ID of an issue event target.
     Issue(IssueId),
+    /// The ID of a merge request event target.
     MergeRequest(MergeRequestId),
+    /// The ID of a snippet event target.
     Snippet(SnippetId),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An event on a project.
 pub struct Event {
+    /// The title of the event.
     pub title: Option<String>,
+    /// The ID of the project.
     pub project_id: ProjectId,
+    /// The action which triggered the event.
+    // FIXME: This should be an enumeration.
     pub action_name: String,
     target_id: Value,
+    /// The type of the event target.
     pub target_type: EventTargetType,
+    /// The ID of the author of the event.
     pub author_id: UserId,
     pub data: Option<Value>,
+    /// The title of the target.
     pub target_title: String,
+    /// When the event was created.
     pub created_at: DateTime<UTC>,
     pub note: Option<Note>,
+    /// The author of the event.
     pub author: Option<UserBasic>,
+    /// The handle of the author.
     pub author_username: Option<String>,
 }
 
 impl Event {
+    /// The ID of an event's target.
     pub fn target_id(&self) -> Option<EventTargetId> {
         match self.target_type {
             EventTargetType::Commit => {
@@ -1365,8 +1715,11 @@ impl Event {
 //end
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The kinds of namespaces supported by Gitlab.
 pub enum NamespaceKind {
+    /// A user namespace.
     User,
+    /// A group namespace.
     Group,
 }
 enum_serialize!(NamespaceKind -> "namespace kind",
@@ -1375,19 +1728,26 @@ enum_serialize!(NamespaceKind -> "namespace kind",
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The ID of a namespace.
 pub enum NamespaceId {
+    /// A user namespace ID.
     User(UserId),
+    /// A group namespace ID.
     Group(GroupId),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An entity which can own projects.
 pub struct Namespace {
     id: u64,
+    /// The URL of the namespace.
     pub path: String,
+    /// The kind of the namespace.
     pub kind: NamespaceKind,
 }
 
 impl Namespace {
+    /// The ID of the namespace.
     pub fn id(&self) -> NamespaceId {
         match self.kind {
             NamespaceKind::User => NamespaceId::User(UserId(self.id)),
@@ -1532,16 +1892,23 @@ impl Namespace {
 //end
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe runner ID.
 pub struct RunnerId(u64);
 impl_id!(RunnerId);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// A Gitlab CI runner.
 pub struct Runner {
+    /// The ID of the runner.
     pub id: RunnerId,
+    /// The description of the runner.
     pub description: Option<String>,
+    /// Whether the runner is active or not.
     pub active: bool,
+    /// Whether the runner is shared or not.
     pub is_shared: bool,
-    pub name: Option<String>
+    /// The name of the runner.
+    pub name: Option<String>,
 }
 
 //class RunnerDetails < Runner
@@ -1561,8 +1928,11 @@ pub struct Runner {
 //end
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// An uploaded artifact from a build.
 pub struct BuildArtifactFile {
+    /// The name of the artifact.
     pub filename: String,
+    /// The size (in bytes) of the artifact.
     pub size: usize,
 }
 
@@ -1572,22 +1942,35 @@ pub struct BuildId(u64);
 impl_id!(BuildId);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// Information about a build in Gitlab CI.
 pub struct Build {
+    /// The ID of the build.
     pub id: BuildId,
+    /// The status of the build.
     pub status: StatusState,
     pub stage: String,
+    /// The name of the build.
     pub name: String,
     #[serde(rename="ref")]
+    /// The name of the reference that was tested.
     pub ref_: Option<String>,
     pub tag: bool,
     pub coverage: Option<f32>,
+    /// When the build was created or marked as pending.
     pub created_at: DateTime<UTC>,
+    /// When the build was started.
     pub started_at: Option<DateTime<UTC>>,
+    /// When the build completed.
     pub finished_at: Option<DateTime<UTC>>,
+    /// The user which ran the build.
     pub user: Option<User>,
+    /// The artifact file uploaded from the build.
     pub artifacts_file: Option<BuildArtifactFile>,
+    /// The commit the build tested.
     pub commit: RepoCommit,
+    /// The runner which ran the build.
     pub runner: Option<Runner>,
+    /// The pipeline the build belongs to.
     pub pipeline: PipelineBasic,
 }
 
@@ -1670,11 +2053,16 @@ pub struct PipelineId(u64);
 impl_id!(PipelineId);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// Information about a pipeline in Gitlab CI.
 pub struct PipelineBasic {
+    /// The ID of the pipeline.
     pub id: PipelineId,
     #[serde(rename="ref")]
+    /// The name of the reference that was tested.
     pub ref_: Option<String>,
+    /// The object ID that was tested.
     pub sha: ObjectId,
+    /// The status of the pipeline.
     pub status: StatusState,
 }
 
