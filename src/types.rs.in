@@ -841,6 +841,10 @@ pub struct RepoCommit {
     pub author_name: String,
     /// The commit author's email address.
     pub author_email: String,
+    /// The committer's name.
+    pub committer_name: String,
+    /// The committer's email address.
+    pub committer_email: String,
     pub created_at: DateTime<UTC>,
     /// The full commit message.
     pub message: String,
@@ -908,6 +912,19 @@ pub struct ProjectSnippet {
     /// The URL of the snippet.
     pub web_url: String,
 }
+
+//class PersonalSnippet < Grape::Entity
+//  expose :id, :title, :file_name
+//  expose :author, using: Entities::UserBasic
+//  expose :updated_at, :created_at
+//
+//  expose :web_url do |snippet|
+//    Gitlab::UrlBuilder.build(snippet)
+//  end
+//  expose :raw_url do |snippet|
+//    Gitlab::UrlBuilder.build(snippet) + "/raw"
+//  end
+//end
 
 // This is just used as a common "base class" in Ruby.
 //#[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1942,7 +1959,7 @@ pub struct Build {
 //end
 
 //class EnvironmentBasic < Grape::Entity
-//  expose :id, :name, :external_url
+//  expose :id, :name, :slug, :external_url
 //end
 
 //class Environment < EnvironmentBasic
