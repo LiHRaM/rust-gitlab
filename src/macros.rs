@@ -46,13 +46,13 @@ macro_rules! enum_serialize {
         }
 
         impl Serialize for $name {
-            fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+            fn serialize<S: Serializer>(&self, serializer: &mut S) -> ::std::result::Result<(), S::Error> {
                 serializer.serialize_str(self.as_str())
             }
         }
 
         impl Deserialize for $name {
-            fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
+            fn deserialize<D: Deserializer>(deserializer: &mut D) -> ::std::result::Result<Self, D::Error> {
                 let val = try!(String::deserialize(deserializer));
 
                 match val.as_str() {

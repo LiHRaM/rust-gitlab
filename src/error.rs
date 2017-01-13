@@ -6,41 +6,26 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-extern crate reqwest;
-use self::reqwest::Error as ReqwestError;
-
 extern crate serde_json;
-use self::serde_json::Error as SerdeError;
 use self::serde_json::Value;
 
-extern crate url;
-use self::url::ParseError as UrlError;
-
-quick_error! {
-    #[derive(Debug)]
-    /// Errors which may occur when communicating with Gitlab.
-    pub enum Error {
+error_chain! {
+    errors {
         /// Error occurred when communicating with Gitlab.
-        Reqwest(err: ReqwestError) {
-            cause(err)
-            display("reqwest error: {:?}", err)
-            from()
+        Communication {
+            display("communication error")
         }
         /// URL parsing error; should never occur.
-        UrlParse(err: UrlError) {
-            cause(err)
-            display("url error: {:?}", err)
-            from()
+        UrlParse {
+            display("url error")
         }
         /// Gitlab returned an error message.
-        Gitlab(err: String) {
-            display("gitlab error: {:?}", err)
+        Gitlab(msg: String) {
+            display("gitlab error: {}", msg)
         }
         /// Failed to deserialize a Gitlab result into a structure.
-        Deserialize(err: Box<SerdeError>) {
-            cause(err)
-            display("deserialization error: {:?}", err)
-            from()
+        Deserialize {
+            display("deserialization error")
         }
     }
 }
@@ -52,12 +37,6 @@ impl Error {
             .and_then(|s| s.as_str())
             .unwrap_or_else(|| "unknown error");
 
-        Error::Gitlab(msg.to_string())
-    }
-}
-
-impl From<SerdeError> for Error {
-    fn from(error: SerdeError) -> Self {
-        Error::Deserialize(Box::new(error))
+        Error::from_kind(ErrorKind::Gitlab(msg.to_string()))
     }
 }

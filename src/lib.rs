@@ -11,13 +11,13 @@
 //! A library for communicating with Gitlab instances.
 
 #[macro_use]
+extern crate error_chain;
+
+#[macro_use]
 extern crate hyper;
 
 #[macro_use]
 extern crate log;
-
-#[macro_use]
-extern crate quick_error;
 
 mod error;
 #[macro_use]
@@ -29,11 +29,10 @@ pub mod types;
 pub mod webhooks;
 pub mod hooks;
 
-pub use error::Error;
+pub use error::*;
 pub use gitlab::CommitStatusInfo;
 pub use gitlab::MergeRequestStateFilter;
 pub use gitlab::Gitlab;
-pub use gitlab::GitlabResult;
 pub use types::*;
 
 #[cfg(test)]
