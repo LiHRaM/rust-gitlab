@@ -6,8 +6,8 @@ license = "MIT/Apache-2.0"
 description = """
 Gitlab API client.
 """
-repository = "https://gitlab.kitware.com/utils/rust-gitlab.git"
-homepage = "https://gitlab.kitware.com/utils/rust-gitlab"
+repository = "https://gitlab.kitware.com/utils/rust-gitlab"
+documentation = "https://docs.rs/gitlab/~0.1"
 readme = "README.md"
 build = "build.rs"
 
