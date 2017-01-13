@@ -141,7 +141,7 @@ impl_id!(ColorSchemeId);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Full user structure information.
-pub struct UserFull {
+pub struct UserPublic {
     /// The username.
     pub username: String,
     /// The display name.
@@ -201,14 +201,10 @@ pub struct UserFull {
     pub two_factor_enabled: bool,
     /// Whether the account is externally controlled.
     pub external: bool,
-
-    // There's a `UserLogin` structure as well which contains this key too, but the API already has
-    // this token, so this is being skipped.
-    //pub private_token: String,
 }
 
-impl From<UserFull> for UserBasic {
-    fn from(user: UserFull) -> Self {
+impl From<UserPublic> for UserBasic {
+    fn from(user: UserPublic) -> Self {
         UserBasic {
             username: user.username,
             name: user.name,
@@ -220,8 +216,8 @@ impl From<UserFull> for UserBasic {
     }
 }
 
-impl From<UserFull> for User {
-    fn from(user: UserFull) -> Self {
+impl From<UserPublic> for User {
+    fn from(user: UserPublic) -> Self {
         User {
             username: user.username,
             name: user.name,
@@ -724,6 +720,8 @@ pub struct GroupDetail {
     pub shared_projects: Vec<Project>,
     /// Whether membership requests are allowed for the group.
     pub request_access_enabled: bool,
+    /// Statistics about the group.
+    pub statistics: Option<ProjectStatistics>,
 }
 
 impl From<GroupDetail> for Group {
@@ -738,6 +736,7 @@ impl From<GroupDetail> for Group {
             avatar_url: detail.avatar_url,
             web_url: detail.web_url,
             request_access_enabled: detail.request_access_enabled,
+            statistics: detail.statistics,
         }
     }
 }
@@ -1323,7 +1322,7 @@ pub struct SshKeyWithUser {
     /// When the key was created.
     pub created_at: DateTime<UTC>,
     /// The user associated with the SSH key.
-    pub user: UserFull,
+    pub user: UserPublic,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
