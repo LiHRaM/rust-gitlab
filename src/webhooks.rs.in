@@ -222,7 +222,6 @@ pub struct IssueHookAttrs {
     pub iid: u64,
     /// Whether the issue is confidential or not.
     pub confidential: bool,
-    pub lock_version: u64,
 
     // It seems that notes miss these properties?
     /// The URL of the issue.
