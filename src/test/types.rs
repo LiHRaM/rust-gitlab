@@ -335,38 +335,21 @@ fn test_read_project() {
                UTC.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               UTC.ymd(2016, 12, 7)
-                   .and_hms_milli(15, 45, 22, 450));
+               UTC.ymd(2017, 1, 18)
+                   .and_hms_milli(17, 27, 17, 734));
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
     assert_eq!(project.creator_id, UserId::new(13));
     assert_eq!(project.namespace.name, "Utils");
     assert_eq!(project.namespace.path, "utils");
-    assert_eq!(project.namespace.description, "");
-    assert_eq!(project.namespace.id, 498);
-    assert_eq!(project.namespace.owner_id(),
+    assert_eq!(project.namespace.id(),
                NamespaceId::Group(GroupId::new(498)));
-    assert_eq!(project.namespace.created_at,
-               UTC.ymd(2016, 2, 3)
-                   .and_hms_milli(21, 26, 13, 133));
-    assert_eq!(project.namespace.updated_at,
-               UTC.ymd(2016, 2, 3)
-                   .and_hms_milli(21, 27, 5, 284));
-    assert_eq!(project.namespace.deleted_at, None);
-    assert_eq!(project.namespace.visibility_level, 20);
-    if let Some(ref avatar) = project.namespace.avatar {
-        assert_eq!(avatar.url, None);
-    } else {
-        panic!("expected to have an avatar for the namespace");
-    }
-    assert_eq!(project.namespace.lfs_enabled, None);
-    assert_eq!(project.namespace.request_access_enabled, true);
-    assert_eq!(project.namespace.share_with_group_lock, false);
+    assert_eq!(project.namespace.kind, NamespaceKind::Group);
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.star_count, 0);
-    assert_eq!(project.forks_count, 2);
-    assert_eq!(project.open_issues_count, Some(3));
+    assert_eq!(project.forks_count, 3);
+    assert_eq!(project.open_issues_count, Some(1));
     assert_eq!(project.public_builds, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_build_succeeds, Some(false));

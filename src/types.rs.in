@@ -464,48 +464,6 @@ pub struct ProjectNamespaceAvatar {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-/// Data about a project's namespace (group or user).
-///
-/// NOTE: This is an ad-hoc entity in Gitlab.
-pub struct ProjectNamespace {
-    /// The name of the namespace.
-    pub name: String,
-    /// The URL path of the namespace.
-    pub path: String,
-    /// The description of the namespace.
-    pub description: String,
-    /// The ID of the namespace.
-    pub id: u64,
-    owner_id: Option<u64>,
-    /// When the namespace was created.
-    pub created_at: DateTime<UTC>,
-    /// When the namespace was last updated.
-    pub updated_at: DateTime<UTC>,
-    /// When the namespace was deleted.
-    pub deleted_at: Option<DateTime<UTC>>,
-    /// The visibility of the namespace.
-    pub visibility_level: u64,
-    /// The avatar of the namespace.
-    pub avatar: Option<ProjectNamespaceAvatar>,
-    /// Whether LFS is enabled for the namespace or not.
-    pub lfs_enabled: Option<bool>,
-    /// Whether access to the namespace may be requested.
-    pub request_access_enabled: bool,
-    /// FIXME: Probably internal.
-    pub share_with_group_lock: bool,
-}
-
-impl ProjectNamespace {
-    /// The owner of the namespace.
-    pub fn owner_id(&self) -> NamespaceId {
-        match self.owner_id {
-            Some(_) => NamespaceId::User(UserId(self.id)),
-            None => NamespaceId::Group(GroupId(self.id)),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information.
 pub struct Project {
     /// The ID of the project.
@@ -554,7 +512,7 @@ pub struct Project {
     /// The user who created the repository.
     pub creator_id: UserId,
     /// The namespace the project lives in.
-    pub namespace: ProjectNamespace,
+    pub namespace: Namespace,
     /// If the project is a fork, details about it.
     pub forked_from_project: Option<BasicProjectDetails>,
     /// The URL to the project avatar.
@@ -1742,6 +1700,8 @@ pub struct Namespace {
     id: u64,
     /// The URL of the namespace.
     pub path: String,
+    /// The name of the namespace.
+    pub name: String,
     /// The kind of the namespace.
     pub kind: NamespaceKind,
 }
