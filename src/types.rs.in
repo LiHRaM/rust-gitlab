@@ -541,10 +541,27 @@ pub struct Project {
     pub snippets_enabled: bool,
     /// Whether the project wiki is enabled or not.
     pub wiki_enabled: bool,
+    /// Statistics about the project.
+    pub statistics: Option<ProjectStatistics>,
 
     /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
     /// optional here.
     pub permissions: Option<Permissions>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// Statistics about a project.
+pub struct ProjectStatistics {
+    /// The number of commits in the repository.
+    pub commit_count: u64,
+    /// The size, in bytes, of the total storage required for the project.
+    pub storage_size: u64,
+    /// The size, in bytes, of the repository.
+    pub repository_size: u64,
+    /// The size, in bytes, of uploaded LFS files.
+    pub lfs_objects_size: u64,
+    /// The size, in bytes, of uploaded build artifacts.
+    pub build_artifacts_size: u64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -693,6 +710,21 @@ pub struct Group {
     pub web_url: String,
     /// Whether membership requests are allowed for the group.
     pub request_access_enabled: bool,
+    /// Statistics about the group.
+    pub statistics: Option<ProjectStatistics>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// Statistics about a group.
+pub struct GroupStatistics {
+    /// The size, in bytes, of the total storage required for the group.
+    pub storage_size: u64,
+    /// The size, in bytes, of all repositories in the group.
+    pub repository_size: u64,
+    /// The size, in bytes, of uploaded LFS files in the group.
+    pub lfs_objects_size: u64,
+    /// The size, in bytes, of uploaded build artifacts in the group.
+    pub build_artifacts_size: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1066,6 +1098,19 @@ pub struct Issue {
     pub web_url: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// A time estimate on an issue or merge request.
+pub struct IssuableTimeEstimate {
+    /// The time estimate, in seconds.
+    pub time_estimate: u64,
+    /// The total time spent, in seconds.
+    pub total_time_spent: u64,
+    /// The time estimate, as a human-readable string.
+    pub human_time_estimate: Option<String>,
+    /// The total time spent, as a human-readable string.
+    pub human_total_time_spent: Option<String>,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe external issue ID.
 pub struct ExternalIssueId(u64);
@@ -1325,6 +1370,8 @@ pub struct SshKey {
     pub key: String,
     /// When the key was created.
     pub created_at: DateTime<UTC>,
+    /// Whether the key may push to repositories or not.
+    pub can_push: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1844,6 +1891,8 @@ impl Namespace {
 //  expose :repository_storages
 //  expose :koding_enabled
 //  expose :koding_url
+//  expose :plantuml_enabled
+//  expose :plantuml_url
 //end
 
 //class Release < Grape::Entity
