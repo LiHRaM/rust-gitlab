@@ -141,7 +141,7 @@ impl_id!(ColorSchemeId);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Full user structure information.
-pub struct UserFull {
+pub struct UserPublic {
     /// The username.
     pub username: String,
     /// The display name.
@@ -201,14 +201,10 @@ pub struct UserFull {
     pub two_factor_enabled: bool,
     /// Whether the account is externally controlled.
     pub external: bool,
-
-    // There's a `UserLogin` structure as well which contains this key too, but the API already has
-    // this token, so this is being skipped.
-    //pub private_token: String,
 }
 
-impl From<UserFull> for UserBasic {
-    fn from(user: UserFull) -> Self {
+impl From<UserPublic> for UserBasic {
+    fn from(user: UserPublic) -> Self {
         UserBasic {
             username: user.username,
             name: user.name,
@@ -220,8 +216,8 @@ impl From<UserFull> for UserBasic {
     }
 }
 
-impl From<UserFull> for User {
-    fn from(user: UserFull) -> Self {
+impl From<UserPublic> for User {
+    fn from(user: UserPublic) -> Self {
         User {
             username: user.username,
             name: user.name,
@@ -464,48 +460,6 @@ pub struct ProjectNamespaceAvatar {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-/// Data about a project's namespace (group or user).
-///
-/// NOTE: This is an ad-hoc entity in Gitlab.
-pub struct ProjectNamespace {
-    /// The name of the namespace.
-    pub name: String,
-    /// The URL path of the namespace.
-    pub path: String,
-    /// The description of the namespace.
-    pub description: String,
-    /// The ID of the namespace.
-    pub id: u64,
-    owner_id: Option<u64>,
-    /// When the namespace was created.
-    pub created_at: DateTime<UTC>,
-    /// When the namespace was last updated.
-    pub updated_at: DateTime<UTC>,
-    /// When the namespace was deleted.
-    pub deleted_at: Option<DateTime<UTC>>,
-    /// The visibility of the namespace.
-    pub visibility_level: u64,
-    /// The avatar of the namespace.
-    pub avatar: Option<ProjectNamespaceAvatar>,
-    /// Whether LFS is enabled for the namespace or not.
-    pub lfs_enabled: Option<bool>,
-    /// Whether access to the namespace may be requested.
-    pub request_access_enabled: bool,
-    /// FIXME: Probably internal.
-    pub share_with_group_lock: bool,
-}
-
-impl ProjectNamespace {
-    /// The owner of the namespace.
-    pub fn owner_id(&self) -> NamespaceId {
-        match self.owner_id {
-            Some(_) => NamespaceId::User(UserId(self.id)),
-            None => NamespaceId::Group(GroupId(self.id)),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information.
 pub struct Project {
     /// The ID of the project.
@@ -554,7 +508,7 @@ pub struct Project {
     /// The user who created the repository.
     pub creator_id: UserId,
     /// The namespace the project lives in.
-    pub namespace: ProjectNamespace,
+    pub namespace: Namespace,
     /// If the project is a fork, details about it.
     pub forked_from_project: Option<BasicProjectDetails>,
     /// The URL to the project avatar.
@@ -587,10 +541,27 @@ pub struct Project {
     pub snippets_enabled: bool,
     /// Whether the project wiki is enabled or not.
     pub wiki_enabled: bool,
+    /// Statistics about the project.
+    pub statistics: Option<ProjectStatistics>,
 
     /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
     /// optional here.
     pub permissions: Option<Permissions>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// Statistics about a project.
+pub struct ProjectStatistics {
+    /// The number of commits in the repository.
+    pub commit_count: u64,
+    /// The size, in bytes, of the total storage required for the project.
+    pub storage_size: u64,
+    /// The size, in bytes, of the repository.
+    pub repository_size: u64,
+    /// The size, in bytes, of uploaded LFS files.
+    pub lfs_objects_size: u64,
+    /// The size, in bytes, of uploaded build artifacts.
+    pub build_artifacts_size: u64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -739,6 +710,21 @@ pub struct Group {
     pub web_url: String,
     /// Whether membership requests are allowed for the group.
     pub request_access_enabled: bool,
+    /// Statistics about the group.
+    pub statistics: Option<ProjectStatistics>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// Statistics about a group.
+pub struct GroupStatistics {
+    /// The size, in bytes, of the total storage required for the group.
+    pub storage_size: u64,
+    /// The size, in bytes, of all repositories in the group.
+    pub repository_size: u64,
+    /// The size, in bytes, of uploaded LFS files in the group.
+    pub lfs_objects_size: u64,
+    /// The size, in bytes, of uploaded build artifacts in the group.
+    pub build_artifacts_size: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -766,6 +752,8 @@ pub struct GroupDetail {
     pub shared_projects: Vec<Project>,
     /// Whether membership requests are allowed for the group.
     pub request_access_enabled: bool,
+    /// Statistics about the group.
+    pub statistics: Option<ProjectStatistics>,
 }
 
 impl From<GroupDetail> for Group {
@@ -780,6 +768,7 @@ impl From<GroupDetail> for Group {
             avatar_url: detail.avatar_url,
             web_url: detail.web_url,
             request_access_enabled: detail.request_access_enabled,
+            statistics: detail.statistics,
         }
     }
 }
@@ -884,6 +873,10 @@ pub struct RepoCommit {
     pub author_name: String,
     /// The commit author's email address.
     pub author_email: String,
+    /// The committer's name.
+    pub committer_name: String,
+    /// The committer's email address.
+    pub committer_email: String,
     pub created_at: DateTime<UTC>,
     /// The full commit message.
     pub message: String,
@@ -951,6 +944,19 @@ pub struct ProjectSnippet {
     /// The URL of the snippet.
     pub web_url: String,
 }
+
+//class PersonalSnippet < Grape::Entity
+//  expose :id, :title, :file_name
+//  expose :author, using: Entities::UserBasic
+//  expose :updated_at, :created_at
+//
+//  expose :web_url do |snippet|
+//    Gitlab::UrlBuilder.build(snippet)
+//  end
+//  expose :raw_url do |snippet|
+//    Gitlab::UrlBuilder.build(snippet) + "/raw"
+//  end
+//end
 
 // This is just used as a common "base class" in Ruby.
 //#[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1090,6 +1096,19 @@ pub struct Issue {
     pub confidential: bool,
     /// The URL of the issue.
     pub web_url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// A time estimate on an issue or merge request.
+pub struct IssuableTimeEstimate {
+    /// The time estimate, in seconds.
+    pub time_estimate: u64,
+    /// The total time spent, in seconds.
+    pub total_time_spent: u64,
+    /// The time estimate, as a human-readable string.
+    pub human_time_estimate: Option<String>,
+    /// The total time spent, as a human-readable string.
+    pub human_total_time_spent: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -1351,6 +1370,8 @@ pub struct SshKey {
     pub key: String,
     /// When the key was created.
     pub created_at: DateTime<UTC>,
+    /// Whether the key may push to repositories or not.
+    pub can_push: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1365,7 +1386,7 @@ pub struct SshKeyWithUser {
     /// When the key was created.
     pub created_at: DateTime<UTC>,
     /// The user associated with the SSH key.
-    pub user: UserFull,
+    pub user: UserPublic,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1742,6 +1763,8 @@ pub struct Namespace {
     id: u64,
     /// The URL of the namespace.
     pub path: String,
+    /// The name of the namespace.
+    pub name: String,
     /// The kind of the namespace.
     pub kind: NamespaceKind,
 }
@@ -1868,6 +1891,8 @@ impl Namespace {
 //  expose :repository_storages
 //  expose :koding_enabled
 //  expose :koding_url
+//  expose :plantuml_enabled
+//  expose :plantuml_url
 //end
 
 //class Release < Grape::Entity
@@ -1983,7 +2008,7 @@ pub struct Build {
 //end
 
 //class EnvironmentBasic < Grape::Entity
-//  expose :id, :name, :external_url
+//  expose :id, :name, :slug, :external_url
 //end
 
 //class Environment < EnvironmentBasic

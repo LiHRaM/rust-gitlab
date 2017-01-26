@@ -96,13 +96,13 @@ impl Gitlab {
         };
 
         // Ensure the API is working.
-        let _: UserFull = try!(api._get("user"));
+        let _: UserPublic = try!(api._get("user"));
 
         Ok(api)
     }
 
     /// The user the API is acting as.
-    pub fn current_user(&self) -> Result<UserFull> {
+    pub fn current_user(&self) -> Result<UserPublic> {
         self._get("user")
     }
 

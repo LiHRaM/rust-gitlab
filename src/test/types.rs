@@ -335,38 +335,21 @@ fn test_read_project() {
                UTC.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               UTC.ymd(2016, 12, 7)
-                   .and_hms_milli(15, 45, 22, 450));
+               UTC.ymd(2017, 1, 18)
+                   .and_hms_milli(17, 27, 17, 734));
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
     assert_eq!(project.creator_id, UserId::new(13));
     assert_eq!(project.namespace.name, "Utils");
     assert_eq!(project.namespace.path, "utils");
-    assert_eq!(project.namespace.description, "");
-    assert_eq!(project.namespace.id, 498);
-    assert_eq!(project.namespace.owner_id(),
+    assert_eq!(project.namespace.id(),
                NamespaceId::Group(GroupId::new(498)));
-    assert_eq!(project.namespace.created_at,
-               UTC.ymd(2016, 2, 3)
-                   .and_hms_milli(21, 26, 13, 133));
-    assert_eq!(project.namespace.updated_at,
-               UTC.ymd(2016, 2, 3)
-                   .and_hms_milli(21, 27, 5, 284));
-    assert_eq!(project.namespace.deleted_at, None);
-    assert_eq!(project.namespace.visibility_level, 20);
-    if let Some(ref avatar) = project.namespace.avatar {
-        assert_eq!(avatar.url, None);
-    } else {
-        panic!("expected to have an avatar for the namespace");
-    }
-    assert_eq!(project.namespace.lfs_enabled, None);
-    assert_eq!(project.namespace.request_access_enabled, true);
-    assert_eq!(project.namespace.share_with_group_lock, false);
+    assert_eq!(project.namespace.kind, NamespaceKind::Group);
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.star_count, 0);
-    assert_eq!(project.forks_count, 2);
-    assert_eq!(project.open_issues_count, Some(3));
+    assert_eq!(project.forks_count, 3);
+    assert_eq!(project.open_issues_count, Some(1));
     assert_eq!(project.public_builds, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_build_succeeds, Some(false));
@@ -505,43 +488,43 @@ fn test_read_user() {
 }
 
 #[test]
-fn test_read_user_full() {
-    let user_full: UserFull = read_test_file("user_full");
+fn test_read_user_public() {
+    let user_public: UserPublic = read_test_file("user_public");
 
-    assert_eq!(user_full.username, "ben.boeckel");
-    assert_eq!(user_full.name, "Ben Boeckel");
-    assert_eq!(user_full.id, UserId::new(13));
-    assert_eq!(user_full.state, UserState::Active);
-    assert_eq!(user_full.avatar_url,
+    assert_eq!(user_public.username, "ben.boeckel");
+    assert_eq!(user_public.name, "Ben Boeckel");
+    assert_eq!(user_public.id, UserId::new(13));
+    assert_eq!(user_public.state, UserState::Active);
+    assert_eq!(user_public.avatar_url,
                "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
-    assert_eq!(user_full.web_url, "https://gitlab.kitware.com/ben.boeckel");
-    assert_eq!(user_full.created_at,
+    assert_eq!(user_public.web_url, "https://gitlab.kitware.com/ben.boeckel");
+    assert_eq!(user_public.created_at,
                UTC.ymd(2015, 2, 26)
                    .and_hms_milli(17, 23, 28, 730));
-    assert_eq!(user_full.is_admin, false);
-    assert_eq!(user_full.bio, None);
-    assert_eq!(user_full.location, None);
-    assert_eq!(user_full.skype, "");
-    assert_eq!(user_full.linkedin, "");
-    assert_eq!(user_full.twitter, "");
-    assert_eq!(user_full.website_url, "");
-    assert_eq!(user_full.organization, None);
-    assert_eq!(user_full.last_sign_in_at,
+    assert_eq!(user_public.is_admin, false);
+    assert_eq!(user_public.bio, None);
+    assert_eq!(user_public.location, None);
+    assert_eq!(user_public.skype, "");
+    assert_eq!(user_public.linkedin, "");
+    assert_eq!(user_public.twitter, "");
+    assert_eq!(user_public.website_url, "");
+    assert_eq!(user_public.organization, None);
+    assert_eq!(user_public.last_sign_in_at,
                Some(UTC.ymd(2016, 12, 7)
                    .and_hms_milli(15, 5, 56, 167)));
-    assert_eq!(user_full.confirmed_at,
+    assert_eq!(user_public.confirmed_at,
                UTC.ymd(2015, 2, 26)
                    .and_hms_milli(17, 23, 28, 693));
-    assert_eq!(user_full.email, "ben.boeckel@kitware.com");
-    assert_eq!(user_full.theme_id, ThemeId::new(2));
-    assert_eq!(user_full.color_scheme_id, ColorSchemeId::new(2));
-    assert_eq!(user_full.projects_limit, 50);
-    assert_eq!(user_full.current_sign_in_at,
+    assert_eq!(user_public.email, "ben.boeckel@kitware.com");
+    assert_eq!(user_public.theme_id, ThemeId::new(2));
+    assert_eq!(user_public.color_scheme_id, ColorSchemeId::new(2));
+    assert_eq!(user_public.projects_limit, 50);
+    assert_eq!(user_public.current_sign_in_at,
                Some(UTC.ymd(2016, 12, 7)
                    .and_hms_milli(16, 15, 50, 720)));
-    assert!(user_full.identities.is_empty());
-    assert_eq!(user_full.can_create_group, true);
-    assert_eq!(user_full.can_create_project, true);
-    assert_eq!(user_full.two_factor_enabled, true);
-    assert_eq!(user_full.external, false);
+    assert!(user_public.identities.is_empty());
+    assert_eq!(user_public.can_create_group, true);
+    assert_eq!(user_public.can_create_project, true);
+    assert_eq!(user_public.two_factor_enabled, true);
+    assert_eq!(user_public.external, false);
 }
