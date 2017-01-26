@@ -1031,7 +1031,7 @@ pub struct Milestone {
     /// When the milestone is due.
     pub due_date: Option<NaiveDate>,
     /// When the milestone was started.
-    pub start_date: DateTime<UTC>,
+    pub start_date: Option<DateTime<UTC>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
