@@ -90,8 +90,8 @@ impl Gitlab {
 
     /// Internal method to create a new Gitlab client.
     fn _new(protocol: &str, host: &str, token: String) -> Result<Self> {
-        let base_url = try!(Url::parse(&format!("{}://{}/api/v3/", protocol, host))
-            .chain_err(|| ErrorKind::UrlParse));
+        let base_url = Url::parse(&format!("{}://{}/api/v3/", protocol, host))
+            .chain_err(|| ErrorKind::UrlParse)?;
 
         let api = Gitlab {
             base_url: base_url,
@@ -99,7 +99,7 @@ impl Gitlab {
         };
 
         // Ensure the API is working.
-        let _: UserPublic = try!(api._get("user"));
+        let _: UserPublic = api._get("user")?;
 
         Ok(api)
     }
@@ -121,7 +121,7 @@ impl Gitlab {
 
     /// Find a user by username.
     pub fn user_by_name<T: UserResult>(&self, name: &str) -> Result<T> {
-        let mut users = try!(self._get_paged_with_param("users", &[("username", name)]));
+        let mut users = self._get_paged_with_param("users", &[("username", name)])?;
         users.pop()
             .ok_or_else(|| Error::from_kind(ErrorKind::Gitlab("no such user".to_string())))
     }
@@ -416,7 +416,7 @@ impl Gitlab {
     /// Create a URL to an API endpoint.
     fn _mk_url(&self, url: &str) -> Result<Url> {
         debug!(target: "gitlab", "api call {}", url);
-        Ok(try!(self.base_url.join(url).chain_err(|| ErrorKind::UrlParse)))
+        Ok(self.base_url.join(url).chain_err(|| ErrorKind::UrlParse)?)
     }
 
     /// Create a URL to an API endpoint with query parameters.
@@ -426,7 +426,7 @@ impl Gitlab {
               K: AsRef<str>,
               V: AsRef<str>,
     {
-        let mut full_url = try!(self._mk_url(url));
+        let mut full_url = self._mk_url(url)?;
         full_url.query_pairs_mut().extend_pairs(param);
         Ok(full_url)
     }
@@ -436,17 +436,17 @@ impl Gitlab {
         where T: Deserialize,
     {
         let req = req.header(GitlabPrivateToken(self.token.to_string()));
-        let rsp = try!(req.send().chain_err(|| ErrorKind::Communication));
+        let rsp = req.send().chain_err(|| ErrorKind::Communication)?;
         if !rsp.status().is_success() {
-            let v = try!(serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize));
+            let v = serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize)?;
             return Err(Error::from_gitlab(v));
         }
 
-        let v = try!(serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize));
+        let v = serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize)?;
         debug!(target: "gitlab",
                "received data: {:?}",
                v);
-        Ok(try!(serde_json::from_value::<T>(v).chain_err(|| ErrorKind::Deserialize)))
+        Ok(serde_json::from_value::<T>(v).chain_err(|| ErrorKind::Deserialize)?)
     }
 
     /// Create a `GET` request to an API endpoint.
@@ -463,8 +463,8 @@ impl Gitlab {
               K: AsRef<str>,
               V: AsRef<str>,
     {
-        let full_url = try!(self._mk_url_with_param(url, param));
-        let req = try!(Client::new().chain_err(|| ErrorKind::Communication)).get(full_url);
+        let full_url = self._mk_url_with_param(url, param)?;
+        let req = Client::new().chain_err(|| ErrorKind::Communication)?.get(full_url);
         self._comm(req)
     }
 
@@ -479,8 +479,8 @@ impl Gitlab {
         where T: Deserialize,
               U: Serialize,
     {
-        let full_url = try!(self._mk_url(url));
-        let req = try!(Client::new().chain_err(|| ErrorKind::Communication)).post(full_url).form(&param);
+        let full_url = self._mk_url(url)?;
+        let req = Client::new().chain_err(|| ErrorKind::Communication)?.post(full_url).form(&param);
         self._comm(req)
     }
 
@@ -502,7 +502,7 @@ impl Gitlab {
         let per_page = 100;
         let per_page_str = &format!("{}", per_page);
 
-        let full_url = try!(self._mk_url_with_param(url, param));
+        let full_url = self._mk_url_with_param(url, param)?;
 
         let mut results: Vec<T> = vec![];
 
@@ -511,9 +511,9 @@ impl Gitlab {
             let mut page_url = full_url.clone();
             page_url.query_pairs_mut()
                 .extend_pairs(&[("page", page_str), ("per_page", per_page_str)]);
-            let req = try!(Client::new().chain_err(|| ErrorKind::Communication)).get(page_url);
+            let req = Client::new().chain_err(|| ErrorKind::Communication)?.get(page_url);
 
-            let page: Vec<T> = try!(self._comm(req));
+            let page: Vec<T> = self._comm(req)?;
             let page_len = page.len();
             results.extend(page);
 

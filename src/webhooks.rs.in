@@ -34,7 +34,7 @@ impl Serialize for HookDate {
 
 impl Deserialize for HookDate {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
-        let val = try!(String::deserialize(deserializer));
+        let val = String::deserialize(deserializer)?;
 
         UTC.datetime_from_str(&val, "%Y-%m-%d %H:%M:%S UTC")
             .or_else(|_| {
@@ -694,7 +694,7 @@ pub enum WebHook {
 
 impl Deserialize for WebHook {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
-        let val = try!(Value::deserialize(deserializer));
+        let val = Value::deserialize(deserializer)?;
 
         let object_kind = match val.pointer("/object_kind") {
             Some(&Value::String(ref kind)) => kind.to_string(),

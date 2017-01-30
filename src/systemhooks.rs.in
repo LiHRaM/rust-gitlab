@@ -370,7 +370,7 @@ pub enum SystemHook {
 
 impl Deserialize for SystemHook {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
-        let val = try!(Value::deserialize(deserializer));
+        let val = Value::deserialize(deserializer)?;
 
         let event_name = match val.pointer("/event_name") {
             Some(&Value::String(ref name)) => name.to_string(),
