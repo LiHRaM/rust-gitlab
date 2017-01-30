@@ -28,7 +28,9 @@ use std::fmt::{self, Debug};
 ///
 /// Separate users should use separate instances of this.
 pub struct Gitlab {
+    /// The base URL to use for API calls.
     base_url: Url,
+    /// The secret token to use when communicating with Gitlab.
     token: String,
 }
 
@@ -86,6 +88,7 @@ impl Gitlab {
         Self::_new("http", host, token.to_string())
     }
 
+    /// Internal method to create a new Gitlab client.
     fn _new(protocol: &str, host: &str, token: String) -> Result<Self> {
         let base_url = try!(Url::parse(&format!("{}://{}/api/v3/", protocol, host))
             .chain_err(|| ErrorKind::UrlParse));
@@ -161,6 +164,7 @@ impl Gitlab {
         self._get(&format!("projects/{}/hooks/{}", project, hook))
     }
 
+    /// Convert a boolean parameter into an HTTP request value.
     fn bool_param_value(value: bool) -> &'static str {
         if value {
             "true"
@@ -169,6 +173,7 @@ impl Gitlab {
         }
     }
 
+    /// HTTP parameters required to register to a project.
     fn event_flags(events: WebhookEvents) -> Vec<(&'static str, &'static str)> {
         vec![("build_events", Self::bool_param_value(events.build())),
              ("issues_events", Self::bool_param_value(events.issues())),
@@ -411,11 +416,13 @@ impl Gitlab {
         self._post_with_param(path, &[("body", content)])
     }
 
+    /// Create a URL to an API endpoint.
     fn _mk_url(&self, url: &str) -> Result<Url> {
         debug!(target: "gitlab", "api call {}", url);
         Ok(try!(self.base_url.join(url).chain_err(|| ErrorKind::UrlParse)))
     }
 
+    /// Create a URL to an API endpoint with query parameters.
     fn _mk_url_with_param<I, K, V>(&self, url: &str, param: I) -> Result<Url>
         where I: IntoIterator,
               I::Item: Borrow<(K, V)>,
@@ -427,7 +434,7 @@ impl Gitlab {
         Ok(full_url)
     }
 
-    // Refactored code which talks to Gitlab and transforms error messages properly.
+    /// Refactored code which talks to Gitlab and transforms error messages properly.
     fn _comm<T>(&self, req: RequestBuilder) -> Result<T>
         where T: Deserialize,
     {
@@ -445,11 +452,13 @@ impl Gitlab {
         Ok(try!(serde_json::from_value::<T>(v).chain_err(|| ErrorKind::Deserialize)))
     }
 
+    /// Create a `GET` request to an API endpoint.
     fn _get<T: Deserialize>(&self, url: &str) -> Result<T> {
         let param: &[(&str, &str)] = &[];
         self._get_with_param(url, param)
     }
 
+    /// Create a `GET` request to an API endpoint with query parameters.
     fn _get_with_param<T, I, K, V>(&self, url: &str, param: I) -> Result<T>
         where T: Deserialize,
               I: IntoIterator,
@@ -462,11 +471,13 @@ impl Gitlab {
         self._comm(req)
     }
 
+    /// Create a `POST` request to an API endpoint.
     fn _post<T: Deserialize>(&self, url: &str) -> Result<T> {
         let param: &[(&str, &str)] = &[];
         self._post_with_param(url, param)
     }
 
+    /// Create a `POST` request to an API endpoint with query parameters.
     fn _post_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
         where T: Deserialize,
               U: Serialize,
@@ -476,12 +487,13 @@ impl Gitlab {
         self._comm(req)
     }
 
-    // Handle paginated queries. Returns all results.
+    /// Handle paginated queries. Returns all results.
     fn _get_paged<T: Deserialize>(&self, url: &str) -> Result<Vec<T>> {
         let param: &[(&str, &str)] = &[];
         self._get_paged_with_param(url, param)
     }
 
+    /// Handle paginated queries with query parameters. Returns all results.
     fn _get_paged_with_param<T, I, K, V>(&self, url: &str, param: I) -> Result<Vec<T>>
         where T: Deserialize,
               I: IntoIterator,
