@@ -549,7 +549,7 @@ pub struct Project {
     pub permissions: Option<Permissions>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Statistics about a project.
 pub struct ProjectStatistics {
     /// The number of commits in the repository.
@@ -714,7 +714,7 @@ pub struct Group {
     pub statistics: Option<ProjectStatistics>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Statistics about a group.
 pub struct GroupStatistics {
     /// The size, in bytes, of the total storage required for the group.
