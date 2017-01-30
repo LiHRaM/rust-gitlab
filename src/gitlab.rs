@@ -185,8 +185,7 @@ impl Gitlab {
     }
 
     /// Add a project hook.
-    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents)
-                    -> Result<Hook> {
+    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents) -> Result<Hook> {
         let mut flags = Self::event_flags(events);
         flags.push(("url", url));
 
@@ -241,8 +240,7 @@ impl Gitlab {
     }
 
     /// Get comments on a commit.
-    pub fn commit_comments(&self, project: ProjectId, commit: &str)
-                           -> Result<Vec<CommitNote>> {
+    pub fn commit_comments(&self, project: ProjectId, commit: &str) -> Result<Vec<CommitNote>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/comments",
                                  project,
                                  commit))
@@ -291,8 +289,7 @@ impl Gitlab {
     }
 
     /// Get the latest builds of a commit.
-    pub fn commit_latest_builds(&self, project: ProjectId, commit: &str)
-                                -> Result<Vec<Build>> {
+    pub fn commit_latest_builds(&self, project: ProjectId, commit: &str) -> Result<Vec<Build>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/builds", project, commit))
     }
 
