@@ -34,7 +34,7 @@ pub enum GitlabHook {
 
 impl Deserialize for GitlabHook {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
-        let val = try!(Value::deserialize(deserializer));
+        let val = Value::deserialize(deserializer)?;
 
         // Look for `object_kind` first because some web hooks also have `event_name` which would
         // cause a false match here.

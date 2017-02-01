@@ -136,7 +136,7 @@ fn test_read_issue() {
         assert_eq!(assignee.name, "Ben Boeckel");
         assert_eq!(assignee.state, UserState::Active);
         assert_eq!(assignee.avatar_url,
-                  "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+                   "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
         assert_eq!(assignee.id, UserId::new(13));
     } else {
         panic!("expected to have an assignee for the issue");
@@ -186,7 +186,7 @@ fn test_read_issue_reference() {
             assert_eq!(assignee.name, "Ben Boeckel");
             assert_eq!(assignee.state, UserState::Active);
             assert_eq!(assignee.avatar_url,
-                      "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+                       "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
             assert_eq!(assignee.id, UserId::new(13));
         } else {
             panic!("expected to have an assignee for the issue");
@@ -497,7 +497,8 @@ fn test_read_user_public() {
     assert_eq!(user_public.state, UserState::Active);
     assert_eq!(user_public.avatar_url,
                "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
-    assert_eq!(user_public.web_url, "https://gitlab.kitware.com/ben.boeckel");
+    assert_eq!(user_public.web_url,
+               "https://gitlab.kitware.com/ben.boeckel");
     assert_eq!(user_public.created_at,
                UTC.ymd(2015, 2, 26)
                    .and_hms_milli(17, 23, 28, 730));

@@ -549,7 +549,7 @@ pub struct Project {
     pub permissions: Option<Permissions>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Statistics about a project.
 pub struct ProjectStatistics {
     /// The number of commits in the repository.
@@ -714,7 +714,7 @@ pub struct Group {
     pub statistics: Option<ProjectStatistics>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Statistics about a group.
 pub struct GroupStatistics {
     /// The size, in bytes, of the total storage required for the group.
@@ -1144,7 +1144,7 @@ impl Serialize for IssueReference {
 
 impl Deserialize for IssueReference {
     fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
-        let val = try!(Value::deserialize(deserializer));
+        let val = Value::deserialize(deserializer)?;
 
         serde_json::from_value::<Issue>(val.clone())
             .map(IssueReference::Internal)
