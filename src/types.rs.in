@@ -1242,7 +1242,9 @@ pub struct MergeRequest {
     /// The status of the merge request.
     pub merge_status: MergeStatus,
     /// The object ID of the head of the source branch.
-    pub sha: ObjectId,
+    ///
+    /// This is `None` if the source branch has been deleted.
+    pub sha: Option<ObjectId>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// Whether the current user is subscribed or not.
@@ -1303,7 +1305,9 @@ pub struct MergeRequestChanges {
     /// The status of the merge request.
     pub merge_status: MergeStatus,
     /// The object ID of the head of the source branch.
-    pub sha: ObjectId,
+    ///
+    /// This is `None` if the source branch has been deleted.
+    pub sha: Option<ObjectId>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// Whether the current user is subscribed or not.

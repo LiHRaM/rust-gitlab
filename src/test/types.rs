@@ -270,7 +270,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.merge_when_build_succeeds, false);
     assert_eq!(merge_request.merge_status, MergeStatus::CanBeMerged);
     assert_eq!(merge_request.sha,
-               ObjectId::new("f2784e0607d08e79b361ccf58a8379b04de2df35"));
+               Some(ObjectId::new("f2784e0607d08e79b361ccf58a8379b04de2df35")));
     assert_eq!(merge_request.merge_commit_sha, None);
     assert_eq!(merge_request.subscribed, true);
     assert_eq!(merge_request.user_notes_count, 7);
