@@ -54,7 +54,7 @@ macro_rules! enum_serialize {
 
         impl Deserialize for $name {
             fn deserialize<D: Deserializer>(deserializer: &mut D) -> ::std::result::Result<Self, D::Error> {
-                let val = try!(String::deserialize(deserializer));
+                let val = String::deserialize(deserializer)?;
 
                 match val.as_str() {
                     $( $str => Ok($name::$value), )*
