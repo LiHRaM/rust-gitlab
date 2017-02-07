@@ -20,8 +20,8 @@ use self::serde::de::Error;
 extern crate serde_json;
 use self::serde_json::Value;
 
-use super::systemhooks::SystemHook;
-use super::webhooks::WebHook;
+use systemhooks::SystemHook;
+use webhooks::WebHook;
 
 #[derive(Debug, Clone)]
 /// A deserializable structure for all Gitlab hooks.

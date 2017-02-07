@@ -18,8 +18,8 @@ extern crate serde_json;
 extern crate url;
 use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 
-use super::error::*;
-use super::types::*;
+use error::*;
+use types::*;
 
 use std::borrow::Borrow;
 use std::fmt::{self, Debug};
