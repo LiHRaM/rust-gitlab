@@ -16,8 +16,8 @@ use self::serde::de::{Error, Type};
 extern crate serde_json;
 use self::serde_json::Value;
 
-use super::types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
-use super::webhooks::{CommitHookAttrs, ProjectHookAttrs};
+use types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
+use webhooks::{CommitHookAttrs, ProjectHookAttrs};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Events which occur at the project level.

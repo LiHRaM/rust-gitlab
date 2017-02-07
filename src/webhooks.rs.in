@@ -16,8 +16,8 @@ use self::serde::de::{Error, Type};
 extern crate serde_json;
 use self::serde_json::Value;
 
-use super::types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus,
-                   MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId, SnippetId, UserId};
+use types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus,
+            MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId, SnippetId, UserId};
 
 #[derive(Debug, Clone, Copy)]
 /// A wrapper struct for dates in web hooks.

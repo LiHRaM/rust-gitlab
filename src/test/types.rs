@@ -15,7 +15,7 @@ use self::serde::Deserialize;
 extern crate serde_json;
 use self::serde_json::from_reader;
 
-use super::super::types::*;
+use types::*;
 
 use std::fs::File;
 
