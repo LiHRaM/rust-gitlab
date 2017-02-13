@@ -298,7 +298,9 @@ impl MergeRequestParams {
 /// Merge request information exposed in hooks.
 pub struct MergeRequestHookAttrs {
     /// The source project of the merge request.
-    pub source: ProjectHookAttrs,
+    ///
+    /// If this is `None`, the source repository has been deleted.
+    pub source: Option<ProjectHookAttrs>,
     /// The target project of the merge request.
     pub target: ProjectHookAttrs,
     pub last_commit: Option<CommitHookAttrs>,
