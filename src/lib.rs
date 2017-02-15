@@ -19,6 +19,9 @@ extern crate hyper;
 #[macro_use]
 extern crate log;
 
+#[macro_use]
+extern crate serde_derive;
+
 mod error;
 #[macro_use]
 mod macros;

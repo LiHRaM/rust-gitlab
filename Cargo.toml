@@ -9,17 +9,14 @@ Gitlab API client.
 repository = "https://gitlab.kitware.com/utils/rust-gitlab"
 documentation = "https://docs.rs/gitlab/~0.1"
 readme = "README.md"
-build = "build.rs"
-
-[build-dependencies]
-serde_codegen = "~0.8"
 
 [dependencies]
-chrono = { version = "~0.2", features = ["serde"] }
+chrono = { version = "~0.3", features = ["serde"] }
 error-chain = "~0.7"
 hyper = { version = "~0.9", default-features = false }
 log = "~0.3"
 reqwest = "~0.2"
-serde = "~0.8"
-serde_json = "~0.8"
+serde = "~0.9"
+serde_derive = "~0.9"
+serde_json = "~0.9"
 url = "~1.2"
