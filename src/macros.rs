@@ -47,20 +47,25 @@ macro_rules! enum_serialize {
         }
 
         impl Serialize for $name {
-            fn serialize<S: Serializer>(&self, serializer: &mut S) -> ::std::result::Result<(), S::Error> {
+            fn serialize<S>(&self, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
+                where S: Serializer,
+            {
                 serializer.serialize_str(self.as_str())
             }
         }
 
         impl Deserialize for $name {
-            fn deserialize<D: Deserializer>(deserializer: &mut D) -> ::std::result::Result<Self, D::Error> {
+            fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+                where D: Deserializer,
+            {
                 let val = String::deserialize(deserializer)?;
 
                 match val.as_str() {
                     $( $str => Ok($name::$value), )*
                     v => {
                         error!(target: "gitlab", concat!("unknown ", $desc, " from gitlab: {}"), v);
-                        Err(D::Error::invalid_value(concat!("invalid ", $desc)))
+                        Err(D::Error::invalid_value(Unexpected::Other("enumeration value"),
+                                                    &concat!("invalid ", $desc)))
                     },
                 }
             }

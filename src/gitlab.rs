@@ -10,8 +10,10 @@ extern crate reqwest;
 use self::reqwest::{Client, RequestBuilder, Url};
 
 extern crate serde;
-use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
+use self::serde::{Deserialize, Deserializer, Serializer};
 use self::serde::de::Error as SerdeError;
+use self::serde::de::Unexpected;
+use self::serde::ser::Serialize;
 
 extern crate serde_json;
 

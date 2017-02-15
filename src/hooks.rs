@@ -15,7 +15,7 @@
 
 extern crate serde;
 use self::serde::{Deserialize, Deserializer};
-use self::serde::de::Error;
+use self::serde::de::{Error, Unexpected};
 
 extern crate serde_json;
 use self::serde_json::Value;
@@ -33,8 +33,8 @@ pub enum GitlabHook {
 }
 
 impl Deserialize for GitlabHook {
-    fn deserialize<D: Deserializer>(deserializer: &mut D) -> Result<Self, D::Error> {
-        let val = Value::deserialize(deserializer)?;
+    fn deserialize<D: Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+        let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         // Look for `object_kind` first because some web hooks also have `event_name` which would
         // cause a false match here.
@@ -46,6 +46,9 @@ impl Deserialize for GitlabHook {
             return Err(D::Error::missing_field("either object_kind or event_name"));
         };
 
-        hook_res.map_err(|err| D::Error::invalid_value(&format!("{:?}", err)))
+        hook_res.map_err(|err| {
+            D::Error::invalid_value(Unexpected::Other("gitlab hook"),
+                                    &format!("{:?}", err).as_str())
+        })
     }
 }
