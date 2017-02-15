@@ -12,11 +12,11 @@ readme = "README.md"
 
 [dependencies]
 chrono = { version = "~0.3", features = ["serde"] }
-error-chain = "~0.7"
-hyper = { version = "~0.9", default-features = false }
+error-chain = "~0.9"
+hyper = { version = "~0.10", default-features = false }
 log = "~0.3"
-reqwest = "~0.2"
+reqwest = "~0.4"
 serde = "~0.9"
 serde_derive = "~0.9"
 serde_json = "~0.9"
-url = "~1.2"
+url = "~1.4"
