@@ -289,7 +289,7 @@ impl MergeRequestParams {
     pub fn force_remove_source_branch(&self) -> bool {
         self.force_remove_source_branch
             .as_ref()
-            .map(|val| {
+            .map_or(false, |val| {
                 if let Some(as_str) = val.as_str() {
                     as_str == "1"
                 } else if let Some(as_bool) = val.as_bool() {
@@ -300,7 +300,6 @@ impl MergeRequestParams {
                     false
                 }
             })
-            .unwrap_or(false)
     }
 }
 
