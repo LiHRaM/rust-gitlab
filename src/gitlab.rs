@@ -7,7 +7,7 @@
 // except according to those terms.
 
 extern crate reqwest;
-use self::reqwest::{Client, RequestBuilder, Url};
+use self::reqwest::{Client, Method, RequestBuilder, Url};
 
 extern crate serde;
 use self::serde::{Deserialize, Deserializer, Serializer};
@@ -483,6 +483,22 @@ impl Gitlab {
     {
         let full_url = self._mk_url(url)?;
         let req = Client::new().chain_err(|| ErrorKind::Communication)?.post(full_url).form(&param);
+        self._comm(req)
+    }
+
+    /// Create a `PUT` request to an API endpoint.
+    fn _put<T: Deserialize>(&self, url: &str) -> Result<T> {
+        let param: &[(&str, &str)] = &[];
+        self._put_with_param(url, param)
+    }
+
+    /// Create a `PUT` request to an API endpoint with query parameters.
+    fn _put_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
+        where T: Deserialize,
+              U: Serialize,
+    {
+        let full_url = self._mk_url(url)?;
+        let req = Client::new().chain_err(|| ErrorKind::Communication)?.request(Method::Put, full_url).form(&param);
         self._comm(req)
     }
 
