@@ -418,6 +418,16 @@ impl Gitlab {
         self._post_with_param(path, &[("body", content)])
     }
 
+    /// Get issues closed by a merge request.
+    pub fn get_issues_closed_by_merge_request(&self, project: ProjectId,
+                                              merge_request: MergeRequestId)
+                                              -> Result<Vec<Issue>> {
+        let path = &format!("projects/{}/merge_requests/{}/closes_issues",
+                            project,
+                            merge_request);
+        self._get_paged(path)
+    }
+
     /// Set the labels on an issue.
     pub fn set_issue_labels<I, L>(&self, project: ProjectId, issue: IssueId, labels: I)
                                   -> Result<Issue>
