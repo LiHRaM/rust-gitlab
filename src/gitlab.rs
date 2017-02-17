@@ -6,6 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+extern crate itertools;
+use self::itertools::Itertools;
+
 extern crate reqwest;
 use self::reqwest::{Client, Method, RequestBuilder, Url};
 
@@ -24,7 +27,7 @@ use error::*;
 use types::*;
 
 use std::borrow::Borrow;
-use std::fmt::{self, Debug};
+use std::fmt::{self, Display, Debug};
 
 /// A representation of the Gitlab API for a single user.
 ///
@@ -413,6 +416,18 @@ impl Gitlab {
                             project,
                             merge_request);
         self._post_with_param(path, &[("body", content)])
+    }
+
+    /// Set the labels on an issue.
+    pub fn set_issue_labels<I, L>(&self, project: ProjectId, issue: IssueId, labels: I)
+                                  -> Result<Issue>
+        where I: IntoIterator<Item = L>,
+              L: Display,
+    {
+        let path = &format!("projects/{}/issues/{}",
+                            project,
+                            issue);
+        self._put_with_param(path, &[("labels", labels.into_iter().join(","))])
     }
 
     /// Create a URL to an API endpoint.
