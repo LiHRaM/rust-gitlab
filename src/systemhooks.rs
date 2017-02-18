@@ -62,6 +62,7 @@ enum_serialize!(ProjectVisibility -> "project visibility",
     Public => "public",
 );
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A hook for a project.
 pub struct ProjectSystemHook {
@@ -137,6 +138,7 @@ impl From<HumanAccessLevel> for AccessLevel {
     }
 }
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A project membership hook.
 pub struct ProjectMemberSystemHook {
@@ -181,6 +183,7 @@ enum_serialize!(UserEvent -> "user event",
     Destroy => "user_destroy",
 );
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A user hook.
 pub struct UserSystemHook {
@@ -213,6 +216,7 @@ enum_serialize!(KeyEvent -> "key event",
     Destroy => "key_destroy",
 );
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An SSH key hook.
 pub struct KeySystemHook {
@@ -243,6 +247,7 @@ enum_serialize!(GroupEvent -> "group event",
     Destroy => "group_destroy",
 );
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A group hook.
 pub struct GroupSystemHook {
@@ -277,6 +282,7 @@ enum_serialize!(GroupMemberEvent -> "group member event",
     Remove => "user_remove_from_group",
 );
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A group membership hook.
 pub struct GroupMemberSystemHook {
@@ -317,6 +323,7 @@ enum_serialize!(PushEvent -> "push event",
     TagPush => "tag_push",
 );
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A push hook.
 pub struct PushSystemHook {
