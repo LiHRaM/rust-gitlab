@@ -20,3 +20,6 @@ serde = "~0.9"
 serde_derive = "~0.9"
 serde_json = "~0.9"
 url = "~1.4"
+
+[features]
+strict = []
