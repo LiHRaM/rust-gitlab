@@ -14,6 +14,7 @@ readme = "README.md"
 chrono = { version = "~0.3", features = ["serde"] }
 error-chain = "~0.9"
 hyper = { version = "~0.10", default-features = false }
+itertools = "~0.5"
 log = "~0.3"
 reqwest = "~0.4"
 serde = "~0.9"

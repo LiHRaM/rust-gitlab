@@ -6,8 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+extern crate itertools;
+use self::itertools::Itertools;
+
 extern crate reqwest;
-use self::reqwest::{Client, RequestBuilder, Url};
+use self::reqwest::{Client, Method, RequestBuilder, Url};
 
 extern crate serde;
 use self::serde::{Deserialize, Deserializer, Serializer};
@@ -24,7 +27,7 @@ use error::*;
 use types::*;
 
 use std::borrow::Borrow;
-use std::fmt::{self, Debug};
+use std::fmt::{self, Display, Debug};
 
 /// A representation of the Gitlab API for a single user.
 ///
@@ -415,6 +418,28 @@ impl Gitlab {
         self._post_with_param(path, &[("body", content)])
     }
 
+    /// Get issues closed by a merge request.
+    pub fn get_issues_closed_by_merge_request(&self, project: ProjectId,
+                                              merge_request: MergeRequestId)
+                                              -> Result<Vec<Issue>> {
+        let path = &format!("projects/{}/merge_requests/{}/closes_issues",
+                            project,
+                            merge_request);
+        self._get_paged(path)
+    }
+
+    /// Set the labels on an issue.
+    pub fn set_issue_labels<I, L>(&self, project: ProjectId, issue: IssueId, labels: I)
+                                  -> Result<Issue>
+        where I: IntoIterator<Item = L>,
+              L: Display,
+    {
+        let path = &format!("projects/{}/issues/{}",
+                            project,
+                            issue);
+        self._put_with_param(path, &[("labels", labels.into_iter().join(","))])
+    }
+
     /// Create a URL to an API endpoint.
     fn _mk_url(&self, url: &str) -> Result<Url> {
         debug!(target: "gitlab", "api call {}", url);
@@ -483,6 +508,22 @@ impl Gitlab {
     {
         let full_url = self._mk_url(url)?;
         let req = Client::new().chain_err(|| ErrorKind::Communication)?.post(full_url).form(&param);
+        self._comm(req)
+    }
+
+    /// Create a `PUT` request to an API endpoint.
+    fn _put<T: Deserialize>(&self, url: &str) -> Result<T> {
+        let param: &[(&str, &str)] = &[];
+        self._put_with_param(url, param)
+    }
+
+    /// Create a `PUT` request to an API endpoint with query parameters.
+    fn _put_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
+        where T: Deserialize,
+              U: Serialize,
+    {
+        let full_url = self._mk_url(url)?;
+        let req = Client::new().chain_err(|| ErrorKind::Communication)?.request(Method::Put, full_url).form(&param);
         self._comm(req)
     }
 
