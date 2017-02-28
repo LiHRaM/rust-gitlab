@@ -23,6 +23,23 @@ If you run into places where Gitlab dumps a JSON value rather than an actual
 entity, please consider updating upstream to use a real entity so that changes
 to the structure are easier to track.
 
+# Versioning
+
+Since this crate follows Gitlab upstream, semantic versioning may not be
+possible. Instead, the crate uses the following versioning scheme:
+
+  * Gitlab 8.16 support → 0.816.x
+  * Gitlab 8.17 support → 0.817.x
+  * Gitlab 9.0 support → 0.900.x
+
+Minor versions may fix bugs, add API endpoint bindings, or improve webhook
+coverage. It is recommended to depend on the full version of the crate since
+types may change in patch-level updates in order to match Gitlab's interface:
+
+```toml
+gitlab = "0.816.0"
+```
+
 # API bugs
 
 Sometimes, the API will return `null` for fields that have been added after the
