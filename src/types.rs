@@ -743,6 +743,8 @@ pub struct Group {
     pub web_url: String,
     /// Whether membership requests are allowed for the group.
     pub request_access_enabled: bool,
+    pub full_name: String,
+    pub full_path: String,
     /// Statistics about the group.
     pub statistics: Option<ProjectStatistics>,
 }
@@ -787,6 +789,8 @@ pub struct GroupDetail {
     pub shared_projects: Vec<Project>,
     /// Whether membership requests are allowed for the group.
     pub request_access_enabled: bool,
+    pub full_name: String,
+    pub full_path: String,
     /// Statistics about the group.
     pub statistics: Option<ProjectStatistics>,
 }
@@ -803,6 +807,8 @@ impl From<GroupDetail> for Group {
             avatar_url: detail.avatar_url,
             web_url: detail.web_url,
             request_access_enabled: detail.request_access_enabled,
+            full_name: detail.full_name,
+            full_path: detail.full_path,
             statistics: detail.statistics,
         }
     }
@@ -1972,6 +1978,7 @@ impl Namespace {
 //  expose :koding_url
 //  expose :plantuml_enabled
 //  expose :plantuml_url
+//  expose :terminal_max_session_time
 //end
 
 //class Release < Grape::Entity
