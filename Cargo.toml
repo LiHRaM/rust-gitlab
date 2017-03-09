@@ -9,6 +9,8 @@ Gitlab API client.
 repository = "https://gitlab.kitware.com/utils/rust-gitlab"
 documentation = "https://docs.rs/gitlab/~0.1"
 readme = "README.md"
+keywords = ["gitlab", "api"]
+categories = ["web-programming", "api-bindings"]
 
 [dependencies]
 chrono = { version = "~0.3", features = ["serde"] }
