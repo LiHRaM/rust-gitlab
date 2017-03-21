@@ -1086,7 +1086,7 @@ pub struct Milestone {
     /// When the milestone is due.
     pub due_date: Option<NaiveDate>,
     /// When the milestone was started.
-    pub start_date: Option<DateTime<UTC>>,
+    pub start_date: Option<NaiveDate>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
