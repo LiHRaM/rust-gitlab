@@ -745,6 +745,7 @@ pub struct Group {
     pub request_access_enabled: bool,
     pub full_name: String,
     pub full_path: String,
+    pub parent_id: Option<GroupId>,
     /// Statistics about the group.
     pub statistics: Option<ProjectStatistics>,
 }
@@ -791,6 +792,7 @@ pub struct GroupDetail {
     pub request_access_enabled: bool,
     pub full_name: String,
     pub full_path: String,
+    pub parent_id: Option<GroupId>,
     /// Statistics about the group.
     pub statistics: Option<ProjectStatistics>,
 }
@@ -809,35 +811,10 @@ impl From<GroupDetail> for Group {
             request_access_enabled: detail.request_access_enabled,
             full_name: detail.full_name,
             full_path: detail.full_path,
+            parent_id: detail.parent_id,
             statistics: detail.statistics,
         }
     }
-}
-
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-/// A commit on at the head of a branch.
-///
-/// NOTE: This is an ad-hoc entity in Gitlab.
-pub struct Commit {
-    /// The object ID of the commit.
-    pub id: ObjectId,
-    /// The object IDs of the commit's parents.
-    pub parent_ids: Vec<ObjectId>,
-    /// The commit message.
-    pub message: String,
-    /// The commit's author's name.
-    pub author_name: String,
-    /// The commit's author's email address.
-    pub author_email: String,
-    /// The commit's authorship date.
-    pub authored_date: DateTime<UTC>,
-    /// The committer's name.
-    pub committer_name: String,
-    /// The committer's email address.
-    pub committer_email: String,
-    /// The commit's commit date.
-    pub committed_date: DateTime<UTC>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -847,7 +824,7 @@ pub struct RepoBranch {
     /// The name of the branch.
     pub name: String,
     /// The commit of the branch.
-    pub commit: Option<Commit>,
+    pub commit: Option<RepoCommit>,
     /// Whether the branch is merged into the main branch or not.
     pub merged: Option<bool>,
     /// Whether the branch is protected or not.
@@ -915,14 +892,20 @@ pub struct RepoCommit {
     pub short_id: ObjectId,
     /// The summary of the commit.
     pub title: String,
+    /// The commit ID of the parents of the commit.
+    pub parent_ids: Vec<ObjectId>,
     /// The commit author's name.
     pub author_name: String,
     /// The commit author's email address.
     pub author_email: String,
+    /// The commit's authorship date.
+    pub authored_date: DateTime<UTC>,
     /// The committer's name.
     pub committer_name: String,
     /// The committer's email address.
     pub committer_email: String,
+    /// The commit's commit date.
+    pub committed_date: DateTime<UTC>,
     pub created_at: DateTime<UTC>,
     /// The full commit message.
     pub message: String,
@@ -950,19 +933,23 @@ pub struct RepoCommitDetail {
     pub short_id: ObjectId,
     /// The summary of the commit.
     pub title: String,
+    /// The commit ID of the parents of the commit.
+    pub parent_ids: Vec<ObjectId>,
     /// The commit author's name.
     pub author_name: String,
     /// The commit author's email address.
     pub author_email: String,
+    /// The commit's authorship date.
+    pub authored_date: DateTime<UTC>,
+    /// The committer's name.
+    pub committer_name: String,
+    /// The committer's email address.
+    pub committer_email: String,
+    /// The commit's commit date.
+    pub committed_date: DateTime<UTC>,
     pub created_at: DateTime<UTC>,
     /// The full commit message.
     pub message: String,
-    /// The commit ID of the parents of the commit.
-    pub parent_ids: Vec<ObjectId>,
-    /// The commit's commit date.
-    pub committed_date: DateTime<UTC>,
-    /// The commit's authorship date.
-    pub authored_date: DateTime<UTC>,
     /// Statistics about the commit.
     pub stats: RepoCommitStats,
     // XXX: Investigate what this is.
@@ -992,6 +979,8 @@ pub struct ProjectSnippet {
     pub updated_at: DateTime<UTC>,
     /// When the snippet was created.
     pub created_at: DateTime<UTC>,
+    /// When the snippet was created.
+    pub expires_at: Option<DateTime<UTC>>,
     /// The URL of the snippet.
     pub web_url: String,
 }
@@ -1702,6 +1691,7 @@ pub struct CommitStatus {
     pub finished_at: Option<DateTime<UTC>>,
     /// Whether the commit status is allowed to fail.
     pub allow_failure: bool,
+    pub coverage: Option<u64>,
     /// The author of the commit status.
     pub author: UserBasic,
 }
@@ -1835,6 +1825,7 @@ pub struct Namespace {
     pub name: String,
     /// The kind of the namespace.
     pub kind: NamespaceKind,
+    pub full_path: String,
 }
 
 impl Namespace {

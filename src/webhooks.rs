@@ -362,7 +362,7 @@ pub struct MergeRequestHookAttrs {
     /// The user which merged the merge request.
     pub merge_user_id: Option<UserId>,
     /// Whether the merge request will be merged once all builds succeed or not.
-    pub merge_when_build_succeeds: bool,
+    pub merge_when_pipeline_succeeds: bool,
     pub position: u64, // ???
     // st_commits
     // st_diffs
