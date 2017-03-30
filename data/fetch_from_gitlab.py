@@ -21,6 +21,7 @@ def write_result(token, name, endpoint):
     result.pop('runners_token', None)
     with open('%s.json' % name, 'w+') as fout:
         json.dump(result, fout)
+        fout.write('\n')
 
 
 REPO = 'utils%2Frust-gitlab'
