@@ -102,6 +102,7 @@ fn test_read_commit_status() {
     assert_eq!(commit_status.author.avatar_url,
                "https://gitlab.kitware.com/uploads/user/avatar/35/buildbot-logo.png");
     assert_eq!(commit_status.author.id, UserId::new(35));
+    assert_eq!(commit_status.coverage, None);
 }
 
 #[test]
@@ -113,13 +114,13 @@ fn test_read_issue() {
     assert_eq!(issue.project_id, ProjectId::new(855));
     assert_eq!(issue.title, "fix documentation warnings");
     assert_eq!(issue.description, "");
-    assert_eq!(issue.state, IssueState::Opened);
+    assert_eq!(issue.state, IssueState::Closed);
     assert_eq!(issue.created_at,
                UTC.ymd(2016, 10, 30)
                    .and_hms_milli(18, 54, 28, 954));
     assert_eq!(issue.updated_at,
-               UTC.ymd(2016, 10, 30)
-                   .and_hms_milli(18, 54, 29, 242));
+               UTC.ymd(2017, 1, 13)
+                   .and_hms_milli(21, 45, 20, 901));
     assert!(issue.labels.is_empty());
     assert!(issue.milestone.is_none());
     assert_eq!(issue.author.username, "ben.boeckel");
@@ -223,46 +224,42 @@ fn test_read_member() {
 fn test_read_merge_request() {
     let merge_request: MergeRequest = read_test_file("merge_request");
 
-    assert_eq!(merge_request.id, MergeRequestId::new(21211));
-    assert_eq!(merge_request.iid, 52);
+    assert_eq!(merge_request.id, MergeRequestId::new(20215));
+    assert_eq!(merge_request.iid, 35);
     assert_eq!(merge_request.project_id, ProjectId::new(855));
-    assert_eq!(merge_request.title, "Migrate to reqwest");
-    assert_eq!(merge_request.description,
-               Some("Currently, we cannot use both `rust-gitlab` (depending on `hyper`'s SSL \
-                     support) and `libgit2` in the same application, because they require \
-                     different versions of `rust-openssl` (hyper: 0.7.x, libgit2: 0.9.x).\r\n(I \
-                     want to use the both libraries in my GitLab helper \
-                     application.)\r\n\r\nseanmonstar (hyper's author) recommends using reqwest \
-                     for HTTP clients.\r\n\r\nhttps://github.\
-                     com/hyperium/hyper/issues/907#issuecomment-255509020\r\n\r\n> reqwest: Be \
-                     the convenient, higher level Client crate. This will release very soon, \
-                     and depend on rust-native-tls. Everyone using hyper for a client should be \
-                     able to easily switch the reqwest, getting better TLS support immediately, \
-                     and a (as much as possible) not-breaking API, even as hyper v0.10 comes \
-                     out with its async Client.\r\n\r\nthoughts?\r\n\r\n(This MR is based on \
-                     !51 changes)"
-                   .to_string()));
-    assert_eq!(merge_request.state, MergeRequestState::Opened);
+    assert_eq!(merge_request.title, "gitlab: expose hook addition API");
+    assert_eq!(merge_request.description, Some("Fixes #5.".to_string()));
+    assert_eq!(merge_request.state, MergeRequestState::Merged);
     assert_eq!(merge_request.created_at,
-               UTC.ymd(2016, 12, 7)
-                   .and_hms_milli(14, 43, 31, 653));
+               UTC.ymd(2016, 10, 4)
+                   .and_hms_milli(19, 56, 43, 276));
     assert_eq!(merge_request.updated_at,
-               UTC.ymd(2016, 12, 7)
-                   .and_hms_milli(15, 45, 22, 184));
+               UTC.ymd(2016, 10, 4)
+                   .and_hms_milli(20, 18, 57, 940));
     assert_eq!(merge_request.target_branch, "master");
-    assert_eq!(merge_request.source_branch, "migrate-to-reqwest");
+    assert_eq!(merge_request.source_branch, "add_hook-api");
     assert_eq!(merge_request.upvotes, 0);
     assert_eq!(merge_request.downvotes, 0);
-    assert_eq!(merge_request.author.username, "gifnksm");
+    assert_eq!(merge_request.author.username, "ben.boeckel");
     assert_eq!(merge_request.author.web_url,
-               "https://gitlab.kitware.com/gifnksm");
-    assert_eq!(merge_request.author.name, "NAKASHIMA, Makoto");
+               "https://gitlab.kitware.com/ben.boeckel");
+    assert_eq!(merge_request.author.name, "Ben Boeckel");
     assert_eq!(merge_request.author.state, UserState::Active);
     assert_eq!(merge_request.author.avatar_url,
-               "https://secure.gravatar.com/avatar/4f544d7f9fc4ae2b04512317f1a06b6e?s=80&d=identicon");
-    assert_eq!(merge_request.author.id, UserId::new(1489));
-    assert!(merge_request.assignee.is_none());
-    assert_eq!(merge_request.source_project_id, ProjectId::new(1154));
+               "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+    assert_eq!(merge_request.author.id, UserId::new(13));
+    if let Some(ref assignee) = merge_request.assignee {
+        assert_eq!(assignee.username, "brad.king");
+        assert_eq!(assignee.web_url, "https://gitlab.kitware.com/brad.king");
+        assert_eq!(assignee.name, "Brad King");
+        assert_eq!(assignee.state, UserState::Active);
+        assert_eq!(assignee.avatar_url,
+                   "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon");
+        assert_eq!(assignee.id, UserId::new(10));
+    } else {
+        panic!("expected to have an assignee for the merge request");
+    }
+    assert_eq!(merge_request.source_project_id, ProjectId::new(856));
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
     assert_eq!(merge_request.work_in_progress, false);
@@ -270,14 +267,14 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.merge_when_build_succeeds, false);
     assert_eq!(merge_request.merge_status, MergeStatus::CanBeMerged);
     assert_eq!(merge_request.sha,
-               Some(ObjectId::new("f2784e0607d08e79b361ccf58a8379b04de2df35")));
+               Some(ObjectId::new("04e94ae667024a62a90179f395bfdc2b35f3efd2")));
     assert_eq!(merge_request.merge_commit_sha, None);
     assert_eq!(merge_request.subscribed, true);
-    assert_eq!(merge_request.user_notes_count, 7);
+    assert_eq!(merge_request.user_notes_count, 3);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
     assert_eq!(merge_request.web_url,
-               "https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/52");
+               "https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35");
 }
 
 #[test]
@@ -335,8 +332,8 @@ fn test_read_project() {
                UTC.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               UTC.ymd(2017, 1, 18)
-                   .and_hms_milli(17, 27, 17, 734));
+               UTC.ymd(2017, 4, 3)
+                   .and_hms_milli(13, 9, 26, 696));
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
     assert_eq!(project.creator_id, UserId::new(13));
@@ -345,11 +342,12 @@ fn test_read_project() {
     assert_eq!(project.namespace.id(),
                NamespaceId::Group(GroupId::new(498)));
     assert_eq!(project.namespace.kind, NamespaceKind::Group);
+    assert_eq!(project.namespace.full_path, "utils");
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.star_count, 0);
     assert_eq!(project.forks_count, 3);
-    assert_eq!(project.open_issues_count, Some(1));
+    assert_eq!(project.open_issues_count, Some(0));
     assert_eq!(project.public_builds, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_build_succeeds, Some(false));
@@ -378,20 +376,20 @@ fn test_read_project() {
 fn test_read_project_hook() {
     let project_hook: ProjectHook = read_test_file("project_hook");
 
-    assert_eq!(project_hook.id, HookId::new(887));
-    assert_eq!(project_hook.url, "http://kwrobot02:8080/event");
+    assert_eq!(project_hook.id, HookId::new(1262));
+    assert_eq!(project_hook.url, "http://kwrobot02:8082/gitlab.kitware.com");
     assert_eq!(project_hook.created_at,
-               UTC.ymd(2016, 6, 29)
-                   .and_hms_milli(17, 35, 15, 771));
+               UTC.ymd(2016, 12, 16)
+                   .and_hms_milli(16, 37, 24, 589));
     assert_eq!(project_hook.push_events, true);
     assert_eq!(project_hook.tag_push_events, true);
     assert_eq!(project_hook.issues_events, true);
     assert_eq!(project_hook.merge_requests_events, true);
     assert_eq!(project_hook.note_events, true);
-    assert_eq!(project_hook.enable_ssl_verification, false);
-    assert_eq!(project_hook.build_events, false);
-    assert_eq!(project_hook.pipeline_events, false);
-    assert_eq!(project_hook.wiki_page_events, false);
+    assert_eq!(project_hook.enable_ssl_verification, true);
+    assert_eq!(project_hook.build_events, true);
+    assert_eq!(project_hook.pipeline_events, true);
+    assert_eq!(project_hook.wiki_page_events, true);
 }
 
 #[test]
@@ -403,28 +401,34 @@ fn test_read_repo_branch() {
         assert_eq!(commit.author_email, "brad.king@kitware.com");
         assert_eq!(commit.author_name, "Brad King");
         assert_eq!(commit.authored_date,
-                   UTC.ymd(2016, 11, 11)
-                       .and_hms_milli(14, 59, 37, 0));
+                   UTC.ymd(2017, 3, 30)
+                       .and_hms_milli(19, 23, 11, 0));
         assert_eq!(commit.committed_date,
-                   UTC.ymd(2016, 11, 11)
-                       .and_hms_milli(14, 59, 37, 0));
+                   UTC.ymd(2017, 3, 30)
+                       .and_hms_milli(19, 23, 13, 0));
+        assert_eq!(commit.created_at,
+                   UTC.ymd(2017, 3, 30)
+                       .and_hms_milli(19, 23, 13, 0));
         assert_eq!(commit.committer_email, "kwrobot@kitware.com");
         assert_eq!(commit.committer_name, "Kitware Robot");
         assert_eq!(commit.id,
-                   ObjectId::new("a418466df1c8b4e676e97d7d8d0d3cdfb1336558"));
+                   ObjectId::new("06356d86ed28f28c99052338fad2b506214bf5f7"));
+        assert_eq!(commit.short_id, ObjectId::new("06356d86"));
         assert_eq!(commit.message,
-                   "Merge topic 'nullable-fields'\n\n370267d4 types: more nullable \
-                    fields\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nReviewed-by: Brad \
-                    King <brad.king@kitware.com>\nMerge-request: !47\n");
+                   "Merge topic 'release-0.817.1'\n\na0cfdfda cargo: prep for 0.817.1\nb6587827 \
+                    cargo: loosen the error-chain dependency\n9323c337 cargo: separate public and \
+                    private dependencies\n\nAcked-by: Kitware Robot \
+                    <kwrobot@kitware.com>\nReviewed-by: Brad King \
+                    <brad.king@kitware.com>\nMerge-request: !83\n");
         assert_eq!(commit.parent_ids,
                    vec![
-                        ObjectId::new("de4ac3cf96cb8a0893be22b03f5171d934f9d392"),
-                        ObjectId::new("370267d429821e0f4354cb43c52ee2053c2cb744"),
+                        ObjectId::new("a16142046f63bd2ed6d9ffe858013fb5c927539b"),
+                        ObjectId::new("a0cfdfdaa5caf7476c8b57c8ae23aa250f7b6711"),
                    ]);
     } else {
         panic!("expected to have a commit for the branch");
     }
-    assert_eq!(repo_branch.merged, None);
+    assert_eq!(repo_branch.merged, Some(false));
     assert_eq!(repo_branch.protected, Some(true));
     assert_eq!(repo_branch.developers_can_push, Some(false));
     assert_eq!(repo_branch.developers_can_merge, Some(false));
@@ -440,6 +444,8 @@ fn test_read_repo_commit_detail() {
     assert_eq!(repo_commit_detail.title, "Merge topic 'mr-awards'");
     assert_eq!(repo_commit_detail.author_name, "Brad King");
     assert_eq!(repo_commit_detail.author_email, "brad.king@kitware.com");
+    assert_eq!(repo_commit_detail.committer_name, "Kitware Robot");
+    assert_eq!(repo_commit_detail.committer_email, "kwrobot@kitware.com");
     assert_eq!(repo_commit_detail.created_at,
                UTC.ymd(2016, 11, 8)
                    .and_hms_milli(14, 30, 13, 0));
