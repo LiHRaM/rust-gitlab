@@ -1,6 +1,6 @@
 [package]
 name = "gitlab"
-version = "0.817.0"
+version = "0.817.1"
 authors = ["Ben Boeckel <ben.boeckel@kitware.com>"]
 license = "MIT/Apache-2.0"
 description = """
@@ -13,16 +13,17 @@ keywords = ["gitlab", "api"]
 categories = ["web-programming", "api-bindings"]
 
 [dependencies]
-chrono = { version = "~0.3", features = ["serde"] }
-error-chain = "~0.9"
 hyper = { version = "~0.10", default-features = false }
 itertools = "~0.5"
 log = "~0.3"
 reqwest = "~0.4"
-serde = "~0.9"
 serde_derive = "~0.9"
-serde_json = "~0.9"
 url = "^1.4"
+
+chrono = { version = "~0.3", features = ["serde"] }
+error-chain = ">= 0.9, < 0.11"
+serde = "~0.9"
+serde_json = "~0.9"
 
 [features]
 strict = []
