@@ -3,9 +3,9 @@
 This library implements an interface to communicate with a Gitlab instance. Not
 all API endpoints are implemented, but patches are welcome.
 
-The API is based off of the 8.17.0 API and will likely aggressively track new
-API additions, so the newest release may not support talking to older releases
-where fields have been added.
+The API is based off of the 9.0.0 v3 API and will likely aggressively track
+new API additions, so the newest release may not support talking to older
+releases where fields have been added.
 
 All API types should be implemented in the [types](src/types.rs) module. These
 types should generally be implemented based on the `lib/api/entities.rb`
@@ -37,7 +37,7 @@ coverage. It is recommended to depend on the full version of the crate since
 types may change in patch-level updates in order to match Gitlab's interface:
 
 ```toml
-gitlab = "0.817.0"
+gitlab = "0.900.0"
 ```
 
 # API bugs
