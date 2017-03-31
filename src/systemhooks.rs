@@ -329,6 +329,8 @@ enum_serialize!(PushEvent -> "push event",
 pub struct PushSystemHook {
     /// The event which occurred.
     pub event_name: PushEvent,
+    /// XXX(gitlab): Bug in Gitlab; it should not send this.
+    object_kind: String,
     /// When the push occurred.
     pub created_at: DateTime<UTC>,
     /// When the push
@@ -362,6 +364,7 @@ pub struct PushSystemHook {
     pub commits: Vec<CommitHookAttrs>,
     /// The total number of commits pushed.
     pub total_commits_count: u64,
+    repository: Value,
 }
 
 #[derive(Debug, Clone)]

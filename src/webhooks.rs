@@ -86,6 +86,10 @@ pub struct ProjectHookAttrs {
     pub path_with_namespace: String,
     /// The default branch for the project.
     pub default_branch: String,
+    homepage: String,
+    http_url: String,
+    ssh_url: String,
+    url: String,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -150,6 +154,8 @@ pub struct CommitHookAttrs {
 pub struct PushHook {
     /// The event which occurred.
     pub object_kind: String,
+    /// XXX(gitlab): Bug in Gitlab; it should not send this.
+    event_name: String,
     /// The old object ID of the ref before the push.
     pub before: ObjectId,
     /// The new object ID of the ref after the push.
@@ -179,6 +185,7 @@ pub struct PushHook {
     pub commits: Vec<CommitHookAttrs>, // limited to 20 commits
     /// The total number of commits pushed.
     pub total_commits_count: u64,
+    repository: Value,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -383,6 +390,8 @@ pub struct MergeRequestHookAttrs {
     pub url: Option<String>,
     /// The type of action which caused the hook.
     pub action: Option<MergeRequestAction>,
+    pub time_estimate: u64,
+    lock_version: Option<u64>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -399,6 +408,7 @@ pub struct MergeRequestHook {
     pub object_attributes: MergeRequestHookAttrs,
     /// The assignee of the merge request.
     pub assignee: Option<UserHookAttrs>,
+    repository: Value,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -521,7 +531,9 @@ pub struct NoteHookAttrs {
     /// The type of entity the note is attached to.
     pub noteable_type: NoteType,
     // pub original_position: Option<PositionHookAttrs>,
+    original_position: Value,
     // pub position: Option<PositionHookAttrs>,
+    position: Value,
     /// The author of the note.
     pub author_id: UserId,
     /// When the note was created.
@@ -604,6 +616,7 @@ pub struct NoteHook {
     pub merge_request: Option<MergeRequestHookAttrs>,
     /// The snippet the note is associated with (for snippet notes).
     pub snippet: Option<SnippetHookAttrs>,
+    repository: Value,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
