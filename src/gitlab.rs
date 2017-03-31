@@ -160,12 +160,12 @@ impl Gitlab {
     }
 
     /// Get a project's hooks.
-    pub fn hooks(&self, project: ProjectId) -> Result<Vec<Hook>> {
+    pub fn hooks(&self, project: ProjectId) -> Result<Vec<ProjectHook>> {
         self._get_paged(&format!("projects/{}/hooks", project))
     }
 
     /// Get a project hook.
-    pub fn hook(&self, project: ProjectId, hook: HookId) -> Result<Hook> {
+    pub fn hook(&self, project: ProjectId, hook: HookId) -> Result<ProjectHook> {
         self._get(&format!("projects/{}/hooks/{}", project, hook))
     }
 
@@ -190,7 +190,7 @@ impl Gitlab {
     }
 
     /// Add a project hook.
-    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents) -> Result<Hook> {
+    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents) -> Result<ProjectHook> {
         let mut flags = Self::event_flags(events);
         flags.push(("url", url));
 
