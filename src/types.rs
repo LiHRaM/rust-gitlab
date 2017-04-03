@@ -197,8 +197,6 @@ pub struct UserPublic {
     /// The primary email address for the user.
     pub email: String,
 
-    /// The theme used by the user.
-    pub theme_id: ThemeId,
     /// The color scheme used by the user.
     pub color_scheme_id: ColorSchemeId,
     /// The number of projects the user may create.
