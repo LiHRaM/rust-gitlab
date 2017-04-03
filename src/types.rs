@@ -745,6 +745,7 @@ pub struct Group {
     pub request_access_enabled: bool,
     pub full_name: String,
     pub full_path: String,
+    pub parent_id: Option<GroupId>,
     /// Statistics about the group.
     pub statistics: Option<ProjectStatistics>,
 }
@@ -791,6 +792,7 @@ pub struct GroupDetail {
     pub request_access_enabled: bool,
     pub full_name: String,
     pub full_path: String,
+    pub parent_id: Option<GroupId>,
     /// Statistics about the group.
     pub statistics: Option<ProjectStatistics>,
 }
@@ -809,35 +811,10 @@ impl From<GroupDetail> for Group {
             request_access_enabled: detail.request_access_enabled,
             full_name: detail.full_name,
             full_path: detail.full_path,
+            parent_id: detail.parent_id,
             statistics: detail.statistics,
         }
     }
-}
-
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-/// A commit on at the head of a branch.
-///
-/// NOTE: This is an ad-hoc entity in Gitlab.
-pub struct Commit {
-    /// The object ID of the commit.
-    pub id: ObjectId,
-    /// The object IDs of the commit's parents.
-    pub parent_ids: Vec<ObjectId>,
-    /// The commit message.
-    pub message: String,
-    /// The commit's author's name.
-    pub author_name: String,
-    /// The commit's author's email address.
-    pub author_email: String,
-    /// The commit's authorship date.
-    pub authored_date: DateTime<UTC>,
-    /// The committer's name.
-    pub committer_name: String,
-    /// The committer's email address.
-    pub committer_email: String,
-    /// The commit's commit date.
-    pub committed_date: DateTime<UTC>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -847,7 +824,7 @@ pub struct RepoBranch {
     /// The name of the branch.
     pub name: String,
     /// The commit of the branch.
-    pub commit: Option<Commit>,
+    pub commit: Option<RepoCommit>,
     /// Whether the branch is merged into the main branch or not.
     pub merged: Option<bool>,
     /// Whether the branch is protected or not.
@@ -915,14 +892,20 @@ pub struct RepoCommit {
     pub short_id: ObjectId,
     /// The summary of the commit.
     pub title: String,
+    /// The commit ID of the parents of the commit.
+    pub parent_ids: Vec<ObjectId>,
     /// The commit author's name.
     pub author_name: String,
     /// The commit author's email address.
     pub author_email: String,
+    /// The commit's authorship date.
+    pub authored_date: DateTime<UTC>,
     /// The committer's name.
     pub committer_name: String,
     /// The committer's email address.
     pub committer_email: String,
+    /// The commit's commit date.
+    pub committed_date: DateTime<UTC>,
     pub created_at: DateTime<UTC>,
     /// The full commit message.
     pub message: String,
@@ -950,19 +933,23 @@ pub struct RepoCommitDetail {
     pub short_id: ObjectId,
     /// The summary of the commit.
     pub title: String,
+    /// The commit ID of the parents of the commit.
+    pub parent_ids: Vec<ObjectId>,
     /// The commit author's name.
     pub author_name: String,
     /// The commit author's email address.
     pub author_email: String,
+    /// The commit's authorship date.
+    pub authored_date: DateTime<UTC>,
+    /// The committer's name.
+    pub committer_name: String,
+    /// The committer's email address.
+    pub committer_email: String,
+    /// The commit's commit date.
+    pub committed_date: DateTime<UTC>,
     pub created_at: DateTime<UTC>,
     /// The full commit message.
     pub message: String,
-    /// The commit ID of the parents of the commit.
-    pub parent_ids: Vec<ObjectId>,
-    /// The commit's commit date.
-    pub committed_date: DateTime<UTC>,
-    /// The commit's authorship date.
-    pub authored_date: DateTime<UTC>,
     /// Statistics about the commit.
     pub stats: RepoCommitStats,
     // XXX: Investigate what this is.
@@ -992,22 +979,11 @@ pub struct ProjectSnippet {
     pub updated_at: DateTime<UTC>,
     /// When the snippet was created.
     pub created_at: DateTime<UTC>,
+    /// When the snippet was created.
+    pub expires_at: Option<DateTime<UTC>>,
     /// The URL of the snippet.
     pub web_url: String,
 }
-
-//class PersonalSnippet < Grape::Entity
-//  expose :id, :title, :file_name
-//  expose :author, using: Entities::UserBasic
-//  expose :updated_at, :created_at
-//
-//  expose :web_url do |snippet|
-//    Gitlab::UrlBuilder.build(snippet)
-//  end
-//  expose :raw_url do |snippet|
-//    Gitlab::UrlBuilder.build(snippet) + "/raw"
-//  end
-//end
 
 // This is just used as a common "base class" in Ruby.
 //#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -1715,6 +1691,7 @@ pub struct CommitStatus {
     pub finished_at: Option<DateTime<UTC>>,
     /// Whether the commit status is allowed to fail.
     pub allow_failure: bool,
+    pub coverage: Option<u64>,
     /// The author of the commit status.
     pub author: UserBasic,
 }
@@ -1815,10 +1792,6 @@ impl Event {
     }
 }
 
-//class ProjectGroupLink < Grape::Entity
-//  expose :id, :project_id, :group_id, :group_access
-//end
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The kinds of namespaces supported by Gitlab.
 pub enum NamespaceKind {
@@ -1852,6 +1825,7 @@ pub struct Namespace {
     pub name: String,
     /// The kind of the namespace.
     pub kind: NamespaceKind,
+    pub full_path: String,
 }
 
 impl Namespace {
@@ -1863,144 +1837,6 @@ impl Namespace {
         }
     }
 }
-
-//class ProjectService < Grape::Entity
-//  expose :id, :title, :created_at, :updated_at, :active
-//  expose :push_events, :issues_events, :merge_requests_events
-//  expose :tag_push_events, :note_events, :build_events, :pipeline_events
-//  # Expose serialized properties
-//  expose :properties do |service, options|
-//    field_names = service.fields.
-//      select { |field| options[:include_passwords] || field[:type] != 'password' }.
-//      map { |field| field[:name] }
-//    service.properties.slice(*field_names)
-//  end
-//end
-
-//class NotificationSetting < Grape::Entity
-//  expose :level
-//  expose :events, if: ->(notification_setting, _) { notification_setting.custom? } do
-//    ::NotificationSetting::EMAIL_EVENTS.each do |event|
-//      expose event
-//    end
-//  end
-//end
-
-//class GlobalNotificationSetting < NotificationSetting
-//  expose :notification_email do |notification_setting, options|
-//    notification_setting.user.notification_email
-//  end
-//end
-
-//class LabelBasic < Grape::Entity
-//  expose :id, :name, :color, :description
-//end
-
-//class Label < LabelBasic
-//  expose :open_issues_count, :closed_issues_count, :open_merge_requests_count
-//  expose :priority do |label, options|
-//    label.priority(options[:project])
-//  end
-
-//  expose :subscribed do |label, options|
-//    label.subscribed?(options[:current_user])
-//  end
-//end
-
-//class List < Grape::Entity
-//  expose :id
-//  expose :label, using Entities::LabelBasic
-//  expose :position
-//end
-
-//class Board < Grape::Entity
-//  expose :id
-//  expose :lists, using: Entities::List do |board|
-//    board.lists.destroyable
-//  end
-//end
-
-//class Compare < Grape::Entity
-//  expose :commit, using: Entities::RepoCommit do |compare, options|
-//    Commit.decorate(compare.commits, nil).last
-//  end
-
-//  expose :commits, using: Entities::RepoCommit do |compare, options|
-//    Commit.decorate(compare.commits, nil)
-//  end
-
-//  expose :diffs, using: Entities::RepoDiff do |compare, options|
-//    compare.diffs(all_diffs: true).to_a
-//  end
-
-//  expose :compare_timeout do |compare, options|
-//    compare.diffs.overflow?
-//  end
-
-//  expose :same, as: :compare_same_ref
-//end
-
-//class Contributor < Grape::Entity
-//  expose :name, :email, :commits, :additions, :deletions
-//end
-
-//class BroadcastMessage < Grape::Entity
-//  expose :message, :starts_at, :ends_at, :color, :font
-//end
-
-//class ApplicationSetting < Grape::Entity
-//  expose :id
-//  expose :default_projects_limit
-//  expose :signup_enabled
-//  expose :signin_enabled
-//  expose :gravatar_enabled
-//  expose :sign_in_text
-//  expose :after_sign_up_text
-//  expose :created_at
-//  expose :updated_at
-//  expose :home_page_url
-//  expose :default_branch_protection
-//  expose :restricted_visibility_levels
-//  expose :max_attachment_size
-//  expose :session_expire_delay
-//  expose :default_project_visibility
-//  expose :default_snippet_visibility
-//  expose :default_group_visibility
-//  expose :domain_whitelist
-//  expose :domain_blacklist_enabled
-//  expose :domain_blacklist
-//  expose :user_oauth_applications
-//  expose :after_sign_out_path
-//  expose :container_registry_token_expire_delay
-//  expose :repository_storage
-//  expose :repository_storages
-//  expose :koding_enabled
-//  expose :koding_url
-//  expose :plantuml_enabled
-//  expose :plantuml_url
-//  expose :terminal_max_session_time
-//end
-
-//class Release < Grape::Entity
-//  expose :tag, as: :tag_name
-//  expose :description
-//end
-
-//class RepoTag < Grape::Entity
-//  expose :name, :message
-
-//  expose :commit do |repo_tag, options|
-//    options[:project].repository.commit(repo_tag.dereferenced_target)
-//  end
-
-//  expose :release, using: Entities::Release do |repo_tag, options|
-//    options[:project].releases.find_by(tag: repo_tag.name)
-//  end
-//end
-
-//class TriggerRequest < Grape::Entity
-//  expose :id, :variables
-//end
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -2023,22 +1859,6 @@ pub struct Runner {
     /// The name of the runner.
     pub name: Option<String>,
 }
-
-//class RunnerDetails < Runner
-//  expose :tag_list
-//  expose :run_untagged
-//  expose :locked
-//  expose :version, :revision, :platform, :architecture
-//  expose :contacted_at
-//  expose :token, if: lambda { |runner, options| options[:current_user].is_admin? || !runner.is_shared? }
-//  expose :projects, with: Entities::BasicProjectDetails do |runner, options|
-//    if options[:current_user].is_admin?
-//      runner.projects
-//    else
-//      options[:current_user].authorized_projects.where(id: runner.projects)
-//    end
-//  end
-//end
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2090,79 +1910,6 @@ pub struct Build {
     pub pipeline: PipelineBasic,
 }
 
-//class Trigger < Grape::Entity
-//  expose :token, :created_at, :updated_at, :deleted_at, :last_used
-//end
-
-//class Variable < Grape::Entity
-//  expose :key, :value
-//end
-
-//class EnvironmentBasic < Grape::Entity
-//  expose :id, :name, :slug, :external_url
-//end
-
-//class Environment < EnvironmentBasic
-//  expose :project, using: Entities::Project
-//end
-
-//class Deployment < Grape::Entity
-//  expose :id, :iid, :ref, :sha, :created_at
-//  expose :user,        using: Entities::UserBasic
-//  expose :environment, using: Entities::EnvironmentBasic
-//  expose :deployable,  using: Entities::Build
-//end
-
-//class RepoLicense < Grape::Entity
-//  expose :key, :name, :nickname
-//  expose :featured, as: :popular
-//  expose :url, as: :html_url
-//  expose(:source_url) { |license| license.meta['source'] }
-//  expose(:description) { |license| license.meta['description'] }
-//  expose(:conditions) { |license| license.meta['conditions'] }
-//  expose(:permissions) { |license| license.meta['permissions'] }
-//  expose(:limitations) { |license| license.meta['limitations'] }
-//  expose :content
-//end
-
-//class TemplatesList < Grape::Entity
-//  expose :name
-//end
-
-//class Template < Grape::Entity
-//  expose :name, :content
-//end
-
-//class BroadcastMessage < Grape::Entity
-//  expose :id, :message, :starts_at, :ends_at, :color, :font
-//  expose :active?, as: :active
-//end
-
-//class Todo < Grape::Entity
-//  expose :id
-//  expose :project, using: Entities::BasicProjectDetails
-//  expose :author, using: Entities::UserBasic
-//  expose :action_name
-//  expose :target_type
-
-//  expose :target do |todo, options|
-//    Entities.const_get(todo.target_type).represent(todo.target, options)
-//  end
-
-//  expose :target_url do |todo, options|
-//    target_type   = todo.target_type.underscore
-//    target_url    = "namespace_project_#{target_type}_url"
-//    target_anchor = "note_#{todo.note_id}" if todo.note_id?
-
-//    Gitlab::Application.routes.url_helpers.public_send(target_url,
-//      todo.project.namespace, todo.project, todo.target, anchor: target_anchor)
-//  end
-
-//  expose :body
-//  expose :state
-//  expose :created_at
-//end
-
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe pipeline ID.
@@ -2183,25 +1930,3 @@ pub struct PipelineBasic {
     /// The status of the pipeline.
     pub status: StatusState,
 }
-
-//class Pipeline < Grape::Entity
-//  expose :before_sha, :tag, :yaml_errors
-
-//  expose :user, with: Entities::UserBasic
-//  expose :created_at, :updated_at, :started_at, :finished_at, :committed_at
-//  expose :duration
-//  expose :coverage
-//end
-
-//class MergeRequestDiff < Grape::Entity
-//  expose :id, :head_commit_sha, :base_commit_sha, :start_commit_sha,
-//    :created_at, :merge_request_id, :state, :real_size
-//end
-
-//class MergeRequestDiffFull < MergeRequestDiff
-//  expose :commits, using: Entities::RepoCommit
-
-//  expose :diffs, using: Entities::RepoDiff do |compare, _|
-//    compare.diffs(all_diffs: true).to_a
-//  end
-//end
