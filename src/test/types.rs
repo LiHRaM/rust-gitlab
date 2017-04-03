@@ -517,18 +517,17 @@ fn test_read_user_public() {
     assert_eq!(user_public.website_url, "");
     assert_eq!(user_public.organization, None);
     assert_eq!(user_public.last_sign_in_at,
-               Some(UTC.ymd(2016, 12, 7)
-                   .and_hms_milli(15, 5, 56, 167)));
+               Some(UTC.ymd(2017, 4, 3)
+                   .and_hms_milli(16, 23, 14, 579)));
     assert_eq!(user_public.confirmed_at,
                UTC.ymd(2015, 2, 26)
                    .and_hms_milli(17, 23, 28, 693));
     assert_eq!(user_public.email, "ben.boeckel@kitware.com");
-    assert_eq!(user_public.theme_id, ThemeId::new(2));
     assert_eq!(user_public.color_scheme_id, ColorSchemeId::new(2));
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(user_public.current_sign_in_at,
-               Some(UTC.ymd(2016, 12, 7)
-                   .and_hms_milli(16, 15, 50, 720)));
+               Some(UTC.ymd(2017, 4, 3)
+                   .and_hms_milli(17, 34, 33, 907)));
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);
     assert_eq!(user_public.can_create_project, true);

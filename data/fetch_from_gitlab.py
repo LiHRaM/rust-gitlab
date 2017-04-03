@@ -2,7 +2,6 @@
 
 import json
 import requests
-import sys
 
 
 def fetch_from_gitlab(token, endpoint, **kwargs):
@@ -32,18 +31,20 @@ MR_ID = 20215 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
 NOTE_ID = 177359
 
 
-token = sys.argv[1]
-write_result(token, 'user_full', '/user')
-write_result(token, 'user', '/users/%d' % USER)
-write_result(token, 'project', '/projects/%s' % REPO)
-write_result(token, 'project_hook', '/projects/%s/hooks' % REPO)
-write_result(token, 'member', '/groups/utils/members')
-write_result(token, 'repo_branch', '/projects/%s/repository/branches/master' % REPO)
-write_result(token, 'repo_commit_detail', '/projects/%s/repository/commits/%s' % (REPO, COMMIT))
-write_result(token, 'commit_note', '/projects/%s/repository/commits/%s/comments' % (REPO, COMMIT))
-write_result(token, 'commit_status', '/projects/%s/repository/commits/%s/statuses' % (REPO, COMMIT))
-write_result(token, 'issue', '/projects/%s/issues/%d' % (REPO, ISSUE_ID))
-write_result(token, 'merge_request', '/projects/%s/merge_requests/%d' % (REPO, MR_ID))
-write_result(token, 'issue_reference', '/projects/%s/merge_requests/%d/closes_issues' % (REPO, MR_ID))
-write_result(token, 'note', '/projects/%s/merge_requests/%d/notes' % (REPO, MR_ID))
-write_result(token, 'award_emoji', '/projects/%s/merge_requests/%d/notes/%d/award_emoji' % (REPO, MR_ID, NOTE_ID))
+if __name__ == '__main__':
+    import sys
+    token = sys.argv[1]
+    write_result(token, 'user_public', '/user')
+    write_result(token, 'user', '/users/%d' % USER)
+    write_result(token, 'project', '/projects/%s' % REPO)
+    write_result(token, 'project_hook', '/projects/%s/hooks' % REPO)
+    write_result(token, 'member', '/groups/utils/members')
+    write_result(token, 'repo_branch', '/projects/%s/repository/branches/master' % REPO)
+    write_result(token, 'repo_commit_detail', '/projects/%s/repository/commits/%s' % (REPO, COMMIT))
+    write_result(token, 'commit_note', '/projects/%s/repository/commits/%s/comments' % (REPO, COMMIT))
+    write_result(token, 'commit_status', '/projects/%s/repository/commits/%s/statuses' % (REPO, COMMIT))
+    write_result(token, 'issue', '/projects/%s/issues/%d' % (REPO, ISSUE_ID))
+    write_result(token, 'merge_request', '/projects/%s/merge_requests/%d' % (REPO, MR_ID))
+    write_result(token, 'issue_reference', '/projects/%s/merge_requests/%d/closes_issues' % (REPO, MR_ID))
+    write_result(token, 'note', '/projects/%s/merge_requests/%d/notes' % (REPO, MR_ID))
+    write_result(token, 'award_emoji', '/projects/%s/merge_requests/%d/notes/%d/award_emoji' % (REPO, MR_ID, NOTE_ID))
