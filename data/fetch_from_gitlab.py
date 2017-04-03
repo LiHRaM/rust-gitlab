@@ -34,7 +34,7 @@ NOTE_ID = 177359
 if __name__ == '__main__':
     import sys
     token = sys.argv[1]
-    write_result(token, 'user_full', '/user')
+    write_result(token, 'user_public', '/user')
     write_result(token, 'user', '/users/%d' % USER)
     write_result(token, 'project', '/projects/%s' % REPO)
     write_result(token, 'project_hook', '/projects/%s/hooks' % REPO)
