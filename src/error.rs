@@ -6,8 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-extern crate serde_json;
-use self::serde_json::Value;
+use crates::serde_json::Value;
 
 error_chain! {
     errors {
