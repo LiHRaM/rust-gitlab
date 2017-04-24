@@ -14,15 +14,10 @@
 //! problems when the types and names change inside of those. If found, issues should be filed
 //! upstream.
 
-extern crate chrono;
-use self::chrono::{DateTime, NaiveDate, UTC};
-
-extern crate serde;
-use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
-use self::serde::de::{Error, Unexpected};
-
-extern crate serde_json;
-use self::serde_json::Value;
+use crates::chrono::{DateTime, NaiveDate, UTC};
+use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
+use crates::serde::de::{Error, Unexpected};
+use crates::serde_json::{self, Value};
 
 use std::fmt::{self, Display, Formatter};
 

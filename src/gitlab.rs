@@ -6,22 +6,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-extern crate itertools;
-use self::itertools::Itertools;
-
-extern crate reqwest;
-use self::reqwest::{Client, Method, RequestBuilder, Url};
-
-extern crate serde;
-use self::serde::{Deserialize, Deserializer, Serializer};
-use self::serde::de::Error as SerdeError;
-use self::serde::de::Unexpected;
-use self::serde::ser::Serialize;
-
-extern crate serde_json;
-
-extern crate url;
-use self::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
+use crates::itertools::Itertools;
+use crates::reqwest::{Client, Method, RequestBuilder, Url};
+use crates::serde::{Deserialize, Deserializer, Serializer};
+use crates::serde::de::Error as SerdeError;
+use crates::serde::de::Unexpected;
+use crates::serde::ser::Serialize;
+use crates::serde_json;
+use crates::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 
 use error::*;
 use types::*;

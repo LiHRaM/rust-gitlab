@@ -22,6 +22,21 @@ extern crate log;
 #[macro_use]
 extern crate serde_derive;
 
+mod crates {
+    // public
+    pub extern crate chrono;
+    // pub extern crate error_chain;
+    pub extern crate serde;
+    pub extern crate serde_json;
+
+    // private
+    pub extern crate hyper;
+    pub extern crate itertools;
+    pub extern crate log;
+    pub extern crate reqwest;
+    pub extern crate url;
+}
+
 mod error;
 #[macro_use]
 mod macros;

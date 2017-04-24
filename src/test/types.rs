@@ -6,14 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-extern crate chrono;
-use self::chrono::{TimeZone, UTC};
-
-extern crate serde;
-use self::serde::Deserialize;
-
-extern crate serde_json;
-use self::serde_json::from_reader;
+use crates::chrono::{TimeZone, UTC};
+use crates::serde::Deserialize;
+use crates::serde_json::from_reader;
 
 use types::*;
 
