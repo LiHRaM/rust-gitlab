@@ -20,7 +20,7 @@ reqwest = "~0.4"
 serde_derive = "~0.9"
 url = "^1.4"
 
-chrono = { version = "~0.3", features = ["serde"] }
+chrono = { version = "=0.3.0", features = ["serde"] }
 error-chain = ">= 0.9, < 0.11"
 serde = "~0.9"
 serde_json = "~0.9"
