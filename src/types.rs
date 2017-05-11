@@ -187,6 +187,8 @@ pub struct UserPublic {
 
     /// When the user last logged in.
     pub last_sign_in_at: Option<DateTime<UTC>>,
+    /// When the user last made an action.
+    pub last_activity_on: Option<NaiveDate>,
     /// When the user's account was confirmed.
     pub confirmed_at: DateTime<UTC>,
     /// The primary email address for the user.
