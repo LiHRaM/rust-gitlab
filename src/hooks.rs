@@ -29,8 +29,10 @@ pub enum GitlabHook {
     Web(WebHook),
 }
 
-impl Deserialize for GitlabHook {
-    fn deserialize<D: Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+impl<'de> Deserialize<'de> for GitlabHook {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>,
+    {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         // Look for `object_kind` first because some web hooks also have `event_name` which would

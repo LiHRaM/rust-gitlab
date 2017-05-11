@@ -54,9 +54,9 @@ macro_rules! enum_serialize {
             }
         }
 
-        impl Deserialize for $name {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
-                where D: Deserializer,
+                where D: Deserializer<'de>,
             {
                 let val = String::deserialize(deserializer)?;
 

@@ -34,8 +34,10 @@ impl Serialize for HookDate {
     }
 }
 
-impl Deserialize for HookDate {
-    fn deserialize<D: Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+impl<'de> Deserialize<'de> for HookDate {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>,
+    {
         let val = String::deserialize(deserializer)?;
 
         UTC.datetime_from_str(&val, "%Y-%m-%d %H:%M:%S UTC")
@@ -733,8 +735,10 @@ pub enum WebHook {
     WikiPage(WikiPageHook),
 }
 
-impl Deserialize for WebHook {
-    fn deserialize<D: Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+impl<'de> Deserialize<'de> for WebHook {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>,
+    {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         let object_kind = match val.pointer("/object_kind") {

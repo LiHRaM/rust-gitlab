@@ -381,8 +381,10 @@ pub enum SystemHook {
     Push(PushSystemHook),
 }
 
-impl Deserialize for SystemHook {
-    fn deserialize<D: Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+impl<'de> Deserialize<'de> for SystemHook {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>,
+    {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         let event_name = match val.pointer("/event_name") {

@@ -7,14 +7,14 @@
 // except according to those terms.
 
 use crates::chrono::{TimeZone, UTC};
-use crates::serde::Deserialize;
+use crates::serde::de::DeserializeOwned;
 use crates::serde_json::from_reader;
 
 use types::*;
 
 use std::fs::File;
 
-fn read_test_file<T: Deserialize>(name: &str) -> T {
+fn read_test_file<T: DeserializeOwned>(name: &str) -> T {
     let fin = File::open(format!(concat!(env!("CARGO_MANIFEST_DIR"), "/data/{}.json"), name))
         .unwrap();
 

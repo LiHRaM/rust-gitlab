@@ -16,7 +16,7 @@
 
 use crates::chrono::{DateTime, NaiveDate, UTC};
 use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
-use crates::serde::de::{Error, Unexpected};
+use crates::serde::de::{DeserializeOwned, Error, Unexpected};
 use crates::serde_json::{self, Value};
 
 use std::fmt::{self, Display, Formatter};
@@ -74,8 +74,8 @@ pub struct UserBasic {
 /// This is used to allow (direct) user queries to return the right information because
 /// administrator users receive additional information for all user queries versus
 /// non-administrator users.
-pub trait UserResult: Deserialize {}
-impl<T: Deserialize + Into<UserBasic>> UserResult for T {}
+pub trait UserResult: DeserializeOwned {}
+impl<T: DeserializeOwned + Into<UserBasic>> UserResult for T {}
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1171,8 +1171,10 @@ impl Serialize for IssueReference {
     }
 }
 
-impl Deserialize for IssueReference {
-    fn deserialize<D: Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+impl<'de> Deserialize<'de> for IssueReference {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>,
+    {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         serde_json::from_value::<Issue>(val.clone())
