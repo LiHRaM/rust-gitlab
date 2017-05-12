@@ -6,15 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crates::chrono::{TimeZone, UTC};
-use crates::serde::Deserialize;
+use crates::chrono::{NaiveDate, TimeZone, UTC};
+use crates::serde::de::DeserializeOwned;
 use crates::serde_json::from_reader;
 
 use types::*;
 
 use std::fs::File;
 
-fn read_test_file<T: Deserialize>(name: &str) -> T {
+fn read_test_file<T: DeserializeOwned>(name: &str) -> T {
     let fin = File::open(format!(concat!(env!("CARGO_MANIFEST_DIR"), "/data/{}.json"), name))
         .unwrap();
 
@@ -327,8 +327,8 @@ fn test_read_project() {
                UTC.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               UTC.ymd(2017, 4, 3)
-                   .and_hms_milli(13, 9, 26, 696));
+               UTC.ymd(2017, 5, 5)
+                   .and_hms_milli(19, 37, 36, 901));
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
     assert_eq!(project.creator_id, UserId::new(13));
@@ -396,29 +396,28 @@ fn test_read_repo_branch() {
         assert_eq!(commit.author_email, "brad.king@kitware.com");
         assert_eq!(commit.author_name, "Brad King");
         assert_eq!(commit.authored_date,
-                   UTC.ymd(2017, 3, 30)
-                       .and_hms_milli(19, 23, 11, 0));
+                   UTC.ymd(2017, 4, 24)
+                       .and_hms_milli(15, 13, 24, 0));
         assert_eq!(commit.committed_date,
-                   UTC.ymd(2017, 3, 30)
-                       .and_hms_milli(19, 23, 13, 0));
+                   UTC.ymd(2017, 4, 24)
+                       .and_hms_milli(15, 13, 28, 0));
         assert_eq!(commit.created_at,
-                   UTC.ymd(2017, 3, 30)
-                       .and_hms_milli(19, 23, 13, 0));
+                   UTC.ymd(2017, 4, 24)
+                       .and_hms_milli(15, 13, 28, 0));
         assert_eq!(commit.committer_email, "kwrobot@kitware.com");
         assert_eq!(commit.committer_name, "Kitware Robot");
         assert_eq!(commit.id,
-                   ObjectId::new("06356d86ed28f28c99052338fad2b506214bf5f7"));
-        assert_eq!(commit.short_id, ObjectId::new("06356d86"));
+                   ObjectId::new("1e402a90a98fb60455a9be6d33da872ebd63f184"));
+        assert_eq!(commit.short_id, ObjectId::new("1e402a90"));
+        assert_eq!(commit.title, "Merge topic 'mod-crates'");
         assert_eq!(commit.message,
-                   "Merge topic 'release-0.817.1'\n\na0cfdfda cargo: prep for 0.817.1\nb6587827 \
-                    cargo: loosen the error-chain dependency\n9323c337 cargo: separate public and \
-                    private dependencies\n\nAcked-by: Kitware Robot \
-                    <kwrobot@kitware.com>\nReviewed-by: Brad King \
-                    <brad.king@kitware.com>\nMerge-request: !83\n");
+                   "Merge topic 'mod-crates'\n\n19357a82 crates: add a module for importing \
+                    crates\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nMerge-request: \
+                    !86\n");
         assert_eq!(commit.parent_ids,
                    vec![
-                        ObjectId::new("a16142046f63bd2ed6d9ffe858013fb5c927539b"),
-                        ObjectId::new("a0cfdfdaa5caf7476c8b57c8ae23aa250f7b6711"),
+                        ObjectId::new("7cb21fade3321158cb5dbf85c41ed516889ff811"),
+                        ObjectId::new("19357a8271c394d9a8a01bbf9bc3c7b39c2820cb"),
                    ]);
     } else {
         panic!("expected to have a commit for the branch");
@@ -512,8 +511,10 @@ fn test_read_user_public() {
     assert_eq!(user_public.website_url, "");
     assert_eq!(user_public.organization, None);
     assert_eq!(user_public.last_sign_in_at,
-               Some(UTC.ymd(2017, 4, 3)
-                   .and_hms_milli(16, 23, 14, 579)));
+               Some(UTC.ymd(2017, 5, 11)
+                   .and_hms_milli(14, 37, 30, 977)));
+    assert_eq!(user_public.last_activity_on,
+               Some(NaiveDate::from_ymd(2017, 5, 10)));
     assert_eq!(user_public.confirmed_at,
                UTC.ymd(2015, 2, 26)
                    .and_hms_milli(17, 23, 28, 693));
@@ -521,8 +522,8 @@ fn test_read_user_public() {
     assert_eq!(user_public.color_scheme_id, ColorSchemeId::new(2));
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(user_public.current_sign_in_at,
-               Some(UTC.ymd(2017, 4, 3)
-                   .and_hms_milli(17, 34, 33, 907)));
+               Some(UTC.ymd(2017, 5, 11)
+                   .and_hms_milli(17, 11, 30, 649)));
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);
     assert_eq!(user_public.can_create_project, true);

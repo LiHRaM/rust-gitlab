@@ -10,7 +10,7 @@ use crates::itertools::Itertools;
 use crates::reqwest::{Client, Method, RequestBuilder, Url};
 use crates::serde::{Deserialize, Deserializer, Serializer};
 use crates::serde::de::Error as SerdeError;
-use crates::serde::de::Unexpected;
+use crates::serde::de::{DeserializeOwned, Unexpected};
 use crates::serde::ser::Serialize;
 use crates::serde_json;
 use crates::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
@@ -452,7 +452,7 @@ impl Gitlab {
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
     fn _comm<T>(&self, req: RequestBuilder) -> Result<T>
-        where T: Deserialize,
+        where T: DeserializeOwned,
     {
         let req = req.header(GitlabPrivateToken(self.token.to_string()));
         let rsp = req.send().chain_err(|| ErrorKind::Communication)?;
@@ -469,14 +469,16 @@ impl Gitlab {
     }
 
     /// Create a `GET` request to an API endpoint.
-    fn _get<T: Deserialize>(&self, url: &str) -> Result<T> {
+    fn _get<T>(&self, url: &str) -> Result<T>
+        where T: DeserializeOwned,
+    {
         let param: &[(&str, &str)] = &[];
         self._get_with_param(url, param)
     }
 
     /// Create a `GET` request to an API endpoint with query parameters.
     fn _get_with_param<T, I, K, V>(&self, url: &str, param: I) -> Result<T>
-        where T: Deserialize,
+        where T: DeserializeOwned,
               I: IntoIterator,
               I::Item: Borrow<(K, V)>,
               K: AsRef<str>,
@@ -488,14 +490,16 @@ impl Gitlab {
     }
 
     /// Create a `POST` request to an API endpoint.
-    fn _post<T: Deserialize>(&self, url: &str) -> Result<T> {
+    fn _post<T>(&self, url: &str) -> Result<T>
+        where T: DeserializeOwned,
+    {
         let param: &[(&str, &str)] = &[];
         self._post_with_param(url, param)
     }
 
     /// Create a `POST` request to an API endpoint with query parameters.
     fn _post_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
-        where T: Deserialize,
+        where T: DeserializeOwned,
               U: Serialize,
     {
         let full_url = self._mk_url(url)?;
@@ -504,14 +508,16 @@ impl Gitlab {
     }
 
     /// Create a `PUT` request to an API endpoint.
-    fn _put<T: Deserialize>(&self, url: &str) -> Result<T> {
+    fn _put<T>(&self, url: &str) -> Result<T>
+        where T: DeserializeOwned,
+    {
         let param: &[(&str, &str)] = &[];
         self._put_with_param(url, param)
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.
     fn _put_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
-        where T: Deserialize,
+        where T: DeserializeOwned,
               U: Serialize,
     {
         let full_url = self._mk_url(url)?;
@@ -520,14 +526,16 @@ impl Gitlab {
     }
 
     /// Handle paginated queries. Returns all results.
-    fn _get_paged<T: Deserialize>(&self, url: &str) -> Result<Vec<T>> {
+    fn _get_paged<T>(&self, url: &str) -> Result<Vec<T>>
+        where T: DeserializeOwned,
+    {
         let param: &[(&str, &str)] = &[];
         self._get_paged_with_param(url, param)
     }
 
     /// Handle paginated queries with query parameters. Returns all results.
     fn _get_paged_with_param<T, I, K, V>(&self, url: &str, param: I) -> Result<Vec<T>>
-        where T: Deserialize,
+        where T: DeserializeOwned,
               I: IntoIterator,
               I::Item: Borrow<(K, V)>,
               K: AsRef<str>,
