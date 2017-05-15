@@ -33,7 +33,9 @@ pub struct Gitlab {
 
 impl Debug for Gitlab {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Gitlab {{ {} }}", self.base_url)
+        f.debug_struct("Gitlab")
+            .field("base_url", &self.base_url)
+            .finish()
     }
 }
 
