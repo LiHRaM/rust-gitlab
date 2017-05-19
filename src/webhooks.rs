@@ -82,7 +82,7 @@ pub struct ProjectHookAttrs {
     /// The path to the project's repository with its namespace.
     pub path_with_namespace: String,
     /// The default branch for the project.
-    pub default_branch: String,
+    pub default_branch: Option<String>,
     homepage: String,
     http_url: String,
     ssh_url: String,
@@ -224,6 +224,8 @@ pub struct IssueHookAttrs {
     pub updated_at: HookDate,
     /// When the issue was deleted.
     pub deleted_at: Option<HookDate>,
+    /// When the issue was closed.
+    pub closed_at: Option<HookDate>,
     /// When the issue is due.
     pub due_date: Option<NaiveDate>,
     /// The ID of the user which last updated the issue.
@@ -242,6 +244,14 @@ pub struct IssueHookAttrs {
     pub iid: u64,
     /// Whether the issue is confidential or not.
     pub confidential: bool,
+    /// The time estimate, in seconds.
+    pub time_estimate: u64,
+    /// The total time spent, in seconds.
+    pub total_time_spent: u64,
+    /// The time estimate, as a human-readable string.
+    pub human_time_estimate: Option<String>,
+    /// The total time spent, as a human-readable string.
+    pub human_total_time_spent: Option<String>,
 
     // It seems that notes miss these properties?
     /// The URL of the issue.
