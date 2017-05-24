@@ -95,8 +95,6 @@ pub struct User {
     pub web_url: String,
     /// When the account was created.
     pub created_at: DateTime<UTC>,
-    /// Whether the user is an administrator or not.
-    pub is_admin: bool,
     /// Self-described biography of the user.
     pub bio: Option<String>,
     /// Geographic location of the user.
@@ -167,8 +165,6 @@ pub struct UserPublic {
     pub web_url: String,
     /// When the account was created.
     pub created_at: DateTime<UTC>,
-    /// Whether the user is an administrator or not.
-    pub is_admin: bool,
     /// Self-described biography of the user.
     pub bio: Option<String>,
     /// Geographic location of the user.
@@ -237,7 +233,6 @@ impl From<UserPublic> for User {
             avatar_url: user.avatar_url,
             web_url: user.web_url,
             created_at: user.created_at,
-            is_admin: user.is_admin,
             bio: user.bio,
             location: user.location,
             skype: user.skype,
@@ -1095,7 +1090,7 @@ pub struct Issue {
     /// The title of the issue.
     pub title: String,
     /// The description of the issue.
-    pub description: String,
+    pub description: Option<String>,
     /// The state of the issue.
     pub state: IssueState,
     /// When the issue was created.
