@@ -108,7 +108,7 @@ fn test_read_issue() {
     assert_eq!(issue.iid, 6);
     assert_eq!(issue.project_id, ProjectId::new(855));
     assert_eq!(issue.title, "fix documentation warnings");
-    assert_eq!(issue.description, "");
+    assert_eq!(issue.description, Some("".to_string()));
     assert_eq!(issue.state, IssueState::Closed);
     assert_eq!(issue.created_at,
                UTC.ymd(2016, 10, 30)
@@ -157,8 +157,8 @@ fn test_read_issue_reference() {
         assert_eq!(issue.project_id, ProjectId::new(855));
         assert_eq!(issue.title, "Add project hook APIs");
         assert_eq!(issue.description,
-                   "The workflow currently requires that the robot be able to register itself as \
-                    a webhook for new projects. An API needs added for this.\n\nCc: @brad.king");
+                   Some("The workflow currently requires that the robot be able to register itself as \
+                         a webhook for new projects. An API needs added for this.\n\nCc: @brad.king".to_string()));
         assert_eq!(issue.state, IssueState::Closed);
         assert_eq!(issue.created_at,
                    UTC.ymd(2016, 10, 4)
@@ -477,7 +477,6 @@ fn test_read_user() {
     assert_eq!(user.created_at,
                UTC.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 670));
-    assert_eq!(user.is_admin, true);
     assert_eq!(user.bio, Some("".to_string()));
     assert_eq!(user.location, None);
     assert_eq!(user.skype, "");
@@ -502,7 +501,6 @@ fn test_read_user_public() {
     assert_eq!(user_public.created_at,
                UTC.ymd(2015, 2, 26)
                    .and_hms_milli(17, 23, 28, 730));
-    assert_eq!(user_public.is_admin, false);
     assert_eq!(user_public.bio, None);
     assert_eq!(user_public.location, None);
     assert_eq!(user_public.skype, "");
