@@ -32,13 +32,14 @@ possible. Instead, the crate uses the following versioning scheme:
   * Gitlab 8.17 support → 0.817.x
   * Gitlab 9.0 support → 0.900.x
   * Gitlab 9.1 support → 0.901.x
+  * Gitlab 9.2 support → 0.902.x
 
 Minor versions may fix bugs, add API endpoint bindings, or improve webhook
 coverage. It is recommended to depend on the full version of the crate since
 types may change in patch-level updates in order to match Gitlab's interface:
 
 ```toml
-gitlab = "0.901.0"
+gitlab = "0.902.0"
 ```
 
 # API bugs
