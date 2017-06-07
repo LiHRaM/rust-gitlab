@@ -235,7 +235,7 @@ pub struct IssueHookAttrs {
     /// The branch name for the issue.
     pub branch_name: Option<String>,
     /// The description of the issue.
-    pub description: String,
+    pub description: Option<String>,
     /// The ID of the milestone of the issue.
     pub milestone_id: Option<MilestoneId>,
     /// The state of the issue.
