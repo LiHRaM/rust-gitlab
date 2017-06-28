@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crates::chrono::{NaiveDate, TimeZone, UTC};
+use crates::chrono::{NaiveDate, TimeZone, Utc};
 use crates::serde::de::DeserializeOwned;
 use crates::serde_json::from_reader;
 
@@ -36,10 +36,10 @@ fn test_read_award_emoji() {
                "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
     assert_eq!(award_emoji.user.id, UserId::new(13));
     assert_eq!(award_emoji.created_at,
-               UTC.ymd(2016, 12, 7)
+               Utc.ymd(2016, 12, 7)
                    .and_hms_milli(16, 23, 46, 742));
     assert_eq!(award_emoji.updated_at,
-               UTC.ymd(2016, 12, 7)
+               Utc.ymd(2016, 12, 7)
                    .and_hms_milli(16, 23, 46, 742));
     assert_eq!(award_emoji.awardable_id(),
                AwardableId::Note(NoteId::new(177359)));
@@ -63,7 +63,7 @@ fn test_read_commit_note() {
                "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
     assert_eq!(commit_note.author.id, UserId::new(13));
     assert_eq!(commit_note.created_at,
-               UTC.ymd(2016, 12, 7)
+               Utc.ymd(2016, 12, 7)
                    .and_hms_milli(16, 28, 33, 966));
 }
 
@@ -82,11 +82,11 @@ fn test_read_commit_status() {
                    .to_string()));
     assert_eq!(commit_status.description, Some("expected".to_string()));
     assert_eq!(commit_status.created_at,
-               UTC.ymd(2016, 11, 8)
+               Utc.ymd(2016, 11, 8)
                    .and_hms_milli(14, 35, 32, 627));
     assert_eq!(commit_status.started_at, None);
     assert_eq!(commit_status.finished_at,
-               Some(UTC.ymd(2016, 11, 8)
+               Some(Utc.ymd(2016, 11, 8)
                    .and_hms_milli(14, 35, 32, 629)));
     assert_eq!(commit_status.allow_failure, false);
     assert_eq!(commit_status.author.username, "buildbot");
@@ -111,10 +111,10 @@ fn test_read_issue() {
     assert_eq!(issue.description, Some("".to_string()));
     assert_eq!(issue.state, IssueState::Closed);
     assert_eq!(issue.created_at,
-               UTC.ymd(2016, 10, 30)
+               Utc.ymd(2016, 10, 30)
                    .and_hms_milli(18, 54, 28, 954));
     assert_eq!(issue.updated_at,
-               UTC.ymd(2017, 1, 13)
+               Utc.ymd(2017, 1, 13)
                    .and_hms_milli(21, 45, 20, 901));
     assert!(issue.labels.is_empty());
     assert!(issue.milestone.is_none());
@@ -161,10 +161,10 @@ fn test_read_issue_reference() {
                          a webhook for new projects. An API needs added for this.\n\nCc: @brad.king".to_string()));
         assert_eq!(issue.state, IssueState::Closed);
         assert_eq!(issue.created_at,
-                   UTC.ymd(2016, 10, 4)
+                   Utc.ymd(2016, 10, 4)
                        .and_hms_milli(18, 59, 37, 178));
         assert_eq!(issue.updated_at,
-                   UTC.ymd(2016, 10, 4)
+                   Utc.ymd(2016, 10, 4)
                        .and_hms_milli(20, 18, 57, 519));
         assert!(issue.labels.is_empty());
         assert!(issue.milestone.is_none());
@@ -226,10 +226,10 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.description, Some("Fixes #5.".to_string()));
     assert_eq!(merge_request.state, MergeRequestState::Merged);
     assert_eq!(merge_request.created_at,
-               UTC.ymd(2016, 10, 4)
+               Utc.ymd(2016, 10, 4)
                    .and_hms_milli(19, 56, 43, 276));
     assert_eq!(merge_request.updated_at,
-               UTC.ymd(2016, 10, 4)
+               Utc.ymd(2016, 10, 4)
                    .and_hms_milli(20, 18, 57, 940));
     assert_eq!(merge_request.target_branch, "master");
     assert_eq!(merge_request.source_branch, "add_hook-api");
@@ -288,10 +288,10 @@ fn test_read_note() {
                "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon");
     assert_eq!(note.author.id, UserId::new(10));
     assert_eq!(note.created_at,
-               UTC.ymd(2016, 10, 4)
+               Utc.ymd(2016, 10, 4)
                    .and_hms_milli(20, 18, 57, 786));
     assert_eq!(note.updated_at,
-               UTC.ymd(2016, 10, 4)
+               Utc.ymd(2016, 10, 4)
                    .and_hms_milli(20, 18, 57, 786));
     assert_eq!(note.system, true);
     assert_eq!(note.noteable_id(),
@@ -324,10 +324,10 @@ fn test_read_project() {
     assert_eq!(project.path_with_namespace, "utils/rust-gitlab");
     assert_eq!(project.container_registry_enabled, Some(true));
     assert_eq!(project.created_at,
-               UTC.ymd(2016, 6, 29)
+               Utc.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               UTC.ymd(2017, 5, 24)
+               Utc.ymd(2017, 5, 24)
                    .and_hms_milli(19, 40, 9, 941));
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
@@ -374,7 +374,7 @@ fn test_read_project_hook() {
     assert_eq!(project_hook.id, HookId::new(1262));
     assert_eq!(project_hook.url, "http://kwrobot02:8082/gitlab.kitware.com");
     assert_eq!(project_hook.created_at,
-               UTC.ymd(2016, 12, 16)
+               Utc.ymd(2016, 12, 16)
                    .and_hms_milli(16, 37, 24, 589));
     assert_eq!(project_hook.push_events, true);
     assert_eq!(project_hook.tag_push_events, true);
@@ -396,13 +396,13 @@ fn test_read_repo_branch() {
         assert_eq!(commit.author_email, "ben.boeckel@kitware.com");
         assert_eq!(commit.author_name, "Ben Boeckel");
         assert_eq!(commit.authored_date,
-                   UTC.ymd(2017, 5, 24)
+                   Utc.ymd(2017, 5, 24)
                        .and_hms_milli(19, 40, 9, 0));
         assert_eq!(commit.committed_date,
-                   UTC.ymd(2017, 5, 24)
+                   Utc.ymd(2017, 5, 24)
                        .and_hms_milli(19, 40, 14, 0));
         assert_eq!(commit.created_at,
-                   UTC.ymd(2017, 5, 24)
+                   Utc.ymd(2017, 5, 24)
                        .and_hms_milli(19, 40, 14, 0));
         assert_eq!(commit.committer_email, "kwrobot@kitware.com");
         assert_eq!(commit.committer_name, "Kitware Robot");
@@ -439,7 +439,7 @@ fn test_read_repo_commit_detail() {
     assert_eq!(repo_commit_detail.committer_name, "Kitware Robot");
     assert_eq!(repo_commit_detail.committer_email, "kwrobot@kitware.com");
     assert_eq!(repo_commit_detail.created_at,
-               UTC.ymd(2016, 11, 8)
+               Utc.ymd(2016, 11, 8)
                    .and_hms_milli(14, 30, 13, 0));
     assert_eq!(repo_commit_detail.message,
                "Merge topic 'mr-awards'\n\na222c553 gitlab: add a method for MR award \
@@ -451,10 +451,10 @@ fn test_read_repo_commit_detail() {
                    ObjectId::new("a222c5539569cda6999b8069f1e51a5202c30711"),
                ]);
     assert_eq!(repo_commit_detail.committed_date,
-               UTC.ymd(2016, 11, 8)
+               Utc.ymd(2016, 11, 8)
                    .and_hms_milli(14, 30, 13, 0));
     assert_eq!(repo_commit_detail.authored_date,
-               UTC.ymd(2016, 11, 8)
+               Utc.ymd(2016, 11, 8)
                    .and_hms_milli(14, 30, 13, 0));
     assert_eq!(repo_commit_detail.stats.additions, 8);
     assert_eq!(repo_commit_detail.stats.deletions, 0);
@@ -473,7 +473,7 @@ fn test_read_user() {
                "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon");
     assert_eq!(user.web_url, "https://gitlab.kitware.com/kwrobot");
     assert_eq!(user.created_at,
-               UTC.ymd(2015, 2, 26)
+               Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 670));
     assert_eq!(user.bio, Some("".to_string()));
     assert_eq!(user.location, None);
@@ -497,7 +497,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.web_url,
                "https://gitlab.kitware.com/kwrobot");
     assert_eq!(user_public.created_at,
-               UTC.ymd(2015, 2, 26)
+               Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 670));
     assert_eq!(user_public.bio, Some("".to_string()));
     assert_eq!(user_public.location, None);
@@ -507,18 +507,18 @@ fn test_read_user_public() {
     assert_eq!(user_public.website_url, "");
     assert_eq!(user_public.organization, None);
     assert_eq!(user_public.last_sign_in_at,
-               Some(UTC.ymd(2017, 4, 27)
+               Some(Utc.ymd(2017, 4, 27)
                    .and_hms_milli(14, 59, 16, 823)));
     assert_eq!(user_public.last_activity_on,
                Some(NaiveDate::from_ymd(2017, 6, 6)));
     assert_eq!(user_public.confirmed_at,
-               UTC.ymd(2015, 2, 26)
+               Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 660));
     assert_eq!(user_public.email, "kwrobot@kitware.com");
     assert_eq!(user_public.color_scheme_id, ColorSchemeId::new(4));
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(user_public.current_sign_in_at,
-               Some(UTC.ymd(2017, 6, 5)
+               Some(Utc.ymd(2017, 6, 5)
                    .and_hms_milli(18, 46, 29, 512)));
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);

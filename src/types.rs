@@ -14,7 +14,7 @@
 //! problems when the types and names change inside of those. If found, issues should be filed
 //! upstream.
 
-use crates::chrono::{DateTime, NaiveDate, UTC};
+use crates::chrono::{DateTime, NaiveDate, Utc};
 use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde::de::{DeserializeOwned, Error, Unexpected};
 use crates::serde_json::{self, Value};
@@ -94,7 +94,7 @@ pub struct User {
     /// The URL of the user's profile page.
     pub web_url: String,
     /// When the account was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// Self-described biography of the user.
     pub bio: Option<String>,
     /// Geographic location of the user.
@@ -164,7 +164,7 @@ pub struct UserPublic {
     /// The URL of the user's profile page.
     pub web_url: String,
     /// When the account was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// Self-described biography of the user.
     pub bio: Option<String>,
     /// Geographic location of the user.
@@ -182,11 +182,11 @@ pub struct UserPublic {
     pub organization: Option<String>,
 
     /// When the user last logged in.
-    pub last_sign_in_at: Option<DateTime<UTC>>,
+    pub last_sign_in_at: Option<DateTime<Utc>>,
     /// When the user last made an action.
     pub last_activity_on: Option<NaiveDate>,
     /// When the user's account was confirmed.
-    pub confirmed_at: DateTime<UTC>,
+    pub confirmed_at: DateTime<Utc>,
     /// The primary email address for the user.
     pub email: String,
 
@@ -195,7 +195,7 @@ pub struct UserPublic {
     /// The number of projects the user may create.
     pub projects_limit: u64,
     /// When the user's current session started.
-    pub current_sign_in_at: Option<DateTime<UTC>>,
+    pub current_sign_in_at: Option<DateTime<Utc>>,
 
     /// List of identities associated with the user.
     pub identities: Vec<Identity>,
@@ -275,7 +275,7 @@ pub struct Hook {
     /// The URL to contact.
     pub url: String,
     /// When the hook was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// Whether the hook is contacted for push events.
     pub push_events: bool,
     /// Whether the hook is contacted for tag push events.
@@ -293,7 +293,7 @@ pub struct ProjectHook {
     /// The URL to contact.
     pub url: String,
     /// When the hook was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// The project associated with the hook.
     pub project_id: ProjectId,
     /// Whether the hook is contacted for push events.
@@ -516,9 +516,9 @@ pub struct Project {
     /// supported appear to return `null`.
     pub container_registry_enabled: Option<bool>,
     /// When the repository was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the last activity on the project occurred.
-    pub last_activity_at: DateTime<UTC>,
+    pub last_activity_at: DateTime<Utc>,
     /// Whether continuous integration shared runners are enabled.
     pub shared_runners_enabled: bool,
     /// Whether LFS object storage is enabled.
@@ -656,7 +656,7 @@ pub struct Member {
     /// The access level of the user.
     pub access_level: u64,
     /// When the membership expires.
-    pub expires_at: Option<DateTime<UTC>>,
+    pub expires_at: Option<DateTime<Utc>>,
 }
 
 impl From<Member> for UserBasic {
@@ -689,7 +689,7 @@ pub struct AccessRequester {
     /// The URL of the user's profile page.
     pub web_url: String,
     /// When the membership request was created.
-    pub requested_at: DateTime<UTC>,
+    pub requested_at: DateTime<Utc>,
 }
 
 impl From<AccessRequester> for UserBasic {
@@ -889,14 +889,14 @@ pub struct RepoCommit {
     /// The commit author's email address.
     pub author_email: String,
     /// The commit's authorship date.
-    pub authored_date: DateTime<UTC>,
+    pub authored_date: DateTime<Utc>,
     /// The committer's name.
     pub committer_name: String,
     /// The committer's email address.
     pub committer_email: String,
     /// The commit's commit date.
-    pub committed_date: DateTime<UTC>,
-    pub created_at: DateTime<UTC>,
+    pub committed_date: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
     /// The full commit message.
     pub message: String,
 }
@@ -930,14 +930,14 @@ pub struct RepoCommitDetail {
     /// The commit author's email address.
     pub author_email: String,
     /// The commit's authorship date.
-    pub authored_date: DateTime<UTC>,
+    pub authored_date: DateTime<Utc>,
     /// The committer's name.
     pub committer_name: String,
     /// The committer's email address.
     pub committer_email: String,
     /// The commit's commit date.
-    pub committed_date: DateTime<UTC>,
-    pub created_at: DateTime<UTC>,
+    pub committed_date: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
     /// The full commit message.
     pub message: String,
     /// Statistics about the commit.
@@ -966,11 +966,11 @@ pub struct ProjectSnippet {
     /// The author of the snippet.
     pub author: UserBasic,
     /// When the snippet was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// When the snippet was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the snippet was created.
-    pub expires_at: Option<DateTime<UTC>>,
+    pub expires_at: Option<DateTime<Utc>>,
     /// The URL of the snippet.
     pub web_url: String,
 }
@@ -985,8 +985,8 @@ pub struct ProjectSnippet {
 //    pub title: String,
 //    pub description: String,
 //    pub state: ProjectEntityState,
-//    pub created_at: DateTime<UTC>,
-//    pub updated_at: DateTime<UTC>,
+//    pub created_at: DateTime<Utc>,
+//    pub updated_at: DateTime<Utc>,
 //}
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -1046,9 +1046,9 @@ pub struct Milestone {
     /// The state of the milestone.
     pub state: MilestoneState,
     /// When the milestone was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the milestone was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// When the milestone is due.
     pub due_date: Option<NaiveDate>,
     /// When the milestone was started.
@@ -1094,9 +1094,9 @@ pub struct Issue {
     /// The state of the issue.
     pub state: IssueState,
     /// When the issue was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the issue was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The labels attached to the issue.
     pub labels: Vec<String>,
     /// The milestone of the issue.
@@ -1242,9 +1242,9 @@ pub struct MergeRequest {
     /// The state of the merge request.
     pub state: MergeRequestState,
     /// When the merge request was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the merge request was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The target branch of the merge request.
     pub target_branch: String,
     /// The source branch of the merge request.
@@ -1306,9 +1306,9 @@ pub struct MergeRequestChanges {
     /// The state of the merge request.
     pub state: MergeRequestState,
     /// When the merge request was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the merge request was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The target branch of the merge request.
     pub target_branch: String,
     /// The source branch of the merge request.
@@ -1406,7 +1406,7 @@ pub struct SshKey {
     /// The public half of the SSH key.
     pub key: String,
     /// When the key was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// Whether the key may push to repositories or not.
     pub can_push: bool,
 }
@@ -1422,7 +1422,7 @@ pub struct SshKeyWithUser {
     /// The public half of the SSH key.
     pub key: String,
     /// When the key was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// The user associated with the SSH key.
     pub user: UserPublic,
 }
@@ -1478,9 +1478,9 @@ pub struct Note {
     /// The author of the note.
     pub author: UserBasic,
     /// When the note was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the note was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// Whether the note was created by a user or in response to an external action.
     ///
     /// System notes include indications that the commit, issue, etc. was referenced elsewhere, a
@@ -1575,9 +1575,9 @@ pub struct AwardEmoji {
     /// The user which created the award.
     pub user: UserBasic,
     /// When the award was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the award was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     awardable_id: u64,
     /// The type of entity that is awarded.
     pub awardable_type: AwardableType,
@@ -1625,7 +1625,7 @@ pub struct CommitNote {
     /// The author of the note.
     pub author: UserBasic,
     /// When the note was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -1676,11 +1676,11 @@ pub struct CommitStatus {
     /// The description of the commit status.
     pub description: Option<String>,
     /// When the commit status was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the commit status started.
-    pub started_at: Option<DateTime<UTC>>,
+    pub started_at: Option<DateTime<Utc>>,
     /// When the commit status completed.
-    pub finished_at: Option<DateTime<UTC>>,
+    pub finished_at: Option<DateTime<Utc>>,
     /// Whether the commit status is allowed to fail.
     pub allow_failure: bool,
     pub coverage: Option<u64>,
@@ -1743,7 +1743,7 @@ pub struct Event {
     /// The title of the target.
     pub target_title: String,
     /// When the event was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     pub note: Option<Note>,
     /// The author of the event.
     pub author: Option<UserBasic>,
@@ -1885,11 +1885,11 @@ pub struct Build {
     pub tag: bool,
     pub coverage: Option<f32>,
     /// When the build was created or marked as pending.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the build was started.
-    pub started_at: Option<DateTime<UTC>>,
+    pub started_at: Option<DateTime<Utc>>,
     /// When the build completed.
-    pub finished_at: Option<DateTime<UTC>>,
+    pub finished_at: Option<DateTime<Utc>>,
     /// The user which ran the build.
     pub user: Option<User>,
     /// The artifact file uploaded from the build.
