@@ -89,7 +89,7 @@ impl Gitlab {
 
     /// Internal method to create a new Gitlab client.
     fn _new(protocol: &str, host: &str, token: String) -> Result<Self> {
-        let base_url = Url::parse(&format!("{}://{}/api/v3/", protocol, host))
+        let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))
             .chain_err(|| ErrorKind::UrlParse)?;
 
         let api = Gitlab {
@@ -322,17 +322,17 @@ impl Gitlab {
     }
 
     /// Get issues.
-    pub fn issue(&self, project: ProjectId, issue: IssueId) -> Result<Issue> {
+    pub fn issue(&self, project: ProjectId, issue: IssueInternalId) -> Result<Issue> {
         self._get(&format!("projects/{}/issues/{}", project, issue))
     }
 
     /// Get the notes from a issue.
-    pub fn issue_notes(&self, project: ProjectId, issue: IssueId) -> Result<Vec<Note>> {
+    pub fn issue_notes(&self, project: ProjectId, issue: IssueInternalId) -> Result<Vec<Note>> {
         self._get_paged(&format!("projects/{}/issues/{}/notes", project, issue))
     }
 
     /// Create a note on a issue.
-    pub fn create_issue_note(&self, project: ProjectId, issue: IssueId, content: &str)
+    pub fn create_issue_note(&self, project: ProjectId, issue: IssueInternalId, content: &str)
                              -> Result<Note> {
         let path = &format!("projects/{}/issues/{}/notes", project, issue);
 
@@ -352,13 +352,13 @@ impl Gitlab {
     }
 
     /// Get merge requests.
-    pub fn merge_request(&self, project: ProjectId, merge_request: MergeRequestId)
+    pub fn merge_request(&self, project: ProjectId, merge_request: MergeRequestInternalId)
                          -> Result<MergeRequest> {
         self._get(&format!("projects/{}/merge_requests/{}", project, merge_request))
     }
 
     /// Get the issues that will be closed when a merge request is merged.
-    pub fn merge_request_closes_issues(&self, project: ProjectId, merge_request: MergeRequestId)
+    pub fn merge_request_closes_issues(&self, project: ProjectId, merge_request: MergeRequestInternalId)
                                        -> Result<Vec<IssueReference>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/closes_issues",
                                  project,
@@ -366,7 +366,7 @@ impl Gitlab {
     }
 
     /// Get the notes from a merge request.
-    pub fn merge_request_notes(&self, project: ProjectId, merge_request: MergeRequestId)
+    pub fn merge_request_notes(&self, project: ProjectId, merge_request: MergeRequestInternalId)
                                -> Result<Vec<Note>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/notes",
                                  project,
@@ -374,7 +374,7 @@ impl Gitlab {
     }
 
     /// Award a merge request note with an award.
-    pub fn award_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId,
+    pub fn award_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestInternalId,
                                     note: NoteId, award: &str)
                                     -> Result<AwardEmoji> {
         let path = &format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
@@ -385,7 +385,7 @@ impl Gitlab {
     }
 
     /// Get the awards for a merge request.
-    pub fn merge_request_awards(&self, project: ProjectId, merge_request: MergeRequestId)
+    pub fn merge_request_awards(&self, project: ProjectId, merge_request: MergeRequestInternalId)
                                 -> Result<Vec<AwardEmoji>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/award_emoji",
                                  project,
@@ -393,7 +393,7 @@ impl Gitlab {
     }
 
     /// Get the awards for a merge request note.
-    pub fn merge_request_note_awards(&self, project: ProjectId, merge_request: MergeRequestId,
+    pub fn merge_request_note_awards(&self, project: ProjectId, merge_request: MergeRequestInternalId,
                                      note: NoteId)
                                      -> Result<Vec<AwardEmoji>> {
         self._get_paged(&format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
@@ -403,7 +403,7 @@ impl Gitlab {
     }
 
     /// Create a note on a merge request.
-    pub fn create_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestId,
+    pub fn create_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestInternalId,
                                      content: &str)
                                      -> Result<Note> {
         let path = &format!("projects/{}/merge_requests/{}/notes",
@@ -414,7 +414,7 @@ impl Gitlab {
 
     /// Get issues closed by a merge request.
     pub fn get_issues_closed_by_merge_request(&self, project: ProjectId,
-                                              merge_request: MergeRequestId)
+                                              merge_request: MergeRequestInternalId)
                                               -> Result<Vec<Issue>> {
         let path = &format!("projects/{}/merge_requests/{}/closes_issues",
                             project,
@@ -423,7 +423,7 @@ impl Gitlab {
     }
 
     /// Set the labels on an issue.
-    pub fn set_issue_labels<I, L>(&self, project: ProjectId, issue: IssueId, labels: I)
+    pub fn set_issue_labels<I, L>(&self, project: ProjectId, issue: IssueInternalId, labels: I)
                                   -> Result<Issue>
         where I: IntoIterator<Item = L>,
               L: Display,
