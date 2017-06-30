@@ -5,7 +5,7 @@ import requests
 
 
 def fetch_from_gitlab(token, endpoint, **kwargs):
-    url = 'https://gitlab.kitware.com/api/v3' + endpoint
+    url = 'https://gitlab.kitware.com/api/v4' + endpoint
     response = requests.get(url, headers={'PRIVATE-TOKEN': token}, params=kwargs)
     return response.json()
 
@@ -26,8 +26,8 @@ def write_result(token, name, endpoint):
 REPO = 'utils%2Frust-gitlab'
 USER = 11 # kwrobot
 COMMIT = 'de4ac3cf96cb8a0893be22b03f5171d934f9d392'
-ISSUE_ID = 69328 # https://gitlab.kitware.com/utils/rust-gitlab/issues/6
-MR_ID = 20215 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
+ISSUE_ID = 6 # https://gitlab.kitware.com/utils/rust-gitlab/issues/6
+MR_ID = 35 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
 NOTE_ID = 177359
 
 

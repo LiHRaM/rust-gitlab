@@ -186,7 +186,7 @@ pub struct UserPublic {
     /// When the user last made an action.
     pub last_activity_on: Option<NaiveDate>,
     /// When the user's account was confirmed.
-    pub confirmed_at: DateTime<Utc>,
+    pub confirmed_at: Option<DateTime<Utc>>,
     /// The primary email address for the user.
     pub email: String,
 
@@ -308,8 +308,8 @@ pub struct ProjectHook {
     pub note_events: bool,
     /// Whether the communication with the hook is verified using TLS certificates.
     pub enable_ssl_verification: bool,
-    /// Whether the hook is contacted for build events.
-    pub build_events: bool,
+    /// Whether the hook is contacted for job events.
+    pub job_events: bool,
     /// Whether the hook is contacted for pipeline events.
     pub pipeline_events: bool,
     /// Whether the hook is contacted for wiki page events.
@@ -332,8 +332,8 @@ impl From<ProjectHook> for Hook {
 #[derive(Debug, Default, Clone, Copy)]
 /// The events a webhook listener may receive.
 pub struct WebhookEvents {
-    /// Whether to receive build events of not.
-    build: bool,
+    /// Whether to receive job events of not.
+    job: bool,
     /// Whether to receive issue events of not.
     issues: bool,
     /// Whether to receive merge request events of not.
@@ -352,7 +352,7 @@ impl WebhookEvents {
     /// Create a new, empty webhook event set.
     pub fn new() -> Self {
         WebhookEvents {
-            build: false,
+            job: false,
             issues: false,
             merge_requests: false,
             note: false,
@@ -362,7 +362,7 @@ impl WebhookEvents {
         }
     }
 
-    with_event!{with_build, build}
+    with_event!{with_job, job}
     with_event!{with_issues, issues}
     with_event!{with_merge_requests, merge_requests}
     with_event!{with_note, note}
@@ -370,7 +370,7 @@ impl WebhookEvents {
     with_event!{with_push, push}
     with_event!{with_wiki_page, wiki_page}
 
-    get_event!{build}
+    get_event!{job}
     get_event!{issues}
     get_event!{merge_requests}
     get_event!{note}
@@ -409,28 +409,17 @@ pub struct BasicProjectDetails {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum VisibilityLevel {
     /// The project is visible to anonymous users.
-    Public = 20,
+    Public,
     /// The project is visible to logged in users.
-    Internal = 10,
+    Internal,
     /// The project is visible only to users with explicit access.
-    Private = 0,
+    Private,
 }
-
-impl From<VisibilityLevel> for u64 {
-    fn from(visibility: VisibilityLevel) -> Self {
-        match visibility {
-            VisibilityLevel::Public => 20,
-            VisibilityLevel::Internal => 10,
-            VisibilityLevel::Private => 0,
-        }
-    }
-}
-
-impl Display for VisibilityLevel {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}", Into::<u64>::into(self.clone()))
-    }
-}
+enum_serialize!(VisibilityLevel -> "visibility level",
+    Public => "public",
+    Internal => "internal",
+    Private => "private",
+);
 
 // TODO: enum for NotificationLevel
 
@@ -488,12 +477,10 @@ pub struct Project {
     pub default_branch: Option<String>,
     /// A list of tags for the project.
     pub tag_list: Vec<String>,
-    /// Whether the project is publicly visible or not.
-    pub public: bool,
     /// Whether the project is archived or not.
     pub archived: bool,
-    /// Integral value for the project's visibility.
-    pub visibility_level: u64,
+    /// Whether the project is public, internal, or private.
+    pub visibility: VisibilityLevel,
     /// The URL to clone the repository over SSH.
     pub ssh_url_to_repo: String,
     /// The URL to clone the repository over HTTPS.
@@ -539,18 +526,18 @@ pub struct Project {
     pub open_issues_count: Option<u64>,
     /// The continuous integration runner token (if enabled).
     pub runners_token: Option<String>,
-    /// Whether builds are publicly visible.
-    pub public_builds: bool,
+    /// Whether jobs are publicly visible.
+    pub public_jobs: bool,
     /// Groups the project is shared with.
     pub shared_with_groups: Vec<SharedGroup>,
-    /// Whether the project only enables the merge button if all builds are passing.
-    pub only_allow_merge_if_build_succeeds: Option<bool>,
+    /// Whether the project only enables the merge button if all pipelines are passing.
+    pub only_allow_merge_if_pipeline_succeeds: Option<bool>,
     /// Whether the project only enables the merge button if all discussions are resolved.
     pub only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
     /// Whether access to the project may be requested.
     pub request_access_enabled: bool,
-    /// Whether builds are enabled or not.
-    pub builds_enabled: bool,
+    /// Whether jobs are enabled or not.
+    pub jobs_enabled: bool,
     /// Whether issues are enabled or not.
     pub issues_enabled: bool,
     /// Whether merge requests are enabled or not.
@@ -579,8 +566,8 @@ pub struct ProjectStatistics {
     pub repository_size: u64,
     /// The size, in bytes, of uploaded LFS files.
     pub lfs_objects_size: u64,
-    /// The size, in bytes, of uploaded build artifacts.
-    pub build_artifacts_size: u64,
+    /// The size, in bytes, of uploaded job artifacts.
+    pub job_artifacts_size: u64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -656,7 +643,7 @@ pub struct Member {
     /// The access level of the user.
     pub access_level: u64,
     /// When the membership expires.
-    pub expires_at: Option<DateTime<Utc>>,
+    pub expires_at: Option<NaiveDate>,
 }
 
 impl From<Member> for UserBasic {
@@ -723,8 +710,8 @@ pub struct Group {
     pub path: String,
     /// The description of the group.
     pub description: Option<String>,
-    /// Integral value for the group's visibility.
-    pub visibility_level: u64,
+    /// Whether the project is public, internal, or private.
+    pub visibility: VisibilityLevel,
     /// Whether LFS is enabled for the group.
     pub lfs_enabled: bool,
     /// The URL to the group avatar.
@@ -737,7 +724,7 @@ pub struct Group {
     pub full_path: String,
     pub parent_id: Option<GroupId>,
     /// Statistics about the group.
-    pub statistics: Option<ProjectStatistics>,
+    pub statistics: Option<GroupStatistics>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -750,8 +737,8 @@ pub struct GroupStatistics {
     pub repository_size: u64,
     /// The size, in bytes, of uploaded LFS files in the group.
     pub lfs_objects_size: u64,
-    /// The size, in bytes, of uploaded build artifacts in the group.
-    pub build_artifacts_size: u64,
+    /// The size, in bytes, of uploaded job artifacts in the group.
+    pub job_artifacts_size: u64,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -766,8 +753,8 @@ pub struct GroupDetail {
     pub path: String,
     /// The description of the group.
     pub description: Option<String>,
-    /// Integral value for the group's visibility.
-    pub visibility_level: u64,
+    /// Whether the project is public, internal, or private.
+    pub visibility: VisibilityLevel,
     /// Whether LFS is enabled for the group.
     pub lfs_enabled: bool,
     /// The URL to the group avatar.
@@ -784,7 +771,7 @@ pub struct GroupDetail {
     pub full_path: String,
     pub parent_id: Option<GroupId>,
     /// Statistics about the group.
-    pub statistics: Option<ProjectStatistics>,
+    pub statistics: Option<GroupStatistics>,
 }
 
 impl From<GroupDetail> for Group {
@@ -794,7 +781,7 @@ impl From<GroupDetail> for Group {
             name: detail.name,
             path: detail.path,
             description: detail.description,
-            visibility_level: detail.visibility_level,
+            visibility: detail.visibility,
             lfs_enabled: detail.lfs_enabled,
             avatar_url: detail.avatar_url,
             web_url: detail.web_url,
@@ -980,7 +967,7 @@ pub struct ProjectSnippet {
 //#[derive(Serialize, Deserialize, Debug, Clone)]
 //pub struct ProjectEntity {
 //    pub id: ProjectEntityId,
-//    pub iid: u64,
+//    pub iid: ProjectEntityInternalId,
 //    pub project_id: ProjectId,
 //    pub title: String,
 //    pub description: String,
@@ -1016,6 +1003,12 @@ pub struct RepoDiff {
 pub struct MilestoneId(u64);
 impl_id!(MilestoneId);
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe milestone internal ID (internal to a project).
+pub struct MilestoneInternalId(u64);
+impl_id!(MilestoneInternalId);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The states a milestone may be in.
 pub enum MilestoneState {
@@ -1036,7 +1029,7 @@ pub struct Milestone {
     /// The ID of the milestone.
     pub id: MilestoneId,
     /// The user-visible ID of the milestone.
-    pub iid: u64,
+    pub iid: MilestoneInternalId,
     /// The ID of the project.
     pub project_id: ProjectId,
     /// The title of the milestone.
@@ -1061,6 +1054,12 @@ pub struct Milestone {
 pub struct IssueId(u64);
 impl_id!(IssueId);
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe issue internal ID (internal to a project).
+pub struct IssueInternalId(u64);
+impl_id!(IssueInternalId);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The states an issue may be in.
 pub enum IssueState {
@@ -1084,7 +1083,7 @@ pub struct Issue {
     /// The ID of the issue.
     pub id: IssueId,
     /// The user-visible ID of the issue.
-    pub iid: u64,
+    pub iid: IssueInternalId,
     /// The ID of the project.
     pub project_id: ProjectId,
     /// The title of the issue.
@@ -1105,8 +1104,12 @@ pub struct Issue {
     pub author: UserBasic,
     /// The assignee of the issue.
     pub assignee: Option<UserBasic>,
+    /// The assignees of the issue.
+    pub assignees: Option<Vec<UserBasic>>,
     /// Whether the current user is subscribed or not.
-    pub subscribed: bool,
+    /// GitLab does not include this in responses with lists of issues but
+    /// does on an individual issue.
+    pub subscribed: Option<bool>,
     /// The number of comments on the issue.
     pub user_notes_count: u64,
     /// The number of upvotes for the issue.
@@ -1187,6 +1190,12 @@ impl<'de> Deserialize<'de> for IssueReference {
 pub struct MergeRequestId(u64);
 impl_id!(MergeRequestId);
 
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe merge request internal ID (internal to a project).
+pub struct MergeRequestInternalId(u64);
+impl_id!(MergeRequestInternalId);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The status of the possible merge for a merge request.
 pub enum MergeStatus {
@@ -1232,7 +1241,7 @@ pub struct MergeRequest {
     /// The ID of the merge request.
     pub id: MergeRequestId,
     /// The user-visible ID of the merge request.
-    pub iid: u64,
+    pub iid: MergeRequestInternalId,
     /// The ID of the project.
     pub project_id: ProjectId,
     /// The title of the merge request.
@@ -1257,6 +1266,8 @@ pub struct MergeRequest {
     pub author: UserBasic,
     /// The assignee of the merge request.
     pub assignee: Option<UserBasic>,
+    /// The assignees of the merge request.
+    pub assignees: Option<Vec<UserBasic>>,
     /// The ID of the project hosting the source branch.
     pub source_project_id: ProjectId,
     /// The ID of the project hosting the target branch.
@@ -1267,8 +1278,8 @@ pub struct MergeRequest {
     pub work_in_progress: bool,
     /// The milestone of the merge request.
     pub milestone: Option<Milestone>,
-    /// Whether the merge request will be merged once all builds succeed or not.
-    pub merge_when_build_succeeds: bool,
+    /// Whether the merge request will be merged once all pipelines succeed or not.
+    pub merge_when_pipeline_succeeds: bool,
     /// The status of the merge request.
     pub merge_status: MergeStatus,
     /// The object ID of the head of the source branch.
@@ -1278,7 +1289,9 @@ pub struct MergeRequest {
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// Whether the current user is subscribed or not.
-    pub subscribed: bool,
+    /// GitLab does not include this in responses with lists of merge requests but
+    /// does on an individual merge request.
+    pub subscribed: Option<bool>,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
     /// Whether the merge request should be deleted or not (set by the merger).
@@ -1296,7 +1309,7 @@ pub struct MergeRequestChanges {
     /// The ID of the merge request.
     pub id: MergeRequestId,
     /// The user-visible ID of the merge request.
-    pub iid: u64,
+    pub iid: MergeRequestInternalId,
     /// The ID of the project.
     pub project_id: ProjectId,
     /// The title of the merge request.
@@ -1321,6 +1334,8 @@ pub struct MergeRequestChanges {
     pub author: UserBasic,
     /// The assignee of the merge request.
     pub assignee: Option<UserBasic>,
+    /// The assignees of the merge request.
+    pub assignees: Option<Vec<UserBasic>>,
     /// The ID of the project hosting the source branch.
     pub source_project_id: ProjectId,
     /// The ID of the project hosting the target branch.
@@ -1331,8 +1346,8 @@ pub struct MergeRequestChanges {
     pub work_in_progress: bool,
     /// The milestone of the merge request.
     pub milestone: Option<Milestone>,
-    /// Whether the merge request will be merged once all builds succeed or not.
-    pub merge_when_build_succeeds: bool,
+    /// Whether the merge request will be merged once all jobs succeed or not.
+    pub merge_when_pipeline_succeeds: bool,
     /// The status of the merge request.
     pub merge_status: MergeStatus,
     /// The object ID of the head of the source branch.
@@ -1341,8 +1356,9 @@ pub struct MergeRequestChanges {
     pub sha: Option<ObjectId>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
-    /// Whether the current user is subscribed or not.
-    pub subscribed: bool,
+    /// GitLab does not include this in responses with lists of merge requests but
+    /// does on an individual merge request.
+    pub subscribed: Option<bool>,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
     /// Whether the merge request should be deleted or not (set by the merger).
@@ -1371,12 +1387,13 @@ impl From<MergeRequestChanges> for MergeRequest {
             downvotes: mr.downvotes,
             author: mr.author,
             assignee: mr.assignee,
+            assignees: mr.assignees,
             source_project_id: mr.source_project_id,
             target_project_id: mr.target_project_id,
             labels: mr.labels,
             work_in_progress: mr.work_in_progress,
             milestone: mr.milestone,
-            merge_when_build_succeeds: mr.merge_when_build_succeeds,
+            merge_when_pipeline_succeeds: mr.merge_when_pipeline_succeeds,
             merge_status: mr.merge_status,
             sha: mr.sha,
             merge_commit_sha: mr.merge_commit_sha,
@@ -1490,12 +1507,6 @@ pub struct Note {
     noteable_id: Value,
     /// The type of entity the note is attached to.
     pub noteable_type: NoteType,
-    #[serde(rename="upvote?")]
-    /// Whether the note is an upvote for the entity or not.
-    pub upvote: bool,
-    #[serde(rename="downvote?")]
-    /// Whether the note is a downvote for the entity or not.
-    pub downvote: bool,
 }
 
 impl Note {
@@ -1854,8 +1865,8 @@ pub struct Runner {
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-/// An uploaded artifact from a build.
-pub struct BuildArtifactFile {
+/// An uploaded artifact from a job.
+pub struct JobArtifactFile {
     /// The name of the artifact.
     pub filename: String,
     /// The size (in bytes) of the artifact.
@@ -1864,41 +1875,41 @@ pub struct BuildArtifactFile {
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-/// Type-safe build ID.
-pub struct BuildId(u64);
-impl_id!(BuildId);
+/// Type-safe job ID.
+pub struct JobId(u64);
+impl_id!(JobId);
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-/// Information about a build in Gitlab CI.
-pub struct Build {
-    /// The ID of the build.
-    pub id: BuildId,
-    /// The status of the build.
+/// Information about a job in Gitlab CI.
+pub struct Job {
+    /// The ID of the job.
+    pub id: JobId,
+    /// The status of the job.
     pub status: StatusState,
     pub stage: String,
-    /// The name of the build.
+    /// The name of the job.
     pub name: String,
     #[serde(rename="ref")]
     /// The name of the reference that was tested.
     pub ref_: Option<String>,
     pub tag: bool,
     pub coverage: Option<f32>,
-    /// When the build was created or marked as pending.
+    /// When the job was created or marked as pending.
     pub created_at: DateTime<Utc>,
-    /// When the build was started.
+    /// When the job was started.
     pub started_at: Option<DateTime<Utc>>,
-    /// When the build completed.
+    /// When the job completed.
     pub finished_at: Option<DateTime<Utc>>,
-    /// The user which ran the build.
+    /// The user which ran the job.
     pub user: Option<User>,
-    /// The artifact file uploaded from the build.
-    pub artifacts_file: Option<BuildArtifactFile>,
-    /// The commit the build tested.
+    /// The artifact file uploaded from the job.
+    pub artifacts_file: Option<JobArtifactFile>,
+    /// The commit the job tested.
     pub commit: RepoCommit,
-    /// The runner which ran the build.
+    /// The runner which ran the job.
     pub runner: Option<Runner>,
-    /// The pipeline the build belongs to.
+    /// The pipeline the job belongs to.
     pub pipeline: PipelineBasic,
 }
 

@@ -174,7 +174,7 @@ impl Gitlab {
 
     /// HTTP parameters required to register to a project.
     fn event_flags(events: WebhookEvents) -> Vec<(&'static str, &'static str)> {
-        vec![("build_events", Self::bool_param_value(events.build())),
+        vec![("job_events", Self::bool_param_value(events.job())),
              ("issues_events", Self::bool_param_value(events.issues())),
              ("merge_requests_events", Self::bool_param_value(events.merge_requests())),
              ("note_events", Self::bool_param_value(events.note())),
@@ -288,12 +288,12 @@ impl Gitlab {
     }
 
     /// Get the latest builds of a commit.
-    pub fn commit_latest_builds(&self, project: ProjectId, commit: &str) -> Result<Vec<Build>> {
+    pub fn commit_latest_builds(&self, project: ProjectId, commit: &str) -> Result<Vec<Job>> {
         self._get_paged(&format!("projects/{}/repository/commits/{}/builds", project, commit))
     }
 
     /// Get the all builds of a commit.
-    pub fn commit_all_builds(&self, project: ProjectId, commit: &str) -> Result<Vec<Build>> {
+    pub fn commit_all_builds(&self, project: ProjectId, commit: &str) -> Result<Vec<Job>> {
         self._get_paged_with_param(&format!("projects/{}/repository/commits/{}/builds",
                                             project,
                                             commit),

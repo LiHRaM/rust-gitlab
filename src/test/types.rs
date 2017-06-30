@@ -95,7 +95,7 @@ fn test_read_commit_status() {
     assert_eq!(commit_status.author.name, "buildbot");
     assert_eq!(commit_status.author.state, UserState::Active);
     assert_eq!(commit_status.author.avatar_url,
-               "https://gitlab.kitware.com/uploads/user/avatar/35/buildbot-logo.png");
+               "https://gitlab.kitware.com/uploads/system/user/avatar/35/buildbot-logo.png");
     assert_eq!(commit_status.author.id, UserId::new(35));
     assert_eq!(commit_status.coverage, None);
 }
@@ -105,7 +105,7 @@ fn test_read_issue() {
     let issue: Issue = read_test_file("issue");
 
     assert_eq!(issue.id, IssueId::new(69328));
-    assert_eq!(issue.iid, 6);
+    assert_eq!(issue.iid, IssueInternalId::new(6));
     assert_eq!(issue.project_id, ProjectId::new(855));
     assert_eq!(issue.title, "fix documentation warnings");
     assert_eq!(issue.description, Some("".to_string()));
@@ -137,7 +137,20 @@ fn test_read_issue() {
     } else {
         panic!("expected to have an assignee for the issue");
     }
-    assert_eq!(issue.subscribed, true);
+    if let Some(ref assignees) = issue.assignees {
+        assert_eq!(assignees.len(), 1);
+        let assignee = &assignees[0];
+        assert_eq!(assignee.username, "ben.boeckel");
+        assert_eq!(assignee.web_url, "https://gitlab.kitware.com/ben.boeckel");
+        assert_eq!(assignee.name, "Ben Boeckel");
+        assert_eq!(assignee.state, UserState::Active);
+        assert_eq!(assignee.avatar_url,
+                   "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+        assert_eq!(assignee.id, UserId::new(13));
+    } else {
+        panic!("expected to have assignees for the issue");
+    }
+    assert_eq!(issue.subscribed, Some(true));
     assert_eq!(issue.user_notes_count, 0);
     assert_eq!(issue.upvotes, 0);
     assert_eq!(issue.downvotes, 0);
@@ -153,7 +166,7 @@ fn test_read_issue_reference() {
 
     if let IssueReference::Internal(issue) = issue_reference {
         assert_eq!(issue.id, IssueId::new(69075));
-        assert_eq!(issue.iid, 5);
+        assert_eq!(issue.iid, IssueInternalId::new(5));
         assert_eq!(issue.project_id, ProjectId::new(855));
         assert_eq!(issue.title, "Add project hook APIs");
         assert_eq!(issue.description,
@@ -187,7 +200,7 @@ fn test_read_issue_reference() {
         } else {
             panic!("expected to have an assignee for the issue");
         }
-        assert_eq!(issue.subscribed, false);
+        assert_eq!(issue.subscribed, None);
         assert_eq!(issue.user_notes_count, 0);
         assert_eq!(issue.upvotes, 0);
         assert_eq!(issue.downvotes, 0);
@@ -220,7 +233,7 @@ fn test_read_merge_request() {
     let merge_request: MergeRequest = read_test_file("merge_request");
 
     assert_eq!(merge_request.id, MergeRequestId::new(20215));
-    assert_eq!(merge_request.iid, 35);
+    assert_eq!(merge_request.iid, MergeRequestInternalId::new(35));
     assert_eq!(merge_request.project_id, ProjectId::new(855));
     assert_eq!(merge_request.title, "gitlab: expose hook addition API");
     assert_eq!(merge_request.description, Some("Fixes #5.".to_string()));
@@ -259,12 +272,12 @@ fn test_read_merge_request() {
     assert!(merge_request.labels.is_empty());
     assert_eq!(merge_request.work_in_progress, false);
     assert!(merge_request.milestone.is_none());
-    assert_eq!(merge_request.merge_when_build_succeeds, false);
+    assert_eq!(merge_request.merge_when_pipeline_succeeds, false);
     assert_eq!(merge_request.merge_status, MergeStatus::CanBeMerged);
     assert_eq!(merge_request.sha,
                Some(ObjectId::new("04e94ae667024a62a90179f395bfdc2b35f3efd2")));
     assert_eq!(merge_request.merge_commit_sha, None);
-    assert_eq!(merge_request.subscribed, true);
+    assert_eq!(merge_request.subscribed, Some(true));
     assert_eq!(merge_request.user_notes_count, 3);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
@@ -308,9 +321,8 @@ fn test_read_project() {
                Some("Rust library for communicating with a Gitlab instance.".to_string()));
     assert_eq!(project.default_branch, Some("master".to_string()));
     assert!(project.tag_list.is_empty());
-    assert_eq!(project.public, true);
     assert_eq!(project.archived, false);
-    assert_eq!(project.visibility_level, 20);
+    assert_eq!(project.visibility, VisibilityLevel::Public);
     assert_eq!(project.ssh_url_to_repo,
                "git@gitlab.kitware.com:utils/rust-gitlab.git");
     assert_eq!(project.http_url_to_repo,
@@ -327,8 +339,8 @@ fn test_read_project() {
                Utc.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               Utc.ymd(2017, 5, 24)
-                   .and_hms_milli(19, 40, 9, 941));
+               Utc.ymd(2017, 6, 19)
+                   .and_hms_milli(14, 17, 18, 412));
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
     assert_eq!(project.creator_id, UserId::new(13));
@@ -341,15 +353,15 @@ fn test_read_project() {
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.star_count, 0);
-    assert_eq!(project.forks_count, 4);
-    assert_eq!(project.open_issues_count, Some(0));
-    assert_eq!(project.public_builds, true);
+    assert_eq!(project.forks_count, 5);
+    assert_eq!(project.open_issues_count, Some(3));
+    assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
-    assert_eq!(project.only_allow_merge_if_build_succeeds, Some(false));
+    assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
     assert_eq!(project.only_allow_merge_if_all_discussions_are_resolved,
                None);
     assert_eq!(project.request_access_enabled, true);
-    assert_eq!(project.builds_enabled, false);
+    assert_eq!(project.jobs_enabled, false);
     assert_eq!(project.issues_enabled, true);
     assert_eq!(project.merge_requests_enabled, true);
     assert_eq!(project.snippets_enabled, false);
@@ -382,7 +394,7 @@ fn test_read_project_hook() {
     assert_eq!(project_hook.merge_requests_events, true);
     assert_eq!(project_hook.note_events, true);
     assert_eq!(project_hook.enable_ssl_verification, true);
-    assert_eq!(project_hook.build_events, true);
+    assert_eq!(project_hook.job_events, true);
     assert_eq!(project_hook.pipeline_events, true);
     assert_eq!(project_hook.wiki_page_events, true);
 }
@@ -393,30 +405,26 @@ fn test_read_repo_branch() {
 
     assert_eq!(repo_branch.name, "master");
     if let Some(ref commit) = repo_branch.commit {
-        assert_eq!(commit.author_email, "ben.boeckel@kitware.com");
-        assert_eq!(commit.author_name, "Ben Boeckel");
+        assert_eq!(commit.author_email, "brad.king@kitware.com");
+        assert_eq!(commit.author_name, "Brad King");
         assert_eq!(commit.authored_date,
-                   Utc.ymd(2017, 5, 24)
-                       .and_hms_milli(19, 40, 9, 0));
+                   Utc.ymd(2017, 6, 7)
+                       .and_hms_milli(23, 55, 39, 0));
         assert_eq!(commit.committed_date,
-                   Utc.ymd(2017, 5, 24)
-                       .and_hms_milli(19, 40, 14, 0));
+                   Utc.ymd(2017, 6, 7)
+                       .and_hms_milli(23, 55, 39, 0));
         assert_eq!(commit.created_at,
-                   Utc.ymd(2017, 5, 24)
-                       .and_hms_milli(19, 40, 14, 0));
-        assert_eq!(commit.committer_email, "kwrobot@kitware.com");
-        assert_eq!(commit.committer_name, "Kitware Robot");
+                   Utc.ymd(2017, 6, 7)
+                       .and_hms_milli(23, 55, 39, 0));
+        assert_eq!(commit.committer_email, "brad.king@kitware.com");
+        assert_eq!(commit.committer_name, "Brad King");
         assert_eq!(commit.id,
-                   ObjectId::new("936709be30f9b51bb7be316187641068efa765a9"));
-        assert_eq!(commit.short_id, ObjectId::new("936709be"));
-        assert_eq!(commit.title, "Merge topic 'gitlab-9.2-update'");
-        assert_eq!(commit.message,
-                   "Merge topic 'gitlab-9.2-update'\n\n861eb484 types: update for 9.2 \
-                    changes\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nReviewed-by: Ben \
-                    Boeckel <ben.boeckel@kitware.com>\nMerge-request: !91\n");
+                   ObjectId::new("b2bcc6ae59863b6c8e186ebe1de67df8ba7647ba"));
+        assert_eq!(commit.short_id, ObjectId::new("b2bcc6ae"));
+        assert_eq!(commit.title, " cargo: prep for 0.902.1");
+        assert_eq!(commit.message, " cargo: prep for 0.902.1\n");
         assert_eq!(commit.parent_ids,
-                   vec![ObjectId::new("b67a5f29bccd11ce94c267538c93c519dae0a1ed"),
-                        ObjectId::new("861eb484822c41220ff7adfee3b95aa10353414f")]);
+                   vec![ObjectId::new("2853b2549d433c638a895dd487add365930797d9")]);
     } else {
         panic!("expected to have a commit for the branch");
     }
@@ -510,10 +518,10 @@ fn test_read_user_public() {
                Some(Utc.ymd(2017, 4, 27)
                    .and_hms_milli(14, 59, 16, 823)));
     assert_eq!(user_public.last_activity_on,
-               Some(NaiveDate::from_ymd(2017, 6, 6)));
+               Some(NaiveDate::from_ymd(2017, 6, 30)));
     assert_eq!(user_public.confirmed_at,
-               Utc.ymd(2015, 2, 26)
-                   .and_hms_milli(15, 58, 34, 660));
+               Some(Utc.ymd(2015, 2, 26)
+                   .and_hms_milli(15, 58, 34, 660)));
     assert_eq!(user_public.email, "kwrobot@kitware.com");
     assert_eq!(user_public.color_scheme_id, ColorSchemeId::new(4));
     assert_eq!(user_public.projects_limit, 50);

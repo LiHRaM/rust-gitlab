@@ -18,7 +18,8 @@ use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde::de::{Error, Unexpected};
 use crates::serde_json::{self, Value};
 
-use types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, MergeStatus,
+use types::{JobId, IssueId, IssueInternalId, IssueState,
+            MergeRequestId, MergeRequestInternalId, MergeRequestState, MergeStatus,
             MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId, SnippetId, UserId};
 
 #[derive(Debug, Clone, Copy)]
@@ -241,7 +242,7 @@ pub struct IssueHookAttrs {
     /// The state of the issue.
     pub state: IssueState,
     /// The user-visible ID of the issue.
-    pub iid: u64,
+    pub iid: IssueInternalId,
     /// Whether the issue is confidential or not.
     pub confidential: bool,
     /// The time estimate, in seconds.
@@ -388,7 +389,7 @@ pub struct MergeRequestHookAttrs {
     /// The merge status of the merge request.
     pub merge_status: MergeStatus,
     /// The user-visible ID of the merge request.
-    pub iid: u64,
+    pub iid: MergeRequestInternalId,
     /// The description of the merge request.
     pub description: Option<String>,
 
@@ -691,7 +692,7 @@ pub struct BuildHook {
     /// The object ID that was built.
     pub sha: String,
     /// The ID of the build.
-    pub build_id: BuildId,
+    pub build_id: JobId,
     /// The name of the build.
     pub build_name: String,
     pub build_stage: String,
