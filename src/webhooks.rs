@@ -13,7 +13,7 @@
 //! Gitlab does not have consistent structures for its hooks, so they often change from
 //! version to version.
 
-use crates::chrono::{DateTime, NaiveDate, TimeZone, UTC};
+use crates::chrono::{DateTime, NaiveDate, TimeZone, Utc};
 use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde::de::{Error, Unexpected};
 use crates::serde_json::{self, Value};
@@ -26,7 +26,7 @@ use types::{BuildId, IssueId, IssueState, MergeRequestId, MergeRequestState, Mer
 ///
 /// Gitlab does not use a standard date format for dates in web hooks. This structure supports
 /// deserializing the formats that have been observed.
-pub struct HookDate(DateTime<UTC>);
+pub struct HookDate(DateTime<Utc>);
 
 impl Serialize for HookDate {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -40,21 +40,21 @@ impl<'de> Deserialize<'de> for HookDate {
     {
         let val = String::deserialize(deserializer)?;
 
-        UTC.datetime_from_str(&val, "%Y-%m-%d %H:%M:%S UTC")
+        Utc.datetime_from_str(&val, "%Y-%m-%d %H:%M:%S UTC")
             .or_else(|_| {
                 DateTime::parse_from_str(&val, "%Y-%m-%d %H:%M:%S %z")
                     .map_err(|err| {
                         D::Error::invalid_value(Unexpected::Other("hook date"),
                                                 &format!("{:?}", err).as_str())
                     })
-                    .map(|dt| dt.with_timezone(&UTC))
+                    .map(|dt| dt.with_timezone(&Utc))
             })
             .map(HookDate)
     }
 }
 
-impl AsRef<DateTime<UTC>> for HookDate {
-    fn as_ref(&self) -> &DateTime<UTC> {
+impl AsRef<DateTime<Utc>> for HookDate {
+    fn as_ref(&self) -> &DateTime<Utc> {
         &self.0
     }
 }
@@ -135,7 +135,7 @@ pub struct CommitHookAttrs {
     pub id: ObjectId,
     /// The commit message.
     pub message: String,
-    pub timestamp: DateTime<UTC>,
+    pub timestamp: DateTime<Utc>,
     /// The URL of the commit.
     pub url: String,
     /// The author of the commit.

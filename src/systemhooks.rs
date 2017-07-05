@@ -14,7 +14,7 @@
 //! Gitlab does not have consistent structures for its hooks, so they often change from
 //! version to version.
 
-use crates::chrono::{DateTime, UTC};
+use crates::chrono::{DateTime, Utc};
 use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde::de::{Error, Unexpected};
 use crates::serde_json::{self, Value};
@@ -64,9 +64,9 @@ pub struct ProjectSystemHook {
     /// The event which occurred.
     pub event_name: ProjectEvent,
     /// When the project was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the project was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
 
     /// The display name of the project.
     pub name: String,
@@ -140,9 +140,9 @@ pub struct ProjectMemberSystemHook {
     /// The event which occurred.
     pub event_name: ProjectMemberEvent,
     /// When the membership was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the membership was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The name of the project.
     pub project_name: String,
     /// The path of the project (used for URLs).
@@ -185,9 +185,9 @@ pub struct UserSystemHook {
     /// The event which occurred.
     pub event_name: UserEvent,
     /// When the user account was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the user account was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The name of the user.
     pub name: String,
     /// The email address of the user.
@@ -218,9 +218,9 @@ pub struct KeySystemHook {
     /// The event which occurred.
     pub event_name: KeyEvent,
     /// When the key was added.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the key was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The username of the user.
     pub username: String,
     /// The content of the key.
@@ -249,9 +249,9 @@ pub struct GroupSystemHook {
     /// The event which occurred.
     pub event_name: GroupEvent,
     /// When the group was created.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the group was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The name of the group.
     pub name: String,
     /// The path of the group (used for URLs).
@@ -284,9 +284,9 @@ pub struct GroupMemberSystemHook {
     /// The event which occurred.
     pub event_name: GroupMemberEvent,
     /// When the group membership was added.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the group membership was last updated.
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The name of the group.
     pub group_name: String,
     /// The path of the group (used for URLs).
@@ -327,9 +327,9 @@ pub struct PushSystemHook {
     /// XXX(gitlab): Bug in Gitlab; it should not send this.
     object_kind: String,
     /// When the push occurred.
-    pub created_at: DateTime<UTC>,
+    pub created_at: DateTime<Utc>,
     /// When the push
-    pub updated_at: DateTime<UTC>,
+    pub updated_at: DateTime<Utc>,
     /// The old object ID of the ref that was pushed.
     pub before: ObjectId,
     /// The new object ID of the ref that was pushed.
