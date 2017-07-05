@@ -3,7 +3,7 @@
 This library implements an interface to communicate with a Gitlab instance. Not
 all API endpoints are implemented, but patches are welcome.
 
-The API is based off of the 9.1.0 v3 API and will likely aggressively track
+The API is based off of the GitLab 9.2 API v4 and will likely aggressively track
 new API additions, so the newest release may not support talking to older
 releases where fields have been added.
 
@@ -39,7 +39,7 @@ coverage. It is recommended to depend on the full version of the crate since
 types may change in patch-level updates in order to match Gitlab's interface:
 
 ```toml
-gitlab = "0.902.1"
+gitlab = "0.902.2"
 ```
 
 # API bugs
