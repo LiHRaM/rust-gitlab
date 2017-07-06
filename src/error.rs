@@ -6,9 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crates::reqwest;
 use crates::serde_json::Value;
 
 error_chain! {
+    foreign_links {
+        Reqwest(reqwest::Error)
+            #[doc = "An error from the reqwest crate."];
+    }
+
     errors {
         /// Error occurred when communicating with Gitlab.
         Communication {

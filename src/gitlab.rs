@@ -25,6 +25,8 @@ use std::fmt::{self, Display, Debug};
 ///
 /// Separate users should use separate instances of this.
 pub struct Gitlab {
+    /// The client to use for API calls.
+    client: Client,
     /// The base URL to use for API calls.
     base_url: Url,
     /// The secret token to use when communicating with Gitlab.
@@ -93,6 +95,7 @@ impl Gitlab {
             .chain_err(|| ErrorKind::UrlParse)?;
 
         let api = Gitlab {
+            client: Client::new()?,
             base_url: base_url,
             token: token,
         };
@@ -458,10 +461,10 @@ impl Gitlab {
     }
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
-    fn _comm<T>(&self, req: RequestBuilder) -> Result<T>
+    fn _comm<T>(&self, mut req: RequestBuilder) -> Result<T>
         where T: DeserializeOwned,
     {
-        let req = req.header(GitlabPrivateToken(self.token.to_string()));
+        req.header(GitlabPrivateToken(self.token.to_string()));
         let rsp = req.send().chain_err(|| ErrorKind::Communication)?;
         if !rsp.status().is_success() {
             let v = serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize)?;
@@ -492,7 +495,7 @@ impl Gitlab {
               V: AsRef<str>,
     {
         let full_url = self._mk_url_with_param(url, param)?;
-        let req = Client::new().chain_err(|| ErrorKind::Communication)?.get(full_url);
+        let req = self.client.get(full_url)?;
         self._comm(req)
     }
 
@@ -510,7 +513,8 @@ impl Gitlab {
               U: Serialize,
     {
         let full_url = self._mk_url(url)?;
-        let req = Client::new().chain_err(|| ErrorKind::Communication)?.post(full_url).form(&param);
+        let mut req = self.client.post(full_url)?;
+        req.form(&param)?;
         self._comm(req)
     }
 
@@ -528,7 +532,8 @@ impl Gitlab {
               U: Serialize,
     {
         let full_url = self._mk_url(url)?;
-        let req = Client::new().chain_err(|| ErrorKind::Communication)?.request(Method::Put, full_url).form(&param);
+        let mut req = self.client.request(Method::Put, full_url)?;
+        req.form(&param)?;
         self._comm(req)
     }
 
@@ -561,7 +566,7 @@ impl Gitlab {
             let mut page_url = full_url.clone();
             page_url.query_pairs_mut()
                 .extend_pairs(&[("page", page_str), ("per_page", per_page_str)]);
-            let req = Client::new().chain_err(|| ErrorKind::Communication)?.get(page_url);
+            let req = self.client.get(page_url)?;
 
             let page: Vec<T> = self._comm(req)?;
             let page_len = page.len();
