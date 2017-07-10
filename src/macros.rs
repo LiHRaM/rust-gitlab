@@ -36,7 +36,7 @@ macro_rules! impl_id {
 }
 
 macro_rules! enum_serialize {
-    ( $name:ident -> $desc:expr, $( $value:ident => $str:expr, )+ ) => {
+    ( $name:ident -> $desc:expr, $( $value:ident => $str:expr $( ; $opt:expr )*, )+ ) => {
         impl $name {
             /// String representation of the variant.
             pub fn as_str(&self) -> &'static str {
@@ -61,7 +61,7 @@ macro_rules! enum_serialize {
                 let val = String::deserialize(deserializer)?;
 
                 match val.as_str() {
-                    $( $str => Ok($name::$value), )*
+                    $( $str $( | $opt )* => Ok($name::$value), )*
                     v => {
                         error!(target: "gitlab", concat!("unknown ", $desc, " from gitlab: {}"), v);
                         Err(D::Error::invalid_value(Unexpected::Other("enumeration value"),
