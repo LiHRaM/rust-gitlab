@@ -132,14 +132,7 @@ impl Gitlab {
 
     /// Get all owned projects.
     pub fn owned_projects(&self) -> Result<Vec<Project>> {
-        self._get_paged("projects/owned")
-    }
-
-    /// Get all projects.
-    ///
-    /// Requires administrator privileges.
-    pub fn all_projects(&self) -> Result<Vec<Project>> {
-        self._get_paged("projects/all")
+        self._get_paged_with_param("projects", &[("owned", "true")])
     }
 
     /// Find a project by id.
