@@ -434,6 +434,18 @@ impl Gitlab {
         self._put_with_param(path, &[("labels", labels.into_iter().join(","))])
     }
 
+    /// Set the labels on a merge request.
+    pub fn set_merge_request_labels<I, L>(&self, project: ProjectId, merge_request: MergeRequestInternalId, labels: I)
+                                  -> Result<MergeRequest>
+        where I: IntoIterator<Item = L>,
+              L: Display,
+    {
+        let path = &format!("projects/{}/merge_requests/{}",
+                            project,
+                            merge_request);
+        self._put_with_param(path, &[("labels", labels.into_iter().join(","))])
+    }
+
     /// Create a URL to an API endpoint.
     fn _mk_url(&self, url: &str) -> Result<Url> {
         debug!(target: "gitlab", "api call {}", url);
