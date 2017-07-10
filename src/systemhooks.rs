@@ -52,9 +52,9 @@ pub enum ProjectVisibility {
     Public,
 }
 enum_serialize!(ProjectVisibility -> "project visibility",
-    Internal => "internal",
-    Private => "private",
-    Public => "public",
+    Internal => "internal" ; "visibilitylevel|internal",
+    Private => "private" ; "visibilitylevel|private",
+    Public => "public" ; "visibilitylevel|public",
 );
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
