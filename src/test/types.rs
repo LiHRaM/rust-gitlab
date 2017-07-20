@@ -483,6 +483,7 @@ fn test_read_user() {
     assert_eq!(user.created_at,
                Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 670));
+    assert_eq!(user.is_admin, None);
     assert_eq!(user.bio, Some("".to_string()));
     assert_eq!(user.location, None);
     assert_eq!(user.skype, "");
@@ -507,6 +508,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.created_at,
                Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 670));
+    assert_eq!(user_public.is_admin, None);
     assert_eq!(user_public.bio, Some("".to_string()));
     assert_eq!(user_public.location, None);
     assert_eq!(user_public.skype, "");

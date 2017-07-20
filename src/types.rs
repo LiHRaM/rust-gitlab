@@ -95,6 +95,9 @@ pub struct User {
     pub web_url: String,
     /// When the account was created.
     pub created_at: DateTime<Utc>,
+    /// Whether the user is an administrator or not.
+    /// Only available when talking to GitLab as an admin.
+    pub is_admin: Option<bool>,
     /// Self-described biography of the user.
     pub bio: Option<String>,
     /// Geographic location of the user.
@@ -165,6 +168,9 @@ pub struct UserPublic {
     pub web_url: String,
     /// When the account was created.
     pub created_at: DateTime<Utc>,
+    /// Whether the user is an administrator or not.
+    /// Only available when talking to GitLab as an admin.
+    pub is_admin: Option<bool>,
     /// Self-described biography of the user.
     pub bio: Option<String>,
     /// Geographic location of the user.
@@ -233,6 +239,7 @@ impl From<UserPublic> for User {
             avatar_url: user.avatar_url,
             web_url: user.web_url,
             created_at: user.created_at,
+            is_admin: user.is_admin,
             bio: user.bio,
             location: user.location,
             skype: user.skype,
