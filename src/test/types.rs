@@ -114,8 +114,8 @@ fn test_read_issue() {
                Utc.ymd(2016, 10, 30)
                    .and_hms_milli(18, 54, 28, 954));
     assert_eq!(issue.updated_at,
-               Utc.ymd(2017, 1, 13)
-                   .and_hms_milli(21, 45, 20, 901));
+               Utc.ymd(2017, 7, 7)
+                   .and_hms_milli(6, 31, 03, 757));
     assert!(issue.labels.is_empty());
     assert!(issue.milestone.is_none());
     assert_eq!(issue.author.username, "ben.boeckel");
@@ -177,8 +177,8 @@ fn test_read_issue_reference() {
                    Utc.ymd(2016, 10, 4)
                        .and_hms_milli(18, 59, 37, 178));
         assert_eq!(issue.updated_at,
-                   Utc.ymd(2016, 10, 4)
-                       .and_hms_milli(20, 18, 57, 519));
+                   Utc.ymd(2017, 7, 7)
+                       .and_hms_milli(6, 31, 5, 370));
         assert!(issue.labels.is_empty());
         assert!(issue.milestone.is_none());
         assert_eq!(issue.author.username, "ben.boeckel");
@@ -339,8 +339,8 @@ fn test_read_project() {
                Utc.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               Utc.ymd(2017, 6, 19)
-                   .and_hms_milli(14, 17, 18, 412));
+               Utc.ymd(2017, 7, 20)
+                   .and_hms_milli(14, 48, 56, 344));
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
     assert_eq!(project.creator_id, UserId::new(13));
@@ -354,7 +354,7 @@ fn test_read_project() {
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.star_count, 0);
     assert_eq!(project.forks_count, 5);
-    assert_eq!(project.open_issues_count, Some(3));
+    assert_eq!(project.open_issues_count, Some(4));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
@@ -405,26 +405,35 @@ fn test_read_repo_branch() {
 
     assert_eq!(repo_branch.name, "master");
     if let Some(ref commit) = repo_branch.commit {
-        assert_eq!(commit.author_email, "brad.king@kitware.com");
-        assert_eq!(commit.author_name, "Brad King");
+        assert_eq!(commit.author_email, "ben.boeckel@kitware.com");
+        assert_eq!(commit.author_name, "Ben Boeckel");
         assert_eq!(commit.authored_date,
-                   Utc.ymd(2017, 6, 7)
-                       .and_hms_milli(23, 55, 39, 0));
+                   Utc.ymd(2017, 7, 10)
+                       .and_hms_milli(18, 39, 4, 0));
         assert_eq!(commit.committed_date,
-                   Utc.ymd(2017, 6, 7)
-                       .and_hms_milli(23, 55, 39, 0));
+                   Utc.ymd(2017, 7, 10)
+                       .and_hms_milli(18, 39, 6, 0));
         assert_eq!(commit.created_at,
-                   Utc.ymd(2017, 6, 7)
-                       .and_hms_milli(23, 55, 39, 0));
-        assert_eq!(commit.committer_email, "brad.king@kitware.com");
-        assert_eq!(commit.committer_name, "Brad King");
+                   Utc.ymd(2017, 7, 10)
+                       .and_hms_milli(18, 39, 6, 0));
+        assert_eq!(commit.committer_email, "kwrobot@kitware.com");
+        assert_eq!(commit.committer_name, "Kitware Robot");
         assert_eq!(commit.id,
-                   ObjectId::new("b2bcc6ae59863b6c8e186ebe1de67df8ba7647ba"));
-        assert_eq!(commit.short_id, ObjectId::new("b2bcc6ae"));
-        assert_eq!(commit.title, " cargo: prep for 0.902.1");
-        assert_eq!(commit.message, " cargo: prep for 0.902.1\n");
+                   ObjectId::new("a84836ab97dc687ca5a241205aff6a713255f767"));
+        assert_eq!(commit.short_id, ObjectId::new("a84836ab"));
+        assert_eq!(commit.title, "Merge topic 'gitlab-9.3'");
+        assert_eq!(commit.message,
+                   "Merge topic 'gitlab-9.3'\n\
+                    \n\
+                    e5a23653 systemhooks: update for 9.3 changes\n\
+                    \n\
+                    Acked-by: Kitware Robot <kwrobot@kitware.com>\n\
+                    Reviewed-by: Ben Boeckel <ben.boeckel@kitware.com>\n\
+                    Merge-request: !100\n\
+                    ");
         assert_eq!(commit.parent_ids,
-                   vec![ObjectId::new("2853b2549d433c638a895dd487add365930797d9")]);
+                   vec![ObjectId::new("45aadb02640f6672fb4a382fc5b1ab5efec4f1df"),
+                        ObjectId::new("e5a23653f3d6532fefad0dffd90fb101ef94d42f")]);
     } else {
         panic!("expected to have a commit for the branch");
     }
@@ -454,10 +463,8 @@ fn test_read_repo_commit_detail() {
                 queries\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nReviewed-by: Brad King \
                 <brad.king@kitware.com>\nMerge-request: !46\n");
     assert_eq!(repo_commit_detail.parent_ids,
-               vec![
-                   ObjectId::new("559f5f4a2bfe1f48e9e95afa09c029deb655cf7d"),
-                   ObjectId::new("a222c5539569cda6999b8069f1e51a5202c30711"),
-               ]);
+               vec![ObjectId::new("559f5f4a2bfe1f48e9e95afa09c029deb655cf7d"),
+                    ObjectId::new("a222c5539569cda6999b8069f1e51a5202c30711")]);
     assert_eq!(repo_commit_detail.committed_date,
                Utc.ymd(2016, 11, 8)
                    .and_hms_milli(14, 30, 13, 0));
@@ -483,6 +490,7 @@ fn test_read_user() {
     assert_eq!(user.created_at,
                Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 670));
+    assert_eq!(user.is_admin, None);
     assert_eq!(user.bio, Some("".to_string()));
     assert_eq!(user.location, None);
     assert_eq!(user.skype, "");
@@ -507,6 +515,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.created_at,
                Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 670));
+    assert_eq!(user_public.is_admin, Some(true));
     assert_eq!(user_public.bio, Some("".to_string()));
     assert_eq!(user_public.location, None);
     assert_eq!(user_public.skype, "");
@@ -515,10 +524,10 @@ fn test_read_user_public() {
     assert_eq!(user_public.website_url, "");
     assert_eq!(user_public.organization, None);
     assert_eq!(user_public.last_sign_in_at,
-               Some(Utc.ymd(2017, 4, 27)
-                   .and_hms_milli(14, 59, 16, 823)));
+               Some(Utc.ymd(2017, 6, 5)
+                   .and_hms_milli(18, 46, 29, 512)));
     assert_eq!(user_public.last_activity_on,
-               Some(NaiveDate::from_ymd(2017, 6, 30)));
+               Some(NaiveDate::from_ymd(2017, 7, 20)));
     assert_eq!(user_public.confirmed_at,
                Some(Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 660)));
@@ -526,8 +535,8 @@ fn test_read_user_public() {
     assert_eq!(user_public.color_scheme_id, ColorSchemeId::new(4));
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(user_public.current_sign_in_at,
-               Some(Utc.ymd(2017, 6, 5)
-                   .and_hms_milli(18, 46, 29, 512)));
+               Some(Utc.ymd(2017, 7, 10)
+                   .and_hms_milli(15, 35, 58, 336)));
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);
     assert_eq!(user_public.can_create_project, true);
