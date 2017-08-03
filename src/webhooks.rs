@@ -232,7 +232,6 @@ pub struct IssueHookAttrs {
     /// The ID of the user which last updated the issue.
     pub updated_by_id: Option<UserId>,
     pub moved_to_id: Option<Value>, // ???
-    pub position: u64,
     /// The branch name for the issue.
     pub branch_name: Option<String>,
     /// The description of the issue.
@@ -378,7 +377,6 @@ pub struct MergeRequestHookAttrs {
     pub merge_user_id: Option<UserId>,
     /// Whether the merge request will be merged once all builds succeed or not.
     pub merge_when_pipeline_succeeds: bool,
-    pub position: u64, // ???
     // st_commits
     // st_diffs
     /// The milestone of the merge request.
