@@ -95,7 +95,7 @@ fn test_read_commit_status() {
     assert_eq!(commit_status.author.name, "buildbot");
     assert_eq!(commit_status.author.state, UserState::Active);
     assert_eq!(commit_status.author.avatar_url,
-               "https://gitlab.kitware.com/uploads/system/user/avatar/35/buildbot-logo.png");
+               "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png");
     assert_eq!(commit_status.author.id, UserId::new(35));
     assert_eq!(commit_status.coverage, None);
 }
@@ -339,8 +339,9 @@ fn test_read_project() {
                Utc.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               Utc.ymd(2017, 7, 20)
-                   .and_hms_milli(14, 48, 56, 344));
+               Utc.ymd(2017, 8, 3)
+                   .and_hms_milli(16, 11, 16, 279));
+    assert_eq!(project.import_error, None);
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
     assert_eq!(project.creator_id, UserId::new(13));
@@ -350,8 +351,10 @@ fn test_read_project() {
                NamespaceId::Group(GroupId::new(498)));
     assert_eq!(project.namespace.kind, NamespaceKind::Group);
     assert_eq!(project.namespace.full_path, "utils");
+    assert_eq!(project.namespace.members_count_with_descendants, Some(3));
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
+    assert_eq!(project.ci_config_path, None);
     assert_eq!(project.star_count, 0);
     assert_eq!(project.forks_count, 5);
     assert_eq!(project.open_issues_count, Some(4));
@@ -360,6 +363,7 @@ fn test_read_project() {
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
     assert_eq!(project.only_allow_merge_if_all_discussions_are_resolved,
                None);
+    assert_eq!(project.printing_merge_request_link_enabled, Some(true));
     assert_eq!(project.request_access_enabled, true);
     assert_eq!(project.jobs_enabled, false);
     assert_eq!(project.issues_enabled, true);
@@ -393,6 +397,7 @@ fn test_read_project_hook() {
     assert_eq!(project_hook.issues_events, true);
     assert_eq!(project_hook.merge_requests_events, true);
     assert_eq!(project_hook.note_events, true);
+    assert_eq!(project_hook.repository_update_events, false);
     assert_eq!(project_hook.enable_ssl_verification, true);
     assert_eq!(project_hook.job_events, true);
     assert_eq!(project_hook.pipeline_events, true);
