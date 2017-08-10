@@ -96,6 +96,7 @@ pub struct User {
     /// When the account was created.
     pub created_at: DateTime<Utc>,
     /// Whether the user is an administrator or not.
+    ///
     /// Only available when talking to GitLab as an admin.
     pub is_admin: Option<bool>,
     /// Self-described biography of the user.
@@ -169,6 +170,7 @@ pub struct UserPublic {
     /// When the account was created.
     pub created_at: DateTime<Utc>,
     /// Whether the user is an administrator or not.
+    ///
     /// Only available when talking to GitLab as an admin.
     pub is_admin: Option<bool>,
     /// Self-described biography of the user.
@@ -313,6 +315,8 @@ pub struct ProjectHook {
     pub merge_requests_events: bool,
     /// Whether the hook is contacted for note events.
     pub note_events: bool,
+    /// Whether the hook is contacted for repository update events.
+    pub repository_update_events: bool,
     /// Whether the communication with the hook is verified using TLS certificates.
     pub enable_ssl_verification: bool,
     /// Whether the hook is contacted for job events.
@@ -525,6 +529,10 @@ pub struct Project {
     pub forked_from_project: Option<BasicProjectDetails>,
     /// The URL to the project avatar.
     pub avatar_url: Option<String>,
+    /// The path to CI config file.
+    pub ci_config_path: Option<String>,
+    /// Description of error if project failed to import.
+    pub import_error: Option<String>,
     /// The number of stars for the project.
     pub star_count: u64,
     /// The number of forks.
@@ -541,6 +549,8 @@ pub struct Project {
     pub only_allow_merge_if_pipeline_succeeds: Option<bool>,
     /// Whether the project only enables the merge button if all discussions are resolved.
     pub only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
+    /// Whether to show the link to create/view merge request when pusing from command line.
+    pub printing_merge_request_link_enabled: Option<bool>,
     /// Whether access to the project may be requested.
     pub request_access_enabled: bool,
     /// Whether jobs are enabled or not.
@@ -1836,6 +1846,10 @@ pub struct Namespace {
     /// The kind of the namespace.
     pub kind: NamespaceKind,
     pub full_path: String,
+    /// Number of members in the namespace and its descendants.
+    ///
+    /// Only available when talking to GitLab as a user that can admin the namespace.
+    pub members_count_with_descendants: Option<u64>,
 }
 
 impl Namespace {
