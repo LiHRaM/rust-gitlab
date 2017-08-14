@@ -533,14 +533,6 @@ impl Gitlab {
         self.send(req)
     }
 
-    /// Create a `POST` request to an API endpoint.
-    fn post<T>(&self, url: &str) -> Result<T>
-        where T: DeserializeOwned,
-    {
-        let param: &[(&str, &str)] = &[];
-        self.post_with_param(url, param)
-    }
-
     /// Create a `POST` request to an API endpoint with query parameters.
     fn post_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
         where T: DeserializeOwned,
@@ -550,14 +542,6 @@ impl Gitlab {
         let mut req = self.client.post(full_url)?;
         req.form(&param)?;
         self.send(req)
-    }
-
-    /// Create a `PUT` request to an API endpoint.
-    fn put<T>(&self, url: &str) -> Result<T>
-        where T: DeserializeOwned,
-    {
-        let param: &[(&str, &str)] = &[];
-        self.put_with_param(url, param)
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.
