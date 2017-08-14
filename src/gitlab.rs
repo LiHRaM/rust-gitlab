@@ -466,12 +466,12 @@ impl Gitlab {
     {
         req.header(GitlabPrivateToken(self.token.to_string()));
         let rsp = req.send().chain_err(|| ErrorKind::Communication)?;
-        if !rsp.status().is_success() {
-            let v = serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize)?;
+        let success = rsp.status().is_success();
+        let v = serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize)?;
+        if !success {
             return Err(Error::from_gitlab(v));
         }
 
-        let v = serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize)?;
         debug!(target: "gitlab",
                "received data: {:?}",
                v);
