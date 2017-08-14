@@ -101,7 +101,7 @@ impl Gitlab {
         };
 
         // Ensure the API is working.
-        let _: UserPublic = api._get("user")?;
+        let _: UserPublic = api.current_user()?;
 
         Ok(api)
     }
