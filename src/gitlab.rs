@@ -78,15 +78,21 @@ impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
-    pub fn new<T: ToString>(host: &str, token: T) -> Result<Self> {
-        Self::new_impl("https", host, token.to_string())
+    pub fn new<H, T>(host: H, token: T) -> Result<Self>
+        where H: AsRef<str>,
+              T: ToString,
+    {
+        Self::new_impl("https", host.as_ref(), token.to_string())
     }
 
     /// Create a new non-SSL Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
-    pub fn new_insecure<T: ToString>(host: &str, token: T) -> Result<Self> {
-        Self::new_impl("http", host, token.to_string())
+    pub fn new_insecure<H, T>(host: H, token: T) -> Result<Self>
+        where H: AsRef<str>,
+              T: ToString,
+    {
+        Self::new_impl("http", host.as_ref(), token.to_string())
     }
 
     /// Internal method to create a new Gitlab client.
@@ -122,8 +128,11 @@ impl Gitlab {
     }
 
     /// Find a user by username.
-    pub fn user_by_name<T: UserResult>(&self, name: &str) -> Result<T> {
-        let mut users = self.get_paged_with_param("users", &[("username", name)])?;
+    pub fn user_by_name<T, N>(&self, name: N) -> Result<T>
+        where T: UserResult,
+              N: AsRef<str>,
+    {
+        let mut users = self.get_paged_with_param("users", &[("username", name.as_ref())])?;
         users.pop()
             .ok_or_else(|| Error::from_kind(ErrorKind::Gitlab("no such user".to_string())))
     }
@@ -144,9 +153,11 @@ impl Gitlab {
     }
 
     /// Find a project by name.
-    pub fn project_by_name(&self, name: &str) -> Result<Project> {
+    pub fn project_by_name<N>(&self, name: N) -> Result<Project>
+        where N: AsRef<str>,
+    {
         self.get(&format!("projects/{}",
-                          percent_encode(name.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+                          percent_encode(name.as_ref().as_bytes(), PATH_SEGMENT_ENCODE_SET)))
     }
 
     /// Get a project's hooks.
@@ -180,9 +191,11 @@ impl Gitlab {
     }
 
     /// Add a project hook.
-    pub fn add_hook(&self, project: ProjectId, url: &str, events: WebhookEvents) -> Result<ProjectHook> {
+    pub fn add_hook<U>(&self, project: ProjectId, url: U, events: WebhookEvents) -> Result<ProjectHook>
+        where U: AsRef<str>,
+    {
         let mut flags = Self::event_flags(events);
-        flags.push(("url", url));
+        flags.push(("url", url.as_ref()));
 
         self.post_with_param(&format!("projects/{}/hooks", project), &flags)
     }
@@ -223,31 +236,40 @@ impl Gitlab {
     }
 
     /// Get a branch.
-    pub fn branch(&self, project: ProjectId, branch: &str) -> Result<RepoBranch> {
+    pub fn branch<B>(&self, project: ProjectId, branch: B) -> Result<RepoBranch>
+        where B: AsRef<str>,
+    {
         self.get(&format!("projects/{}/repository/branches/{}",
                           project,
-                          percent_encode(branch.as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+                          percent_encode(branch.as_ref().as_bytes(), PATH_SEGMENT_ENCODE_SET)))
     }
 
     /// Get a commit.
-    pub fn commit(&self, project: ProjectId, commit: &str) -> Result<RepoCommitDetail> {
-        self.get(&format!("projects/{}/repository/commits/{}", project, commit))
+    pub fn commit<C>(&self, project: ProjectId, commit: C) -> Result<RepoCommitDetail>
+        where C: AsRef<str>,
+    {
+        self.get(&format!("projects/{}/repository/commits/{}", project, commit.as_ref()))
     }
 
     /// Get comments on a commit.
-    pub fn commit_comments(&self, project: ProjectId, commit: &str) -> Result<Vec<CommitNote>> {
+    pub fn commit_comments<C>(&self, project: ProjectId, commit: C) -> Result<Vec<CommitNote>>
+        where C: AsRef<str>,
+    {
         self.get_paged(&format!("projects/{}/repository/commits/{}/comments",
                                 project,
-                                commit))
+                                commit.as_ref()))
     }
 
     /// Get comments on a commit.
-    pub fn create_commit_comment(&self, project: ProjectId, commit: &str, body: &str)
-                                 -> Result<CommitNote> {
+    pub fn create_commit_comment<C, B>(&self, project: ProjectId, commit: C, body: B)
+                                       -> Result<CommitNote>
+        where C: AsRef<str>,
+              B: AsRef<str>,
+    {
         self.post_with_param(&format!("projects/{}/repository/commits/{}/comment",
                                       project,
-                                      commit),
-                             &[("note", body)])
+                                      commit.as_ref()),
+                             &[("note", body.as_ref())])
     }
 
     /// Get comments on a commit.
@@ -267,40 +289,50 @@ impl Gitlab {
     }
 
     /// Get the latest statuses of a commit.
-    pub fn commit_latest_statuses(&self, project: ProjectId, commit: &str)
-                                  -> Result<Vec<CommitStatus>> {
+    pub fn commit_latest_statuses<C>(&self, project: ProjectId, commit: C)
+                                     -> Result<Vec<CommitStatus>>
+        where C: AsRef<str>,
+    {
         self.get_paged(&format!("projects/{}/repository/commits/{}/statuses",
                                 project,
-                                commit))
+                                commit.as_ref()))
     }
 
     /// Get the all statuses of a commit.
-    pub fn commit_all_statuses(&self, project: ProjectId, commit: &str)
-                               -> Result<Vec<CommitStatus>> {
+    pub fn commit_all_statuses<C>(&self, project: ProjectId, commit: C)
+                                  -> Result<Vec<CommitStatus>>
+        where C: AsRef<str>,
+    {
         self.get_paged_with_param(&format!("projects/{}/repository/commits/{}/statuses",
                                            project,
-                                           commit),
+                                           commit.as_ref()),
                                   &[("all", "true")])
     }
 
     /// Get the latest builds of a commit.
-    pub fn commit_latest_builds(&self, project: ProjectId, commit: &str) -> Result<Vec<Job>> {
-        self.get_paged(&format!("projects/{}/repository/commits/{}/builds", project, commit))
+    pub fn commit_latest_builds<C>(&self, project: ProjectId, commit: C) -> Result<Vec<Job>>
+        where C: AsRef<str>,
+    {
+        self.get_paged(&format!("projects/{}/repository/commits/{}/builds", project, commit.as_ref()))
     }
 
     /// Get the all builds of a commit.
-    pub fn commit_all_builds(&self, project: ProjectId, commit: &str) -> Result<Vec<Job>> {
+    pub fn commit_all_builds<C>(&self, project: ProjectId, commit: C) -> Result<Vec<Job>>
+        where C: AsRef<str>,
+    {
         self.get_paged_with_param(&format!("projects/{}/repository/commits/{}/builds",
                                            project,
-                                           commit),
+                                           commit.as_ref()),
                                   &[("all", "true")])
     }
 
     /// Create a status message for a commit.
-    pub fn create_commit_status(&self, project: ProjectId, sha: &str, state: StatusState,
-                                info: &CommitStatusInfo)
-                                -> Result<CommitStatus> {
-        let path = &format!("projects/{}/statuses/{}", project, sha);
+    pub fn create_commit_status<S>(&self, project: ProjectId, sha: S, state: StatusState,
+                                   info: &CommitStatusInfo)
+                                   -> Result<CommitStatus>
+        where S: AsRef<str>,
+    {
+        let path = &format!("projects/{}/statuses/{}", project, sha.as_ref());
 
         let mut params = vec![("state", state.as_str())];
 
@@ -328,11 +360,13 @@ impl Gitlab {
     }
 
     /// Create a note on a issue.
-    pub fn create_issue_note(&self, project: ProjectId, issue: IssueInternalId, content: &str)
-                             -> Result<Note> {
+    pub fn create_issue_note<C>(&self, project: ProjectId, issue: IssueInternalId, content: C)
+                                -> Result<Note>
+        where C: AsRef<str>,
+    {
         let path = &format!("projects/{}/issues/{}/notes", project, issue);
 
-        self.post_with_param(path, &[("body", content)])
+        self.post_with_param(path, &[("body", content.as_ref())])
     }
 
     /// Get the merge requests for a project.
