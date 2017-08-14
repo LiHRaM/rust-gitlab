@@ -445,7 +445,7 @@ impl Gitlab {
     /// Create a URL to an API endpoint.
     fn create_url(&self, url: &str) -> Result<Url> {
         debug!(target: "gitlab", "api call {}", url);
-        Ok(self.base_url.join(url).chain_err(|| ErrorKind::UrlParse)?)
+        self.base_url.join(url).chain_err(|| ErrorKind::UrlParse)
     }
 
     /// Create a URL to an API endpoint with query parameters.
@@ -475,7 +475,7 @@ impl Gitlab {
         debug!(target: "gitlab",
                "received data: {:?}",
                v);
-        Ok(serde_json::from_value::<T>(v).chain_err(|| ErrorKind::Deserialize)?)
+        serde_json::from_value::<T>(v).chain_err(|| ErrorKind::Deserialize)
     }
 
     /// Create a `GET` request to an API endpoint.
