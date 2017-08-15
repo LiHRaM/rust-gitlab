@@ -118,12 +118,16 @@ impl Gitlab {
     }
 
     /// Get all user accounts
-    pub fn users<T: UserResult>(&self) -> Result<Vec<T>> {
+    pub fn users<T>(&self) -> Result<Vec<T>>
+        where T: UserResult,
+    {
         self.get_paged("users")
     }
 
     /// Find a user by id.
-    pub fn user<T: UserResult>(&self, user: UserId) -> Result<T> {
+    pub fn user<T>(&self, user: UserId) -> Result<T>
+        where T: UserResult,
+    {
         self.get(&format!("users/{}", user))
     }
 
