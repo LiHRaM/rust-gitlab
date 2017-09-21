@@ -478,6 +478,26 @@ pub struct ProjectNamespaceAvatar {
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
+struct ProjectLinks {
+    #[serde(rename="self")]
+    /// API URL of project itself.
+    self_: String,
+    /// API URL of project issues, if enabled.
+    issues: Option<String>,
+    /// API URL of project merge requests, if enabled.
+    merge_requests: Option<String>,
+    /// API URL of project repository branches.
+    repo_branches: String,
+    /// API URL of project labels.
+    labels: String,
+    /// API URL of project events.
+    events: String,
+    /// API URL of project members.
+    members: String,
+}
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information.
 pub struct Project {
     /// The ID of the project.
@@ -569,6 +589,18 @@ pub struct Project {
     /// If this is present, it is `ProjectWithAccess`, but since it is so similar, just have it be
     /// optional here.
     pub permissions: Option<Permissions>,
+
+    /// Links to related API URLs provided by GitLab in response to
+    /// direct project lookup.  We do not expose this because our
+    /// clients do not need them.
+    _links: Option<ProjectLinks>,
+}
+
+#[cfg(test)]
+impl Project {
+    pub fn has_links(&self) -> bool {
+        self._links.is_some()
+    }
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -1095,6 +1127,20 @@ enum_serialize!(IssueState -> "issue type",
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
+struct IssueLinks {
+    #[serde(rename="self")]
+    /// API URL of issue itself.
+    self_: String,
+    /// API URL of issue notes.
+    notes: String,
+    /// API URL of issue award emoji.
+    award_emoji: String,
+    /// API URL of issue project.
+    project: String,
+}
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An issue on a project.
 pub struct Issue {
     /// The ID of the issue.
@@ -1139,6 +1185,18 @@ pub struct Issue {
     pub confidential: bool,
     /// The URL of the issue.
     pub web_url: String,
+
+    /// Links to related API URLs provided by GitLab in response to
+    /// direct issue lookup.  We do not expose this because our
+    /// clients do not need them.
+    _links: Option<IssueLinks>,
+}
+
+#[cfg(test)]
+impl Issue {
+    pub fn has_links(&self) -> bool {
+        self._links.is_some()
+    }
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -1493,6 +1551,16 @@ pub enum NoteableId {
     Snippet(SnippetId),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// The internal ID of an entity a note is attached to (internal to a project).
+/// GitLab only has this for notes attached to issues and merge requests.
+pub enum NoteableInternalId {
+    /// The internal ID of the issue for an issue note.
+    Issue(IssueInternalId),
+    /// The internal ID of the merge request for a merge request note.
+    MergeRequest(MergeRequestInternalId),
+}
+
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe note (comment) ID.
@@ -1522,6 +1590,8 @@ pub struct Note {
     pub system: bool,
     // Keep as JSON because its type depends on what `noteable_type` is.
     noteable_id: Value,
+    // Keep as JSON because its type depends on what `noteable_type` is.
+    noteable_iid: Option<Value>,
     /// The type of entity the note is attached to.
     pub noteable_type: NoteType,
 }
@@ -1549,6 +1619,31 @@ impl Note {
                 self.noteable_id
                     .as_u64()
                     .map(|id| NoteableId::Snippet(SnippetId::new(id)))
+            },
+        }
+    }
+
+    /// The internal ID of the entity the note is attached to (internal to a project).
+    /// This is available only for notes attached to issues and merge requests.
+    pub fn noteable_iid(&self) -> Option<NoteableInternalId> {
+        match self.noteable_type {
+            NoteType::Commit => {
+                None
+            },
+            NoteType::Issue => {
+                self.noteable_iid
+                    .as_ref()
+                    .and_then(|value| value.as_u64())
+                    .map(|id| NoteableInternalId::Issue(IssueInternalId::new(id)))
+            },
+            NoteType::MergeRequest => {
+                self.noteable_iid
+                    .as_ref()
+                    .and_then(|value| value.as_u64())
+                    .map(|id| NoteableInternalId::MergeRequest(MergeRequestInternalId::new(id)))
+            },
+            NoteType::Snippet => {
+                None
             },
         }
     }
