@@ -158,6 +158,7 @@ fn test_read_issue() {
     assert_eq!(issue.confidential, false);
     assert_eq!(issue.web_url,
                "https://gitlab.kitware.com/utils/rust-gitlab/issues/6");
+    assert!(issue.has_links());
 }
 
 #[test]
@@ -309,6 +310,8 @@ fn test_read_note() {
     assert_eq!(note.system, true);
     assert_eq!(note.noteable_id(),
                Some(NoteableId::MergeRequest(MergeRequestId::new(20215))));
+    assert_eq!(note.noteable_iid(),
+               Some(NoteableInternalId::MergeRequest(MergeRequestInternalId::new(35))));
     assert_eq!(note.noteable_type, NoteType::MergeRequest);
 }
 
@@ -378,6 +381,7 @@ fn test_read_project() {
             panic!("expected to have group access on the permissions");
         }
         assert!(permissions.project_access.is_none());
+    assert!(project.has_links());
     } else {
         panic!("expected to have permissions available");
     }
