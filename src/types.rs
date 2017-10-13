@@ -198,6 +198,8 @@ pub struct UserPublic {
     /// The primary email address for the user.
     pub email: String,
 
+    /// The theme used by the user, if configured.
+    pub theme_id: Option<ThemeId>,
     /// The color scheme used by the user.
     pub color_scheme_id: ColorSchemeId,
     /// The number of projects the user may create.
@@ -575,6 +577,9 @@ pub struct Project {
     pub request_access_enabled: bool,
     /// Whether jobs are enabled or not.
     pub jobs_enabled: bool,
+    /// Whether to automatically resolve merge request diff discussions when they become outdated,
+    /// if configured.
+    pub resolve_outdated_diff_discussions: Option<bool>,
     /// Whether issues are enabled or not.
     pub issues_enabled: bool,
     /// Whether merge requests are enabled or not.
@@ -1173,6 +1178,8 @@ pub struct Issue {
     /// GitLab does not include this in responses with lists of issues but
     /// does on an individual issue.
     pub subscribed: Option<bool>,
+    /// Time estimates.
+    pub time_stats: IssuableTimeStats,
     /// The number of comments on the issue.
     pub user_notes_count: u64,
     /// The number of upvotes for the issue.
@@ -1202,7 +1209,7 @@ impl Issue {
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A time estimate on an issue or merge request.
-pub struct IssuableTimeEstimate {
+pub struct IssuableTimeStats {
     /// The time estimate, in seconds.
     pub time_estimate: u64,
     /// The total time spent, in seconds.
@@ -1367,6 +1374,8 @@ pub struct MergeRequest {
     /// GitLab does not include this in responses with lists of merge requests but
     /// does on an individual merge request.
     pub subscribed: Option<bool>,
+    /// Time estimates.
+    pub time_stats: IssuableTimeStats,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
     /// Whether the merge request should be deleted or not (set by the merger).
@@ -1434,6 +1443,8 @@ pub struct MergeRequestChanges {
     /// GitLab does not include this in responses with lists of merge requests but
     /// does on an individual merge request.
     pub subscribed: Option<bool>,
+    /// Time estimates.
+    pub time_stats: IssuableTimeStats,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
     /// Whether the merge request should be deleted or not (set by the merger).
@@ -1473,6 +1484,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             sha: mr.sha,
             merge_commit_sha: mr.merge_commit_sha,
             subscribed: mr.subscribed,
+            time_stats: mr.time_stats,
             user_notes_count: mr.user_notes_count,
             should_remove_source_branch: mr.should_remove_source_branch,
             force_remove_source_branch: mr.force_remove_source_branch,

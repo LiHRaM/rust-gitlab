@@ -202,6 +202,10 @@ fn test_read_issue_reference() {
             panic!("expected to have an assignee for the issue");
         }
         assert_eq!(issue.subscribed, None);
+        assert_eq!(issue.time_stats.time_estimate, 0);
+        assert_eq!(issue.time_stats.total_time_spent, 0);
+        assert_eq!(issue.time_stats.human_time_estimate, None);
+        assert_eq!(issue.time_stats.human_total_time_spent, None);
         assert_eq!(issue.user_notes_count, 0);
         assert_eq!(issue.upvotes, 0);
         assert_eq!(issue.downvotes, 0);
@@ -279,6 +283,10 @@ fn test_read_merge_request() {
                Some(ObjectId::new("04e94ae667024a62a90179f395bfdc2b35f3efd2")));
     assert_eq!(merge_request.merge_commit_sha, None);
     assert_eq!(merge_request.subscribed, Some(true));
+    assert_eq!(merge_request.time_stats.time_estimate, 0);
+    assert_eq!(merge_request.time_stats.total_time_spent, 0);
+    assert_eq!(merge_request.time_stats.human_time_estimate, None);
+    assert_eq!(merge_request.time_stats.human_total_time_spent, None);
     assert_eq!(merge_request.user_notes_count, 3);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
@@ -342,8 +350,8 @@ fn test_read_project() {
                Utc.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               Utc.ymd(2017, 8, 3)
-                   .and_hms_milli(16, 11, 16, 279));
+               Utc.ymd(2017, 10, 5)
+                   .and_hms_milli(15, 18, 57, 875));
     assert_eq!(project.import_error, None);
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
@@ -369,6 +377,7 @@ fn test_read_project() {
     assert_eq!(project.printing_merge_request_link_enabled, Some(true));
     assert_eq!(project.request_access_enabled, true);
     assert_eq!(project.jobs_enabled, false);
+    assert_eq!(project.resolve_outdated_diff_discussions, None);
     assert_eq!(project.issues_enabled, true);
     assert_eq!(project.merge_requests_enabled, true);
     assert_eq!(project.snippets_enabled, false);
@@ -536,11 +545,12 @@ fn test_read_user_public() {
                Some(Utc.ymd(2017, 6, 5)
                    .and_hms_milli(18, 46, 29, 512)));
     assert_eq!(user_public.last_activity_on,
-               Some(NaiveDate::from_ymd(2017, 7, 20)));
+               Some(NaiveDate::from_ymd(2017, 10, 10)));
     assert_eq!(user_public.confirmed_at,
                Some(Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 660)));
     assert_eq!(user_public.email, "kwrobot@kitware.com");
+    assert_eq!(user_public.theme_id, None);
     assert_eq!(user_public.color_scheme_id, ColorSchemeId::new(4));
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(user_public.current_sign_in_at,
