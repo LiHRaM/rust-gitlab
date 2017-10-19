@@ -101,7 +101,7 @@ impl Gitlab {
             .chain_err(|| ErrorKind::UrlParse)?;
 
         let api = Gitlab {
-            client: Client::new()?,
+            client: Client::new(),
             base_url: base_url,
             token: token,
         };
@@ -533,7 +533,7 @@ impl Gitlab {
               V: AsRef<str>,
     {
         let full_url = self.create_url_with_param(url, param)?;
-        let req = self.client.get(full_url)?;
+        let req = self.client.get(full_url);
         self.send(req)
     }
 
@@ -543,8 +543,8 @@ impl Gitlab {
               U: Serialize,
     {
         let full_url = self.create_url(url)?;
-        let mut req = self.client.post(full_url)?;
-        req.form(&param)?;
+        let mut req = self.client.post(full_url);
+        req.form(&param);
         self.send(req)
     }
 
@@ -554,8 +554,8 @@ impl Gitlab {
               U: Serialize,
     {
         let full_url = self.create_url(url)?;
-        let mut req = self.client.request(Method::Put, full_url)?;
-        req.form(&param)?;
+        let mut req = self.client.request(Method::Put, full_url);
+        req.form(&param);
         self.send(req)
     }
 
@@ -588,7 +588,7 @@ impl Gitlab {
             let mut page_url = full_url.clone();
             page_url.query_pairs_mut()
                 .extend_pairs(&[("page", page_str), ("per_page", per_page_str)]);
-            let req = self.client.get(page_url)?;
+            let req = self.client.get(page_url);
 
             let page: Vec<T> = self.send(req)?;
             let page_len = page.len();
