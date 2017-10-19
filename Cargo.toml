@@ -16,7 +16,7 @@ categories = ["web-programming", "api-bindings"]
 hyper = { version = "~0.11", default-features = false }
 itertools = "~0.7"
 log = "~0.3"
-reqwest = "~0.7"
+reqwest = "~0.8"
 serde_derive = "^1.0"
 url = "^1.4"
 
