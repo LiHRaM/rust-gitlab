@@ -983,6 +983,8 @@ pub struct RepoCommitDetail {
     pub message: String,
     /// Statistics about the commit.
     pub stats: RepoCommitStats,
+    /// The last pipeline for this commit, if any.
+    pub last_pipeline: Option<PipelineBasic>,
     // XXX: Investigate what this is.
     /// This looks to be CI related; ignoring without better docs.
     status: Value,
@@ -1164,6 +1166,8 @@ pub struct Issue {
     pub created_at: DateTime<Utc>,
     /// When the issue was last updated.
     pub updated_at: DateTime<Utc>,
+    /// When the issue was closed, if closed.
+    pub closed_at: Option<DateTime<Utc>>,
     /// The labels attached to the issue.
     pub labels: Vec<String>,
     /// The milestone of the issue.
@@ -1190,6 +1194,8 @@ pub struct Issue {
     pub due_date: Option<NaiveDate>,
     /// Whether the issue is confidential or not.
     pub confidential: bool,
+    /// Whether the discussion has been locked.
+    pub discussion_locked: Option<bool>,
     /// The URL of the issue.
     pub web_url: String,
 
@@ -1378,6 +1384,8 @@ pub struct MergeRequest {
     pub time_stats: IssuableTimeStats,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
+    /// Whether the discussion has been locked.
+    pub discussion_locked: Option<bool>,
     /// Whether the merge request should be deleted or not (set by the merger).
     pub should_remove_source_branch: Option<bool>,
     /// Whether the merge request should be deleted or not (set by the author).
@@ -1447,6 +1455,8 @@ pub struct MergeRequestChanges {
     pub time_stats: IssuableTimeStats,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
+    /// Whether the discussion has been locked.
+    pub discussion_locked: Option<bool>,
     /// Whether the merge request should be deleted or not (set by the merger).
     pub should_remove_source_branch: Option<bool>,
     /// Whether the merge request should be deleted or not (set by the author).
@@ -1486,6 +1496,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             subscribed: mr.subscribed,
             time_stats: mr.time_stats,
             user_notes_count: mr.user_notes_count,
+            discussion_locked: mr.discussion_locked,
             should_remove_source_branch: mr.should_remove_source_branch,
             force_remove_source_branch: mr.force_remove_source_branch,
             web_url: mr.web_url,

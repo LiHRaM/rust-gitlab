@@ -116,6 +116,7 @@ fn test_read_issue() {
     assert_eq!(issue.updated_at,
                Utc.ymd(2017, 7, 7)
                    .and_hms_milli(6, 31, 03, 757));
+    assert_eq!(issue.closed_at, None);
     assert!(issue.labels.is_empty());
     assert!(issue.milestone.is_none());
     assert_eq!(issue.author.username, "ben.boeckel");
@@ -156,6 +157,7 @@ fn test_read_issue() {
     assert_eq!(issue.downvotes, 0);
     assert_eq!(issue.due_date, None);
     assert_eq!(issue.confidential, false);
+    assert_eq!(issue.discussion_locked, None);
     assert_eq!(issue.web_url,
                "https://gitlab.kitware.com/utils/rust-gitlab/issues/6");
     assert!(issue.has_links());
@@ -180,6 +182,7 @@ fn test_read_issue_reference() {
         assert_eq!(issue.updated_at,
                    Utc.ymd(2017, 7, 7)
                        .and_hms_milli(6, 31, 5, 370));
+        assert_eq!(issue.closed_at, None);
         assert!(issue.labels.is_empty());
         assert!(issue.milestone.is_none());
         assert_eq!(issue.author.username, "ben.boeckel");
@@ -211,6 +214,7 @@ fn test_read_issue_reference() {
         assert_eq!(issue.downvotes, 0);
         assert_eq!(issue.due_date, None);
         assert_eq!(issue.confidential, false);
+        assert_eq!(issue.discussion_locked, None);
         assert_eq!(issue.web_url,
                    "https://gitlab.kitware.com/utils/rust-gitlab/issues/5");
     } else {
@@ -288,6 +292,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.time_stats.human_time_estimate, None);
     assert_eq!(merge_request.time_stats.human_total_time_spent, None);
     assert_eq!(merge_request.user_notes_count, 3);
+    assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
     assert_eq!(merge_request.web_url,
@@ -492,6 +497,14 @@ fn test_read_repo_commit_detail() {
     assert_eq!(repo_commit_detail.stats.additions, 8);
     assert_eq!(repo_commit_detail.stats.deletions, 0);
     assert_eq!(repo_commit_detail.stats.total, 8);
+    if let Some(ref last_pipeline) = repo_commit_detail.last_pipeline {
+        assert_eq!(last_pipeline.id, PipelineId::new(34289));
+        assert_eq!(last_pipeline.ref_, Some("master".to_string()));
+        assert_eq!(last_pipeline.sha, ObjectId::new("de4ac3cf96cb8a0893be22b03f5171d934f9d392"));
+        assert_eq!(last_pipeline.status, StatusState::Success);
+    } else {
+        panic!("expected to have a last_pipeline for this commit");
+    }
 }
 
 #[test]
