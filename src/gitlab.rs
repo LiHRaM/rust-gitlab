@@ -112,6 +112,14 @@ impl Gitlab {
         Ok(api)
     }
 
+    /// Create a new Gitlab API client builder.
+    pub fn builder<H, T>(host: H, token: T) -> GitlabBuilder
+        where H: ToString,
+              T: ToString,
+    {
+        GitlabBuilder::new(host, token)
+    }
+
     /// The user the API is acting as.
     pub fn current_user(&self) -> Result<UserPublic> {
         self.get("user")
@@ -605,5 +613,36 @@ impl Gitlab {
         }
 
         Ok(results)
+    }
+}
+
+pub struct GitlabBuilder {
+    protocol: &'static str,
+    host: String,
+    token: String,
+}
+
+impl GitlabBuilder {
+    /// Create a new Gitlab API client builder.
+    pub fn new<H, T>(host: H, token: T) -> Self
+        where H: ToString,
+              T: ToString,
+    {
+        Self {
+            protocol: "https",
+            host: host.to_string(),
+            token: token.to_string(),
+        }
+    }
+
+    /// Switch to an insecure protocol (http instead of https).
+    pub fn insecure(&mut self) -> &mut Self
+    {
+        self.protocol = "http";
+        self
+    }
+
+    pub fn build(&self) -> Result<Gitlab> {
+        Gitlab::new_impl(self.protocol, &self.host, self.token.clone())
     }
 }
