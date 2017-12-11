@@ -13,7 +13,7 @@ keywords = ["gitlab", "api"]
 categories = ["web-programming", "api-bindings"]
 
 [dependencies]
-hyper = { version = "~0.11", default-features = false }
+hyper = { version = "~0.11.9", default-features = false }
 itertools = "~0.7"
 log = "~0.3"
 reqwest = "~0.8"
