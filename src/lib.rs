@@ -51,6 +51,7 @@ pub use error::*;
 pub use gitlab::CommitStatusInfo;
 pub use gitlab::MergeRequestStateFilter;
 pub use gitlab::Gitlab;
+pub use gitlab::GitlabBuilder;
 pub use types::*;
 
 #[cfg(test)]
