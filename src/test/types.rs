@@ -291,6 +291,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.time_stats.total_time_spent, 0);
     assert_eq!(merge_request.time_stats.human_time_estimate, None);
     assert_eq!(merge_request.time_stats.human_total_time_spent, None);
+    assert_eq!(merge_request.changes_count, 3);
     assert_eq!(merge_request.user_notes_count, 3);
     assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
