@@ -29,21 +29,6 @@ use std::fmt::{self, Display, Formatter};
 //    pub name: String,
 //}
 
-fn serialize_u64_string<S>(x: &u64, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer,
-{
-    x.to_string().serialize(serializer)
-}
-
-fn deserialize_u64_string<'de, D>(deserializer: D) -> Result<u64, D::Error>
-    where D: Deserializer<'de>,
-{
-    let val = <String as Deserialize>::deserialize(deserializer)?;
-    val.parse().map_err(|err| {
-        D::Error::custom(format!("string does not parse as unsigned integer: {:?}", err))
-    })
-}
-
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe user ID.
@@ -1398,9 +1383,10 @@ pub struct MergeRequest {
     /// Time estimates.
     pub time_stats: IssuableTimeStats,
     /// The number of paths changed by the merge request.
-    #[serde(serialize_with = "serialize_u64_string")]
-    #[serde(deserialize_with = "deserialize_u64_string")]
-    pub changes_count: u64,
+    ///
+    /// This is an integer suffixed by `+` if there are more files changed than some threshold
+    /// (probably determined by a timeout).
+    pub changes_count: String,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
     /// Whether the discussion has been locked.
@@ -1473,9 +1459,7 @@ pub struct MergeRequestChanges {
     /// Time estimates.
     pub time_stats: IssuableTimeStats,
     /// The number of paths changed by the merge request.
-    #[serde(serialize_with = "serialize_u64_string")]
-    #[serde(deserialize_with = "deserialize_u64_string")]
-    pub changes_count: u64,
+    pub changes_count: String,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
     /// Whether the discussion has been locked.
