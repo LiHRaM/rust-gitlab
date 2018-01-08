@@ -1386,7 +1386,7 @@ pub struct MergeRequest {
     ///
     /// This is an integer suffixed by `+` if there are more files changed than some threshold
     /// (probably determined by a timeout).
-    pub changes_count: String,
+    pub changes_count: Option<String>,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
     /// Whether the discussion has been locked.
@@ -1459,7 +1459,7 @@ pub struct MergeRequestChanges {
     /// Time estimates.
     pub time_stats: IssuableTimeStats,
     /// The number of paths changed by the merge request.
-    pub changes_count: String,
+    pub changes_count: Option<String>,
     /// The number of comments on the merge request.
     pub user_notes_count: u64,
     /// Whether the discussion has been locked.
