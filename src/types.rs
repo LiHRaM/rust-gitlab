@@ -349,6 +349,8 @@ pub struct WebhookEvents {
     job: bool,
     /// Whether to receive issue events of not.
     issues: bool,
+    /// Whether to receive confidential issue events of not.
+    confidential_issues: bool,
     /// Whether to receive merge request events of not.
     merge_requests: bool,
     /// Whether to receive note (comment) events of not.
@@ -367,6 +369,7 @@ impl WebhookEvents {
         WebhookEvents {
             job: false,
             issues: false,
+            confidential_issues: false,
             merge_requests: false,
             note: false,
             pipeline: false,
@@ -377,6 +380,7 @@ impl WebhookEvents {
 
     with_event!{with_job, job}
     with_event!{with_issues, issues}
+    with_event!{with_confidential_issues, issues}
     with_event!{with_merge_requests, merge_requests}
     with_event!{with_note, note}
     with_event!{with_pipeline, pipeline}
@@ -385,6 +389,7 @@ impl WebhookEvents {
 
     get_event!{job}
     get_event!{issues}
+    get_event!{confidential_issues}
     get_event!{merge_requests}
     get_event!{note}
     get_event!{pipeline}
