@@ -987,7 +987,7 @@ pub struct RepoCommitDetail {
     /// The full commit message.
     pub message: String,
     /// Statistics about the commit.
-    pub stats: RepoCommitStats,
+    pub stats: Option<RepoCommitStats>,
     /// The last pipeline for this commit, if any.
     pub last_pipeline: Option<PipelineBasic>,
     // XXX: Investigate what this is.

@@ -261,7 +261,9 @@ impl Gitlab {
     pub fn commit<C>(&self, project: ProjectId, commit: C) -> Result<RepoCommitDetail>
         where C: AsRef<str>,
     {
-        self.get(&format!("projects/{}/repository/commits/{}", project, commit.as_ref()))
+        self.get_with_param(
+            &format!("projects/{}/repository/commits/{}", project, commit.as_ref()),
+            &[("stats", "true")])
     }
 
     /// Get comments on a commit.
