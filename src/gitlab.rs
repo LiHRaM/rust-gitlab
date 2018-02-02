@@ -195,6 +195,7 @@ impl Gitlab {
     fn event_flags(events: WebhookEvents) -> Vec<(&'static str, &'static str)> {
         vec![("job_events", Self::bool_param_value(events.job())),
              ("issues_events", Self::bool_param_value(events.issues())),
+             ("confidential_issues_events", Self::bool_param_value(events.confidential_issues())),
              ("merge_requests_events", Self::bool_param_value(events.merge_requests())),
              ("note_events", Self::bool_param_value(events.note())),
              ("pipeline_events", Self::bool_param_value(events.pipeline())),
