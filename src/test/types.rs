@@ -495,9 +495,13 @@ fn test_read_repo_commit_detail() {
     assert_eq!(repo_commit_detail.authored_date,
                Utc.ymd(2016, 11, 8)
                    .and_hms_milli(14, 30, 13, 0));
-    assert_eq!(repo_commit_detail.stats.additions, 8);
-    assert_eq!(repo_commit_detail.stats.deletions, 0);
-    assert_eq!(repo_commit_detail.stats.total, 8);
+    if let Some(ref stats) = repo_commit_detail.stats {
+        assert_eq!(stats.additions, 8);
+        assert_eq!(stats.deletions, 0);
+        assert_eq!(stats.total, 8);
+    } else {
+        panic!("expected to have stats for this commit");
+    }
     if let Some(ref last_pipeline) = repo_commit_detail.last_pipeline {
         assert_eq!(last_pipeline.id, PipelineId::new(34289));
         assert_eq!(last_pipeline.ref_, Some("master".to_string()));

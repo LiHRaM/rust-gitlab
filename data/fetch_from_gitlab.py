@@ -40,7 +40,7 @@ if __name__ == '__main__':
     write_result(token, 'project_hook', '/projects/%s/hooks' % REPO)
     write_result(token, 'member', '/groups/utils/members')
     write_result(token, 'repo_branch', '/projects/%s/repository/branches/master' % REPO)
-    write_result(token, 'repo_commit_detail', '/projects/%s/repository/commits/%s' % (REPO, COMMIT))
+    write_result(token, 'repo_commit_detail', '/projects/%s/repository/commits/%s?stats=true' % (REPO, COMMIT))
     write_result(token, 'commit_note', '/projects/%s/repository/commits/%s/comments' % (REPO, COMMIT))
     write_result(token, 'commit_status', '/projects/%s/repository/commits/%s/statuses' % (REPO, COMMIT))
     write_result(token, 'issue', '/projects/%s/issues/%d' % (REPO, ISSUE_ID))
