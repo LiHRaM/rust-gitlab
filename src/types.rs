@@ -990,6 +990,8 @@ pub struct RepoCommitDetail {
     pub stats: Option<RepoCommitStats>,
     /// The last pipeline for this commit, if any.
     pub last_pipeline: Option<PipelineBasic>,
+    /// The project associated with the commit.
+    pub project_id: ProjectId,
     // XXX: Investigate what this is.
     /// This looks to be CI related; ignoring without better docs.
     status: Value,
