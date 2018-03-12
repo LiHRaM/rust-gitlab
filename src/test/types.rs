@@ -510,6 +510,7 @@ fn test_read_repo_commit_detail() {
     } else {
         panic!("expected to have a last_pipeline for this commit");
     }
+    assert_eq!(repo_commit_detail.project_id, ProjectId::new(855));
 }
 
 #[test]
