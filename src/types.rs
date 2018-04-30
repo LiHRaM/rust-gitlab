@@ -313,10 +313,14 @@ pub struct ProjectHook {
     pub tag_push_events: bool,
     /// Whether the hook is contacted for issue events.
     pub issues_events: bool,
+    /// Whether the hook is contacted for confidential issue events.
+    pub confidential_issues_events: bool,
     /// Whether the hook is contacted for merge request events.
     pub merge_requests_events: bool,
     /// Whether the hook is contacted for note events.
     pub note_events: bool,
+    /// Whether the hook is contacted for confidential note events.
+    pub confidential_note_events: bool,
     /// Whether the hook is contacted for repository update events.
     pub repository_update_events: bool,
     /// Whether the communication with the hook is verified using TLS certificates.
@@ -1349,6 +1353,14 @@ pub struct MergeRequest {
     pub created_at: DateTime<Utc>,
     /// When the merge request was last updated.
     pub updated_at: DateTime<Utc>,
+    /// When the merge request was merged.
+    pub merged_at: Option<DateTime<Utc>>,
+    /// When the merge request was closed.
+    pub closed_at: Option<DateTime<Utc>>,
+    /// The user that merged the merge request.
+    pub merged_by: Option<UserBasic>,
+    /// The user that closed the merge request.
+    pub closed_by: Option<UserBasic>,
     /// The target branch of the merge request.
     pub target_branch: String,
     /// The source branch of the merge request.
@@ -1371,6 +1383,8 @@ pub struct MergeRequest {
     pub labels: Vec<String>,
     /// Whether the merge request is a work-in-progress or not.
     pub work_in_progress: bool,
+    /// Whether the merge request allows a maintainer to push.
+    pub allow_maintainer_to_push: Option<bool>,
     /// The milestone of the merge request.
     pub milestone: Option<Milestone>,
     /// Whether the merge request will be merged once all pipelines succeed or not.
@@ -1426,6 +1440,14 @@ pub struct MergeRequestChanges {
     pub created_at: DateTime<Utc>,
     /// When the merge request was last updated.
     pub updated_at: DateTime<Utc>,
+    /// When the merge request was merged.
+    pub merged_at: Option<DateTime<Utc>>,
+    /// When the merge request was closed.
+    pub closed_at: Option<DateTime<Utc>>,
+    /// The user that merged the merge request.
+    pub merged_by: Option<UserBasic>,
+    /// The user that closed the merge request.
+    pub closed_by: Option<UserBasic>,
     /// The target branch of the merge request.
     pub target_branch: String,
     /// The source branch of the merge request.
@@ -1448,6 +1470,8 @@ pub struct MergeRequestChanges {
     pub labels: Vec<String>,
     /// Whether the merge request is a work-in-progress or not.
     pub work_in_progress: bool,
+    /// Whether the merge request allows a maintainer to push.
+    pub allow_maintainer_to_push: Option<bool>,
     /// The milestone of the merge request.
     pub milestone: Option<Milestone>,
     /// Whether the merge request will be merged once all jobs succeed or not.
@@ -1491,6 +1515,10 @@ impl From<MergeRequestChanges> for MergeRequest {
             state: mr.state,
             created_at: mr.created_at,
             updated_at: mr.updated_at,
+            merged_at: mr.merged_at,
+            closed_at: mr.closed_at,
+            merged_by: mr.merged_by,
+            closed_by: mr.closed_by,
             target_branch: mr.target_branch,
             source_branch: mr.source_branch,
             upvotes: mr.upvotes,
@@ -1502,6 +1530,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             target_project_id: mr.target_project_id,
             labels: mr.labels,
             work_in_progress: mr.work_in_progress,
+            allow_maintainer_to_push: mr.allow_maintainer_to_push,
             milestone: mr.milestone,
             merge_when_pipeline_succeeds: mr.merge_when_pipeline_succeeds,
             merge_status: mr.merge_status,
