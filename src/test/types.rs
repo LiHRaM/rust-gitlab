@@ -253,6 +253,11 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.updated_at,
                Utc.ymd(2016, 10, 4)
                    .and_hms_milli(20, 18, 57, 940));
+    assert_eq!(merge_request.merged_at,
+               Some(Utc.ymd(2016, 10, 4)
+                    .and_hms_milli(20, 18, 57, 914)));
+    assert!(merge_request.merged_by.is_none());
+    assert!(merge_request.closed_by.is_none());
     assert_eq!(merge_request.target_branch, "master");
     assert_eq!(merge_request.source_branch, "add_hook-api");
     assert_eq!(merge_request.upvotes, 0);
@@ -280,6 +285,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
     assert_eq!(merge_request.work_in_progress, false);
+    assert!(merge_request.allow_maintainer_to_push.is_none());
     assert!(merge_request.milestone.is_none());
     assert_eq!(merge_request.merge_when_pipeline_succeeds, false);
     assert_eq!(merge_request.merge_status, MergeStatus::CanBeMerged);
@@ -414,8 +420,10 @@ fn test_read_project_hook() {
     assert_eq!(project_hook.push_events, true);
     assert_eq!(project_hook.tag_push_events, true);
     assert_eq!(project_hook.issues_events, true);
+    assert_eq!(project_hook.confidential_issues_events, true);
     assert_eq!(project_hook.merge_requests_events, true);
     assert_eq!(project_hook.note_events, true);
+    assert_eq!(project_hook.confidential_note_events, true);
     assert_eq!(project_hook.repository_update_events, false);
     assert_eq!(project_hook.enable_ssl_verification, true);
     assert_eq!(project_hook.job_events, true);
