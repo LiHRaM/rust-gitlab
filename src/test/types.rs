@@ -420,10 +420,10 @@ fn test_read_project_hook() {
     assert_eq!(project_hook.push_events, true);
     assert_eq!(project_hook.tag_push_events, true);
     assert_eq!(project_hook.issues_events, true);
-    assert_eq!(project_hook.confidential_issues_events, true);
+    assert_eq!(project_hook.confidential_issues_events, Some(true));
     assert_eq!(project_hook.merge_requests_events, true);
     assert_eq!(project_hook.note_events, true);
-    assert_eq!(project_hook.confidential_note_events, true);
+    assert_eq!(project_hook.confidential_note_events, Some(true));
     assert_eq!(project_hook.repository_update_events, false);
     assert_eq!(project_hook.enable_ssl_verification, true);
     assert_eq!(project_hook.job_events, true);

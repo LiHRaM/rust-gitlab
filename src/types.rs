@@ -314,13 +314,13 @@ pub struct ProjectHook {
     /// Whether the hook is contacted for issue events.
     pub issues_events: bool,
     /// Whether the hook is contacted for confidential issue events.
-    pub confidential_issues_events: bool,
+    pub confidential_issues_events: Option<bool>,
     /// Whether the hook is contacted for merge request events.
     pub merge_requests_events: bool,
     /// Whether the hook is contacted for note events.
     pub note_events: bool,
     /// Whether the hook is contacted for confidential note events.
-    pub confidential_note_events: bool,
+    pub confidential_note_events: Option<bool>,
     /// Whether the hook is contacted for repository update events.
     pub repository_update_events: bool,
     /// Whether the communication with the hook is verified using TLS certificates.
