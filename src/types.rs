@@ -597,6 +597,8 @@ pub struct Project {
     pub snippets_enabled: bool,
     /// Whether the project wiki is enabled or not.
     pub wiki_enabled: bool,
+    /// The merge method used when merging merge request.
+    pub merge_method: Option<String>,
     /// Statistics about the project.
     pub statistics: Option<ProjectStatistics>,
 
@@ -1179,6 +1181,8 @@ pub struct Issue {
     pub updated_at: DateTime<Utc>,
     /// When the issue was closed, if closed.
     pub closed_at: Option<DateTime<Utc>>,
+    /// The user that closed the issue.
+    pub closed_by: Option<UserBasic>,
     /// The labels attached to the issue.
     pub labels: Vec<String>,
     /// The milestone of the issue.

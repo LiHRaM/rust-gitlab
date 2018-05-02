@@ -117,6 +117,7 @@ fn test_read_issue() {
                Utc.ymd(2017, 7, 7)
                    .and_hms_milli(6, 31, 03, 757));
     assert_eq!(issue.closed_at, None);
+    assert!(issue.closed_by.is_none());
     assert!(issue.labels.is_empty());
     assert!(issue.milestone.is_none());
     assert_eq!(issue.author.username, "ben.boeckel");
@@ -183,6 +184,7 @@ fn test_read_issue_reference() {
                    Utc.ymd(2017, 7, 7)
                        .and_hms_milli(6, 31, 5, 370));
         assert_eq!(issue.closed_at, None);
+        assert!(issue.closed_by.is_none());
         assert!(issue.labels.is_empty());
         assert!(issue.milestone.is_none());
         assert_eq!(issue.author.username, "ben.boeckel");
@@ -394,6 +396,7 @@ fn test_read_project() {
     assert_eq!(project.merge_requests_enabled, true);
     assert_eq!(project.snippets_enabled, false);
     assert_eq!(project.wiki_enabled, true);
+    assert_eq!(project.merge_method, Some("merge".to_string()));
     if let Some(ref permissions) = project.permissions {
         if let Some(ref group_access) = permissions.group_access {
             assert_eq!(group_access.access_level, 50);
