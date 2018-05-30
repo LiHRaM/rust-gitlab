@@ -293,6 +293,12 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.merge_status, MergeStatus::CanBeMerged);
     assert_eq!(merge_request.sha,
                Some(ObjectId::new("04e94ae667024a62a90179f395bfdc2b35f3efd2")));
+    assert_eq!(merge_request.diff_refs.base_sha,
+               Some(ObjectId::new("981262b03fc0149c1677ca51ea47b570e30d6a90")));
+    assert_eq!(merge_request.diff_refs.head_sha,
+               Some(ObjectId::new("04e94ae667024a62a90179f395bfdc2b35f3efd2")));
+    assert_eq!(merge_request.diff_refs.start_sha,
+               Some(ObjectId::new("981262b03fc0149c1677ca51ea47b570e30d6a90")));
     assert_eq!(merge_request.merge_commit_sha, None);
     assert_eq!(merge_request.subscribed, Some(true));
     assert_eq!(merge_request.time_stats.time_estimate, 0);
@@ -312,23 +318,26 @@ fn test_read_merge_request() {
 fn test_read_note() {
     let note: Note = read_test_file("note");
 
-    assert_eq!(note.id, NoteId::new(177371));
+    assert_eq!(note.id, NoteId::new(177373));
     assert_eq!(note.body,
-               "Mentioned in commit 47d475d8625424bd37efd27f7097354306842b93");
+               "Status changed to merged");
     assert_eq!(note.attachment, None);
-    assert_eq!(note.author.username, "brad.king");
-    assert_eq!(note.author.web_url, "https://gitlab.kitware.com/brad.king");
-    assert_eq!(note.author.name, "Brad King");
+    assert_eq!(note.author.username, "kwrobot");
+    assert_eq!(note.author.web_url, "https://gitlab.kitware.com/kwrobot");
+    assert_eq!(note.author.name, "Kitware Robot");
     assert_eq!(note.author.state, UserState::Active);
     assert_eq!(note.author.avatar_url,
-               "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon");
-    assert_eq!(note.author.id, UserId::new(10));
+               "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon");
+    assert_eq!(note.author.id, UserId::new(11));
     assert_eq!(note.created_at,
                Utc.ymd(2016, 10, 4)
-                   .and_hms_milli(20, 18, 57, 786));
+                   .and_hms_milli(20, 18, 57, 937));
     assert_eq!(note.updated_at,
                Utc.ymd(2016, 10, 4)
-                   .and_hms_milli(20, 18, 57, 786));
+                   .and_hms_milli(20, 18, 57, 937));
+    assert_eq!(note.resolvable, false);
+    assert_eq!(note.resolved, None);
+    assert!(note.resolved_by.is_none());
     assert_eq!(note.system, true);
     assert_eq!(note.noteable_id(),
                Some(NoteableId::MergeRequest(MergeRequestId::new(20215))));
