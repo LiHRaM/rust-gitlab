@@ -1067,6 +1067,17 @@ pub struct RepoDiff {
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub struct DiffRefs {
+    /// SHA referencing base commit in the source branch
+    pub base_sha: Option<ObjectId>,
+    /// SHA referencing head commit in the source branch
+    pub head_sha: Option<ObjectId>,
+    /// SHA referencing commit in target branch
+    pub start_sha: Option<ObjectId>,
+}
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe milestone ID.
 pub struct MilestoneId(u64);
@@ -1399,6 +1410,8 @@ pub struct MergeRequest {
     ///
     /// This is `None` if the source branch has been deleted.
     pub sha: Option<ObjectId>,
+    /// The commits used to construct the merge request diffs.
+    pub diff_refs: DiffRefs,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// Whether the current user is subscribed or not.
@@ -1486,6 +1499,8 @@ pub struct MergeRequestChanges {
     ///
     /// This is `None` if the source branch has been deleted.
     pub sha: Option<ObjectId>,
+    /// The commits used to construct the merge request diffs.
+    pub diff_refs: DiffRefs,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// GitLab does not include this in responses with lists of merge requests but
@@ -1539,6 +1554,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             merge_when_pipeline_succeeds: mr.merge_when_pipeline_succeeds,
             merge_status: mr.merge_status,
             sha: mr.sha,
+            diff_refs: mr.diff_refs,
             merge_commit_sha: mr.merge_commit_sha,
             subscribed: mr.subscribed,
             time_stats: mr.time_stats,
@@ -1654,6 +1670,12 @@ pub struct Note {
     pub created_at: DateTime<Utc>,
     /// When the note was last updated.
     pub updated_at: DateTime<Utc>,
+    /// Whether the note can be resolved.
+    pub resolvable: bool,
+    /// Whether the note has been resolved.
+    pub resolved: Option<bool>,
+    /// The user that resolved the note.
+    pub resolved_by: Option<UserBasic>,
     /// Whether the note was created by a user or in response to an external action.
     ///
     /// System notes include indications that the commit, issue, etc. was referenced elsewhere, a
