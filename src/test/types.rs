@@ -366,7 +366,7 @@ fn test_read_project() {
     assert_eq!(project.web_url,
                "https://gitlab.kitware.com/utils/rust-gitlab");
     assert_eq!(project.readme_url,
-               "https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md");
+               Some("https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md".to_string()));
     assert!(project.owner.is_none());
     assert_eq!(project.name, "rust-gitlab");
     assert_eq!(project.name_with_namespace, "Utils / rust-gitlab");

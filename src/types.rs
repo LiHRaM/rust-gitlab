@@ -530,7 +530,7 @@ pub struct Project {
     /// The URL for the project's homepage.
     pub web_url: String,
     /// The URL for the project's readme.
-    pub readme_url: String,
+    pub readme_url: Option<String>,
     /// The owner of the project (`None` for a group-owned project).
     pub owner: Option<UserBasic>,
     /// The display name of the project.
