@@ -287,8 +287,10 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
     assert_eq!(merge_request.work_in_progress, false);
+    assert!(merge_request.allow_collaboration.is_none());
     assert!(merge_request.allow_maintainer_to_push.is_none());
     assert!(merge_request.milestone.is_none());
+    assert_eq!(merge_request.squash, false);
     assert_eq!(merge_request.merge_when_pipeline_succeeds, false);
     assert_eq!(merge_request.merge_status, MergeStatus::CanBeMerged);
     assert_eq!(merge_request.sha,
@@ -363,6 +365,8 @@ fn test_read_project() {
                "https://gitlab.kitware.com/utils/rust-gitlab.git");
     assert_eq!(project.web_url,
                "https://gitlab.kitware.com/utils/rust-gitlab");
+    assert_eq!(project.readme_url,
+               "https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md");
     assert!(project.owner.is_none());
     assert_eq!(project.name, "rust-gitlab");
     assert_eq!(project.name_with_namespace, "Utils / rust-gitlab");
@@ -373,8 +377,8 @@ fn test_read_project() {
                Utc.ymd(2016, 6, 29)
                    .and_hms_milli(17, 35, 12, 495));
     assert_eq!(project.last_activity_at,
-               Utc.ymd(2017, 10, 5)
-                   .and_hms_milli(15, 18, 57, 875));
+               Utc.ymd(2018, 5, 31)
+                   .and_hms_milli(15, 8, 12, 338));
     assert_eq!(project.import_error, None);
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
@@ -385,13 +389,13 @@ fn test_read_project() {
                NamespaceId::Group(GroupId::new(498)));
     assert_eq!(project.namespace.kind, NamespaceKind::Group);
     assert_eq!(project.namespace.full_path, "utils");
-    assert_eq!(project.namespace.members_count_with_descendants, Some(3));
+    assert!(project.namespace.members_count_with_descendants.is_none());
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
-    assert_eq!(project.star_count, 0);
-    assert_eq!(project.forks_count, 5);
-    assert_eq!(project.open_issues_count, Some(4));
+    assert_eq!(project.star_count, 1);
+    assert_eq!(project.forks_count, 7);
+    assert_eq!(project.open_issues_count, Some(6));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
