@@ -3,7 +3,7 @@
 This library implements an interface to communicate with a Gitlab instance. Not
 all API endpoints are implemented, but patches are welcome.
 
-The API is based off of the GitLab 10.8 API v4 and will likely aggressively track
+The API is based off of the GitLab 11.0 API v4 and will likely aggressively track
 new API additions, so the newest release may not support talking to older
 releases where fields have been added.
 
@@ -45,13 +45,14 @@ possible. Instead, the crate uses the following versioning scheme:
   * Gitlab 10.6 support → 0.1006.x
   * Gitlab 10.7 support → 0.1007.x
   * Gitlab 10.8 support → 0.1008.x
+  * Gitlab 11.0 support → 0.1100.x
 
 Minor versions may fix bugs, add API endpoint bindings, or improve webhook
 coverage. It is recommended to depend on the full version of the crate since
 types may change in patch-level updates in order to match Gitlab's interface:
 
 ```toml
-gitlab = "=0.1008.0"
+gitlab = "=0.1100.0"
 ```
 
 # API bugs
