@@ -108,8 +108,8 @@ pub enum HumanAccessLevel {
     Reporter,
     /// Developer access (can push branches, handle issues and merge requests).
     Developer,
-    /// Master access (can push to protected branches).
-    Master,
+    /// Maintainer access (can push to protected branches).
+    Maintainer,
     /// Owner access (full rights).
     Owner,
 }
@@ -117,7 +117,7 @@ enum_serialize!(HumanAccessLevel -> "human access level",
     Guest => "Guest",
     Reporter => "Reporter",
     Developer => "Developer",
-    Master => "Master",
+    Maintainer => "Maintainer",
     Owner => "Owner",
 );
 
@@ -127,7 +127,7 @@ impl From<HumanAccessLevel> for AccessLevel {
             HumanAccessLevel::Guest => AccessLevel::Guest,
             HumanAccessLevel::Reporter => AccessLevel::Reporter,
             HumanAccessLevel::Developer => AccessLevel::Developer,
-            HumanAccessLevel::Master => AccessLevel::Master,
+            HumanAccessLevel::Maintainer => AccessLevel::Maintainer,
             HumanAccessLevel::Owner => AccessLevel::Owner,
         }
     }

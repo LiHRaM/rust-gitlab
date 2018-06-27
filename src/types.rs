@@ -529,6 +529,8 @@ pub struct Project {
     pub http_url_to_repo: String,
     /// The URL for the project's homepage.
     pub web_url: String,
+    /// The URL for the project's readme.
+    pub readme_url: String,
     /// The owner of the project (`None` for a group-owned project).
     pub owner: Option<UserBasic>,
     /// The display name of the project.
@@ -646,8 +648,8 @@ pub enum AccessLevel {
     Reporter,
     /// Developer access (can push branches, handle issues and merge requests).
     Developer,
-    /// Master access (can push to protected branches).
-    Master,
+    /// Maintainer access (can push to protected branches).
+    Maintainer,
     /// Owner access (full rights).
     Owner,
 }
@@ -659,7 +661,7 @@ impl From<AccessLevel> for u64 {
             AccessLevel::Guest => 10,
             AccessLevel::Reporter => 20,
             AccessLevel::Developer => 30,
-            AccessLevel::Master => 40,
+            AccessLevel::Maintainer => 40,
             AccessLevel::Owner => 50,
         }
     }
@@ -670,7 +672,7 @@ impl From<u64> for AccessLevel {
         if access >= 50 {
             AccessLevel::Owner
         } else if access >= 40 {
-            AccessLevel::Master
+            AccessLevel::Maintainer
         } else if access >= 30 {
             AccessLevel::Developer
         } else if access >= 20 {
@@ -1319,11 +1321,15 @@ pub enum MergeStatus {
     CanBeMerged,
     /// The merge request may not be merged yet.
     CannotBeMerged,
+    /// The merge request has not been checked but previously
+    /// could not be merged.
+    CannotBeMergedRecheck,
 }
 enum_serialize!(MergeStatus -> "merge status",
     Unchecked => "unchecked",
     CanBeMerged => "can_be_merged",
     CannotBeMerged => "cannot_be_merged",
+    CannotBeMergedRecheck => "cannot_be_merged_recheck",
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1398,10 +1404,14 @@ pub struct MergeRequest {
     pub labels: Vec<String>,
     /// Whether the merge request is a work-in-progress or not.
     pub work_in_progress: bool,
-    /// Whether the merge request allows a maintainer to push.
+    /// Whether the merge request allows a maintainer to collaborate.
+    pub allow_collaboration: Option<bool>,
+    /// Whether the merge request allows a maintainer to push (deprecated).
     pub allow_maintainer_to_push: Option<bool>,
     /// The milestone of the merge request.
     pub milestone: Option<Milestone>,
+    /// Whether to squash commits on merge.
+    pub squash: bool,
     /// Whether the merge request will be merged once all pipelines succeed or not.
     pub merge_when_pipeline_succeeds: bool,
     /// The status of the merge request.
@@ -1487,10 +1497,14 @@ pub struct MergeRequestChanges {
     pub labels: Vec<String>,
     /// Whether the merge request is a work-in-progress or not.
     pub work_in_progress: bool,
-    /// Whether the merge request allows a maintainer to push.
+    /// Whether the merge request allows a maintainer to collaborate.
+    pub allow_collaboration: Option<bool>,
+    /// Whether the merge request allows a maintainer to push (deprecated).
     pub allow_maintainer_to_push: Option<bool>,
     /// The milestone of the merge request.
     pub milestone: Option<Milestone>,
+    /// Whether to squash commits on merge.
+    pub squash: bool,
     /// Whether the merge request will be merged once all jobs succeed or not.
     pub merge_when_pipeline_succeeds: bool,
     /// The status of the merge request.
@@ -1549,8 +1563,10 @@ impl From<MergeRequestChanges> for MergeRequest {
             target_project_id: mr.target_project_id,
             labels: mr.labels,
             work_in_progress: mr.work_in_progress,
+            allow_collaboration: mr.allow_collaboration,
             allow_maintainer_to_push: mr.allow_maintainer_to_push,
             milestone: mr.milestone,
+            squash: mr.squash,
             merge_when_pipeline_succeeds: mr.merge_when_pipeline_succeeds,
             merge_status: mr.merge_status,
             sha: mr.sha,
