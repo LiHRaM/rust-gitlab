@@ -1112,8 +1112,10 @@ pub struct Milestone {
     pub id: MilestoneId,
     /// The user-visible ID of the milestone.
     pub iid: MilestoneInternalId,
-    /// The ID of the project.
-    pub project_id: ProjectId,
+    /// The ID of the project if this is a project milestone.
+    pub project_id: Option<ProjectId>,
+    /// The ID of the group if this is a group milestone.
+    pub group_id: Option<GroupId>,
     /// The title of the milestone.
     pub title: String,
     /// The description of the milestone.
