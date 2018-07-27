@@ -453,35 +453,26 @@ fn test_read_repo_branch() {
 
     assert_eq!(repo_branch.name, "master");
     if let Some(ref commit) = repo_branch.commit {
-        assert_eq!(commit.author_email, "ben.boeckel@kitware.com");
-        assert_eq!(commit.author_name, "Ben Boeckel");
+        assert_eq!(commit.author_email, "brad.king@kitware.com");
+        assert_eq!(commit.author_name, "Brad King");
         assert_eq!(commit.authored_date,
-                   Utc.ymd(2017, 7, 10)
-                       .and_hms_milli(18, 39, 4, 0));
+                   Utc.ymd(2018, 7, 12)
+                       .and_hms_milli(12, 50, 24, 0));
         assert_eq!(commit.committed_date,
-                   Utc.ymd(2017, 7, 10)
-                       .and_hms_milli(18, 39, 6, 0));
+                   Utc.ymd(2018, 7, 12)
+                       .and_hms_milli(12, 50, 24, 0));
         assert_eq!(commit.created_at,
-                   Utc.ymd(2017, 7, 10)
-                       .and_hms_milli(18, 39, 6, 0));
-        assert_eq!(commit.committer_email, "kwrobot@kitware.com");
-        assert_eq!(commit.committer_name, "Kitware Robot");
+                   Utc.ymd(2018, 7, 12)
+                       .and_hms_milli(12, 50, 24, 0));
+        assert_eq!(commit.committer_email, "brad.king@kitware.com");
+        assert_eq!(commit.committer_name, "Brad King");
         assert_eq!(commit.id,
-                   ObjectId::new("a84836ab97dc687ca5a241205aff6a713255f767"));
-        assert_eq!(commit.short_id, ObjectId::new("a84836ab"));
-        assert_eq!(commit.title, "Merge topic 'gitlab-9.3'");
-        assert_eq!(commit.message,
-                   "Merge topic 'gitlab-9.3'\n\
-                    \n\
-                    e5a23653 systemhooks: update for 9.3 changes\n\
-                    \n\
-                    Acked-by: Kitware Robot <kwrobot@kitware.com>\n\
-                    Reviewed-by: Ben Boeckel <ben.boeckel@kitware.com>\n\
-                    Merge-request: !100\n\
-                    ");
+                   ObjectId::new("e59db4b129b29df220ecec6119ed2130207a0397"));
+        assert_eq!(commit.short_id, ObjectId::new("e59db4b1"));
+        assert_eq!(commit.title, "cargo: prep for 0.1100.1");
+        assert_eq!(commit.message, "cargo: prep for 0.1100.1\n");
         assert_eq!(commit.parent_ids,
-                   vec![ObjectId::new("45aadb02640f6672fb4a382fc5b1ab5efec4f1df"),
-                        ObjectId::new("e5a23653f3d6532fefad0dffd90fb101ef94d42f")]);
+                   vec![ObjectId::new("5c81cc05661dcbb5fd923cca093920816c21ef7e")]);
     } else {
         panic!("expected to have a commit for the branch");
     }
@@ -489,6 +480,7 @@ fn test_read_repo_branch() {
     assert_eq!(repo_branch.protected, Some(true));
     assert_eq!(repo_branch.developers_can_push, Some(false));
     assert_eq!(repo_branch.developers_can_merge, Some(false));
+    assert_eq!(repo_branch.can_push, Some(true));
 }
 
 #[test]
