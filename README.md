@@ -28,24 +28,24 @@ to the structure are easier to track.
 Since this crate follows Gitlab upstream, semantic versioning may not be
 possible. Instead, the crate uses the following versioning scheme:
 
-  * Gitlab 8.16 support → 0.816.x
-  * Gitlab 8.17 support → 0.817.x
-  * Gitlab 9.0 support → 0.900.x
-  * Gitlab 9.1 support → 0.901.x
-  * Gitlab 9.2 support → 0.902.x
-  * Gitlab 9.3 support → 0.903.x
-  * Gitlab 9.4 support → 0.904.x
-  * Gitlab 9.5 support → 0.905.x
-  * Gitlab 10.0 support → 0.1000.x
-  * Gitlab 10.1 support → 0.1001.x
-  * Gitlab 10.2 support → 0.1002.x
-  * Gitlab 10.3 support → 0.1003.x
-  * Gitlab 10.4 support → 0.1004.x
-  * Gitlab 10.5 support → 0.1005.x
-  * Gitlab 10.6 support → 0.1006.x
-  * Gitlab 10.7 support → 0.1007.x
-  * Gitlab 10.8 support → 0.1008.x
   * Gitlab 11.0 support → 0.1100.x
+  * Gitlab 10.8 support → 0.1008.x
+  * Gitlab 10.7 support → 0.1007.x
+  * Gitlab 10.6 support → 0.1006.x
+  * Gitlab 10.5 support → 0.1005.x
+  * Gitlab 10.4 support → 0.1004.x
+  * Gitlab 10.3 support → 0.1003.x
+  * Gitlab 10.2 support → 0.1002.x
+  * Gitlab 10.1 support → 0.1001.x
+  * Gitlab 10.0 support → 0.1000.x
+  * Gitlab 9.5 support → 0.905.x
+  * Gitlab 9.4 support → 0.904.x
+  * Gitlab 9.3 support → 0.903.x
+  * Gitlab 9.2 support → 0.902.x
+  * Gitlab 9.1 support → 0.901.x
+  * Gitlab 9.0 support → 0.900.x
+  * Gitlab 8.17 support → 0.817.x
+  * Gitlab 8.16 support → 0.816.x
 
 Minor versions may fix bugs, add API endpoint bindings, or improve webhook
 coverage. It is recommended to depend on the full version of the crate since
