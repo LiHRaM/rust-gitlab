@@ -877,6 +877,8 @@ pub struct RepoBranch {
     pub developers_can_push: Option<bool>,
     /// Whether the developers can merge into the branch or not.
     pub developers_can_merge: Option<bool>,
+    /// Whether the current user can push to the branch.
+    pub can_push: Option<bool>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
