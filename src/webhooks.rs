@@ -115,7 +115,7 @@ pub struct UserHookAttrs {
     /// The handle of the user.
     pub username: String,
     /// The URL to the avatar of the user.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -172,7 +172,7 @@ pub struct PushHook {
     /// The email address of the user who pushed.
     pub user_email: String,
     /// The URL of the user's avatar.
-    pub user_avatar: String,
+    pub user_avatar: Option<String>,
     /// The ID of the project pushed to.
     pub project_id: ProjectId,
     /// Attributes of the project.

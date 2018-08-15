@@ -64,7 +64,7 @@ pub struct UserBasic {
     /// The state of the user account.
     pub state: UserState,
     /// The URL of the user's avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL of the user's profile page.
     pub web_url: String,
 }
@@ -90,7 +90,7 @@ pub struct User {
     /// The state of the user account.
     pub state: UserState,
     /// The URL of the user's avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL of the user's profile page.
     pub web_url: String,
     /// When the account was created.
@@ -164,7 +164,7 @@ pub struct UserPublic {
     /// The state of the user account.
     pub state: UserState,
     /// The URL of the user's avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL of the user's profile page.
     pub web_url: String,
     /// When the account was created.
@@ -704,7 +704,7 @@ pub struct Member {
     /// The state of the user account.
     pub state: UserState,
     /// The URL of the user's avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL of the user's profile page.
     pub web_url: String,
     /// The access level of the user.
@@ -739,7 +739,7 @@ pub struct AccessRequester {
     /// The state of the user account.
     pub state: UserState,
     /// The URL of the user's avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL of the user's profile page.
     pub web_url: String,
     /// When the membership request was created.
@@ -782,7 +782,7 @@ pub struct Group {
     /// Whether LFS is enabled for the group.
     pub lfs_enabled: bool,
     /// The URL to the group avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL to the group's profile page.
     pub web_url: String,
     /// Whether membership requests are allowed for the group.
@@ -825,7 +825,7 @@ pub struct GroupDetail {
     /// Whether LFS is enabled for the group.
     pub lfs_enabled: bool,
     /// The URL to the group avatar.
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     /// The URL to the group's profile page.
     pub web_url: String,
     /// The projects in a group.
