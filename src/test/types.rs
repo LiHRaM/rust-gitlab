@@ -33,7 +33,7 @@ fn test_read_award_emoji() {
     assert_eq!(award_emoji.user.name, "Ben Boeckel");
     assert_eq!(award_emoji.user.state, UserState::Active);
     assert_eq!(award_emoji.user.avatar_url,
-               "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+               Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
     assert_eq!(award_emoji.user.id, UserId::new(13));
     assert_eq!(award_emoji.created_at,
                Utc.ymd(2016, 12, 7)
@@ -60,7 +60,7 @@ fn test_read_commit_note() {
     assert_eq!(commit_note.author.name, "Ben Boeckel");
     assert_eq!(commit_note.author.state, UserState::Active);
     assert_eq!(commit_note.author.avatar_url,
-               "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+               Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
     assert_eq!(commit_note.author.id, UserId::new(13));
     assert_eq!(commit_note.created_at,
                Utc.ymd(2016, 12, 7)
@@ -95,7 +95,7 @@ fn test_read_commit_status() {
     assert_eq!(commit_status.author.name, "buildbot");
     assert_eq!(commit_status.author.state, UserState::Active);
     assert_eq!(commit_status.author.avatar_url,
-               "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png");
+               Some("https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png".to_string()));
     assert_eq!(commit_status.author.id, UserId::new(35));
     assert_eq!(commit_status.coverage, None);
 }
@@ -126,7 +126,7 @@ fn test_read_issue() {
     assert_eq!(issue.author.name, "Ben Boeckel");
     assert_eq!(issue.author.state, UserState::Active);
     assert_eq!(issue.author.avatar_url,
-               "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+               Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
     assert_eq!(issue.author.id, UserId::new(13));
     if let Some(ref assignee) = issue.assignee {
         assert_eq!(assignee.username, "ben.boeckel");
@@ -134,7 +134,7 @@ fn test_read_issue() {
         assert_eq!(assignee.name, "Ben Boeckel");
         assert_eq!(assignee.state, UserState::Active);
         assert_eq!(assignee.avatar_url,
-                   "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
         assert_eq!(assignee.id, UserId::new(13));
     } else {
         panic!("expected to have an assignee for the issue");
@@ -147,7 +147,7 @@ fn test_read_issue() {
         assert_eq!(assignee.name, "Ben Boeckel");
         assert_eq!(assignee.state, UserState::Active);
         assert_eq!(assignee.avatar_url,
-                   "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
         assert_eq!(assignee.id, UserId::new(13));
     } else {
         panic!("expected to have assignees for the issue");
@@ -193,7 +193,7 @@ fn test_read_issue_reference() {
         assert_eq!(issue.author.name, "Ben Boeckel");
         assert_eq!(issue.author.state, UserState::Active);
         assert_eq!(issue.author.avatar_url,
-                   "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
         assert_eq!(issue.author.id, UserId::new(13));
         if let Some(ref assignee) = issue.assignee {
             assert_eq!(assignee.username, "ben.boeckel");
@@ -201,7 +201,7 @@ fn test_read_issue_reference() {
             assert_eq!(assignee.name, "Ben Boeckel");
             assert_eq!(assignee.state, UserState::Active);
             assert_eq!(assignee.avatar_url,
-                       "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+                       Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
             assert_eq!(assignee.id, UserId::new(13));
         } else {
             panic!("expected to have an assignee for the issue");
@@ -233,7 +233,7 @@ fn test_read_member() {
     assert_eq!(member.id, UserId::new(11));
     assert_eq!(member.state, UserState::Active);
     assert_eq!(member.avatar_url,
-               "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon");
+               Some("https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon".to_string()));
     assert_eq!(member.web_url, "https://gitlab.kitware.com/kwrobot");
     assert_eq!(member.access_level, 50);
     assert_eq!(member.expires_at, None);
@@ -270,7 +270,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.author.name, "Ben Boeckel");
     assert_eq!(merge_request.author.state, UserState::Active);
     assert_eq!(merge_request.author.avatar_url,
-               "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon");
+               Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
     assert_eq!(merge_request.author.id, UserId::new(13));
     if let Some(ref assignee) = merge_request.assignee {
         assert_eq!(assignee.username, "brad.king");
@@ -278,7 +278,7 @@ fn test_read_merge_request() {
         assert_eq!(assignee.name, "Brad King");
         assert_eq!(assignee.state, UserState::Active);
         assert_eq!(assignee.avatar_url,
-                   "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon");
+                   Some("https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon".to_string()));
         assert_eq!(assignee.id, UserId::new(10));
     } else {
         panic!("expected to have an assignee for the merge request");
@@ -329,7 +329,7 @@ fn test_read_note() {
     assert_eq!(note.author.name, "Kitware Robot");
     assert_eq!(note.author.state, UserState::Active);
     assert_eq!(note.author.avatar_url,
-               "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon");
+               Some("https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon".to_string()));
     assert_eq!(note.author.id, UserId::new(11));
     assert_eq!(note.created_at,
                Utc.ymd(2016, 10, 4)
@@ -538,7 +538,7 @@ fn test_read_user() {
     assert_eq!(user.id, UserId::new(11));
     assert_eq!(user.state, UserState::Active);
     assert_eq!(user.avatar_url,
-               "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon");
+               Some("https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon".to_string()));
     assert_eq!(user.web_url, "https://gitlab.kitware.com/kwrobot");
     assert_eq!(user.created_at,
                Utc.ymd(2015, 2, 26)
@@ -562,7 +562,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.id, UserId::new(11));
     assert_eq!(user_public.state, UserState::Active);
     assert_eq!(user_public.avatar_url,
-               "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon");
+               Some("https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon".to_string()));
     assert_eq!(user_public.web_url,
                "https://gitlab.kitware.com/kwrobot");
     assert_eq!(user_public.created_at,
