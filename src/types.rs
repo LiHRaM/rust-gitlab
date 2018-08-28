@@ -94,13 +94,15 @@ pub struct User {
     /// The URL of the user's profile page.
     pub web_url: String,
     /// When the account was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Option<DateTime<Utc>>,
     /// Whether the user is an administrator or not.
     ///
     /// Only available when talking to GitLab as an admin.
     pub is_admin: Option<bool>,
     /// Self-described biography of the user.
     pub bio: Option<String>,
+    /// Whether the account has a private profile.
+    pub private_profile: Option<bool>,
     /// Geographic location of the user.
     pub location: Option<String>,
 
@@ -168,13 +170,15 @@ pub struct UserPublic {
     /// The URL of the user's profile page.
     pub web_url: String,
     /// When the account was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Option<DateTime<Utc>>,
     /// Whether the user is an administrator or not.
     ///
     /// Only available when talking to GitLab as an admin.
     pub is_admin: Option<bool>,
     /// Self-described biography of the user.
     pub bio: Option<String>,
+    /// Whether the account has a private profile.
+    pub private_profile: Option<bool>,
     /// Geographic location of the user.
     pub location: Option<String>,
 
@@ -245,6 +249,7 @@ impl From<UserPublic> for User {
             created_at: user.created_at,
             is_admin: user.is_admin,
             bio: user.bio,
+            private_profile: user.private_profile,
             location: user.location,
             skype: user.skype,
             linkedin: user.linkedin,
@@ -2161,4 +2166,6 @@ pub struct PipelineBasic {
     pub sha: ObjectId,
     /// The status of the pipeline.
     pub status: StatusState,
+    /// The URL to the pipeline page.
+    pub web_url: String,
 }
