@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use crates::itertools::Itertools;
-use crates::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
+use crates::percent_encoding::{PATH_SEGMENT_ENCODE_SET, PercentEncode, utf8_percent_encode};
 use crates::reqwest::{Client, Method, RequestBuilder, Url};
 use crates::serde::{Deserialize, Deserializer, Serializer};
 use crates::serde::de::Error as SerdeError;
@@ -164,12 +164,17 @@ impl Gitlab {
         self.get(&format!("projects/{}", project))
     }
 
+    /// A URL-safe name for projects.
+    fn url_name(name: &str) -> PercentEncode<PATH_SEGMENT_ENCODE_SET> {
+        utf8_percent_encode(name, PATH_SEGMENT_ENCODE_SET)
+    }
+
     /// Find a project by name.
     pub fn project_by_name<N>(&self, name: N) -> Result<Project>
         where N: AsRef<str>,
     {
         self.get(&format!("projects/{}",
-                          percent_encode(name.as_ref().as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+                          Self::url_name(name.as_ref())))
     }
 
     /// Get a project's hooks.
@@ -254,7 +259,7 @@ impl Gitlab {
     {
         self.get(&format!("projects/{}/repository/branches/{}",
                           project,
-                          percent_encode(branch.as_ref().as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+                          Self::url_name(branch.as_ref())))
     }
 
     /// Get a commit.
