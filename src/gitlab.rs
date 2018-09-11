@@ -7,13 +7,13 @@
 // except according to those terms.
 
 use crates::itertools::Itertools;
+use crates::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 use crates::reqwest::{Client, Method, RequestBuilder, Url};
 use crates::serde::{Deserialize, Deserializer, Serializer};
 use crates::serde::de::Error as SerdeError;
 use crates::serde::de::{DeserializeOwned, Unexpected};
 use crates::serde::ser::Serialize;
 use crates::serde_json;
-use crates::url::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
 
 use error::*;
 use types::*;
