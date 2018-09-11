@@ -169,6 +169,8 @@ pub struct PushHook {
     pub user_id: UserId,
     /// The name of the user who pushed.
     pub user_name: String,
+    /// The username of the user who pushed.
+    pub user_username: String,
     /// The email address of the user who pushed.
     pub user_email: String,
     /// The URL of the user's avatar.

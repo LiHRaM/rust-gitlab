@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use crates::itertools::Itertools;
-use crates::percent_encoding::{PATH_SEGMENT_ENCODE_SET, percent_encode};
+use crates::percent_encoding::{PATH_SEGMENT_ENCODE_SET, PercentEncode, utf8_percent_encode};
 use crates::reqwest::{Client, Method, RequestBuilder, Url};
 use crates::serde::{Deserialize, Deserializer, Serializer};
 use crates::serde::de::Error as SerdeError;
@@ -164,12 +164,17 @@ impl Gitlab {
         self.get(&format!("projects/{}", project))
     }
 
+    /// A URL-safe name for projects.
+    fn url_name(name: &str) -> PercentEncode<PATH_SEGMENT_ENCODE_SET> {
+        utf8_percent_encode(name, PATH_SEGMENT_ENCODE_SET)
+    }
+
     /// Find a project by name.
     pub fn project_by_name<N>(&self, name: N) -> Result<Project>
         where N: AsRef<str>,
     {
         self.get(&format!("projects/{}",
-                          percent_encode(name.as_ref().as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+                          Self::url_name(name.as_ref())))
     }
 
     /// Get a project's hooks.
@@ -243,6 +248,18 @@ impl Gitlab {
                              &[("user", &user_str), ("access", &access_str)])
     }
 
+    /// Add a user to a project.
+    pub fn add_user_to_project_by_name<P>(&self, project: P, user: UserId, access: AccessLevel)
+                                          -> Result<Member>
+        where P: AsRef<str>,
+    {
+        let user_str = format!("{}", user);
+        let access_str = format!("{}", access);
+
+        self.post_with_param(&format!("projects/{}/members", Self::url_name(project.as_ref())),
+                             &[("user", &user_str), ("access", &access_str)])
+    }
+
     /// Get branches for a project.
     pub fn branches(&self, project: ProjectId) -> Result<Vec<RepoBranch>> {
         self.get_paged(&format!("projects/{}/branches", project))
@@ -254,7 +271,7 @@ impl Gitlab {
     {
         self.get(&format!("projects/{}/repository/branches/{}",
                           project,
-                          percent_encode(branch.as_ref().as_bytes(), PATH_SEGMENT_ENCODE_SET)))
+                          Self::url_name(branch.as_ref())))
     }
 
     /// Get a commit.
@@ -288,6 +305,19 @@ impl Gitlab {
     }
 
     /// Get comments on a commit.
+    pub fn create_commit_comment_by_name<P, C, B>(&self, project: P, commit: C, body: B)
+                                                  -> Result<CommitNote>
+        where P: AsRef<str>,
+              C: AsRef<str>,
+              B: AsRef<str>,
+    {
+        self.post_with_param(&format!("projects/{}/repository/commits/{}/comment",
+                                      Self::url_name(project.as_ref()),
+                                      commit.as_ref()),
+                             &[("note", body.as_ref())])
+    }
+
+    /// Get comments on a commit.
     pub fn create_commit_line_comment(&self, project: ProjectId, commit: &str, body: &str,
                                       path: &str, line: u64)
                                       -> Result<CommitNote> {
@@ -310,6 +340,17 @@ impl Gitlab {
     {
         self.get_paged(&format!("projects/{}/repository/commits/{}/statuses",
                                 project,
+                                commit.as_ref()))
+    }
+
+    /// Get the latest statuses of a commit.
+    pub fn commit_latest_statuses_by_name<P, C>(&self, project: P, commit: C)
+                                                -> Result<Vec<CommitStatus>>
+        where P: AsRef<str>,
+              C: AsRef<str>,
+    {
+        self.get_paged(&format!("projects/{}/repository/commits/{}/statuses",
+                                Self::url_name(project.as_ref()),
                                 commit.as_ref()))
     }
 
@@ -359,6 +400,25 @@ impl Gitlab {
         self.post_with_param(path, &params)
     }
 
+    /// Create a status message for a commit.
+    pub fn create_commit_status_by_name<P, S>(&self, project: P, sha: S, state: StatusState,
+                                              info: &CommitStatusInfo)
+                                              -> Result<CommitStatus>
+        where P: AsRef<str>,
+              S: AsRef<str>,
+    {
+        let path = &format!("projects/{}/statuses/{}", Self::url_name(project.as_ref()), sha.as_ref());
+
+        let mut params = vec![("state", state.as_str())];
+
+        info.refname.map(|v| params.push(("ref", v)));
+        info.name.map(|v| params.push(("name", v)));
+        info.target_url.map(|v| params.push(("target_url", v)));
+        info.description.map(|v| params.push(("description", v)));
+
+        self.post_with_param(path, &params)
+    }
+
     /// Get the issues for a project.
     pub fn issues(&self, project: ProjectId) -> Result<Vec<Issue>> {
         self.get_paged(&format!("projects/{}/issues", project))
@@ -374,12 +434,30 @@ impl Gitlab {
         self.get_paged(&format!("projects/{}/issues/{}/notes", project, issue))
     }
 
+    /// Get the notes from a issue.
+    pub fn issue_notes_by_name<P>(&self, project: P, issue: IssueInternalId) -> Result<Vec<Note>>
+        where P: AsRef<str>,
+    {
+        self.get_paged(&format!("projects/{}/issues/{}/notes", Self::url_name(project.as_ref()), issue))
+    }
+
     /// Create a note on a issue.
     pub fn create_issue_note<C>(&self, project: ProjectId, issue: IssueInternalId, content: C)
                                 -> Result<Note>
         where C: AsRef<str>,
     {
         let path = &format!("projects/{}/issues/{}/notes", project, issue);
+
+        self.post_with_param(path, &[("body", content.as_ref())])
+    }
+
+    /// Create a note on a issue.
+    pub fn create_issue_note_by_name<P, C>(&self, project: P, issue: IssueInternalId, content: C)
+                                           -> Result<Note>
+        where P: AsRef<str>,
+              C: AsRef<str>,
+    {
+        let path = &format!("projects/{}/issues/{}/notes", Self::url_name(project.as_ref()), issue);
 
         self.post_with_param(path, &[("body", content.as_ref())])
     }
@@ -418,12 +496,35 @@ impl Gitlab {
                                 merge_request))
     }
 
+    /// Get the notes from a merge request.
+    pub fn merge_request_notes_by_name<P>(&self, project: P, merge_request: MergeRequestInternalId)
+                                          -> Result<Vec<Note>>
+        where P: AsRef<str>,
+    {
+        self.get_paged(&format!("projects/{}/merge_requests/{}/notes",
+                                Self::url_name(project.as_ref()),
+                                merge_request))
+    }
+
     /// Award a merge request note with an award.
     pub fn award_merge_request_note(&self, project: ProjectId, merge_request: MergeRequestInternalId,
                                     note: NoteId, award: &str)
                                     -> Result<AwardEmoji> {
         let path = &format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
                             project,
+                            merge_request,
+                            note);
+        self.post_with_param(path, &[("name", award)])
+    }
+
+    /// Award a merge request note with an award.
+    pub fn award_merge_request_note_by_name<P>(&self, project: P, merge_request: MergeRequestInternalId,
+                                               note: NoteId, award: &str)
+                                               -> Result<AwardEmoji>
+        where P: AsRef<str>,
+    {
+        let path = &format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
+                            Self::url_name(project.as_ref()),
                             merge_request,
                             note);
         self.post_with_param(path, &[("name", award)])
@@ -437,12 +538,34 @@ impl Gitlab {
                                 merge_request))
     }
 
+    /// Get the awards for a merge request.
+    pub fn merge_request_awards_by_name<P>(&self, project: P, merge_request: MergeRequestInternalId)
+                                           -> Result<Vec<AwardEmoji>>
+        where P: AsRef<str>,
+    {
+        self.get_paged(&format!("projects/{}/merge_requests/{}/award_emoji",
+                                Self::url_name(project.as_ref()),
+                                merge_request))
+    }
+
     /// Get the awards for a merge request note.
     pub fn merge_request_note_awards(&self, project: ProjectId, merge_request: MergeRequestInternalId,
                                      note: NoteId)
                                      -> Result<Vec<AwardEmoji>> {
         self.get_paged(&format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
                                 project,
+                                merge_request,
+                                note))
+    }
+
+    /// Get the awards for a merge request note.
+    pub fn merge_request_note_awards_by_name<P>(&self, project: P, merge_request: MergeRequestInternalId,
+                                                note: NoteId)
+                                                -> Result<Vec<AwardEmoji>>
+        where P: AsRef<str>,
+    {
+        self.get_paged(&format!("projects/{}/merge_requests/{}/notes/{}/award_emoji",
+                                Self::url_name(project.as_ref()),
                                 merge_request,
                                 note))
     }
@@ -457,12 +580,36 @@ impl Gitlab {
         self.post_with_param(path, &[("body", content)])
     }
 
+    /// Create a note on a merge request.
+    pub fn create_merge_request_note_by_name<P>(&self, project: P, merge_request: MergeRequestInternalId,
+                                                content: &str)
+                                                -> Result<Note>
+        where P: AsRef<str>,
+    {
+        let path = &format!("projects/{}/merge_requests/{}/notes",
+                            Self::url_name(project.as_ref()),
+                            merge_request);
+        self.post_with_param(path, &[("body", content)])
+    }
+
     /// Get issues closed by a merge request.
     pub fn get_issues_closed_by_merge_request(&self, project: ProjectId,
                                               merge_request: MergeRequestInternalId)
                                               -> Result<Vec<Issue>> {
         let path = &format!("projects/{}/merge_requests/{}/closes_issues",
                             project,
+                            merge_request);
+        self.get_paged(path)
+    }
+
+    /// Get issues closed by a merge request.
+    pub fn get_issues_closed_by_merge_request_by_name<P>(&self, project: P,
+                                                         merge_request: MergeRequestInternalId)
+                                                         -> Result<Vec<Issue>>
+        where P: AsRef<str>,
+    {
+        let path = &format!("projects/{}/merge_requests/{}/closes_issues",
+                            Self::url_name(project.as_ref()),
                             merge_request);
         self.get_paged(path)
     }
@@ -475,6 +622,19 @@ impl Gitlab {
     {
         let path = &format!("projects/{}/issues/{}",
                             project,
+                            issue);
+        self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
+    }
+
+    /// Set the labels on an issue.
+    pub fn set_issue_labels_by_name<P, I, L>(&self, project: P, issue: IssueInternalId, labels: I)
+                                             -> Result<Issue>
+                                             where P: AsRef<str>,
+              I: IntoIterator<Item = L>,
+              L: Display,
+    {
+        let path = &format!("projects/{}/issues/{}",
+                            Self::url_name(project.as_ref()),
                             issue);
         self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
     }
