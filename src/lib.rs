@@ -33,8 +33,8 @@ mod crates {
     pub extern crate hyper;
     pub extern crate itertools;
     pub extern crate log;
+    pub extern crate percent_encoding;
     pub extern crate reqwest;
-    pub extern crate url;
 }
 
 mod error;
