@@ -1878,6 +1878,8 @@ impl_id!(CommitStatusId);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// States for commit statuses.
 pub enum StatusState {
+    /// The check was created.
+    Created,
     /// The check is queued.
     Pending,
     /// The check is currently running.
@@ -1888,13 +1890,21 @@ pub enum StatusState {
     Failed,
     /// The check was canceled.
     Canceled,
+    /// The check was skipped.
+    Skipped,
+    /// The check is waiting for manual action.
+    Manual,
 }
+
 enum_serialize!(StatusState -> "status state",
+    Created => "created",
     Pending => "pending",
     Running => "running",
     Success => "success",
     Failed => "failed",
     Canceled => "canceled",
+    Skipped => "skipped",
+    Manual => "manual",
 );
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
