@@ -1,13 +1,13 @@
 [package]
 name = "gitlab"
-version = "0.1102.1"
+version = "0.1102.2"
 authors = ["Ben Boeckel <ben.boeckel@kitware.com>"]
 license = "MIT/Apache-2.0"
 description = """
 Gitlab API client.
 """
 repository = "https://gitlab.kitware.com/utils/rust-gitlab"
-documentation = "https://docs.rs/gitlab/0.1102.1"
+documentation = "https://docs.rs/gitlab/0.1102.2"
 readme = "README.md"
 keywords = ["gitlab", "api"]
 categories = ["web-programming", "api-bindings"]
