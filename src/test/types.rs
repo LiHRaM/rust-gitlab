@@ -434,6 +434,7 @@ fn test_read_project_hook() {
                Utc.ymd(2016, 12, 16)
                    .and_hms_milli(16, 37, 24, 589));
     assert_eq!(project_hook.push_events, true);
+    assert!(project_hook.push_events_branch_filter.is_none());
     assert_eq!(project_hook.tag_push_events, true);
     assert_eq!(project_hook.issues_events, true);
     assert_eq!(project_hook.confidential_issues_events, Some(true));
@@ -481,6 +482,7 @@ fn test_read_repo_branch() {
     assert_eq!(repo_branch.developers_can_push, Some(false));
     assert_eq!(repo_branch.developers_can_merge, Some(false));
     assert_eq!(repo_branch.can_push, Some(true));
+    assert_eq!(repo_branch.default, Some(true));
 }
 
 #[test]
