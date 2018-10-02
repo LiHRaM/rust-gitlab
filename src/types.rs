@@ -314,6 +314,8 @@ pub struct ProjectHook {
     pub project_id: ProjectId,
     /// Whether the hook is contacted for push events.
     pub push_events: bool,
+    /// Filter branches for which the hook is contacted for push events.
+    pub push_events_branch_filter: Option<String>,
     /// Whether the hook is contacted for tag push events.
     pub tag_push_events: bool,
     /// Whether the hook is contacted for issue events.
@@ -884,6 +886,8 @@ pub struct RepoBranch {
     pub developers_can_merge: Option<bool>,
     /// Whether the current user can push to the branch.
     pub can_push: Option<bool>,
+    /// Whether the branch is the repository default branch.
+    pub default: Option<bool>,
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
