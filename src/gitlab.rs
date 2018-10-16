@@ -8,7 +8,8 @@
 
 use crates::itertools::Itertools;
 use crates::percent_encoding::{PATH_SEGMENT_ENCODE_SET, PercentEncode, utf8_percent_encode};
-use crates::reqwest::{Client, Method, RequestBuilder, Url};
+use crates::reqwest::{Client, RequestBuilder, Url};
+use crates::reqwest::header::HeaderValue;
 use crates::serde::{Deserialize, Deserializer, Serializer};
 use crates::serde::de::Error as SerdeError;
 use crates::serde::de::{DeserializeOwned, Unexpected};
@@ -40,9 +41,6 @@ impl Debug for Gitlab {
             .finish()
     }
 }
-
-// The header Gitlab uses to authenticate the user.
-header!{ (GitlabPrivateToken, "PRIVATE-TOKEN") => [String] }
 
 #[derive(Debug)]
 /// Optional information for commit statuses.
@@ -670,11 +668,15 @@ impl Gitlab {
     }
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
-    fn send<T>(&self, mut req: RequestBuilder) -> Result<T>
+    fn send<T>(&self, req: RequestBuilder) -> Result<T>
         where T: DeserializeOwned,
     {
-        req.header(GitlabPrivateToken(self.token.to_string()));
-        let rsp = req.send().chain_err(|| ErrorKind::Communication)?;
+        let mut token_header_value = HeaderValue::from_str(&self.token)
+            .map_err(|_| ErrorKind::HeaderValueParse)?;
+        token_header_value.set_sensitive(true);
+        let rsp = req.header("PRIVATE-TOKEN", token_header_value)
+            .send()
+            .chain_err(|| ErrorKind::Communication)?;
         let status = rsp.status();
         if status.is_server_error() {
             return Err(ErrorKind::Gitlab(
@@ -720,9 +722,9 @@ impl Gitlab {
               U: Serialize,
     {
         let full_url = self.create_url(url)?;
-        let mut req = self.client.post(full_url);
-        req.form(&param);
-        self.send(req)
+        self.send(self.client
+            .post(full_url)
+            .form(&param))
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.
@@ -731,9 +733,8 @@ impl Gitlab {
               U: Serialize,
     {
         let full_url = self.create_url(url)?;
-        let mut req = self.client.request(Method::Put, full_url);
-        req.form(&param);
-        self.send(req)
+        self.send(self.client.put(full_url)
+            .form(&param))
     }
 
     /// Handle paginated queries. Returns all results.

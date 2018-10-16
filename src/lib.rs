@@ -14,9 +14,6 @@
 extern crate error_chain;
 
 #[macro_use]
-extern crate hyper;
-
-#[macro_use]
 extern crate log;
 
 #[macro_use]
@@ -30,7 +27,6 @@ mod crates {
     pub extern crate serde_json;
 
     // private
-    pub extern crate hyper;
     pub extern crate itertools;
     pub extern crate log;
     pub extern crate percent_encoding;

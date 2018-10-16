@@ -20,6 +20,10 @@ error_chain! {
         Communication {
             display("communication error")
         }
+        /// Header value parsing error; should never occur.
+        HeaderValueParse {
+            display("header value error")
+        }
         /// URL parsing error; should never occur.
         UrlParse {
             display("url error")
