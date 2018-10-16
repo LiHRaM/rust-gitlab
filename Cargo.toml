@@ -13,11 +13,10 @@ keywords = ["gitlab", "api"]
 categories = ["web-programming", "api-bindings"]
 
 [dependencies]
-hyper = { version = "~0.11.9", default-features = false }
 itertools = "~0.7"
 log = "~0.4"
 percent-encoding = "^1.0"
-reqwest = "~0.8"
+reqwest = "~0.9"
 serde_derive = "^1.0"
 
 chrono = { version = "~0.4", features = ["serde"] }
