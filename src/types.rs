@@ -1434,7 +1434,7 @@ pub struct MergeRequest {
     /// This is `None` if the source branch has been deleted.
     pub sha: Option<ObjectId>,
     /// The commits used to construct the merge request diffs.
-    pub diff_refs: DiffRefs,
+    pub diff_refs: Option<DiffRefs>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// Whether the current user is subscribed or not.
@@ -1527,7 +1527,7 @@ pub struct MergeRequestChanges {
     /// This is `None` if the source branch has been deleted.
     pub sha: Option<ObjectId>,
     /// The commits used to construct the merge request diffs.
-    pub diff_refs: DiffRefs,
+    pub diff_refs: Option<DiffRefs>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// GitLab does not include this in responses with lists of merge requests but
