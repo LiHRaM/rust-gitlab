@@ -105,6 +105,8 @@ pub struct User {
     pub private_profile: Option<bool>,
     /// Geographic location of the user.
     pub location: Option<String>,
+    /// User public email address, if any.
+    pub public_email: Option<String>,
 
     /// Skype contact information.
     pub skype: String,
@@ -181,6 +183,8 @@ pub struct UserPublic {
     pub private_profile: Option<bool>,
     /// Geographic location of the user.
     pub location: Option<String>,
+    /// User public email address, if any.
+    pub public_email: Option<String>,
 
     /// Skype contact information.
     pub skype: String,
@@ -251,6 +255,7 @@ impl From<UserPublic> for User {
             bio: user.bio,
             private_profile: user.private_profile,
             location: user.location,
+            public_email: user.public_email,
             skype: user.skype,
             linkedin: user.linkedin,
             twitter: user.twitter,
