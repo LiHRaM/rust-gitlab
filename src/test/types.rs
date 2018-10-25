@@ -550,6 +550,7 @@ fn test_read_user() {
     assert_eq!(user.bio, Some("".to_string()));
     assert_eq!(user.private_profile, None);
     assert_eq!(user.location, None);
+    assert_eq!(user.public_email, Some("".to_string()));
     assert_eq!(user.skype, "");
     assert_eq!(user.linkedin, "");
     assert_eq!(user.twitter, "");
@@ -576,16 +577,17 @@ fn test_read_user_public() {
     assert_eq!(user_public.bio, Some("".to_string()));
     assert_eq!(user_public.private_profile, None);
     assert_eq!(user_public.location, None);
+    assert_eq!(user_public.public_email, Some("".to_string()));
     assert_eq!(user_public.skype, "");
     assert_eq!(user_public.linkedin, "");
     assert_eq!(user_public.twitter, "");
     assert_eq!(user_public.website_url, "");
     assert_eq!(user_public.organization, None);
     assert_eq!(user_public.last_sign_in_at,
-               Some(Utc.ymd(2018, 7, 18)
-                   .and_hms_milli(11, 33, 59, 612)));
+               Some(Utc.ymd(2018, 10, 8)
+                   .and_hms_milli(17, 25, 29, 86)));
     assert_eq!(user_public.last_activity_on,
-               Some(NaiveDate::from_ymd(2018, 8, 28)));
+               Some(NaiveDate::from_ymd(2018, 10, 25)));
     assert_eq!(user_public.confirmed_at,
                Some(Utc.ymd(2015, 2, 26)
                    .and_hms_milli(15, 58, 34, 660)));
@@ -594,8 +596,8 @@ fn test_read_user_public() {
     assert_eq!(user_public.color_scheme_id, ColorSchemeId::new(4));
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(user_public.current_sign_in_at,
-               Some(Utc.ymd(2018, 8, 24)
-                   .and_hms_milli(14, 10, 45, 623)));
+               Some(Utc.ymd(2018, 10, 11)
+                   .and_hms_milli(12, 36, 9, 687)));
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);
     assert_eq!(user_public.can_create_project, true);
