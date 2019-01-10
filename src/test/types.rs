@@ -301,6 +301,8 @@ fn test_read_merge_request() {
                Some(ObjectId::new("04e94ae667024a62a90179f395bfdc2b35f3efd2")));
     assert_eq!(merge_request.diff_refs.as_ref().unwrap().start_sha,
                Some(ObjectId::new("981262b03fc0149c1677ca51ea47b570e30d6a90")));
+    assert_eq!(merge_request.merge_error, None);
+    assert_eq!(merge_request.rebase_in_progress, None);
     assert_eq!(merge_request.merge_commit_sha, None);
     assert_eq!(merge_request.subscribed, Some(true));
     assert_eq!(merge_request.time_stats.time_estimate, 0);
