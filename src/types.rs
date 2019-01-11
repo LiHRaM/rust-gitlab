@@ -1440,6 +1440,10 @@ pub struct MergeRequest {
     pub sha: Option<ObjectId>,
     /// The commits used to construct the merge request diffs.
     pub diff_refs: Option<DiffRefs>,
+    /// Description of error if MR failed to merge.
+    pub merge_error: Option<String>,
+    /// Whether a rebase is in progress.
+    pub rebase_in_progress: Option<bool>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// Whether the current user is subscribed or not.
@@ -1533,6 +1537,10 @@ pub struct MergeRequestChanges {
     pub sha: Option<ObjectId>,
     /// The commits used to construct the merge request diffs.
     pub diff_refs: Option<DiffRefs>,
+    /// Description of error if MR failed to merge.
+    pub merge_error: Option<String>,
+    /// Whether a rebase is in progress.
+    pub rebase_in_progress: Option<bool>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
     /// GitLab does not include this in responses with lists of merge requests but
@@ -1589,6 +1597,8 @@ impl From<MergeRequestChanges> for MergeRequest {
             merge_status: mr.merge_status,
             sha: mr.sha,
             diff_refs: mr.diff_refs,
+            merge_error: mr.merge_error,
+            rebase_in_progress: mr.rebase_in_progress,
             merge_commit_sha: mr.merge_commit_sha,
             subscribed: mr.subscribed,
             time_stats: mr.time_stats,
