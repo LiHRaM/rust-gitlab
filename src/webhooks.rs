@@ -353,7 +353,7 @@ pub struct MergeRequestHookAttrs {
     /// The source branch of the merge request.
     pub source_branch: String,
     /// The ID of the source project.
-    pub source_project_id: ProjectId,
+    pub source_project_id: Option<ProjectId>,
     /// The ID of the author of the merge request.
     pub author_id: UserId,
     /// The ID of the assignee of the merge request.
