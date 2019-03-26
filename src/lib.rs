@@ -1,5 +1,3 @@
-// Copyright 2016 Kitware, Inc.
-//
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
@@ -38,16 +36,16 @@ mod error;
 mod macros;
 mod gitlab;
 
+pub mod hooks;
 pub mod systemhooks;
 pub mod types;
 pub mod webhooks;
-pub mod hooks;
 
 pub use error::*;
 pub use gitlab::CommitStatusInfo;
-pub use gitlab::MergeRequestStateFilter;
 pub use gitlab::Gitlab;
 pub use gitlab::GitlabBuilder;
+pub use gitlab::MergeRequestStateFilter;
 pub use types::*;
 
 #[cfg(test)]

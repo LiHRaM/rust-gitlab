@@ -1,5 +1,3 @@
-// Copyright 2016 Kitware, Inc.
-//
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
@@ -13,8 +11,8 @@
 //! Gitlab does not have consistent structures for its hooks, so they often change from
 //! version to version.
 
-use crates::serde::{Deserialize, Deserializer};
 use crates::serde::de::{Error, Unexpected};
+use crates::serde::{Deserialize, Deserializer};
 use crates::serde_json::{self, Value};
 
 use systemhooks::SystemHook;
@@ -31,7 +29,8 @@ pub enum GitlabHook {
 
 impl<'de> Deserialize<'de> for GitlabHook {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
@@ -46,8 +45,10 @@ impl<'de> Deserialize<'de> for GitlabHook {
         };
 
         hook_res.map_err(|err| {
-            D::Error::invalid_value(Unexpected::Other("gitlab hook"),
-                                    &format!("{:?}", err).as_str())
+            D::Error::invalid_value(
+                Unexpected::Other("gitlab hook"),
+                &format!("{:?}", err).as_str(),
+            )
         })
     }
 }

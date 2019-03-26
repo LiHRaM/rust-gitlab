@@ -1,5 +1,3 @@
-// Copyright 2016 Kitware, Inc.
-//
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
@@ -42,7 +40,8 @@ error_chain! {
 impl Error {
     /// Extract the message from a Gitlab JSON error.
     pub fn from_gitlab(value: Value) -> Self {
-        let msg = value.pointer("/message")
+        let msg = value
+            .pointer("/message")
             .and_then(|s| s.as_str())
             .unwrap_or_else(|| "unknown error");
 
