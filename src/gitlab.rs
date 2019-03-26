@@ -417,6 +417,16 @@ impl Gitlab {
         self.post_with_param(path, &params)
     }
 
+    /// Get the labels for a project.
+    pub fn labels(&self, project: ProjectId) -> Result<Vec<Label>> {
+        self.get_paged(&format!("projects/{}/labels", project))
+    }
+
+    /// Get label by ID.
+    pub fn label(&self, project: ProjectId, label: LabelId) -> Result<Label> {
+        self.get(&format!("projects/{}/labels/{}", project, label))
+    }
+
     /// Get the issues for a project.
     pub fn issues(&self, project: ProjectId) -> Result<Vec<Issue>> {
         self.get_paged(&format!("projects/{}/issues", project))
@@ -437,6 +447,26 @@ impl Gitlab {
         where P: AsRef<str>,
     {
         self.get_paged(&format!("projects/{}/issues/{}/notes", Self::url_name(project.as_ref()), issue))
+    }
+
+    /// Create a new label
+    pub fn create_label (&self, project: ProjectId, label: Label) -> Result<Label> {
+        let path = &format!("projects/{}/labels", project);
+
+        let mut params: Vec<(&str, String)> = Vec::new();
+
+        params.push(("name", label.name));
+        params.push(("color", label.color.value()));
+
+        if let Some(d) = label.description {
+            params.push(("description", d));
+        }
+
+        if let Some(p) = label.priority {
+            params.push(("priority", p.to_string()));
+        }
+
+        self.post_with_param(path, &params)
     }
 
     /// Create a new milestone

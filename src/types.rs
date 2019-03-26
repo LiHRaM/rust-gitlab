@@ -1135,7 +1135,7 @@ pub struct Milestone {
     /// The title of the milestone.
     pub title: String,
     /// The description of the milestone.
-    pub description: String,
+    pub description: Option<String>,
     /// The state of the milestone.
     pub state: MilestoneState,
     /// When the milestone was created.
@@ -1179,6 +1179,107 @@ impl Milestone {
     /// Complements the milestone with optional parameter: start_date
     pub fn with_start_date(mut self, start_date: NaiveDate) -> Milestone {
         self.start_date = Some(start_date);
+        self
+    }
+}
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe label ID.
+pub struct LabelId(u64);
+impl_id!(LabelId);
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+/// Type-safe label color.
+pub struct LabelColor(String);
+
+impl LabelColor {
+    /// Creates a LabelColor from RGB values
+    pub fn from_rgb(r: u8, g: u8, b: u8) -> LabelColor {
+        LabelColor(format!("#{:02X}{:02X}{:02X}", r, g, b))
+    }
+
+    /// Creates a LabelColor from standard HTML values
+    pub fn from_str(stdcolor: &str) -> LabelColor {
+        let hex = match stdcolor {
+            "white" => "FFFFFF",
+            "silver" => "C0C0C0",
+            "gray" => "808080",
+            "black" => "000000",
+            "red" => "FF0000",
+            "maroon" => "800000",
+            "yellow" => "FFFF00",
+            "olive" => "808000",
+            "lime" => "00FF00",
+            "green" => "008000",
+            "aqua" => "00FFFF",
+            "teal" => "008080",
+            "blue" => "0000FF",
+            "navy" => "000080",
+            "fuchsia" => "FF00FF",
+            "purple" => "800080",
+            _ => "808080",
+        };
+
+        LabelColor(format!("#{}", hex))
+    }
+
+    /// Get the value from a LabelColor
+    pub fn value(self) -> String {
+        self.0
+    }
+}
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// An label on a project.
+pub struct Label {
+    /// The Id of the label.
+    pub id: LabelId,
+    /// The name of the label.
+    pub name: String,
+    /// The color of the label.
+    pub color: LabelColor,
+    /// The description of the label.
+    pub description: Option<String>,
+    /// The number of opened issues associated with the label.
+    pub open_issues_count: u64,
+    /// the number of closed issues associated with the label.
+    pub closed_issues_count: u64,
+    /// The number of open merge request associated with the label.
+    pub open_merge_requests_count: u64,
+    /// Whether or not the account connecting has subscribed to the label.
+    pub subscribed: bool,
+    /// The priority of the label.
+    pub priority: Option<u64>,
+}
+
+impl Label {
+    /// Create a new Label: it needs at least a name and a color.
+    /// ProjectId is mandatory for Gitlab API
+    pub fn new(name: String, color: LabelColor) -> Label {
+        Label {
+            id: LabelId::new(0),
+            name: name,
+            color: color,
+            description: None,
+            open_issues_count: 0,
+            closed_issues_count: 0,
+            open_merge_requests_count: 0,
+            subscribed: false,
+            priority: None,
+        }
+    }
+    /// Complements the label with optional parameter: description
+    pub fn with_description(mut self, description: String) -> Label {
+        self.description = Some(description);
+        self
+    }
+
+    /// Complements the label with optional parameter: priority
+    pub fn with_priority(mut self, priority: u64) -> Label {
+        self.priority = Some(priority);
         self
     }
 }
