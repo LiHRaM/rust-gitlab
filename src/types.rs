@@ -1148,6 +1148,41 @@ pub struct Milestone {
     pub start_date: Option<NaiveDate>,
 }
 
+impl Milestone {
+    /// Create a new blank milestone: it needs at least the ProjectId and title
+    /// ProjectId and title are mandatory for new milestone API of Gitlab
+    pub fn new(project_id: ProjectId, title: String) -> Milestone {
+        Milestone {
+            id: MilestoneId::new(0),
+            iid: MilestoneInternalId::new(0),
+            project_id: Some(project_id),
+            group_id: None,
+            title: title,
+            description: None,
+            state: MilestoneState::Active,
+            created_at: DateTime::from(Utc::now()),
+            updated_at: DateTime::from(Utc::now()),
+            due_date: None,
+            start_date: None,
+        }
+    }
+    /// Complements the milestone with optional paramater: description
+    pub fn with_description(mut self, description: String) -> Milestone {
+        self.description = Some(description);
+        self
+    }
+    /// Complements the milestone with optional parameter: due_date
+    pub fn with_due_date(mut self, due_date: NaiveDate) -> Milestone {
+        self.due_date = Some(due_date);
+        self
+    }
+    /// Complements the milestone with optional parameter: start_date
+    pub fn with_start_date(mut self, start_date: NaiveDate) -> Milestone {
+        self.start_date = Some(start_date);
+        self
+    }
+}
+
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe issue ID.

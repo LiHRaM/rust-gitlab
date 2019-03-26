@@ -439,6 +439,29 @@ impl Gitlab {
         self.get_paged(&format!("projects/{}/issues/{}/notes", Self::url_name(project.as_ref()), issue))
     }
 
+    /// Create a new milestone
+    pub fn create_milestone (&self, project: ProjectId, milestone: Milestone) -> Result<Milestone> {
+        let path = &format!("projects/{}/milestones", project);
+
+        let mut params: Vec<(&str, String)> = Vec::new();
+
+        params.push(("title", milestone.title));
+
+        if let Some(d) = milestone.description {
+            params.push(("description", d));
+        }
+
+        if let Some(d) = milestone.due_date {
+            params.push(("due_date", d.to_string()))
+        }
+
+        if let Some(s) = milestone.start_date {
+            params.push(("start_date", s.to_string()))
+        }
+
+        self.post_with_param(path, &params)
+    }
+
     /// Create a new issue
     pub fn create_issue (&self, project: ProjectId, issue: Issue) -> Result<Issue> {
         let path = &format!("projects/{}/issues", project);
