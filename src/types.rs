@@ -1251,8 +1251,85 @@ pub struct Issue {
     _links: Option<IssueLinks>,
 }
 
-#[cfg(test)]
 impl Issue {
+    /// Creates a new blank issue: it needs at least the ProjectId, title and author
+    /// ProjectId and author are mandatory in the Issue struct itself
+    /// title is mandatory for the new issue API of Gitlab
+    pub fn new(project_id: ProjectId, title: String, author: UserBasic) -> Issue {
+        // initialize with default parameters
+        Issue {
+            id: IssueId::new(0),
+            iid: IssueInternalId::new(0),
+            project_id: project_id,
+            title: title,
+            description: None,
+            state: IssueState::Opened,
+            created_at: DateTime::from(Utc::now()),
+            updated_at: DateTime::from(Utc::now()),
+            closed_at: None,
+            closed_by: None,
+            labels: Vec::new(),
+            milestone: None,
+            author: author,
+            assignee: None,
+            assignees: None,
+            subscribed: None,
+            time_stats: IssuableTimeStats {
+                time_estimate: 0,
+                total_time_spent: 0,
+                human_time_estimate: None,
+                human_total_time_spent: None,
+            },
+            user_notes_count: 0,
+            upvotes: 0,
+            downvotes: 0,
+            due_date: None,
+            confidential: false,
+            discussion_locked: None,
+            web_url: "".to_string(),
+            _links: None,
+        }
+    }
+    /// Complements the issue with optional parameter: iid
+    pub fn with_iid(mut self, iid: IssueInternalId) -> Issue {
+        self.iid = iid;
+        self
+    }
+    /// Complements the issue with optional parameter: description
+    pub fn with_description(mut self, description: String) -> Issue {
+        self.description = Some(description);
+        self
+    }
+    /// Complements the issue with optional parameter: confidential
+    pub fn with_confidential(mut self, confidential: bool) -> Issue {
+        self.confidential = confidential;
+        self
+    }
+    /// Complements the issue with optional parameter: assignees
+    pub fn with_assignees(mut self, assignees: Vec<UserBasic>) -> Issue {
+        self.assignees = Some(assignees);
+        self
+    }
+    /// Complements the issue with optional parameter: milestone
+    pub fn with_milestone(mut self, milestone: Milestone) -> Issue {
+        self.milestone = Some(milestone);
+        self
+    }
+    /// Complements the issue with optional parameter: labels
+    pub fn with_labels(mut self, labels: Vec<String>) -> Issue {
+        self.labels = labels;
+        self
+    }
+    /// Complements the issue with optional parameter: created_at
+    pub fn with_created_at(mut self, created_at: DateTime<Utc>) -> Issue {
+        self.created_at = created_at;
+        self
+    }
+    /// Complements the issue with optional parameter: due_date
+    pub fn with_due_date(mut self, due_date: NaiveDate) -> Issue {
+        self.due_date = Some(due_date);
+        self
+    }
     pub fn has_links(&self) -> bool {
         self._links.is_some()
     }
