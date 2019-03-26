@@ -517,7 +517,7 @@ pub struct DiffHookAttrs {
 
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-// FIXME: This can apparently be a string sometimes.
+// FIXME(gitlab#21467): This can apparently be a string sometimes.
 // https://gitlab.com/gitlab-org/gitlab-ce/issues/21467
 pub struct PositionHookAttrs {
     pub base_sha: ObjectId,
@@ -561,7 +561,7 @@ pub struct NoteHookAttrs {
     pub project_id: ProjectId,
     /// The URL of an attachment to the note.
     pub attachment: Option<String>,
-    pub line_code: Option<String>, // TODO: This is some internal format.
+    pub line_code: Option<String>, // XXX: This is some internal format.
     pub commit_id: Option<ObjectId>, // XXX(8.11): apparently can be an empty string?
     pub discussion_id: ObjectId,
     pub original_discussion_id: Option<ObjectId>,
