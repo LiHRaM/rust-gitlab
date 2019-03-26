@@ -572,9 +572,11 @@ pub struct NoteHookAttrs {
     /// The URL of the note.
     pub url: String,
 
+    // XXX: What is this field?
     #[serde(rename = "type")]
-    pub type_: Option<String>, // ???
-    //pub is_award: bool, // seems to have been removed?
+    pub type_: Option<String>,
+    // XXX: Seems to have been removed?
+    // pub is_award: bool,
 }
 
 impl NoteHookAttrs {
