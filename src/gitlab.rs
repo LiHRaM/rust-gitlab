@@ -439,6 +439,47 @@ impl Gitlab {
         self.get_paged(&format!("projects/{}/issues/{}/notes", Self::url_name(project.as_ref()), issue))
     }
 
+    /// Create a new issue
+    pub fn create_issue (&self, project: ProjectId, issue: Issue) -> Result<Issue> {
+        let path = &format!("projects/{}/issues", project);
+
+        let mut params: Vec<(&str, String)> = Vec::new();
+
+        if issue.iid.value() != 0 {
+            params.push(("iid", issue.iid.value().to_string()));
+        }
+
+        params.push(("title", issue.title));
+
+        if let Some(d) = issue.description {
+            params.push(("description", d));
+        }
+
+        params.push(("confidential", issue.confidential.to_string()));
+
+        if let Some(v) = issue.assignees {
+            params.extend(v.into_iter().map(|x|
+                ("assignee_ids[]", x.id.value().to_string())
+            ));
+        }
+
+        if let Some(m) = issue.milestone {
+            params.push(("milestone_id", m.id.value().to_string()))
+        }
+
+        if !issue.labels.is_empty() {
+            params.push(("labels", issue.labels.join(",")));
+        }
+
+        params.push(("created_at", issue.created_at.to_string()));
+
+        if let Some(d) = issue.due_date {
+            params.push(("due_date", d.to_string()))
+        }
+
+        self.post_with_param(path, &params)
+    }
+
     /// Create a note on a issue.
     pub fn create_issue_note<C>(&self, project: ProjectId, issue: IssueInternalId, content: C)
                                 -> Result<Note>
