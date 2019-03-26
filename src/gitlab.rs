@@ -417,6 +417,16 @@ impl Gitlab {
         self.post_with_param(path, &params)
     }
 
+    /// Get the labels for a project.
+    pub fn labels(&self, project: ProjectId) -> Result<Vec<Label>> {
+        self.get_paged(&format!("projects/{}/labels", project))
+    }
+
+    /// Get label by ID.
+    pub fn label(&self, project: ProjectId, label: LabelId) -> Result<Label> {
+        self.get(&format!("projects/{}/labels/{}", project, label))
+    }
+
     /// Get the issues for a project.
     pub fn issues(&self, project: ProjectId) -> Result<Vec<Issue>> {
         self.get_paged(&format!("projects/{}/issues", project))
@@ -437,6 +447,90 @@ impl Gitlab {
         where P: AsRef<str>,
     {
         self.get_paged(&format!("projects/{}/issues/{}/notes", Self::url_name(project.as_ref()), issue))
+    }
+
+    /// Create a new label
+    pub fn create_label (&self, project: ProjectId, label: Label) -> Result<Label> {
+        let path = &format!("projects/{}/labels", project);
+
+        let mut params: Vec<(&str, String)> = Vec::new();
+
+        params.push(("name", label.name));
+        params.push(("color", label.color.value()));
+
+        if let Some(d) = label.description {
+            params.push(("description", d));
+        }
+
+        if let Some(p) = label.priority {
+            params.push(("priority", p.to_string()));
+        }
+
+        self.post_with_param(path, &params)
+    }
+
+    /// Create a new milestone
+    pub fn create_milestone (&self, project: ProjectId, milestone: Milestone) -> Result<Milestone> {
+        let path = &format!("projects/{}/milestones", project);
+
+        let mut params: Vec<(&str, String)> = Vec::new();
+
+        params.push(("title", milestone.title));
+
+        if let Some(d) = milestone.description {
+            params.push(("description", d));
+        }
+
+        if let Some(d) = milestone.due_date {
+            params.push(("due_date", d.to_string()))
+        }
+
+        if let Some(s) = milestone.start_date {
+            params.push(("start_date", s.to_string()))
+        }
+
+        self.post_with_param(path, &params)
+    }
+
+    /// Create a new issue
+    pub fn create_issue (&self, project: ProjectId, issue: Issue) -> Result<Issue> {
+        let path = &format!("projects/{}/issues", project);
+
+        let mut params: Vec<(&str, String)> = Vec::new();
+
+        if issue.iid.value() != 0 {
+            params.push(("iid", issue.iid.value().to_string()));
+        }
+
+        params.push(("title", issue.title));
+
+        if let Some(d) = issue.description {
+            params.push(("description", d));
+        }
+
+        params.push(("confidential", issue.confidential.to_string()));
+
+        if let Some(v) = issue.assignees {
+            params.extend(v.into_iter().map(|x|
+                ("assignee_ids[]", x.id.value().to_string())
+            ));
+        }
+
+        if let Some(m) = issue.milestone {
+            params.push(("milestone_id", m.id.value().to_string()))
+        }
+
+        if !issue.labels.is_empty() {
+            params.push(("labels", issue.labels.join(",")));
+        }
+
+        params.push(("created_at", issue.created_at.to_string()));
+
+        if let Some(d) = issue.due_date {
+            params.push(("due_date", d.to_string()))
+        }
+
+        self.post_with_param(path, &params)
     }
 
     /// Create a note on a issue.

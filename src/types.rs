@@ -1135,7 +1135,7 @@ pub struct Milestone {
     /// The title of the milestone.
     pub title: String,
     /// The description of the milestone.
-    pub description: String,
+    pub description: Option<String>,
     /// The state of the milestone.
     pub state: MilestoneState,
     /// When the milestone was created.
@@ -1146,6 +1146,142 @@ pub struct Milestone {
     pub due_date: Option<NaiveDate>,
     /// When the milestone was started.
     pub start_date: Option<NaiveDate>,
+}
+
+impl Milestone {
+    /// Create a new blank milestone: it needs at least the ProjectId and title
+    /// ProjectId and title are mandatory for new milestone API of Gitlab
+    pub fn new(project_id: ProjectId, title: String) -> Milestone {
+        Milestone {
+            id: MilestoneId::new(0),
+            iid: MilestoneInternalId::new(0),
+            project_id: Some(project_id),
+            group_id: None,
+            title: title,
+            description: None,
+            state: MilestoneState::Active,
+            created_at: DateTime::from(Utc::now()),
+            updated_at: DateTime::from(Utc::now()),
+            due_date: None,
+            start_date: None,
+        }
+    }
+    /// Complements the milestone with optional paramater: description
+    pub fn with_description(mut self, description: String) -> Milestone {
+        self.description = Some(description);
+        self
+    }
+    /// Complements the milestone with optional parameter: due_date
+    pub fn with_due_date(mut self, due_date: NaiveDate) -> Milestone {
+        self.due_date = Some(due_date);
+        self
+    }
+    /// Complements the milestone with optional parameter: start_date
+    pub fn with_start_date(mut self, start_date: NaiveDate) -> Milestone {
+        self.start_date = Some(start_date);
+        self
+    }
+}
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+/// Type-safe label ID.
+pub struct LabelId(u64);
+impl_id!(LabelId);
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+/// Type-safe label color.
+pub struct LabelColor(String);
+
+impl LabelColor {
+    /// Creates a LabelColor from RGB values
+    pub fn from_rgb(r: u8, g: u8, b: u8) -> LabelColor {
+        LabelColor(format!("#{:02X}{:02X}{:02X}", r, g, b))
+    }
+
+    /// Creates a LabelColor from standard HTML values
+    pub fn from_str(stdcolor: &str) -> LabelColor {
+        let hex = match stdcolor {
+            "white" => "FFFFFF",
+            "silver" => "C0C0C0",
+            "gray" => "808080",
+            "black" => "000000",
+            "red" => "FF0000",
+            "maroon" => "800000",
+            "yellow" => "FFFF00",
+            "olive" => "808000",
+            "lime" => "00FF00",
+            "green" => "008000",
+            "aqua" => "00FFFF",
+            "teal" => "008080",
+            "blue" => "0000FF",
+            "navy" => "000080",
+            "fuchsia" => "FF00FF",
+            "purple" => "800080",
+            _ => "808080",
+        };
+
+        LabelColor(format!("#{}", hex))
+    }
+
+    /// Get the value from a LabelColor
+    pub fn value(self) -> String {
+        self.0
+    }
+}
+
+#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// An label on a project.
+pub struct Label {
+    /// The Id of the label.
+    pub id: LabelId,
+    /// The name of the label.
+    pub name: String,
+    /// The color of the label.
+    pub color: LabelColor,
+    /// The description of the label.
+    pub description: Option<String>,
+    /// The number of opened issues associated with the label.
+    pub open_issues_count: u64,
+    /// the number of closed issues associated with the label.
+    pub closed_issues_count: u64,
+    /// The number of open merge request associated with the label.
+    pub open_merge_requests_count: u64,
+    /// Whether or not the account connecting has subscribed to the label.
+    pub subscribed: bool,
+    /// The priority of the label.
+    pub priority: Option<u64>,
+}
+
+impl Label {
+    /// Create a new Label: it needs at least a name and a color.
+    /// ProjectId is mandatory for Gitlab API
+    pub fn new(name: String, color: LabelColor) -> Label {
+        Label {
+            id: LabelId::new(0),
+            name: name,
+            color: color,
+            description: None,
+            open_issues_count: 0,
+            closed_issues_count: 0,
+            open_merge_requests_count: 0,
+            subscribed: false,
+            priority: None,
+        }
+    }
+    /// Complements the label with optional parameter: description
+    pub fn with_description(mut self, description: String) -> Label {
+        self.description = Some(description);
+        self
+    }
+
+    /// Complements the label with optional parameter: priority
+    pub fn with_priority(mut self, priority: u64) -> Label {
+        self.priority = Some(priority);
+        self
+    }
 }
 
 #[cfg_attr(feature="strict", serde(deny_unknown_fields))]
@@ -1251,8 +1387,85 @@ pub struct Issue {
     _links: Option<IssueLinks>,
 }
 
-#[cfg(test)]
 impl Issue {
+    /// Creates a new blank issue: it needs at least the ProjectId, title and author
+    /// ProjectId and author are mandatory in the Issue struct itself
+    /// title is mandatory for the new issue API of Gitlab
+    pub fn new(project_id: ProjectId, title: String, author: UserBasic) -> Issue {
+        // initialize with default parameters
+        Issue {
+            id: IssueId::new(0),
+            iid: IssueInternalId::new(0),
+            project_id: project_id,
+            title: title,
+            description: None,
+            state: IssueState::Opened,
+            created_at: DateTime::from(Utc::now()),
+            updated_at: DateTime::from(Utc::now()),
+            closed_at: None,
+            closed_by: None,
+            labels: Vec::new(),
+            milestone: None,
+            author: author,
+            assignee: None,
+            assignees: None,
+            subscribed: None,
+            time_stats: IssuableTimeStats {
+                time_estimate: 0,
+                total_time_spent: 0,
+                human_time_estimate: None,
+                human_total_time_spent: None,
+            },
+            user_notes_count: 0,
+            upvotes: 0,
+            downvotes: 0,
+            due_date: None,
+            confidential: false,
+            discussion_locked: None,
+            web_url: "".to_string(),
+            _links: None,
+        }
+    }
+    /// Complements the issue with optional parameter: iid
+    pub fn with_iid(mut self, iid: IssueInternalId) -> Issue {
+        self.iid = iid;
+        self
+    }
+    /// Complements the issue with optional parameter: description
+    pub fn with_description(mut self, description: String) -> Issue {
+        self.description = Some(description);
+        self
+    }
+    /// Complements the issue with optional parameter: confidential
+    pub fn with_confidential(mut self, confidential: bool) -> Issue {
+        self.confidential = confidential;
+        self
+    }
+    /// Complements the issue with optional parameter: assignees
+    pub fn with_assignees(mut self, assignees: Vec<UserBasic>) -> Issue {
+        self.assignees = Some(assignees);
+        self
+    }
+    /// Complements the issue with optional parameter: milestone
+    pub fn with_milestone(mut self, milestone: Milestone) -> Issue {
+        self.milestone = Some(milestone);
+        self
+    }
+    /// Complements the issue with optional parameter: labels
+    pub fn with_labels(mut self, labels: Vec<String>) -> Issue {
+        self.labels = labels;
+        self
+    }
+    /// Complements the issue with optional parameter: created_at
+    pub fn with_created_at(mut self, created_at: DateTime<Utc>) -> Issue {
+        self.created_at = created_at;
+        self
+    }
+    /// Complements the issue with optional parameter: due_date
+    pub fn with_due_date(mut self, due_date: NaiveDate) -> Issue {
+        self.due_date = Some(due_date);
+        self
+    }
     pub fn has_links(&self) -> bool {
         self._links.is_some()
     }
