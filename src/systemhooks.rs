@@ -13,8 +13,8 @@
 //! version to version.
 
 use crates::chrono::{DateTime, Utc};
-use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde::de::{Error, Unexpected};
+use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde_json::{self, Value};
 
 use types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
@@ -55,7 +55,7 @@ enum_serialize!(ProjectVisibility -> "project visibility",
     Public => "public" ; "visibilitylevel|public",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A hook for a project.
 pub struct ProjectSystemHook {
@@ -131,7 +131,7 @@ impl From<HumanAccessLevel> for AccessLevel {
     }
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A project membership hook.
 pub struct ProjectMemberSystemHook {
@@ -176,7 +176,7 @@ enum_serialize!(UserEvent -> "user event",
     Destroy => "user_destroy",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A user hook.
 pub struct UserSystemHook {
@@ -209,7 +209,7 @@ enum_serialize!(KeyEvent -> "key event",
     Destroy => "key_destroy",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An SSH key hook.
 pub struct KeySystemHook {
@@ -240,7 +240,7 @@ enum_serialize!(GroupEvent -> "group event",
     Destroy => "group_destroy",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A group hook.
 pub struct GroupSystemHook {
@@ -275,7 +275,7 @@ enum_serialize!(GroupMemberEvent -> "group member event",
     Remove => "user_remove_from_group",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A group membership hook.
 pub struct GroupMemberSystemHook {
@@ -316,7 +316,7 @@ enum_serialize!(PushEvent -> "push event",
     TagPush => "tag_push",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A push hook.
 pub struct PushSystemHook {
@@ -332,7 +332,7 @@ pub struct PushSystemHook {
     pub before: ObjectId,
     /// The new object ID of the ref that was pushed.
     pub after: ObjectId,
-    #[serde(rename="ref")]
+    #[serde(rename = "ref")]
     /// The name of the reference that was pushed.
     pub ref_: String,
     /// The new object ID of the ref that was pushed.
@@ -381,14 +381,18 @@ pub enum SystemHook {
 
 impl<'de> Deserialize<'de> for SystemHook {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         let event_name = match val.pointer("/event_name") {
             Some(&Value::String(ref name)) => name.to_string(),
             Some(_) => {
-                return Err(D::Error::invalid_type(Unexpected::Other("JSON value"), &"a string"));
+                return Err(D::Error::invalid_type(
+                    Unexpected::Other("JSON value"),
+                    &"a string",
+                ));
             },
             None => {
                 return Err(D::Error::missing_field("event_name"));
@@ -396,13 +400,13 @@ impl<'de> Deserialize<'de> for SystemHook {
         };
 
         let hook_res = match event_name.as_str() {
-            "project_create" |
-            "project_destroy" |
-            "project_rename" |
-            "project_transfer" => serde_json::from_value(val).map(SystemHook::Project),
+            "project_create" | "project_destroy" | "project_rename" | "project_transfer" => {
+                serde_json::from_value(val).map(SystemHook::Project)
+            },
 
-            "user_add_to_team" |
-            "user_remove_from_team" => serde_json::from_value(val).map(SystemHook::ProjectMember),
+            "user_add_to_team" | "user_remove_from_team" => {
+                serde_json::from_value(val).map(SystemHook::ProjectMember)
+            },
 
             "user_create" | "user_destroy" => serde_json::from_value(val).map(SystemHook::User),
 
@@ -410,14 +414,17 @@ impl<'de> Deserialize<'de> for SystemHook {
 
             "group_create" | "group_destroy" => serde_json::from_value(val).map(SystemHook::Group),
 
-            "user_add_to_group" |
-            "user_remove_from_group" => serde_json::from_value(val).map(SystemHook::GroupMember),
+            "user_add_to_group" | "user_remove_from_group" => {
+                serde_json::from_value(val).map(SystemHook::GroupMember)
+            },
 
             "push" | "tag_push" => serde_json::from_value(val).map(SystemHook::Push),
 
             _ => {
-                return Err(D::Error::custom(format!("unrecognized system event name: {}",
-                                                    event_name)));
+                return Err(D::Error::custom(format!(
+                    "unrecognized system event name: {}",
+                    event_name,
+                )));
             },
         };
 

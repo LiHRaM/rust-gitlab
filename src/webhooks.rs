@@ -12,13 +12,15 @@
 //! version to version.
 
 use crates::chrono::{DateTime, NaiveDate, TimeZone, Utc};
-use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde::de::{Error, Unexpected};
+use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde_json::{self, Value};
 
-use types::{JobId, IssueId, IssueInternalId, IssueState,
-            MergeRequestId, MergeRequestInternalId, MergeRequestState, MergeStatus,
-            MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId, SnippetId, UserId};
+use types::{
+    IssueId, IssueInternalId, IssueState, JobId, MergeRequestId, MergeRequestInternalId,
+    MergeRequestState, MergeStatus, MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId,
+    SnippetId, UserId,
+};
 
 #[derive(Debug, Clone, Copy)]
 /// A wrapper struct for dates in web hooks.
@@ -35,7 +37,8 @@ impl Serialize for HookDate {
 
 impl<'de> Deserialize<'de> for HookDate {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         let val = String::deserialize(deserializer)?;
 
@@ -43,8 +46,10 @@ impl<'de> Deserialize<'de> for HookDate {
             .or_else(|_| {
                 DateTime::parse_from_str(&val, "%Y-%m-%d %H:%M:%S %z")
                     .map_err(|err| {
-                        D::Error::invalid_value(Unexpected::Other("hook date"),
-                                                &format!("{:?}", err).as_str())
+                        D::Error::invalid_value(
+                            Unexpected::Other("hook date"),
+                            &format!("{:?}", err).as_str(),
+                        )
                     })
                     .map(|dt| dt.with_timezone(&Utc))
             })
@@ -58,7 +63,7 @@ impl AsRef<DateTime<Utc>> for HookDate {
     }
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information exposed in hooks.
 pub struct ProjectHookAttrs {
@@ -88,7 +93,7 @@ pub struct ProjectHookAttrs {
     url: String,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Wiki project information exposed in hooks.
 pub struct ProjectWikiHookAttrs {
@@ -104,7 +109,7 @@ pub struct ProjectWikiHookAttrs {
     pub default_branch: String,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// User information exposed in hooks.
 pub struct UserHookAttrs {
@@ -116,7 +121,7 @@ pub struct UserHookAttrs {
     pub avatar_url: Option<String>,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// The identity of a user exposed through a hook.
 pub struct HookCommitIdentity {
@@ -126,7 +131,7 @@ pub struct HookCommitIdentity {
     pub email: String,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Commit information exposed in hooks.
 pub struct CommitHookAttrs {
@@ -144,7 +149,7 @@ pub struct CommitHookAttrs {
     pub removed: Option<Vec<String>>,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A push hook.
 pub struct PushHook {
@@ -156,7 +161,7 @@ pub struct PushHook {
     pub before: ObjectId,
     /// The new object ID of the ref after the push.
     pub after: ObjectId,
-    #[serde(rename="ref")]
+    #[serde(rename = "ref")]
     /// The name of the reference which has been pushed.
     pub ref_: String,
     /// The new object ID of the ref after the push.
@@ -205,7 +210,7 @@ enum_serialize!(IssueAction -> "issue action",
     Reopen => "reopen",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Issue information exposed in hooks.
 pub struct IssueHookAttrs {
@@ -260,7 +265,7 @@ pub struct IssueHookAttrs {
     pub action: Option<IssueAction>,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An issue hook.
 pub struct IssueHook {
@@ -298,7 +303,7 @@ enum_serialize!(MergeRequestAction -> "merge request action",
     Merge => "merge",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Merge parameters for a merge request.
 pub struct MergeRequestParams {
@@ -326,7 +331,7 @@ impl MergeRequestParams {
     }
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Merge request information exposed in hooks.
 pub struct MergeRequestHookAttrs {
@@ -400,7 +405,7 @@ pub struct MergeRequestHookAttrs {
     lock_version: Option<u64>,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A merge request hook.
 pub struct MergeRequestHook {
@@ -430,7 +435,7 @@ enum_serialize!(SnippetType -> "snippet type",
     Personal => "PersonalSnippet",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Snippet information exposed in hooks.
 pub struct SnippetHookAttrs {
@@ -448,7 +453,7 @@ pub struct SnippetHookAttrs {
     pub updated_at: HookDate,
     /// The name of the snippet.
     pub file_name: String,
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     /// The type of the snippet.
     pub type_: SnippetType,
     /// The visibility of the snippet.
@@ -468,7 +473,7 @@ enum_serialize!(WikiPageAction -> "wiki page action",
     Update => "update",
 );
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Wiki information exposed in hooks.
 pub struct WikiPageHookAttrs {
@@ -487,7 +492,7 @@ pub struct WikiPageHookAttrs {
     pub action: WikiPageAction,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Diff information exposed in hooks.
 pub struct DiffHookAttrs {
@@ -510,7 +515,7 @@ pub struct DiffHookAttrs {
     pub too_large: bool,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 // FIXME: This can apparently be a string sometimes.
 // https://gitlab.com/gitlab-org/gitlab-ce/issues/21467
@@ -526,7 +531,7 @@ pub struct PositionHookAttrs {
     pub new_path: String,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Note (comment) information exposed in hooks.
 pub struct NoteHookAttrs {
@@ -567,7 +572,7 @@ pub struct NoteHookAttrs {
     /// The URL of the note.
     pub url: String,
 
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     pub type_: Option<String>, // ???
     //pub is_award: bool, // seems to have been removed?
 }
@@ -600,7 +605,7 @@ impl NoteHookAttrs {
     }
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A note hook.
 pub struct NoteHook {
@@ -625,7 +630,7 @@ pub struct NoteHook {
     repository: Value,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Build user information exposed in hooks.
 pub struct BuildUserHookAttrs {
@@ -637,7 +642,7 @@ pub struct BuildUserHookAttrs {
     pub email: Option<String>,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Build commit information exposed in hooks.
 pub struct BuildCommitHookAttrs {
@@ -658,7 +663,7 @@ pub struct BuildCommitHookAttrs {
     pub finished_at: Option<HookDate>,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information exposed in build hooks.
 pub struct BuildProjectHookAttrs {
@@ -676,13 +681,13 @@ pub struct BuildProjectHookAttrs {
     pub visibility_level: u64,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A build hook.
 pub struct BuildHook {
     /// The event which occurred.
     pub object_kind: String,
-    #[serde(rename="ref")]
+    #[serde(rename = "ref")]
     /// The name of the reference that was tested.
     pub ref_: String,
     pub tag: String,
@@ -711,7 +716,7 @@ pub struct BuildHook {
     pub repository: BuildProjectHookAttrs,
 }
 
-#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A wiki page hook.
 pub struct WikiPageHook {
@@ -746,14 +751,18 @@ pub enum WebHook {
 
 impl<'de> Deserialize<'de> for WebHook {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         let object_kind = match val.pointer("/object_kind") {
             Some(&Value::String(ref kind)) => kind.to_string(),
             Some(_) => {
-                return Err(D::Error::invalid_type(Unexpected::Other("JSON value"), &"a string"));
+                return Err(D::Error::invalid_type(
+                    Unexpected::Other("JSON value"),
+                    &"a string",
+                ));
             },
             None => {
                 return Err(D::Error::missing_field("object_kind"));
@@ -772,17 +781,18 @@ impl<'de> Deserialize<'de> for WebHook {
             "build" => serde_json::from_value(val).map(WebHook::Build),
 
             _ => {
-                return Err(D::Error::invalid_value(Unexpected::Other("object kind"),
-                                                   &format!("unrecognized webhook object kind: \
-                                                             {}",
-                                                            object_kind)
-                                                       .as_str()));
+                return Err(D::Error::invalid_value(
+                    Unexpected::Other("object kind"),
+                    &format!("unrecognized webhook object kind: {}", object_kind).as_str(),
+                ));
             },
         };
 
         hook_res.map_err(|err| {
-            D::Error::invalid_value(Unexpected::Other("web hook"),
-                                    &format!("{:?}", err).as_str())
+            D::Error::invalid_value(
+                Unexpected::Other("web hook"),
+                &format!("{:?}", err).as_str(),
+            )
         })
     }
 }

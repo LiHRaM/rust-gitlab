@@ -36,16 +36,16 @@ mod error;
 mod macros;
 mod gitlab;
 
+pub mod hooks;
 pub mod systemhooks;
 pub mod types;
 pub mod webhooks;
-pub mod hooks;
 
 pub use error::*;
 pub use gitlab::CommitStatusInfo;
-pub use gitlab::MergeRequestStateFilter;
 pub use gitlab::Gitlab;
 pub use gitlab::GitlabBuilder;
+pub use gitlab::MergeRequestStateFilter;
 pub use types::*;
 
 #[cfg(test)]
