@@ -1366,6 +1366,8 @@ pub struct Issue {
     pub time_stats: IssuableTimeStats,
     /// The number of comments on the issue.
     pub user_notes_count: u64,
+    /// The number of merge requests referencing the issue.
+    pub merge_requests_count: u64,
     /// The number of upvotes for the issue.
     pub upvotes: u64,
     /// The number of downvotes against the issue.
@@ -1415,6 +1417,7 @@ impl Issue {
                 human_total_time_spent: None,
             },
             user_notes_count: 0,
+            merge_requests_count: 0,
             upvotes: 0,
             downvotes: 0,
             due_date: None,
@@ -1586,6 +1589,14 @@ enum_serialize!(MergeRequestState -> "merge request state",
 
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// Information about current user's access to the merge request.
+pub struct MergeRequestUser {
+    /// Whether the current user can merge the MR.
+    pub can_merge: bool,
+}
+
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A merge request.
 pub struct MergeRequest {
     /// The ID of the merge request.
@@ -1677,6 +1688,8 @@ pub struct MergeRequest {
     pub should_remove_source_branch: Option<bool>,
     /// Whether the merge request should be deleted or not (set by the author).
     pub force_remove_source_branch: Option<bool>,
+    /// Information about current user's access to the merge request.
+    pub user: MergeRequestUser,
     /// The URL of the merge request.
     pub web_url: String,
 }
@@ -1770,6 +1783,8 @@ pub struct MergeRequestChanges {
     pub should_remove_source_branch: Option<bool>,
     /// Whether the merge request should be deleted or not (set by the author).
     pub force_remove_source_branch: Option<bool>,
+    /// Information about current user's access to the merge request.
+    pub user: MergeRequestUser,
     /// The URL of the merge request.
     pub web_url: String,
     pub changes: Vec<RepoDiff>,
@@ -1819,6 +1834,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             discussion_locked: mr.discussion_locked,
             should_remove_source_branch: mr.should_remove_source_branch,
             force_remove_source_branch: mr.force_remove_source_branch,
+            user: mr.user,
             web_url: mr.web_url,
         }
     }

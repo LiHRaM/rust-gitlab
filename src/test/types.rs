@@ -198,6 +198,7 @@ fn test_read_issue() {
     }
     assert_eq!(issue.subscribed, Some(true));
     assert_eq!(issue.user_notes_count, 0);
+    assert_eq!(issue.merge_requests_count, 1);
     assert_eq!(issue.upvotes, 0);
     assert_eq!(issue.downvotes, 0);
     assert_eq!(issue.due_date, None);
@@ -267,6 +268,7 @@ fn test_read_issue_reference() {
         assert_eq!(issue.time_stats.human_time_estimate, None);
         assert_eq!(issue.time_stats.human_total_time_spent, None);
         assert_eq!(issue.user_notes_count, 0);
+        assert_eq!(issue.merge_requests_count, 1);
         assert_eq!(issue.upvotes, 0);
         assert_eq!(issue.downvotes, 0);
         assert_eq!(issue.due_date, None);
@@ -394,6 +396,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
+    assert_eq!(merge_request.user.can_merge, true);
     assert_eq!(
         merge_request.web_url,
         "https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35",
