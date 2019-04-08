@@ -207,6 +207,17 @@ impl Gitlab {
         )
     }
 
+    /// Get all accessible groups.
+    pub fn groups<I, K, V>(&self, params: I) -> Result<Vec<Group>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param("groups", params)
+    }
+
     /// Get a project's hooks.
     pub fn hooks<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<ProjectHook>>
     where
