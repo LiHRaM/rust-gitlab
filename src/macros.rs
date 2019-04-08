@@ -87,3 +87,15 @@ macro_rules! get_event {
         }
     };
 }
+
+macro_rules! query_param_slice {
+    ( $( $x:expr ),* ) => (
+        &[$($x),*] as QueryParamSlice
+    )
+}
+
+macro_rules! query_param_vec {
+    ( $( $x:expr ),* ) => (
+        vec![$($x),*] as QueryParamVec
+    )
+}
