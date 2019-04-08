@@ -121,23 +121,31 @@ impl Gitlab {
 
     /// The user the API is acting as.
     pub fn current_user(&self) -> Result<UserPublic> {
-        self.get("user")
+        self.get_with_param("user", query_param_slice![])
     }
 
     /// Get all user accounts
-    pub fn users<T>(&self) -> Result<Vec<T>>
+    pub fn users<T, I, K, V>(&self, params: I) -> Result<Vec<T>>
     where
         T: UserResult,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged("users")
+        self.get_paged_with_param("users", params)
     }
 
     /// Find a user by id.
-    pub fn user<T>(&self, user: UserId) -> Result<T>
+    pub fn user<T, I, K, V>(&self, user: UserId, params: I) -> Result<T>
     where
         T: UserResult,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get(&format!("users/{}", user))
+        self.get_with_param(&format!("users/{}", user), params)
     }
 
     /// Find a user by username.
@@ -153,8 +161,14 @@ impl Gitlab {
     }
 
     /// Get all accessible projects.
-    pub fn projects(&self) -> Result<Vec<Project>> {
-        self.get_paged("projects")
+    pub fn projects<I, K, V>(&self, params: I) -> Result<Vec<Project>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param("projects", params)
     }
 
     /// Get all owned projects.
@@ -163,8 +177,14 @@ impl Gitlab {
     }
 
     /// Find a project by id.
-    pub fn project(&self, project: ProjectId) -> Result<Project> {
-        self.get(&format!("projects/{}", project))
+    pub fn project<I, K, V>(&self, project: ProjectId, params: I) -> Result<Project>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_with_param(&format!("projects/{}", project), params)
     }
 
     /// A URL-safe name for projects.
@@ -173,21 +193,40 @@ impl Gitlab {
     }
 
     /// Find a project by name.
-    pub fn project_by_name<N>(&self, name: N) -> Result<Project>
+    pub fn project_by_name<N, I, K, V>(&self, name: N, params: I) -> Result<Project>
     where
         N: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get(&format!("projects/{}", Self::url_name(name.as_ref())))
+        self.get_with_param(
+            &format!("projects/{}", Self::url_name(name.as_ref())),
+            params,
+        )
     }
 
     /// Get a project's hooks.
-    pub fn hooks(&self, project: ProjectId) -> Result<Vec<ProjectHook>> {
-        self.get_paged(&format!("projects/{}/hooks", project))
+    pub fn hooks<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<ProjectHook>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(&format!("projects/{}/hooks", project), params)
     }
 
     /// Get a project hook.
-    pub fn hook(&self, project: ProjectId, hook: HookId) -> Result<ProjectHook> {
-        self.get(&format!("projects/{}/hooks/{}", project, hook))
+    pub fn hook<I, K, V>(&self, project: ProjectId, hook: HookId, params: I) -> Result<ProjectHook>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_with_param(&format!("projects/{}/hooks/{}", project, hook), params)
     }
 
     /// Convert a boolean parameter into an HTTP request value.
@@ -239,23 +278,52 @@ impl Gitlab {
     }
 
     /// Get the team members of a group.
-    pub fn group_members(&self, group: GroupId) -> Result<Vec<Member>> {
-        self.get_paged(&format!("groups/{}/members", group))
+    pub fn group_members<I, K, V>(&self, group: GroupId, params: I) -> Result<Vec<Member>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(&format!("groups/{}/members", group), params)
     }
 
     /// Get a team member of a group.
-    pub fn group_member(&self, group: GroupId, user: UserId) -> Result<Member> {
-        self.get(&format!("groups/{}/members/{}", group, user))
+    pub fn group_member<I, K, V>(&self, group: GroupId, user: UserId, params: I) -> Result<Member>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_with_param(&format!("groups/{}/members/{}", group, user), params)
     }
 
     /// Get the team members of a project.
-    pub fn project_members(&self, project: ProjectId) -> Result<Vec<Member>> {
-        self.get_paged(&format!("projects/{}/members", project))
+    pub fn project_members<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<Member>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(&format!("projects/{}/members", project), params)
     }
 
     /// Get a team member of a project.
-    pub fn project_member(&self, project: ProjectId, user: UserId) -> Result<Member> {
-        self.get(&format!("projects/{}/members/{}", project, user))
+    pub fn project_member<I, K, V>(
+        &self,
+        project: ProjectId,
+        user: UserId,
+        params: I,
+    ) -> Result<Member>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_with_param(&format!("projects/{}/members/{}", project, user), params)
     }
 
     /// Add a user to a project.
@@ -294,20 +362,33 @@ impl Gitlab {
     }
 
     /// Get branches for a project.
-    pub fn branches(&self, project: ProjectId) -> Result<Vec<RepoBranch>> {
-        self.get_paged(&format!("projects/{}/branches", project))
+    pub fn branches<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<RepoBranch>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(&format!("projects/{}/branches", project), params)
     }
 
     /// Get a branch.
-    pub fn branch<B>(&self, project: ProjectId, branch: B) -> Result<RepoBranch>
+    pub fn branch<B, I, K, V>(&self, project: ProjectId, branch: B, params: I) -> Result<RepoBranch>
     where
         B: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get(&format!(
-            "projects/{}/repository/branches/{}",
-            project,
-            Self::url_name(branch.as_ref()),
-        ))
+        self.get_with_param(
+            &format!(
+                "projects/{}/repository/branches/{}",
+                project,
+                Self::url_name(branch.as_ref()),
+            ),
+            params,
+        )
     }
 
     /// Get a commit.
@@ -326,15 +407,27 @@ impl Gitlab {
     }
 
     /// Get comments on a commit.
-    pub fn commit_comments<C>(&self, project: ProjectId, commit: C) -> Result<Vec<CommitNote>>
+    pub fn commit_comments<C, I, K, V>(
+        &self,
+        project: ProjectId,
+        commit: C,
+        params: I,
+    ) -> Result<Vec<CommitNote>>
     where
         C: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged(&format!(
-            "projects/{}/repository/commits/{}/comments",
-            project,
-            commit.as_ref(),
-        ))
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/repository/commits/{}/comments",
+                project,
+                commit.as_ref(),
+            ),
+            params,
+        )
     }
 
     /// Get comments on a commit.
@@ -404,36 +497,52 @@ impl Gitlab {
     }
 
     /// Get the latest statuses of a commit.
-    pub fn commit_latest_statuses<C>(
+    pub fn commit_latest_statuses<C, I, K, V>(
         &self,
         project: ProjectId,
         commit: C,
+        params: I,
     ) -> Result<Vec<CommitStatus>>
     where
         C: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged(&format!(
-            "projects/{}/repository/commits/{}/statuses",
-            project,
-            commit.as_ref(),
-        ))
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/repository/commits/{}/statuses",
+                project,
+                commit.as_ref(),
+            ),
+            params,
+        )
     }
 
     /// Get the latest statuses of a commit.
-    pub fn commit_latest_statuses_by_name<P, C>(
+    pub fn commit_latest_statuses_by_name<P, C, I, K, V>(
         &self,
         project: P,
         commit: C,
+        params: I,
     ) -> Result<Vec<CommitStatus>>
     where
         P: AsRef<str>,
         C: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged(&format!(
-            "projects/{}/repository/commits/{}/statuses",
-            Self::url_name(project.as_ref()),
-            commit.as_ref(),
-        ))
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/repository/commits/{}/statuses",
+                Self::url_name(project.as_ref()),
+                commit.as_ref(),
+            ),
+            params,
+        )
     }
 
     /// Get the all statuses of a commit.
@@ -452,15 +561,27 @@ impl Gitlab {
     }
 
     /// Get the latest builds of a commit.
-    pub fn commit_latest_builds<C>(&self, project: ProjectId, commit: C) -> Result<Vec<Job>>
+    pub fn commit_latest_builds<C, I, K, V>(
+        &self,
+        project: ProjectId,
+        commit: C,
+        params: I,
+    ) -> Result<Vec<Job>>
     where
         C: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged(&format!(
-            "projects/{}/repository/commits/{}/builds",
-            project,
-            commit.as_ref(),
-        ))
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/repository/commits/{}/builds",
+                project,
+                commit.as_ref(),
+            ),
+            params,
+        )
     }
 
     /// Get the all builds of a commit.
@@ -489,7 +610,7 @@ impl Gitlab {
     where
         S: AsRef<str>,
     {
-        let path = &format!("projects/{}/statuses/{}", project, sha.as_ref());
+        let path = format!("projects/{}/statuses/{}", project, sha.as_ref());
 
         let mut params = vec![("state", state.as_str())];
 
@@ -498,7 +619,7 @@ impl Gitlab {
         info.target_url.map(|v| params.push(("target_url", v)));
         info.description.map(|v| params.push(("description", v)));
 
-        self.post_with_param(path, &params)
+        self.post_with_param(&path, &params)
     }
 
     /// Create a status message for a commit.
@@ -526,7 +647,7 @@ impl Gitlab {
         info.target_url.map(|v| params.push(("target_url", v)));
         info.description.map(|v| params.push(("description", v)));
 
-        self.post_with_param(path, &params)
+        self.post_with_param(&path, &params)
     }
 
     /// Get the labels for a project.
@@ -540,30 +661,73 @@ impl Gitlab {
     }
 
     /// Get the issues for a project.
-    pub fn issues(&self, project: ProjectId) -> Result<Vec<Issue>> {
-        self.get_paged(&format!("projects/{}/issues", project))
+    pub fn issues<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<Issue>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(&format!("projects/{}/issues", project), params)
     }
 
     /// Get issues.
-    pub fn issue(&self, project: ProjectId, issue: IssueInternalId) -> Result<Issue> {
-        self.get(&format!("projects/{}/issues/{}", project, issue))
+    pub fn issue<I, K, V>(
+        &self,
+        project: ProjectId,
+        issue: IssueInternalId,
+        params: I,
+    ) -> Result<Issue>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_with_param(&format!("projects/{}/issues/{}", project, issue), params)
     }
 
     /// Get the notes from a issue.
-    pub fn issue_notes(&self, project: ProjectId, issue: IssueInternalId) -> Result<Vec<Note>> {
-        self.get_paged(&format!("projects/{}/issues/{}/notes", project, issue))
+    pub fn issue_notes<I, K, V>(
+        &self,
+        project: ProjectId,
+        issue: IssueInternalId,
+        params: I,
+    ) -> Result<Vec<Note>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            &format!("projects/{}/issues/{}/notes", project, issue),
+            params,
+        )
     }
 
     /// Get the notes from a issue.
-    pub fn issue_notes_by_name<P>(&self, project: P, issue: IssueInternalId) -> Result<Vec<Note>>
+    pub fn issue_notes_by_name<P, I, K, V>(
+        &self,
+        project: P,
+        issue: IssueInternalId,
+        params: I,
+    ) -> Result<Vec<Note>>
     where
         P: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged(&format!(
-            "projects/{}/issues/{}/notes",
-            Self::url_name(project.as_ref()),
-            issue,
-        ))
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/issues/{}/notes",
+                Self::url_name(project.as_ref()),
+                issue,
+            ),
+            params,
+        )
     }
 
     /// Create a new label
@@ -661,9 +825,9 @@ impl Gitlab {
     where
         C: AsRef<str>,
     {
-        let path = &format!("projects/{}/issues/{}/notes", project, issue);
+        let path = format!("projects/{}/issues/{}/notes", project, issue);
 
-        self.post_with_param(path, &[("body", content.as_ref())])
+        self.post_with_param(&path, &[("body", content.as_ref())])
     }
 
     /// Create a note on a issue.
@@ -683,12 +847,22 @@ impl Gitlab {
             issue,
         );
 
-        self.post_with_param(path, &[("body", content.as_ref())])
+        self.post_with_param(&path, &[("body", content.as_ref())])
     }
 
     /// Get the merge requests for a project.
-    pub fn merge_requests(&self, project: ProjectId) -> Result<Vec<MergeRequest>> {
-        self.get_paged(&format!("projects/{}/merge_requests", project))
+    pub fn merge_requests<I, K, V>(
+        &self,
+        project: ProjectId,
+        params: I,
+    ) -> Result<Vec<MergeRequest>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(&format!("projects/{}/merge_requests", project), params)
     }
 
     /// Get the merge requests with a given state.
@@ -704,55 +878,90 @@ impl Gitlab {
     }
 
     /// Get merge requests.
-    pub fn merge_request(
+    pub fn merge_request<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-    ) -> Result<MergeRequest> {
-        self.get(&format!(
-            "projects/{}/merge_requests/{}",
-            project, merge_request,
-        ))
+        params: I,
+    ) -> Result<MergeRequest>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_with_param(
+            &format!("projects/{}/merge_requests/{}", project, merge_request),
+            params,
+        )
     }
 
     /// Get the issues that will be closed when a merge request is merged.
-    pub fn merge_request_closes_issues(
+    pub fn merge_request_closes_issues<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-    ) -> Result<Vec<IssueReference>> {
-        self.get_paged(&format!(
-            "projects/{}/merge_requests/{}/closes_issues",
-            project, merge_request,
-        ))
+        params: I,
+    ) -> Result<Vec<IssueReference>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/closes_issues",
+                project, merge_request,
+            ),
+            params,
+        )
     }
 
     /// Get the notes from a merge request.
-    pub fn merge_request_notes(
+    pub fn merge_request_notes<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-    ) -> Result<Vec<Note>> {
-        self.get_paged(&format!(
-            "projects/{}/merge_requests/{}/notes",
-            project, merge_request,
-        ))
+        params: I,
+    ) -> Result<Vec<Note>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/notes",
+                project, merge_request,
+            ),
+            params,
+        )
     }
 
     /// Get the notes from a merge request.
-    pub fn merge_request_notes_by_name<P>(
+    pub fn merge_request_notes_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
+        params: I,
     ) -> Result<Vec<Note>>
     where
         P: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged(&format!(
-            "projects/{}/merge_requests/{}/notes",
-            Self::url_name(project.as_ref()),
-            merge_request,
-        ))
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/notes",
+                Self::url_name(project.as_ref()),
+                merge_request,
+            ),
+            params,
+        )
     }
 
     /// Award a merge request note with an award.
@@ -791,62 +1000,98 @@ impl Gitlab {
     }
 
     /// Get the awards for a merge request.
-    pub fn merge_request_awards(
+    pub fn merge_request_awards<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-    ) -> Result<Vec<AwardEmoji>> {
-        self.get_paged(&format!(
-            "projects/{}/merge_requests/{}/award_emoji",
-            project, merge_request,
-        ))
+        params: I,
+    ) -> Result<Vec<AwardEmoji>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/award_emoji",
+                project, merge_request,
+            ),
+            params,
+        )
     }
 
     /// Get the awards for a merge request.
-    pub fn merge_request_awards_by_name<P>(
+    pub fn merge_request_awards_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
+        params: I,
     ) -> Result<Vec<AwardEmoji>>
     where
         P: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged(&format!(
-            "projects/{}/merge_requests/{}/award_emoji",
-            Self::url_name(project.as_ref()),
-            merge_request,
-        ))
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/award_emoji",
+                Self::url_name(project.as_ref()),
+                merge_request,
+            ),
+            params,
+        )
     }
 
     /// Get the awards for a merge request note.
-    pub fn merge_request_note_awards(
+    pub fn merge_request_note_awards<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         note: NoteId,
-    ) -> Result<Vec<AwardEmoji>> {
-        self.get_paged(&format!(
-            "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-            project, merge_request, note,
-        ))
+        params: I,
+    ) -> Result<Vec<AwardEmoji>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/notes/{}/award_emoji",
+                project, merge_request, note,
+            ),
+            params,
+        )
     }
 
     /// Get the awards for a merge request note.
-    pub fn merge_request_note_awards_by_name<P>(
+    pub fn merge_request_note_awards_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
         note: NoteId,
+        params: I,
     ) -> Result<Vec<AwardEmoji>>
     where
         P: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        self.get_paged(&format!(
-            "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-            Self::url_name(project.as_ref()),
-            merge_request,
-            note,
-        ))
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/notes/{}/award_emoji",
+                Self::url_name(project.as_ref()),
+                merge_request,
+                note,
+            ),
+            params,
+        )
     }
 
     /// Create a note on a merge request.
@@ -882,33 +1127,49 @@ impl Gitlab {
     }
 
     /// Get issues closed by a merge request.
-    pub fn get_issues_closed_by_merge_request(
+    pub fn get_issues_closed_by_merge_request<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-    ) -> Result<Vec<Issue>> {
-        let path = &format!(
-            "projects/{}/merge_requests/{}/closes_issues",
-            project, merge_request,
-        );
-        self.get_paged(path)
+        params: I,
+    ) -> Result<Vec<Issue>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/closes_issues",
+                project, merge_request,
+            ),
+            params,
+        )
     }
 
     /// Get issues closed by a merge request.
-    pub fn get_issues_closed_by_merge_request_by_name<P>(
+    pub fn get_issues_closed_by_merge_request_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
+        params: I,
     ) -> Result<Vec<Issue>>
     where
         P: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
     {
-        let path = &format!(
-            "projects/{}/merge_requests/{}/closes_issues",
-            Self::url_name(project.as_ref()),
-            merge_request,
-        );
-        self.get_paged(path)
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/closes_issues",
+                Self::url_name(project.as_ref()),
+                merge_request,
+            ),
+            params,
+        )
     }
 
     /// Set the labels on an issue.
@@ -1018,12 +1279,11 @@ impl Gitlab {
     where
         T: DeserializeOwned,
     {
-        let param: &[(&str, &str)] = &[];
-        self.get_with_param(url, param)
+        self.get_with_param(url, query_param_slice![])
     }
 
     /// Create a `GET` request to an API endpoint with query parameters.
-    fn get_with_param<T, I, K, V>(&self, url: &str, param: I) -> Result<T>
+    fn get_with_param<T, I, K, V>(&self, url: &str, params: I) -> Result<T>
     where
         T: DeserializeOwned,
         I: IntoIterator,
@@ -1031,7 +1291,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        let full_url = self.create_url_with_param(url, param)?;
+        let full_url = self.create_url_with_param(url, params.into_iter())?;
         let req = self.client.get(full_url);
         self.send(req)
     }
@@ -1061,12 +1321,11 @@ impl Gitlab {
     where
         T: DeserializeOwned,
     {
-        let param: &[(&str, &str)] = &[];
-        self.get_paged_with_param(url, param)
+        self.get_paged_with_param(url, query_param_slice![])
     }
 
     /// Handle paginated queries with query parameters. Returns all results.
-    fn get_paged_with_param<T, I, K, V>(&self, url: &str, param: I) -> Result<Vec<T>>
+    fn get_paged_with_param<T, I, K, V>(&self, url: &str, params: I) -> Result<Vec<T>>
     where
         T: DeserializeOwned,
         I: IntoIterator,
@@ -1078,7 +1337,7 @@ impl Gitlab {
         let per_page = 100;
         let per_page_str = &format!("{}", per_page);
 
-        let full_url = self.create_url_with_param(url, param)?;
+        let full_url = self.create_url_with_param(url, params.into_iter())?;
 
         let mut results: Vec<T> = vec![];
 

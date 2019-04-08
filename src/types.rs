@@ -27,6 +27,12 @@ use std::fmt::{self, Display, Formatter};
 //    pub name: String,
 //}
 
+/// Type alias for slice of string two-tuples
+pub type QueryParamSlice<'a> = &'a [(&'a str, &'a str)];
+
+/// Type alias for Vec of string two-tuples
+pub type QueryParamVec<'a> = Vec<(&'a str, &'a str)>;
+
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe user ID.
