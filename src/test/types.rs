@@ -396,7 +396,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
-    assert_eq!(merge_request.user.can_merge, true);
+    assert_eq!(merge_request.user.unwrap().can_merge, true);
     assert_eq!(
         merge_request.web_url,
         "https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35",

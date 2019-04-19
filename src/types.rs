@@ -1695,7 +1695,7 @@ pub struct MergeRequest {
     /// Whether the merge request should be deleted or not (set by the author).
     pub force_remove_source_branch: Option<bool>,
     /// Information about current user's access to the merge request.
-    pub user: MergeRequestUser,
+    pub user: Option<MergeRequestUser>,
     /// The URL of the merge request.
     pub web_url: String,
 }
@@ -1840,7 +1840,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             discussion_locked: mr.discussion_locked,
             should_remove_source_branch: mr.should_remove_source_branch,
             force_remove_source_branch: mr.force_remove_source_branch,
-            user: mr.user,
+            user: Some(mr.user),
             web_url: mr.web_url,
         }
     }
