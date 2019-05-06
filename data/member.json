@@ -1,1 +1,10 @@
-{"username": "kwrobot", "web_url": "https://gitlab.kitware.com/kwrobot", "name": "Kitware Robot", "expires_at": null, "access_level": 50, "state": "active", "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon", "id": 11}
+{
+  "access_level": 50,
+  "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
+  "expires_at": null,
+  "id": 11,
+  "name": "Kitware Robot",
+  "state": "active",
+  "username": "kwrobot",
+  "web_url": "https://gitlab.kitware.com/kwrobot"
+}

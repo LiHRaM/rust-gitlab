@@ -1,1 +1,21 @@
-{"body": "Status changed to merged", "author": {"username": "kwrobot", "web_url": "https://gitlab.kitware.com/kwrobot", "name": "Kitware Robot", "state": "active", "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon", "id": 11}, "created_at": "2016-10-04T16:18:57.937-04:00", "updated_at": "2016-10-04T16:18:57.937-04:00", "noteable_type": "MergeRequest", "system": true, "resolvable": false, "attachment": null, "noteable_id": 20215, "noteable_iid": 35, "type": null, "id": 177373}
+{
+  "attachment": null,
+  "author": {
+    "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
+    "id": 11,
+    "name": "Kitware Robot",
+    "state": "active",
+    "username": "kwrobot",
+    "web_url": "https://gitlab.kitware.com/kwrobot"
+  },
+  "body": "Status changed to merged",
+  "created_at": "2016-10-04T16:18:57.937-04:00",
+  "id": 177373,
+  "noteable_id": 20215,
+  "noteable_iid": 35,
+  "noteable_type": "MergeRequest",
+  "resolvable": false,
+  "system": true,
+  "type": null,
+  "updated_at": "2016-10-04T16:18:57.937-04:00"
+}
