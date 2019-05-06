@@ -1,1 +1,66 @@
-{"lfs_enabled": true, "request_access_enabled": true, "forks_count": 7, "only_allow_merge_if_all_discussions_are_resolved": null, "container_registry_enabled": true, "web_url": "https://gitlab.kitware.com/utils/rust-gitlab", "wiki_enabled": true, "id": 855, "merge_requests_enabled": true, "archived": false, "snippets_enabled": false, "http_url_to_repo": "https://gitlab.kitware.com/utils/rust-gitlab.git", "namespace": {"kind": "group", "name": "Utils", "parent_id": null, "path": "utils", "id": 498, "full_path": "utils"}, "star_count": 1, "_links": {"repo_branches": "https://gitlab.kitware.com/api/v4/projects/855/repository/branches", "merge_requests": "https://gitlab.kitware.com/api/v4/projects/855/merge_requests", "self": "https://gitlab.kitware.com/api/v4/projects/855", "labels": "https://gitlab.kitware.com/api/v4/projects/855/labels", "members": "https://gitlab.kitware.com/api/v4/projects/855/members", "events": "https://gitlab.kitware.com/api/v4/projects/855/events", "issues": "https://gitlab.kitware.com/api/v4/projects/855/issues"}, "resolve_outdated_diff_discussions": null, "issues_enabled": true, "path_with_namespace": "utils/rust-gitlab", "ci_config_path": null, "shared_with_groups": [], "description": "Rust library for communicating with a Gitlab instance.", "import_error": null, "default_branch": "master", "visibility": "public", "readme_url": "https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md", "ssh_url_to_repo": "git@gitlab.kitware.com:utils/rust-gitlab.git", "path": "rust-gitlab", "import_status": "none", "only_allow_merge_if_pipeline_succeeds": false, "open_issues_count": 6, "last_activity_at": "2018-05-31T11:08:12.338-04:00", "name": "rust-gitlab", "printing_merge_request_link_enabled": true, "name_with_namespace": "Utils / rust-gitlab", "created_at": "2016-06-29T13:35:12.495-04:00", "shared_runners_enabled": true, "merge_method": "merge", "creator_id": 13, "avatar_url": null, "permissions": {"group_access": {"notification_level": 3, "access_level": 50}, "project_access": null}, "tag_list": [], "jobs_enabled": false, "public_jobs": true}
+{
+  "_links": {
+    "events": "https://gitlab.kitware.com/api/v4/projects/855/events",
+    "issues": "https://gitlab.kitware.com/api/v4/projects/855/issues",
+    "labels": "https://gitlab.kitware.com/api/v4/projects/855/labels",
+    "members": "https://gitlab.kitware.com/api/v4/projects/855/members",
+    "merge_requests": "https://gitlab.kitware.com/api/v4/projects/855/merge_requests",
+    "repo_branches": "https://gitlab.kitware.com/api/v4/projects/855/repository/branches",
+    "self": "https://gitlab.kitware.com/api/v4/projects/855"
+  },
+  "archived": false,
+  "avatar_url": null,
+  "ci_config_path": null,
+  "container_registry_enabled": true,
+  "created_at": "2016-06-29T13:35:12.495-04:00",
+  "creator_id": 13,
+  "default_branch": "master",
+  "description": "Rust library for communicating with a Gitlab instance.",
+  "forks_count": 7,
+  "http_url_to_repo": "https://gitlab.kitware.com/utils/rust-gitlab.git",
+  "id": 855,
+  "import_error": null,
+  "import_status": "none",
+  "issues_enabled": true,
+  "jobs_enabled": false,
+  "last_activity_at": "2018-05-31T11:08:12.338-04:00",
+  "lfs_enabled": true,
+  "merge_method": "merge",
+  "merge_requests_enabled": true,
+  "name": "rust-gitlab",
+  "name_with_namespace": "Utils / rust-gitlab",
+  "namespace": {
+    "full_path": "utils",
+    "id": 498,
+    "kind": "group",
+    "name": "Utils",
+    "parent_id": null,
+    "path": "utils"
+  },
+  "only_allow_merge_if_all_discussions_are_resolved": null,
+  "only_allow_merge_if_pipeline_succeeds": false,
+  "open_issues_count": 6,
+  "path": "rust-gitlab",
+  "path_with_namespace": "utils/rust-gitlab",
+  "permissions": {
+    "group_access": {
+      "access_level": 50,
+      "notification_level": 3
+    },
+    "project_access": null
+  },
+  "printing_merge_request_link_enabled": true,
+  "public_jobs": true,
+  "readme_url": "https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md",
+  "request_access_enabled": true,
+  "resolve_outdated_diff_discussions": null,
+  "shared_runners_enabled": true,
+  "shared_with_groups": [],
+  "snippets_enabled": false,
+  "ssh_url_to_repo": "git@gitlab.kitware.com:utils/rust-gitlab.git",
+  "star_count": 1,
+  "tag_list": [],
+  "visibility": "public",
+  "web_url": "https://gitlab.kitware.com/utils/rust-gitlab",
+  "wiki_enabled": true
+}

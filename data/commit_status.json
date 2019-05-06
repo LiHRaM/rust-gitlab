@@ -1,1 +1,22 @@
-{"status": "success", "target_url": "https://buildbot.kitware.com/builders/rust-gitlab-megas-linux-debug/builds/41", "name": "rust-gitlab-megas-linux-debug", "author": {"username": "buildbot", "web_url": "https://gitlab.kitware.com/buildbot", "name": "buildbot", "state": "active", "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png", "id": 35}, "finished_at": "2016-11-08T09:35:32.629-05:00", "created_at": "2016-11-08T09:35:32.627-05:00", "allow_failure": false, "sha": "de4ac3cf96cb8a0893be22b03f5171d934f9d392", "coverage": null, "started_at": null, "ref": "master", "id": 931434, "description": "expected"}
+{
+  "allow_failure": false,
+  "author": {
+    "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+    "id": 35,
+    "name": "buildbot",
+    "state": "active",
+    "username": "buildbot",
+    "web_url": "https://gitlab.kitware.com/buildbot"
+  },
+  "coverage": null,
+  "created_at": "2016-11-08T09:35:32.627-05:00",
+  "description": "expected",
+  "finished_at": "2016-11-08T09:35:32.629-05:00",
+  "id": 931434,
+  "name": "rust-gitlab-megas-linux-debug",
+  "ref": "master",
+  "sha": "de4ac3cf96cb8a0893be22b03f5171d934f9d392",
+  "started_at": null,
+  "status": "success",
+  "target_url": "https://buildbot.kitware.com/builders/rust-gitlab-megas-linux-debug/builds/41"
+}

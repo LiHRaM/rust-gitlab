@@ -1,1 +1,61 @@
-{"downvotes": 0, "labels": [], "updated_at": "2017-07-07T02:31:03.757-04:00", "assignee": {"username": "ben.boeckel", "web_url": "https://gitlab.kitware.com/ben.boeckel", "name": "Ben Boeckel", "state": "active", "avatar_url": "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon", "id": 13}, "user_notes_count": 0, "closed_at": null, "id": 69328, "upvotes": 0, "subscribed": true, "title": "fix documentation warnings", "time_stats": {"time_estimate": 0, "human_total_time_spent": null, "human_time_estimate": null, "total_time_spent": 0}, "state": "closed", "_links": {"project": "https://gitlab.kitware.com/api/v4/projects/855", "self": "https://gitlab.kitware.com/api/v4/projects/855/issues/6", "notes": "https://gitlab.kitware.com/api/v4/projects/855/issues/6/notes", "award_emoji": "https://gitlab.kitware.com/api/v4/projects/855/issues/6/award_emoji"}, "merge_requests_count": 1, "project_id": 855, "due_date": null, "description": "", "confidential": false, "iid": 6, "milestone": null, "discussion_locked": null, "closed_by": null, "created_at": "2016-10-30T14:54:28.954-04:00", "author": {"username": "ben.boeckel", "web_url": "https://gitlab.kitware.com/ben.boeckel", "name": "Ben Boeckel", "state": "active", "avatar_url": "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon", "id": 13}, "assignees": [{"username": "ben.boeckel", "web_url": "https://gitlab.kitware.com/ben.boeckel", "name": "Ben Boeckel", "state": "active", "avatar_url": "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon", "id": 13}], "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/issues/6"}
+{
+  "_links": {
+    "award_emoji": "https://gitlab.kitware.com/api/v4/projects/855/issues/6/award_emoji",
+    "notes": "https://gitlab.kitware.com/api/v4/projects/855/issues/6/notes",
+    "project": "https://gitlab.kitware.com/api/v4/projects/855",
+    "self": "https://gitlab.kitware.com/api/v4/projects/855/issues/6"
+  },
+  "assignee": {
+    "avatar_url": "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon",
+    "id": 13,
+    "name": "Ben Boeckel",
+    "state": "active",
+    "username": "ben.boeckel",
+    "web_url": "https://gitlab.kitware.com/ben.boeckel"
+  },
+  "assignees": [
+    {
+      "avatar_url": "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon",
+      "id": 13,
+      "name": "Ben Boeckel",
+      "state": "active",
+      "username": "ben.boeckel",
+      "web_url": "https://gitlab.kitware.com/ben.boeckel"
+    }
+  ],
+  "author": {
+    "avatar_url": "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon",
+    "id": 13,
+    "name": "Ben Boeckel",
+    "state": "active",
+    "username": "ben.boeckel",
+    "web_url": "https://gitlab.kitware.com/ben.boeckel"
+  },
+  "closed_at": null,
+  "closed_by": null,
+  "confidential": false,
+  "created_at": "2016-10-30T14:54:28.954-04:00",
+  "description": "",
+  "discussion_locked": null,
+  "downvotes": 0,
+  "due_date": null,
+  "id": 69328,
+  "iid": 6,
+  "labels": [],
+  "merge_requests_count": 1,
+  "milestone": null,
+  "project_id": 855,
+  "state": "closed",
+  "subscribed": true,
+  "time_stats": {
+    "human_time_estimate": null,
+    "human_total_time_spent": null,
+    "time_estimate": 0,
+    "total_time_spent": 0
+  },
+  "title": "fix documentation warnings",
+  "updated_at": "2017-07-07T02:31:03.757-04:00",
+  "upvotes": 0,
+  "user_notes_count": 0,
+  "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/issues/6"
+}

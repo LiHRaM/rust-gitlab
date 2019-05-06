@@ -18,8 +18,10 @@ def write_result(token, name, endpoint):
     # Remove any keys from the result.
     result.pop('private_token', None)
     result.pop('runners_token', None)
+    if type(result.get('identities')) == list:
+        result['identities'] = []
     with open('%s.json' % name, 'w+') as fout:
-        json.dump(result, fout)
+        json.dump(result, fout, indent = 2, separators=(',', ': '), sort_keys=True)
         fout.write('\n')
 
 
