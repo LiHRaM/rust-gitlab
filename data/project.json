@@ -16,6 +16,7 @@
   "creator_id": 13,
   "default_branch": "master",
   "description": "Rust library for communicating with a Gitlab instance.",
+  "external_authorization_classification_label": null,
   "forks_count": 7,
   "http_url_to_repo": "https://gitlab.kitware.com/utils/rust-gitlab.git",
   "id": 855,

@@ -693,6 +693,7 @@ fn test_read_user() {
         Some(Utc.ymd(2015, 2, 26).and_hms_milli(15, 58, 34, 670)),
     );
     assert_eq!(user.is_admin, None);
+    assert_eq!(user.highest_role, Some(AccessLevel::Owner));
     assert_eq!(user.bio, Some("".to_string()));
     assert_eq!(user.private_profile, None);
     assert_eq!(user.location, None);
