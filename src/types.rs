@@ -707,6 +707,21 @@ impl Display for AccessLevel {
     }
 }
 
+impl Serialize for AccessLevel {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        u64::from(*self).serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for AccessLevel {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(<u64 as Deserialize>::deserialize(deserializer)?.into())
+    }
+}
+
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A member with extra permissions on a project.
