@@ -103,6 +103,10 @@ pub struct User {
     ///
     /// Only available when talking to GitLab as an admin.
     pub is_admin: Option<bool>,
+    /// The highest access level available to the user.
+    ///
+    /// Only available when talking to GitLab as an admin.
+    pub highest_role: Option<AccessLevel>,
     /// Self-described biography of the user.
     pub bio: Option<String>,
     /// Whether the account has a private profile.
@@ -181,6 +185,10 @@ pub struct UserPublic {
     ///
     /// Only available when talking to GitLab as an admin.
     pub is_admin: Option<bool>,
+    /// The highest access level available to the user.
+    ///
+    /// Only available when talking to GitLab as an admin.
+    pub highest_role: Option<AccessLevel>,
     /// Self-described biography of the user.
     pub bio: Option<String>,
     /// Whether the account has a private profile.
@@ -256,6 +264,7 @@ impl From<UserPublic> for User {
             web_url: user.web_url,
             created_at: user.created_at,
             is_admin: user.is_admin,
+            highest_role: user.highest_role,
             bio: user.bio,
             private_profile: user.private_profile,
             location: user.location,
@@ -704,6 +713,21 @@ impl From<u64> for AccessLevel {
 impl Display for AccessLevel {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{}", Into::<u64>::into(self.clone()))
+    }
+}
+
+impl Serialize for AccessLevel {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        u64::from(*self).serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for AccessLevel {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(<u64 as Deserialize>::deserialize(deserializer)?.into())
     }
 }
 

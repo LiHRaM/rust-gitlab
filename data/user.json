@@ -9,6 +9,7 @@
   "current_sign_in_at": "2018-10-11T08:36:09.687-04:00",
   "email": "kwrobot@kitware.com",
   "external": false,
+  "highest_role": 50,
   "id": 11,
   "identities": [],
   "last_activity_on": "2018-10-25",
