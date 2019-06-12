@@ -1301,8 +1301,9 @@ impl Gitlab {
                 req.header("PRIVATE-TOKEN", token_header_value)
             },
             Token::OAuth2(token) => {
+                let value = format!("Bearer {}", token);
                 let mut token_header_value =
-                    HeaderValue::from_str(&format!("Bearer {}", token)).map_err(|_| ErrorKind::HeaderValueParse)?;
+                    HeaderValue::from_str(&value).map_err(|_| ErrorKind::HeaderValueParse)?;
                 token_header_value.set_sensitive(true);
                 req.header("Authorization", token_header_value)
             },
