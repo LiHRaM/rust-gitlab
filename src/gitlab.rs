@@ -20,6 +20,42 @@ use types::*;
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
 
+/// A Gitlab API token
+///
+/// Gitlab supports two kinds of tokens
+#[derive(Debug, Clone)]
+enum Token {
+    /// A personal access token, obtained through Gitlab user settings
+    Private(String),
+    /// An OAuth2 token, obtained through the OAuth2 flow
+    OAuth2(String),
+}
+
+impl Token {
+    /// Sets the appropirate header on the request.
+    ///
+    /// Depending on the token type, this will be either the Private-Token header
+    /// or the Authorization header.
+    /// Returns an error if the token string cannot be parsed as a header value.
+    pub fn set_header(&self, req: RequestBuilder) -> Result<RequestBuilder> {
+        Ok(match self {
+            Token::Private(token) => {
+                let mut token_header_value =
+                    HeaderValue::from_str(&token).map_err(|_| ErrorKind::HeaderValueParse)?;
+                token_header_value.set_sensitive(true);
+                req.header("PRIVATE-TOKEN", token_header_value)
+            },
+            Token::OAuth2(token) => {
+                let value = format!("Bearer {}", token);
+                let mut token_header_value =
+                    HeaderValue::from_str(&value).map_err(|_| ErrorKind::HeaderValueParse)?;
+                token_header_value.set_sensitive(true);
+                req.header("Authorization", token_header_value)
+            },
+        })
+    }
+}
+
 /// A representation of the Gitlab API for a single user.
 ///
 /// Separate users should use separate instances of this.
@@ -29,7 +65,7 @@ pub struct Gitlab {
     /// The base URL to use for API calls.
     base_url: Url,
     /// The secret token to use when communicating with Gitlab.
-    token: String,
+    token: Token,
 }
 
 impl Debug for Gitlab {
@@ -73,13 +109,14 @@ enum_serialize!(MergeRequestStateFilter -> "state",
 impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
+    /// The `token` should be a valid [personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html).
     /// Errors out if `token` is invalid.
     pub fn new<H, T>(host: H, token: T) -> Result<Self>
     where
         H: AsRef<str>,
         T: ToString,
     {
-        Self::new_impl("https", host.as_ref(), token.to_string())
+        Self::new_impl("https", host.as_ref(), Token::Private(token.to_string()))
     }
 
     /// Create a new non-SSL Gitlab API representation.
@@ -90,11 +127,35 @@ impl Gitlab {
         H: AsRef<str>,
         T: ToString,
     {
-        Self::new_impl("http", host.as_ref(), token.to_string())
+        Self::new_impl("http", host.as_ref(), Token::Private(token.to_string()))
+    }
+
+    /// Create a new Gitlab API representation.
+    ///
+    /// The `token` should be a valid [OAuth2 token](https://docs.gitlab.com/ee/api/oauth2.html).
+    /// Errors out if `token` is invalid.
+    pub fn with_oauth2<H, T>(host: H, token: T) -> Result<Self>
+    where
+        H: AsRef<str>,
+        T: ToString,
+    {
+        Self::new_impl("https", host.as_ref(), Token::OAuth2(token.to_string()))
+    }
+
+    /// Create a new non-SSL Gitlab API representation.
+    ///
+    /// The `token` should be a valid [OAuth2 token](https://docs.gitlab.com/ee/api/oauth2.html).
+    /// Errors out if `token` is invalid.
+    pub fn with_oauth2_insecure<H, T>(host: H, token: T) -> Result<Self>
+    where
+        H: AsRef<str>,
+        T: ToString,
+    {
+        Self::new_impl("http", host.as_ref(), Token::OAuth2(token.to_string()))
     }
 
     /// Internal method to create a new Gitlab client.
-    fn new_impl(protocol: &str, host: &str, token: String) -> Result<Self> {
+    fn new_impl(protocol: &str, host: &str, token: Token) -> Result<Self> {
         let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))
             .chain_err(|| ErrorKind::UrlParse)?;
 
@@ -1257,11 +1318,7 @@ impl Gitlab {
     where
         T: DeserializeOwned,
     {
-        let mut token_header_value =
-            HeaderValue::from_str(&self.token).map_err(|_| ErrorKind::HeaderValueParse)?;
-        token_header_value.set_sensitive(true);
-        let rsp = req
-            .header("PRIVATE-TOKEN", token_header_value)
+        let rsp = self.token.set_header(req)?
             .send()
             .chain_err(|| ErrorKind::Communication)?;
         let status = rsp.status();
@@ -1381,7 +1438,7 @@ impl Gitlab {
 pub struct GitlabBuilder {
     protocol: &'static str,
     host: String,
-    token: String,
+    token: Token,
 }
 
 impl GitlabBuilder {
@@ -1394,13 +1451,21 @@ impl GitlabBuilder {
         Self {
             protocol: "https",
             host: host.to_string(),
-            token: token.to_string(),
+            token: Token::Private(token.to_string()),
         }
     }
 
     /// Switch to an insecure protocol (http instead of https).
     pub fn insecure(&mut self) -> &mut Self {
         self.protocol = "http";
+        self
+    }
+
+    /// Switch to using an OAuth2 token instead of a personal access token
+    pub fn oauth2_token(&mut self) -> &mut Self {
+        if let Token::Private(token) = self.token.clone() {
+            self.token = Token::OAuth2(token);
+        }
         self
     }
 
