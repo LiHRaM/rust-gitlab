@@ -31,6 +31,32 @@ enum Token {
     OAuth2(String),
 }
 
+impl Token {
+    /// Sets the appropirate header on the request
+    ///
+    /// Depending on the token type, this will be either the Private-Token header
+    /// or the Authorization header.
+    ///
+    /// Returns an error if the token string cannot be parsed as a header value
+    pub fn set_header(&self, req: RequestBuilder) -> Result<RequestBuilder> {
+        Ok(match self {
+            Token::Private(token) => {
+                let mut token_header_value =
+                    HeaderValue::from_str(&token).map_err(|_| ErrorKind::HeaderValueParse)?;
+                token_header_value.set_sensitive(true);
+                req.header("PRIVATE-TOKEN", token_header_value)
+            },
+            Token::OAuth2(token) => {
+                let value = format!("Bearer {}", token);
+                let mut token_header_value =
+                    HeaderValue::from_str(&value).map_err(|_| ErrorKind::HeaderValueParse)?;
+                token_header_value.set_sensitive(true);
+                req.header("Authorization", token_header_value)
+            },
+        })
+    }
+}
+
 /// A representation of the Gitlab API for a single user.
 ///
 /// Separate users should use separate instances of this.
@@ -1293,22 +1319,7 @@ impl Gitlab {
     where
         T: DeserializeOwned,
     {
-        let req = match &self.token {
-            Token::Private(token) => {
-                let mut token_header_value =
-                    HeaderValue::from_str(&token).map_err(|_| ErrorKind::HeaderValueParse)?;
-                token_header_value.set_sensitive(true);
-                req.header("PRIVATE-TOKEN", token_header_value)
-            },
-            Token::OAuth2(token) => {
-                let value = format!("Bearer {}", token);
-                let mut token_header_value =
-                    HeaderValue::from_str(&value).map_err(|_| ErrorKind::HeaderValueParse)?;
-                token_header_value.set_sensitive(true);
-                req.header("Authorization", token_header_value)
-            },
-        };
-        let rsp = req
+        let rsp = self.token.set_header(req)?
             .send()
             .chain_err(|| ErrorKind::Communication)?;
         let status = rsp.status();
