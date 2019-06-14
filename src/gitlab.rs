@@ -32,12 +32,11 @@ enum Token {
 }
 
 impl Token {
-    /// Sets the appropirate header on the request
+    /// Sets the appropirate header on the request.
     ///
     /// Depending on the token type, this will be either the Private-Token header
     /// or the Authorization header.
-    ///
-    /// Returns an error if the token string cannot be parsed as a header value
+    /// Returns an error if the token string cannot be parsed as a header value.
     pub fn set_header(&self, req: RequestBuilder) -> Result<RequestBuilder> {
         Ok(match self {
             Token::Private(token) => {
