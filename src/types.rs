@@ -2346,6 +2346,10 @@ pub struct Namespace {
     ///
     /// Only available when talking to GitLab as a user that can admin the namespace.
     pub members_count_with_descendants: Option<u64>,
+    /// The URL of the user's avatar if namespace is a user.
+    pub avatar_url: Option<String>,
+    /// The URL to the namespace page (user or group).
+    pub web_url: String,
 }
 
 impl Namespace {

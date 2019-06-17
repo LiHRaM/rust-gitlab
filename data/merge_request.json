@@ -9,6 +9,16 @@
     "username": "brad.king",
     "web_url": "https://gitlab.kitware.com/brad.king"
   },
+  "assignees": [
+    {
+      "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+      "id": 10,
+      "name": "Brad King",
+      "state": "active",
+      "username": "brad.king",
+      "web_url": "https://gitlab.kitware.com/brad.king"
+    }
+  ],
   "author": {
     "avatar_url": "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon",
     "id": 13,

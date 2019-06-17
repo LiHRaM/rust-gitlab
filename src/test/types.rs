@@ -357,6 +357,19 @@ fn test_read_merge_request() {
     } else {
         panic!("expected to have an assignee for the merge request");
     }
+    if let Some(ref assignees) = merge_request.assignees {
+        assert_eq!(assignees.len(), 1);
+        let assignee = &assignees[0];
+        assert_eq!(assignee.username, "brad.king");
+        assert_eq!(assignee.web_url, "https://gitlab.kitware.com/brad.king");
+        assert_eq!(assignee.name, "Brad King");
+        assert_eq!(assignee.state, UserState::Active);
+        assert_eq!(assignee.avatar_url,
+                   Some("https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon".to_string()));
+        assert_eq!(assignee.id, UserId::new(10));
+    } else {
+        panic!("expected to have assignees for the merge request");
+    }
     assert_eq!(merge_request.source_project_id, ProjectId::new(856));
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
@@ -502,6 +515,8 @@ fn test_read_project() {
     );
     assert_eq!(project.namespace.kind, NamespaceKind::Group);
     assert_eq!(project.namespace.full_path, "utils");
+    assert_eq!(project.namespace.avatar_url, None);
+    assert_eq!(project.namespace.web_url, "https://gitlab.kitware.com/groups/utils");
     assert!(project.namespace.members_count_with_descendants.is_none());
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
