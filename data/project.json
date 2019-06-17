@@ -31,12 +31,14 @@
   "name": "rust-gitlab",
   "name_with_namespace": "Utils / rust-gitlab",
   "namespace": {
+    "avatar_url": null,
     "full_path": "utils",
     "id": 498,
     "kind": "group",
     "name": "Utils",
     "parent_id": null,
-    "path": "utils"
+    "path": "utils",
+    "web_url": "https://gitlab.kitware.com/groups/utils"
   },
   "only_allow_merge_if_all_discussions_are_resolved": null,
   "only_allow_merge_if_pipeline_succeeds": false,
