@@ -97,6 +97,10 @@
   "subscribed": true,
   "target_branch": "master",
   "target_project_id": 855,
+  "task_completion_status": {
+    "completed_count": 0,
+    "count": 0
+  },
   "time_stats": {
     "human_time_estimate": null,
     "human_total_time_spent": null,
