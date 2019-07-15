@@ -546,6 +546,8 @@ pub struct Project {
     pub tag_list: Vec<String>,
     /// Whether the project is archived or not.
     pub archived: bool,
+    /// Whether the project has an empty repository or not.
+    pub empty_repo: bool,
     /// Whether the project is public, internal, or private.
     pub visibility: VisibilityLevel,
     /// The URL to clone the repository over SSH.
@@ -1404,6 +1406,9 @@ pub struct Issue {
     pub downvotes: u64,
     /// When the issue is due.
     pub due_date: Option<NaiveDate>,
+    /// Whether the issue is has a non-empty task list.
+    /// GitLab does not include this in issue references.
+    pub has_tasks: Option<bool>,
     /// Whether the issue is confidential or not.
     pub confidential: bool,
     /// Whether the discussion has been locked.
@@ -1451,6 +1456,7 @@ impl Issue {
             upvotes: 0,
             downvotes: 0,
             due_date: None,
+            has_tasks: None,
             confidential: false,
             discussion_locked: None,
             web_url: "".to_string(),

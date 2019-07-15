@@ -202,6 +202,7 @@ fn test_read_issue() {
     assert_eq!(issue.upvotes, 0);
     assert_eq!(issue.downvotes, 0);
     assert_eq!(issue.due_date, None);
+    assert_eq!(issue.has_tasks, Some(false));
     assert_eq!(issue.confidential, false);
     assert_eq!(issue.discussion_locked, None);
     assert_eq!(
@@ -472,6 +473,7 @@ fn test_read_project() {
     assert_eq!(project.default_branch, Some("master".to_string()));
     assert!(project.tag_list.is_empty());
     assert_eq!(project.archived, false);
+    assert_eq!(project.empty_repo, false);
     assert_eq!(project.visibility, VisibilityLevel::Public);
     assert_eq!(
         project.ssh_url_to_repo,
