@@ -778,3 +778,17 @@ fn test_read_user_public() {
     assert_eq!(user_public.two_factor_enabled, true);
     assert_eq!(user_public.external, false);
 }
+
+#[test]
+fn test_read_resoruce_label_events() {
+    let event: ResourceLabelEvent = read_test_file("resource_label_event");
+
+    assert_eq!(event.id, LabelEventId::new(10945));
+    assert_eq!(event.user.id, UserId::new(10));
+    assert_eq!(event.user.username, "brad.king");
+    let label = event.label.unwrap();
+    assert_eq!(label.id, LabelId::new(1720));
+    assert_eq!(label.name, "area:doc");
+    assert_eq!(label.color, LabelColor::from_rgb(0x58, 0x43, 0xAD));
+    assert_eq!(label.description, Some("Documentation issues".to_string()));
+}

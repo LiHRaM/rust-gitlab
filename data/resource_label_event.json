@@ -1,0 +1,22 @@
+{
+  "action": "add",
+  "created_at": "2019-07-17T13:53:48.937Z",
+  "id": 10945,
+  "label": {
+    "color": "#5843AD",
+    "description": "Documentation issues",
+    "id": 1720,
+    "name": "area:doc",
+    "text_color": "#FFFFFF"
+  },
+  "resource_id": 69328,
+  "resource_type": "Issue",
+  "user": {
+    "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+    "id": 10,
+    "name": "Brad King",
+    "state": "active",
+    "username": "brad.king",
+    "web_url": "https://gitlab.kitware.com/brad.king"
+  }
+}
