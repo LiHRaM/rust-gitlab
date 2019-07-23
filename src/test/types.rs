@@ -786,6 +786,14 @@ fn test_read_resoruce_label_events() {
     assert_eq!(event.id, LabelEventId::new(10945));
     assert_eq!(event.user.id, UserId::new(10));
     assert_eq!(event.user.username, "brad.king");
+
+    match &event.event_target() {
+        Some(ResourceLabelEventTarget::Issue(id)) if id.value() == 69328 => {
+            // this is the expected value
+        },
+        x => panic!("Unexpected resource_target: {:?}", x)
+    }
+
     let label = event.label.unwrap();
     assert_eq!(label.id, LabelId::new(1720));
     assert_eq!(label.name, "area:doc");
