@@ -42,6 +42,7 @@ impl Error {
     pub fn from_gitlab(value: Value) -> Self {
         let msg = value
             .pointer("/message")
+            .or_else(|| value.pointer("/error"))
             .and_then(|s| s.as_str())
             .unwrap_or_else(|| "unknown error");
 
