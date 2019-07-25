@@ -50,3 +50,4 @@ if __name__ == '__main__':
     write_result(token, 'issue_reference', '/projects/%s/merge_requests/%d/closes_issues' % (REPO, MR_ID))
     write_result(token, 'note', '/projects/%s/merge_requests/%d/notes' % (REPO, MR_ID))
     write_result(token, 'award_emoji', '/projects/%s/merge_requests/%d/notes/%d/award_emoji' % (REPO, MR_ID, NOTE_ID))
+    write_result(token, 'resource_label_event', '/projects/%s/issues/%d/resource_label_events' % (REPO, ISSUE_ID))

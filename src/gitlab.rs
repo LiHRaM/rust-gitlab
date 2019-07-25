@@ -887,6 +887,21 @@ impl Gitlab {
         self.post_with_param(path, &params)
     }
 
+    /// Get the resource label events from an issue.
+    pub fn issue_label_events(
+        &self,
+        project: ProjectId,
+        issue: IssueInternalId,
+    ) -> Result<Vec<ResourceLabelEvent>>
+    {
+        self.get_paged(
+            &format!(
+                "projects/{}/issues/{}/resource_label_events",
+                project, issue,
+            )
+        )
+    }
+
     /// Create a note on a issue.
     pub fn create_issue_note<C>(
         &self,
@@ -1163,6 +1178,21 @@ impl Gitlab {
                 note,
             ),
             params,
+        )
+    }
+
+    /// Get the resource label events from a merge request.
+    pub fn merge_request_label_events(
+        &self,
+        project: ProjectId,
+        merge_request: MergeRequestInternalId,
+    ) -> Result<Vec<ResourceLabelEvent>>
+    {
+        self.get_paged(
+            &format!(
+                "projects/{}/merge_requests/{}/resource_label_events",
+                project, merge_request,
+            )
         )
     }
 
