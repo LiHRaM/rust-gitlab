@@ -42,7 +42,9 @@
   "has_tasks": false,
   "id": 69328,
   "iid": 6,
-  "labels": [],
+  "labels": [
+    "area:doc"
+  ],
   "merge_requests_count": 1,
   "milestone": null,
   "project_id": 855,
@@ -59,7 +61,7 @@
     "total_time_spent": 0
   },
   "title": "fix documentation warnings",
-  "updated_at": "2017-07-07T02:31:03.757-04:00",
+  "updated_at": "2019-07-17T09:53:48.869-04:00",
   "upvotes": 0,
   "user_notes_count": 0,
   "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/issues/6"

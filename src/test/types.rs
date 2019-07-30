@@ -151,11 +151,12 @@ fn test_read_issue() {
     );
     assert_eq!(
         issue.updated_at,
-        Utc.ymd(2017, 7, 7).and_hms_milli(6, 31, 03, 757),
+        Utc.ymd(2019, 7, 17).and_hms_milli(13, 53, 48, 869),
     );
     assert_eq!(issue.closed_at, None);
     assert!(issue.closed_by.is_none());
-    assert!(issue.labels.is_empty());
+    assert_eq!(issue.labels.len(), 1);
+    assert_eq!(issue.labels[0], "area:doc");
     assert!(issue.milestone.is_none());
     assert_eq!(issue.author.username, "ben.boeckel");
     assert_eq!(
