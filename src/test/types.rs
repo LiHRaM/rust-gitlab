@@ -544,6 +544,13 @@ fn test_read_project() {
     assert_eq!(project.snippets_enabled, false);
     assert_eq!(project.wiki_enabled, true);
 
+    assert_eq!(project.builds_access_level, FeatureVisibilityLevel::Disabled);
+    assert_eq!(project.issues_access_level, FeatureVisibilityLevel::Enabled);
+    assert_eq!(project.merge_requests_access_level, FeatureVisibilityLevel::Enabled);
+    assert_eq!(project.repository_access_level, FeatureVisibilityLevel::Enabled);
+    assert_eq!(project.snippets_access_level, FeatureVisibilityLevel::Disabled);
+    assert_eq!(project.wiki_access_level, FeatureVisibilityLevel::Enabled);
+
     assert_eq!(project.merge_method, Some("merge".to_string()));
     if let Some(ref permissions) = project.permissions {
         if let Some(ref group_access) = permissions.group_access {

@@ -468,6 +468,25 @@ enum_serialize!(VisibilityLevel -> "visibility level",
     Private => "private",
 );
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+/// Visibility levels for project features.
+pub enum FeatureVisibilityLevel {
+    /// Feature is disabled.
+    Disabled,
+    /// Feature is enabled and accessible privately.
+    Private,
+    /// Feature is enabled and accessible with project-wide visibility level.
+    Enabled,
+    /// Feature is enabled and accessible publicly.
+    Public,
+}
+enum_serialize!(FeatureVisibilityLevel -> "feature visibility level",
+    Disabled => "disabled",
+    Private => "private",
+    Enabled => "enabled",
+    Public => "public",
+);
+
 // TODO: enum for NotificationLevel
 
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
@@ -627,6 +646,19 @@ pub struct Project {
     pub snippets_enabled: bool,
     /// Whether the project wiki is enabled or not.
     pub wiki_enabled: bool,
+
+    /// Visibility of builds.
+    pub builds_access_level: FeatureVisibilityLevel,
+    /// Visibility of issues.
+    pub issues_access_level: FeatureVisibilityLevel,
+    /// Visibility of merge requests.
+    pub merge_requests_access_level: FeatureVisibilityLevel,
+    /// Visibility of repository.
+    pub repository_access_level: FeatureVisibilityLevel,
+    /// Visibility of snippets.
+    pub snippets_access_level: FeatureVisibilityLevel,
+    /// Visibility of wiki.
+    pub wiki_access_level: FeatureVisibilityLevel,
 
     /// The merge method used when merging merge request.
     pub merge_method: Option<String>,
