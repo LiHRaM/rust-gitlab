@@ -93,9 +93,3 @@ macro_rules! query_param_slice {
         &[$($x),*] as QueryParamSlice
     )
 }
-
-macro_rules! query_param_vec {
-    ( $( $x:expr ),* ) => (
-        vec![$($x),*] as QueryParamVec
-    )
-}
