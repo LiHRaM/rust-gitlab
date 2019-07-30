@@ -15,12 +15,12 @@ macro_rules! impl_id {
 
         impl $name {
             /// Create a new id.
-            pub fn new(id: u64) -> Self {
+            pub const fn new(id: u64) -> Self {
                 $name(id)
             }
 
             /// The value of the id.
-            pub fn value(&self) -> u64 {
+            pub const fn value(&self) -> u64 {
                 self.0
             }
         }
@@ -91,11 +91,5 @@ macro_rules! get_event {
 macro_rules! query_param_slice {
     ( $( $x:expr ),* ) => (
         &[$($x),*] as QueryParamSlice
-    )
-}
-
-macro_rules! query_param_vec {
-    ( $( $x:expr ),* ) => (
-        vec![$($x),*] as QueryParamVec
     )
 }
