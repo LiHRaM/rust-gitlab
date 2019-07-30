@@ -536,12 +536,14 @@ fn test_read_project() {
     );
     assert_eq!(project.printing_merge_request_link_enabled, Some(true));
     assert_eq!(project.request_access_enabled, true);
-    assert_eq!(project.jobs_enabled, false);
     assert_eq!(project.resolve_outdated_diff_discussions, None);
+
+    assert_eq!(project.jobs_enabled, false);
     assert_eq!(project.issues_enabled, true);
     assert_eq!(project.merge_requests_enabled, true);
     assert_eq!(project.snippets_enabled, false);
     assert_eq!(project.wiki_enabled, true);
+
     assert_eq!(project.merge_method, Some("merge".to_string()));
     if let Some(ref permissions) = project.permissions {
         if let Some(ref group_access) = permissions.group_access {
