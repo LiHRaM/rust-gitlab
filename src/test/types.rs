@@ -504,7 +504,7 @@ fn test_read_project() {
     );
     assert_eq!(
         project.last_activity_at,
-        Utc.ymd(2018, 5, 31).and_hms_milli(15, 8, 12, 338),
+        Utc.ymd(2019, 7, 30).and_hms_milli(16, 42, 57, 649),
     );
     assert_eq!(project.import_error, None);
     assert_eq!(project.shared_runners_enabled, true);
@@ -524,9 +524,9 @@ fn test_read_project() {
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
-    assert_eq!(project.star_count, 1);
-    assert_eq!(project.forks_count, 7);
-    assert_eq!(project.open_issues_count, Some(6));
+    assert_eq!(project.star_count, 6);
+    assert_eq!(project.forks_count, 17);
+    assert_eq!(project.open_issues_count, Some(8));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
