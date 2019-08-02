@@ -151,11 +151,12 @@ fn test_read_issue() {
     );
     assert_eq!(
         issue.updated_at,
-        Utc.ymd(2017, 7, 7).and_hms_milli(6, 31, 03, 757),
+        Utc.ymd(2019, 7, 17).and_hms_milli(13, 53, 48, 869),
     );
     assert_eq!(issue.closed_at, None);
     assert!(issue.closed_by.is_none());
-    assert!(issue.labels.is_empty());
+    assert_eq!(issue.labels.len(), 1);
+    assert_eq!(issue.labels[0], "area:doc");
     assert!(issue.milestone.is_none());
     assert_eq!(issue.author.username, "ben.boeckel");
     assert_eq!(
@@ -503,7 +504,7 @@ fn test_read_project() {
     );
     assert_eq!(
         project.last_activity_at,
-        Utc.ymd(2018, 5, 31).and_hms_milli(15, 8, 12, 338),
+        Utc.ymd(2019, 7, 30).and_hms_milli(16, 42, 57, 649),
     );
     assert_eq!(project.import_error, None);
     assert_eq!(project.shared_runners_enabled, true);
@@ -523,9 +524,9 @@ fn test_read_project() {
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
-    assert_eq!(project.star_count, 1);
-    assert_eq!(project.forks_count, 7);
-    assert_eq!(project.open_issues_count, Some(6));
+    assert_eq!(project.star_count, 6);
+    assert_eq!(project.forks_count, 17);
+    assert_eq!(project.open_issues_count, Some(8));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
@@ -535,12 +536,21 @@ fn test_read_project() {
     );
     assert_eq!(project.printing_merge_request_link_enabled, Some(true));
     assert_eq!(project.request_access_enabled, true);
-    assert_eq!(project.jobs_enabled, false);
     assert_eq!(project.resolve_outdated_diff_discussions, None);
+
+    assert_eq!(project.jobs_enabled, false);
     assert_eq!(project.issues_enabled, true);
     assert_eq!(project.merge_requests_enabled, true);
     assert_eq!(project.snippets_enabled, false);
     assert_eq!(project.wiki_enabled, true);
+
+    assert_eq!(project.builds_access_level, FeatureVisibilityLevel::Disabled);
+    assert_eq!(project.issues_access_level, FeatureVisibilityLevel::Enabled);
+    assert_eq!(project.merge_requests_access_level, FeatureVisibilityLevel::Enabled);
+    assert_eq!(project.repository_access_level, FeatureVisibilityLevel::Enabled);
+    assert_eq!(project.snippets_access_level, FeatureVisibilityLevel::Disabled);
+    assert_eq!(project.wiki_access_level, FeatureVisibilityLevel::Enabled);
+
     assert_eq!(project.merge_method, Some("merge".to_string()));
     if let Some(ref permissions) = project.permissions {
         if let Some(ref group_access) = permissions.group_access {
