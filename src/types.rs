@@ -1967,6 +1967,20 @@ enum_serialize!(NoteType -> "note type",
     Snippet => "Snippet",
 );
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The various types a note can have
+pub enum DiscussionNoteType {
+    /// A note in a standard discussion
+    DiscussionNote,
+    /// A note attached to a diff
+    DiffNote,
+}
+
+enum_serialize!(DiscussionNoteType -> "discussion note type",
+    DiscussionNote => "DiscussionNote",
+    DiffNote => "DiffNote",
+);
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// The ID of an entity a note is attached to.
 pub enum NoteableId {
@@ -1996,12 +2010,50 @@ pub enum NoteableInternalId {
 pub struct NoteId(u64);
 impl_id!(NoteId);
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// A note can be attached to text or an image
+pub enum NotePositionType {
+    Text,
+    Image,
+}
+
+enum_serialize!(NotePositionType -> "note position type",
+    Text => "text",
+    Image => "image",
+);
+
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// When a note is against a diff, the position of the note
+pub struct NotePosition {
+    /// Base commit in the source branch
+    pub base_sha: ObjectId,
+    /// SHA referencing the commit in the target branch
+    pub start_sha: ObjectId,
+    /// The HEAD of the merge request
+    pub head_sha: ObjectId,
+    /// Whether this note is against text or image
+    /// FIXME: image not supported yet.
+    pub position_type: NotePositionType,
+    /// File path before change
+    pub old_path: String,
+    /// File path after change
+    pub new_path: String,
+    /// Line number before the change
+    pub old_line: Option<u64>,
+    /// Line number after the change
+    pub new_line: Option<u64>,
+}
+
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A comment on an entity.
 pub struct Note {
     /// The ID of the note.
     pub id: NoteId,
+    /// The type of the note.
+    #[serde(rename = "type")]
+    pub note_type: Option<DiscussionNoteType>,
     /// The content of the note.
     pub body: String,
     /// The URL of an attachment to the note.
@@ -2029,6 +2081,8 @@ pub struct Note {
     noteable_iid: Option<Value>,
     /// The type of entity the note is attached to.
     pub noteable_type: NoteType,
+    /// If applicable, the diff data to which the note is attached
+    pub position: Option<NotePosition>,
 }
 
 impl Note {
@@ -2078,6 +2132,18 @@ impl Note {
             NoteType::Snippet => None,
         }
     }
+}
+
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// A threaded discussion
+pub struct Discussion {
+    /// The discussion ID, a SHA hash
+    pub id: ObjectId,
+    /// True if the discussion only holds one note.
+    pub individual_note: bool,
+    /// The discussion notes
+    pub notes: Vec<Note>,
 }
 
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
