@@ -1005,6 +1005,28 @@ impl Gitlab {
         )
     }
 
+    /// Get the discussions from a merge request.
+    pub fn merge_request_discussions<I, K, V>(
+        &self,
+        project: ProjectId,
+        merge_request: MergeRequestInternalId,
+        params: I,
+    ) -> Result<Vec<Discussion>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/merge_requests/{}/discussions",
+                project, merge_request,
+            ),
+            params,
+        )
+    }
+
     /// Get the notes from a merge request.
     pub fn merge_request_notes<I, K, V>(
         &self,
@@ -1196,6 +1218,18 @@ impl Gitlab {
         )
     }
 
+    pub fn create_merge_request_discussion(
+        &self,
+        project: ProjectId,
+        merge_request: MergeRequestInternalId,
+        content: &str,
+    ) -> Result<Discussion> {
+        let path = &format!(
+            "projects/{}/merge_requests/{}/discussions",
+            project, merge_request
+        );
+        self.post_with_param(path, &[("body", content)])
+    }
     /// Create a note on a merge request.
     pub fn create_merge_request_note(
         &self,
