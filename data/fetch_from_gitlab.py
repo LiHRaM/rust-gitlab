@@ -10,16 +10,17 @@ def fetch_from_gitlab(token, endpoint, **kwargs):
     return response.json()
 
 
-def write_result(token, name, endpoint):
+def write_result(token, name, endpoint, dumpall=False):
     print('Writing out %s...' % name)
     result = fetch_from_gitlab(token, endpoint)
-    if type(result) == list:
-        result = result[0]
-    # Remove any keys from the result.
-    result.pop('private_token', None)
-    result.pop('runners_token', None)
-    if type(result.get('identities')) == list:
-        result['identities'] = []
+    if not dumpall:
+        if type(result) == list:
+            result = result[0]
+        # Remove any keys from the result.
+        result.pop('private_token', None)
+        result.pop('runners_token', None)
+        if type(result.get('identities')) == list:
+            result['identities'] = []
     with open('%s.json' % name, 'w+') as fout:
         json.dump(result, fout, indent = 2, separators=(',', ': '), sort_keys=True)
         fout.write('\n')
