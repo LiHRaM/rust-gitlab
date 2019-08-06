@@ -31,6 +31,7 @@ USER = 11 # kwrobot
 COMMIT = 'de4ac3cf96cb8a0893be22b03f5171d934f9d392'
 ISSUE_ID = 6 # https://gitlab.kitware.com/utils/rust-gitlab/issues/6
 MR_ID = 35 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
+MR_DISCUSSION_ID = 158 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
 NOTE_ID = 177359
 
 
@@ -50,5 +51,6 @@ if __name__ == '__main__':
     write_result(token, 'merge_request', '/projects/%s/merge_requests/%d' % (REPO, MR_ID))
     write_result(token, 'issue_reference', '/projects/%s/merge_requests/%d/closes_issues' % (REPO, MR_ID))
     write_result(token, 'note', '/projects/%s/merge_requests/%d/notes' % (REPO, MR_ID))
+    write_result(token, 'discussion', '/projects/%s/merge_requests/%d/discussions' % (REPO, MR_ID), dumpall=True)
     write_result(token, 'award_emoji', '/projects/%s/merge_requests/%d/notes/%d/award_emoji' % (REPO, MR_ID, NOTE_ID))
     write_result(token, 'resource_label_event', '/projects/%s/issues/%d/resource_label_events' % (REPO, ISSUE_ID))

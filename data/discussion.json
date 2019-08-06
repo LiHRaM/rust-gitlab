@@ -1,0 +1,467 @@
+[
+  {
+    "id": "cf0c0f06ce25d48f9228ab0e5eacb1f13d9a5209",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
+          "id": 11,
+          "name": "Kitware Robot",
+          "state": "active",
+          "username": "kwrobot",
+          "web_url": "https://gitlab.kitware.com/kwrobot"
+        },
+        "body": "Basic content checks passed!\n\nBranch-at: 04e94ae667024a62a90179f395bfdc2b35f3efd2  \nAcked-by: @kwrobot",
+        "created_at": "2016-10-04T15:56:54.015-04:00",
+        "id": 177359,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": false,
+        "type": null,
+        "updated_at": "2016-10-04T15:56:54.015-04:00"
+      }
+    ]
+  },
+  {
+    "id": "ec35059bf30784083ccdf9f1a929338e6e10ba04",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "+2\n\nDo: merge",
+        "created_at": "2016-10-04T16:18:35.548-04:00",
+        "id": 177368,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": false,
+        "type": null,
+        "updated_at": "2016-10-04T16:18:35.548-04:00"
+      }
+    ]
+  },
+  {
+    "id": "1c1eccd9e86c75e56a01d26cfd7d7ee57ad18e0a",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
+          "id": 11,
+          "name": "Kitware Robot",
+          "state": "active",
+          "username": "kwrobot",
+          "web_url": "https://gitlab.kitware.com/kwrobot"
+        },
+        "body": "Branch successfully merged and pushed!",
+        "created_at": "2016-10-04T16:18:57.466-04:00",
+        "id": 177369,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": false,
+        "type": null,
+        "updated_at": "2016-10-04T16:18:57.466-04:00"
+      }
+    ]
+  },
+  {
+    "id": "2fb15a0dc8c2293d632a757db20fa95152036ebc",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "Mentioned in commit 47d475d8625424bd37efd27f7097354306842b93",
+        "created_at": "2016-10-04T16:18:57.786-04:00",
+        "id": 177371,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": true,
+        "type": null,
+        "updated_at": "2016-10-04T16:18:57.786-04:00"
+      }
+    ]
+  },
+  {
+    "id": "e7e5c2688e7c32b8086c223840534bdcbdc1d7af",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
+          "id": 11,
+          "name": "Kitware Robot",
+          "state": "active",
+          "username": "kwrobot",
+          "web_url": "https://gitlab.kitware.com/kwrobot"
+        },
+        "body": "Status changed to merged",
+        "created_at": "2016-10-04T16:18:57.937-04:00",
+        "id": 177373,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": true,
+        "type": null,
+        "updated_at": "2016-10-04T16:18:57.937-04:00"
+      }
+    ]
+  },
+  {
+    "id": "397dbd07ac8796e539db624e56ec318453cb3599",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/c6d5328c0ae2a0589a054b18542961e7?s=80&d=identicon",
+          "id": 12142,
+          "name": "Simon Chopin",
+          "state": "active",
+          "username": "laarmen",
+          "web_url": "https://gitlab.kitware.com/laarmen"
+        },
+        "body": "mentioned in merge request !158",
+        "created_at": "2019-08-06T14:10:46.934-04:00",
+        "id": 607465,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": true,
+        "type": null,
+        "updated_at": "2019-08-06T14:10:46.936-04:00"
+      }
+    ]
+  },
+  {
+    "id": "a4d5505b3556eaa45edbe567af7aebc1760dedd7",
+    "individual_note": false,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "Start sample discussion.",
+        "created_at": "2019-08-07T09:52:52.190-04:00",
+        "id": 607911,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": true,
+        "resolved": true,
+        "resolved_by": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "system": false,
+        "type": "DiscussionNote",
+        "updated_at": "2019-08-07T09:52:52.190-04:00"
+      },
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "Comment on sample discussion.",
+        "created_at": "2019-08-07T09:53:00.074-04:00",
+        "id": 607912,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": true,
+        "resolved": true,
+        "resolved_by": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "system": false,
+        "type": "DiscussionNote",
+        "updated_at": "2019-08-07T09:53:00.074-04:00"
+      },
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "Comment and resolve sample discussion.",
+        "created_at": "2019-08-07T09:53:08.058-04:00",
+        "id": 607913,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": true,
+        "resolved": true,
+        "resolved_by": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "system": false,
+        "type": "DiscussionNote",
+        "updated_at": "2019-08-07T09:53:08.058-04:00"
+      }
+    ]
+  },
+  {
+    "id": "3fc9a701c54f4ec16510ce0d3de71bc3f52b9632",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "resolved all threads",
+        "created_at": "2019-08-07T09:53:08.398-04:00",
+        "id": 607914,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": true,
+        "type": null,
+        "updated_at": "2019-08-07T09:53:08.401-04:00"
+      }
+    ]
+  },
+  {
+    "id": "18ea341cb10e952889e277836ba638c6b17ff26c",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "Sample note.",
+        "created_at": "2019-08-29T13:30:19.341-04:00",
+        "id": 619271,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": false,
+        "type": null,
+        "updated_at": "2019-08-29T13:30:19.341-04:00"
+      }
+    ]
+  },
+  {
+    "id": "9f4998b2308728b95cff52af97019479e1269183",
+    "individual_note": false,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "Start sample review discussion.",
+        "created_at": "2019-08-29T13:30:56.406-04:00",
+        "id": 619272,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "position": {
+          "base_sha": "981262b03fc0149c1677ca51ea47b570e30d6a90",
+          "head_sha": "04e94ae667024a62a90179f395bfdc2b35f3efd2",
+          "new_line": 156,
+          "new_path": "src/gitlab.rs",
+          "old_line": null,
+          "old_path": "src/gitlab.rs",
+          "position_type": "text",
+          "start_sha": "981262b03fc0149c1677ca51ea47b570e30d6a90"
+        },
+        "resolvable": true,
+        "resolved": true,
+        "resolved_by": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "system": false,
+        "type": "DiffNote",
+        "updated_at": "2019-08-29T13:30:56.406-04:00"
+      },
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "Comment on sample review discussion.",
+        "created_at": "2019-08-29T13:31:02.993-04:00",
+        "id": 619273,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "position": {
+          "base_sha": "981262b03fc0149c1677ca51ea47b570e30d6a90",
+          "head_sha": "04e94ae667024a62a90179f395bfdc2b35f3efd2",
+          "new_line": 156,
+          "new_path": "src/gitlab.rs",
+          "old_line": null,
+          "old_path": "src/gitlab.rs",
+          "position_type": "text",
+          "start_sha": "981262b03fc0149c1677ca51ea47b570e30d6a90"
+        },
+        "resolvable": true,
+        "resolved": true,
+        "resolved_by": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "system": false,
+        "type": "DiffNote",
+        "updated_at": "2019-08-29T13:31:02.993-04:00"
+      },
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "Comment and resolve sample review discussion.",
+        "created_at": "2019-08-29T13:31:17.580-04:00",
+        "id": 619274,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "position": {
+          "base_sha": "981262b03fc0149c1677ca51ea47b570e30d6a90",
+          "head_sha": "04e94ae667024a62a90179f395bfdc2b35f3efd2",
+          "new_line": 156,
+          "new_path": "src/gitlab.rs",
+          "old_line": null,
+          "old_path": "src/gitlab.rs",
+          "position_type": "text",
+          "start_sha": "981262b03fc0149c1677ca51ea47b570e30d6a90"
+        },
+        "resolvable": true,
+        "resolved": true,
+        "resolved_by": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "system": false,
+        "type": "DiffNote",
+        "updated_at": "2019-08-29T13:31:17.580-04:00"
+      }
+    ]
+  },
+  {
+    "id": "6135399579941bd203787667c16e2a53413af10c",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "resolved all threads",
+        "created_at": "2019-08-29T13:31:17.886-04:00",
+        "id": 619275,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": true,
+        "type": null,
+        "updated_at": "2019-08-29T13:31:17.889-04:00"
+      }
+    ]
+  }
+]
