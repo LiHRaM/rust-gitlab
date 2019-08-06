@@ -463,6 +463,63 @@ fn test_read_note() {
 }
 
 #[test]
+fn test_read_singlenote_discussion() {
+    let discussions: Vec<Discussion> = read_test_file("discussion");
+    let discussion = discussions.iter().find(|x| x.id.value() == "18ea341cb10e952889e277836ba638c6b17ff26c").unwrap();
+    assert!(discussion.individual_note);
+    assert_eq!(discussion.notes.len(), 1);
+    let note = discussion.notes.get(0).unwrap();
+    assert!(!(note.resolvable));
+    assert!(note.position.is_none());
+    assert!(note.note_type.is_none())
+}
+
+#[test]
+fn test_read_nocode_discussion() {
+    let discussions: Vec<Discussion> = read_test_file("discussion");
+    let discussion = discussions.iter().find(|x| x.id.value() == "a4d5505b3556eaa45edbe567af7aebc1760dedd7").unwrap();
+    assert!(!(discussion.individual_note));
+    assert_eq!(discussion.notes.len(), 3);
+    let question = discussion.notes.get(0).unwrap();
+    let comment = discussion.notes.get(1).unwrap();
+    assert!(question.resolvable);
+    assert!(comment.resolvable);
+
+    assert!(question.resolved.is_some());
+
+    assert!(question.position.is_none());
+    assert!(comment.position.is_none());
+
+    assert_eq!(question.id, NoteId::new(607911));
+    assert_eq!(comment.id, NoteId::new(607912));
+
+    assert_eq!(question.note_type, Some(DiscussionNoteType::DiscussionNote));
+    assert_eq!(comment.note_type, Some(DiscussionNoteType::DiscussionNote));
+}
+
+#[test]
+fn test_read_code_discussion() {
+    let discussions: Vec<Discussion> = read_test_file("discussion");
+    let discussion = discussions.into_iter().find(|x| x.id.value() == "9f4998b2308728b95cff52af97019479e1269183").unwrap();
+    assert!(!(discussion.individual_note));
+    let note = discussion.notes.get(0).unwrap();
+    assert!(note.resolvable);
+    assert!(note.resolved.is_some());
+    assert_eq!(note.author.username, "brad.king");
+    assert_eq!(note.id, NoteId::new(619272));
+    assert_eq!(note.note_type, Some(DiscussionNoteType::DiffNote));
+    assert!(note.position.is_some());
+    if let Some(position) = &note.position {
+        assert_eq!(position.position_type, NotePositionType::Text);
+        assert_eq!(position.head_sha.value(), "04e94ae667024a62a90179f395bfdc2b35f3efd2");
+        assert_eq!(position.new_line, Some(156));
+        assert_eq!(position.new_path, "src/gitlab.rs");
+    } else {
+        unreachable!();
+    }
+}
+
+#[test]
 fn test_read_project() {
     let project: Project = read_test_file("project");
 
