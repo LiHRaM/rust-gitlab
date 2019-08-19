@@ -429,7 +429,7 @@ impl Gitlab {
 
         self.post_with_param(
             &format!("projects/{}/members", Self::url_name(project.as_ref())),
-            &[("user", &user_str), ("access", &access_str)],
+            &[("user_id", &user_str), ("access_level", &access_str)],
         )
     }
 
