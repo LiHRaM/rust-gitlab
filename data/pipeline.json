@@ -1,0 +1,36 @@
+{
+  "before_sha": null,
+  "committed_at": null,
+  "coverage": null,
+  "created_at": "2019-09-03T14:09:47.178-04:00",
+  "detailed_status": {
+    "details_path": "/utils/rust-gitlab/pipelines/145400",
+    "favicon": "/assets/ci_favicons/favicon_status_success-8451333011eee8ce9f2ab25dc487fe24a8758c694827a582f17f42b0a90446a2.png",
+    "group": "success",
+    "has_details": true,
+    "icon": "status_success",
+    "illustration": null,
+    "label": "passed",
+    "text": "passed",
+    "tooltip": "passed"
+  },
+  "duration": 0,
+  "finished_at": "2019-09-03T14:15:47.013-04:00",
+  "id": 145400,
+  "ref": "master",
+  "sha": "7134adce4522c399cdab16e128b0a1af15b93f14",
+  "started_at": "2019-09-03T14:09:51.465-04:00",
+  "status": "success",
+  "tag": false,
+  "updated_at": "2019-09-03T14:15:47.018-04:00",
+  "user": {
+    "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+    "id": 35,
+    "name": "buildbot",
+    "state": "active",
+    "username": "buildbot",
+    "web_url": "https://gitlab.kitware.com/buildbot"
+  },
+  "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400",
+  "yaml_errors": null
+}
