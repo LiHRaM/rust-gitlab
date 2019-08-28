@@ -18,7 +18,7 @@
   "location": null,
   "name": "Kitware Robot",
   "organization": null,
-  "private_profile": null,
+  "private_profile": false,
   "projects_limit": 50,
   "public_email": "",
   "skype": "",
