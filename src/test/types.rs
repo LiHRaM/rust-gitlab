@@ -535,7 +535,7 @@ fn test_read_project() {
         None,
     );
     assert_eq!(project.printing_merge_request_link_enabled, Some(true));
-    assert_eq!(project.request_access_enabled, true);
+    assert_eq!(project.request_access_enabled, false);
     assert_eq!(project.resolve_outdated_diff_discussions, None);
 
     assert_eq!(project.jobs_enabled, false);
@@ -722,7 +722,7 @@ fn test_read_user() {
     assert_eq!(user.is_admin, None);
     assert_eq!(user.highest_role, Some(AccessLevel::Owner));
     assert_eq!(user.bio, Some("".to_string()));
-    assert_eq!(user.private_profile, None);
+    assert_eq!(user.private_profile, Some(false));
     assert_eq!(user.location, None);
     assert_eq!(user.public_email, Some("".to_string()));
     assert_eq!(user.skype, "");
@@ -754,7 +754,7 @@ fn test_read_user_public() {
     );
     assert_eq!(user_public.is_admin, Some(true));
     assert_eq!(user_public.bio, Some("".to_string()));
-    assert_eq!(user_public.private_profile, None);
+    assert_eq!(user_public.private_profile, Some(false));
     assert_eq!(user_public.location, None);
     assert_eq!(user_public.public_email, Some("".to_string()));
     assert_eq!(user_public.skype, "");
