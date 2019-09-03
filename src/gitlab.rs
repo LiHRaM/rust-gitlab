@@ -727,6 +727,11 @@ impl Gitlab {
         self.get_paged(&format!("projects/{}/labels", project))
     }
 
+    /// Get the labels with open/closed/merge requests count
+    pub fn labels_with_counts(&self, project: ProjectId) -> Result<Vec<Label>> {
+        self.get_paged_with_param(&format!("projects/{}/labels", project), vec![("with_counts", "true")])
+    }
+
     /// Get label by ID.
     pub fn label(&self, project: ProjectId, label: LabelId) -> Result<Label> {
         self.get(&format!("projects/{}/labels/{}", project, label))

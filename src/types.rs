@@ -1308,11 +1308,11 @@ pub struct Label {
     /// The description of the label.
     pub description: Option<String>,
     /// The number of opened issues associated with the label.
-    pub open_issues_count: u64,
+    pub open_issues_count: Option<u64>,
     /// the number of closed issues associated with the label.
-    pub closed_issues_count: u64,
+    pub closed_issues_count: Option<u64>,
     /// The number of open merge request associated with the label.
-    pub open_merge_requests_count: u64,
+    pub open_merge_requests_count: Option<u64>,
     /// Whether or not the account connecting has subscribed to the label.
     pub subscribed: bool,
     /// The priority of the label.
@@ -1328,9 +1328,9 @@ impl Label {
             name: name,
             color: color,
             description: None,
-            open_issues_count: 0,
-            closed_issues_count: 0,
-            open_merge_requests_count: 0,
+            open_issues_count: None,
+            closed_issues_count: None,
+            open_merge_requests_count: None,
             subscribed: false,
             priority: None,
         }
