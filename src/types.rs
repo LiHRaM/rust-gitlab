@@ -2563,6 +2563,78 @@ pub struct PipelineBasic {
     pub web_url: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// More information about a pipeline in Gitlab CI.
+pub struct Pipeline {
+    /// The ID of the pipeline.
+    pub id: PipelineId,
+    /// The object ID that was tested.
+    pub sha: ObjectId,
+    #[serde(rename = "ref")]
+    /// The name of the reference that was tested.
+    pub ref_: Option<String>,
+    /// The status of the pipeline.
+    pub status: StatusState,
+    /// The URL to the pipeline page.
+    pub web_url: String,
+    /// FIXME What are the semantics of this field?
+    pub before_sha: Option<ObjectId>,
+    /// Was this pipeline triggered by a tag.
+    pub tag: bool,
+    /// Error returned by the parser of `gitlab-ci.yml`, if any.
+    pub yaml_errors: Option<String>,
+    /// When the pipeline was created.
+    pub created_at: Option<DateTime<Utc>>,
+    /// When the pipeline was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
+    /// When the pipeline began running.
+    pub started_at: Option<DateTime<Utc>>,
+    /// When the pipeline completed.
+    pub finished_at: Option<DateTime<Utc>>,
+    /// FIXME What are the semantics of this field?
+    pub committed_at: Option<DateTime<Utc>>,
+    /// Duration of pipeline in seconds.
+    pub duration: Option<u64>,
+    /// FIXME What are the semantics of this field?
+    pub coverage: Option<String>,
+    /// The user who triggered this pipeline.
+    pub user: UserBasic,
+    /// FIXME: What are the semantics of this field?
+    /// See <https://gitlab.com/gitlab-org/gitlab-foss/blob/master/app/serializers/detailed_status_entity.rb>.
+    pub detailed_status: Value,
+}
+
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum PipelineVariableType {
+    EnvVar,
+    File,
+}
+enum_serialize!(PipelineVariableType -> "variable type",
+    EnvVar => "env_var",
+    File => "file",
+);
+
+impl Default for PipelineVariableType {
+    fn default() -> Self {
+        PipelineVariableType::EnvVar
+    }
+}
+
+#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+/// A pipeline variable.
+pub struct PipelineVariable {
+    /// Name of the variable.
+    pub key: String,
+    /// Value of the variable.
+    pub value: String,
+
+    /// Type of the variable (eg. `env_var`).
+    #[serde(default)]
+    pub variable_type: PipelineVariableType,
+}
+
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe label event ID.

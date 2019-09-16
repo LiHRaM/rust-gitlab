@@ -6,7 +6,7 @@
 
 use crates::chrono::{NaiveDate, TimeZone, Utc};
 use crates::serde::de::DeserializeOwned;
-use crates::serde_json::from_reader;
+use crates::serde_json::{from_reader, json};
 
 use types::*;
 
@@ -866,4 +866,69 @@ fn test_read_resoruce_label_events() {
     assert_eq!(label.name, "area:doc");
     assert_eq!(label.color, LabelColor::from_rgb(0x58, 0x43, 0xAD));
     assert_eq!(label.description, Some("Documentation issues".to_string()));
+}
+
+#[test]
+fn test_read_pipelines() {
+    let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
+
+    assert_eq!(pipeline_basic.id, PipelineId::new(145400));
+    assert_eq!(pipeline_basic.status,StatusState::Success);
+    assert_eq!(pipeline_basic.ref_, Some("master".to_string()));
+    assert_eq!(pipeline_basic.sha, ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14".to_string()));
+    assert_eq!(pipeline_basic.web_url, "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400");
+}
+
+#[test]
+fn test_read_pipeline() {
+    let pipeline: Pipeline = read_test_file("pipeline");
+
+    assert_eq!(pipeline.id, PipelineId::new(145400));
+    assert_eq!(pipeline.status, StatusState::Success);
+    assert_eq!(pipeline.ref_, Some("master".to_string()));
+    assert_eq!(pipeline.sha, ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14".to_string()));
+    assert_eq!(pipeline.before_sha, None);
+    assert_eq!(pipeline.tag, false);
+    assert_eq!(pipeline.yaml_errors, None);
+    assert_eq!(pipeline.created_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,09,47,178)));
+    assert_eq!(pipeline.updated_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,15,47,18)));
+    assert_eq!(pipeline.started_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,09,51,465)));
+    assert_eq!(pipeline.finished_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,15,47,13)));
+    assert_eq!(pipeline.committed_at, None);
+    assert_eq!(pipeline.duration, Some(0));
+    assert_eq!(pipeline.coverage, None);
+    assert_eq!(pipeline.web_url, "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400");
+
+    // nested user
+    assert_eq!(pipeline.user.avatar_url, Some("https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png".to_owned()));
+    assert_eq!(pipeline.user.id, UserId::new(35));
+    assert_eq!(pipeline.user.name, "buildbot");
+    assert_eq!(pipeline.user.username, "buildbot");
+    assert_eq!(pipeline.user.state, UserState::Active);
+    assert_eq!(pipeline.user.web_url, "https://gitlab.kitware.com/buildbot");
+
+    // nested detailed status
+    assert_eq!(
+        pipeline.detailed_status,
+        json!({
+            "details_path": "/utils/rust-gitlab/pipelines/145400",
+            "favicon": "/assets/ci_favicons/favicon_status_success-8451333011eee8ce9f2ab25dc487fe24a8758c694827a582f17f42b0a90446a2.png",
+            "group": "success",
+            "has_details": true,
+            "icon": "status_success",
+            "illustration": null,
+            "label": "passed",
+            "text": "passed",
+            "tooltip": "passed"
+        }),
+    );
+}
+
+#[test]
+fn test_read_pipeline_variables() {
+    let var: PipelineVariable = read_test_file("pipeline_variable");
+
+    assert_eq!(var.key, "RUN_NIGHTLY_BUILD");
+    assert_eq!(var.variable_type, PipelineVariableType::EnvVar);
+    assert_eq!(var.value, "true");
 }

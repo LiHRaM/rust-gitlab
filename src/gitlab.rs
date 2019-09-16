@@ -969,6 +969,102 @@ impl Gitlab {
         )
     }
 
+    /// Get all pipelines for a project.
+    pub fn pipelines<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<PipelineBasic>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            &format!(
+                "projects/{}/pipelines",
+                project,
+            ),
+            params,
+        )
+    }
+
+    /// Get a single pipeline.
+    pub fn pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline>
+    {
+        self.get(
+            &format!(
+                "projects/{}/pipelines/{}",
+                project,
+                id,
+            ),
+        )
+    }
+
+    /// Get variables of a pipeline.
+    pub fn pipeline_variables(&self, project: ProjectId, id: PipelineId) -> Result<Vec<PipelineVariable>>
+    {
+        self.get(
+            &format!(
+                "projects/{}/pipelines/{}/variables",
+                project,
+                id,
+            ),
+        )
+    }
+
+    /// Create a new pipeline.
+    pub fn create_pipeline(&self, project: ProjectId, ref_: ObjectId, variables: &[PipelineVariable]) -> Result<Pipeline>
+    {
+        use crates::serde::Serialize;
+        #[derive(Debug, Serialize)]
+        struct CreatePipelineParams<'a> {
+            ref_: ObjectId,
+            variables:  &'a[PipelineVariable],
+        }
+
+        self.post_with_param(
+            &format!(
+                "projects/{}/pipeline",
+                project,
+            ),
+            CreatePipelineParams{
+                ref_: ref_,
+                variables: variables,
+            },
+        )
+    }
+
+    /// Retry jobs in a pipeline.
+    pub fn retry_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline>
+    {
+        self.post(
+            &format!(
+                "projects/{}/pipelines/{}/retry",
+                project,
+                id,
+            ),
+        )
+    }
+
+    /// Cancel a pipeline.
+    pub fn cancel_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline>
+    {
+        self.post(
+            &format!(
+                "projects/{}/pipelines/{}/cancel",
+                project,
+                id,
+            ),
+        )
+    }
+
+    #[allow(unused)]
+    /// Delete a pipeline.
+    ///
+    /// NOTE Not implemented.
+    fn delete_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline>
+    {
+        unimplemented!();
+    }
+
     /// Get merge requests.
     pub fn merge_request<I, K, V>(
         &self,
@@ -1432,6 +1528,15 @@ impl Gitlab {
         let req = self.client.get(full_url);
         self.send(req)
     }
+
+    /// Create a `POST` request to an API endpoint.
+    fn post<T>(&self, url: &str) -> Result<T>
+        where T: DeserializeOwned
+    {
+        let param: &[(&str, &str)] = &[];
+        self.post_with_param(url, param)
+    }
+
 
     /// Create a `POST` request to an API endpoint with query parameters.
     fn post_with_param<T, U>(&self, url: &str, param: U) -> Result<T>

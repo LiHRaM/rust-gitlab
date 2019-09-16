@@ -33,6 +33,7 @@ ISSUE_ID = 6 # https://gitlab.kitware.com/utils/rust-gitlab/issues/6
 MR_ID = 35 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
 MR_DISCUSSION_ID = 158 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
 NOTE_ID = 177359
+PIPELINE_ID = 145400
 
 
 if __name__ == '__main__':
@@ -54,3 +55,7 @@ if __name__ == '__main__':
     write_result(token, 'discussion', '/projects/%s/merge_requests/%d/discussions' % (REPO, MR_ID), dumpall=True)
     write_result(token, 'award_emoji', '/projects/%s/merge_requests/%d/notes/%d/award_emoji' % (REPO, MR_ID, NOTE_ID))
     write_result(token, 'resource_label_event', '/projects/%s/issues/%d/resource_label_events' % (REPO, ISSUE_ID))
+    write_result(token, 'pipeline_basic', '/projects/%s/pipelines' % REPO)
+    write_result(token, 'pipeline', '/projects/%s/pipelines/%d' % (REPO, PIPELINE_ID))
+    # FIXME: these are hidden behind a `403 forbidden`, so we use a hardcoded example instead.
+    # write_result(token, 'pipeline_variable', '/projects/%s/pipelines/%d/variables' % (REPO, PIPELINE_ID))
