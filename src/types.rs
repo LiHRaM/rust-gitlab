@@ -2658,21 +2658,27 @@ pub struct ResourceLabelEvent {
     resource_type: String,
     /// The label may be None if the label has been deleted.
     pub label: Option<EventLabel>,
-    pub action: String
+    pub action: String,
 }
 
 impl ResourceLabelEvent {
     /// Returns the id of the merge request or issue that this event is from
     pub fn event_target(&self) -> Option<ResourceLabelEventTarget> {
         match self.resource_type.as_ref() {
-            "MergeRequest" => Some(ResourceLabelEventTarget::MergeRequest(MergeRequestId::new(self.resource_id))),
-            "Issue" => Some(ResourceLabelEventTarget::Issue(IssueId::new(self.resource_id))),
-            _ => None
+            "MergeRequest" => {
+                Some(ResourceLabelEventTarget::MergeRequest(MergeRequestId::new(
+                    self.resource_id,
+                )))
+            },
+            "Issue" => {
+                Some(ResourceLabelEventTarget::Issue(IssueId::new(
+                    self.resource_id,
+                )))
+            },
+            _ => None,
         }
-
     }
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// The type of object that on which the resource label event was created
@@ -2682,7 +2688,6 @@ pub enum ResourceLabelEventTarget {
     /// The ID of a merge request event target.
     MergeRequest(MergeRequestId),
 }
-
 
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]

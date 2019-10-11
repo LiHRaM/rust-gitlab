@@ -43,17 +43,16 @@ impl<'de> Deserialize<'de> for HookDate {
         let val = String::deserialize(deserializer)?;
 
         Utc.datetime_from_str(&val, "%Y-%m-%d %H:%M:%S UTC")
+            .or_else(|_| DateTime::parse_from_rfc3339(&val).map(|dt| dt.with_timezone(&Utc)))
             .or_else(|_| {
-                DateTime::parse_from_rfc3339(&val).map(|dt| dt.with_timezone(&Utc))
-            })
-            .or_else(|_| {
-                DateTime::parse_from_str(&val, "%Y-%m-%d %H:%M:%S %z").map(|dt| dt.with_timezone(&Utc))
+                DateTime::parse_from_str(&val, "%Y-%m-%d %H:%M:%S %z")
+                    .map(|dt| dt.with_timezone(&Utc))
             })
             .map_err(|err| {
                 D::Error::invalid_value(
                     Unexpected::Other("hook date"),
                     &format!("Unsupported format: {} {:?}", val, err).as_str(),
-                    )
+                )
             })
             .map(HookDate)
     }

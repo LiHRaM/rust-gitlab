@@ -465,7 +465,10 @@ fn test_read_note() {
 #[test]
 fn test_read_singlenote_discussion() {
     let discussions: Vec<Discussion> = read_test_file("discussion");
-    let discussion = discussions.iter().find(|x| x.id.value() == "18ea341cb10e952889e277836ba638c6b17ff26c").unwrap();
+    let discussion = discussions
+        .iter()
+        .find(|x| x.id.value() == "18ea341cb10e952889e277836ba638c6b17ff26c")
+        .unwrap();
     assert!(discussion.individual_note);
     assert_eq!(discussion.notes.len(), 1);
     let note = discussion.notes.get(0).unwrap();
@@ -477,7 +480,10 @@ fn test_read_singlenote_discussion() {
 #[test]
 fn test_read_nocode_discussion() {
     let discussions: Vec<Discussion> = read_test_file("discussion");
-    let discussion = discussions.iter().find(|x| x.id.value() == "a4d5505b3556eaa45edbe567af7aebc1760dedd7").unwrap();
+    let discussion = discussions
+        .iter()
+        .find(|x| x.id.value() == "a4d5505b3556eaa45edbe567af7aebc1760dedd7")
+        .unwrap();
     assert!(!(discussion.individual_note));
     assert_eq!(discussion.notes.len(), 3);
     let question = discussion.notes.get(0).unwrap();
@@ -500,7 +506,10 @@ fn test_read_nocode_discussion() {
 #[test]
 fn test_read_code_discussion() {
     let discussions: Vec<Discussion> = read_test_file("discussion");
-    let discussion = discussions.into_iter().find(|x| x.id.value() == "9f4998b2308728b95cff52af97019479e1269183").unwrap();
+    let discussion = discussions
+        .into_iter()
+        .find(|x| x.id.value() == "9f4998b2308728b95cff52af97019479e1269183")
+        .unwrap();
     assert!(!(discussion.individual_note));
     let note = discussion.notes.get(0).unwrap();
     assert!(note.resolvable);
@@ -511,7 +520,10 @@ fn test_read_code_discussion() {
     assert!(note.position.is_some());
     if let Some(position) = &note.position {
         assert_eq!(position.position_type, NotePositionType::Text);
-        assert_eq!(position.head_sha.value(), "04e94ae667024a62a90179f395bfdc2b35f3efd2");
+        assert_eq!(
+            position.head_sha.value(),
+            "04e94ae667024a62a90179f395bfdc2b35f3efd2",
+        );
         assert_eq!(position.new_line, Some(156));
         assert_eq!(position.new_path, "src/gitlab.rs");
     } else {
@@ -576,7 +588,10 @@ fn test_read_project() {
     assert_eq!(project.namespace.kind, NamespaceKind::Group);
     assert_eq!(project.namespace.full_path, "utils");
     assert_eq!(project.namespace.avatar_url, None);
-    assert_eq!(project.namespace.web_url, "https://gitlab.kitware.com/groups/utils");
+    assert_eq!(
+        project.namespace.web_url,
+        "https://gitlab.kitware.com/groups/utils",
+    );
     assert!(project.namespace.members_count_with_descendants.is_none());
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
@@ -601,11 +616,23 @@ fn test_read_project() {
     assert_eq!(project.snippets_enabled, false);
     assert_eq!(project.wiki_enabled, true);
 
-    assert_eq!(project.builds_access_level, FeatureVisibilityLevel::Disabled);
+    assert_eq!(
+        project.builds_access_level,
+        FeatureVisibilityLevel::Disabled,
+    );
     assert_eq!(project.issues_access_level, FeatureVisibilityLevel::Enabled);
-    assert_eq!(project.merge_requests_access_level, FeatureVisibilityLevel::Enabled);
-    assert_eq!(project.repository_access_level, FeatureVisibilityLevel::Enabled);
-    assert_eq!(project.snippets_access_level, FeatureVisibilityLevel::Disabled);
+    assert_eq!(
+        project.merge_requests_access_level,
+        FeatureVisibilityLevel::Enabled,
+    );
+    assert_eq!(
+        project.repository_access_level,
+        FeatureVisibilityLevel::Enabled,
+    );
+    assert_eq!(
+        project.snippets_access_level,
+        FeatureVisibilityLevel::Disabled,
+    );
     assert_eq!(project.wiki_access_level, FeatureVisibilityLevel::Enabled);
 
     assert_eq!(project.merge_method, Some("merge".to_string()));
@@ -858,7 +885,7 @@ fn test_read_resoruce_label_events() {
         Some(ResourceLabelEventTarget::Issue(id)) if id.value() == 69328 => {
             // this is the expected value
         },
-        x => panic!("Unexpected resource_target: {:?}", x)
+        x => panic!("Unexpected resource_target: {:?}", x),
     }
 
     let label = event.label.unwrap();
@@ -873,10 +900,16 @@ fn test_read_pipelines() {
     let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
 
     assert_eq!(pipeline_basic.id, PipelineId::new(145400));
-    assert_eq!(pipeline_basic.status,StatusState::Success);
+    assert_eq!(pipeline_basic.status, StatusState::Success);
     assert_eq!(pipeline_basic.ref_, Some("master".to_string()));
-    assert_eq!(pipeline_basic.sha, ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14".to_string()));
-    assert_eq!(pipeline_basic.web_url, "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400");
+    assert_eq!(
+        pipeline_basic.sha,
+        ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14".to_string()),
+    );
+    assert_eq!(
+        pipeline_basic.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400",
+    );
 }
 
 #[test]
@@ -886,21 +919,45 @@ fn test_read_pipeline() {
     assert_eq!(pipeline.id, PipelineId::new(145400));
     assert_eq!(pipeline.status, StatusState::Success);
     assert_eq!(pipeline.ref_, Some("master".to_string()));
-    assert_eq!(pipeline.sha, ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14".to_string()));
+    assert_eq!(
+        pipeline.sha,
+        ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14".to_string()),
+    );
     assert_eq!(pipeline.before_sha, None);
     assert_eq!(pipeline.tag, false);
     assert_eq!(pipeline.yaml_errors, None);
-    assert_eq!(pipeline.created_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,09,47,178)));
-    assert_eq!(pipeline.updated_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,15,47,18)));
-    assert_eq!(pipeline.started_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,09,51,465)));
-    assert_eq!(pipeline.finished_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,15,47,13)));
+    assert_eq!(
+        pipeline.created_at,
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 09, 47, 178)),
+    );
+    assert_eq!(
+        pipeline.updated_at,
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 15, 47, 18)),
+    );
+    assert_eq!(
+        pipeline.started_at,
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 09, 51, 465)),
+    );
+    assert_eq!(
+        pipeline.finished_at,
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 15, 47, 13)),
+    );
     assert_eq!(pipeline.committed_at, None);
     assert_eq!(pipeline.duration, Some(0));
     assert_eq!(pipeline.coverage, None);
-    assert_eq!(pipeline.web_url, "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400");
+    assert_eq!(
+        pipeline.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400",
+    );
 
     // nested user
-    assert_eq!(pipeline.user.avatar_url, Some("https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png".to_owned()));
+    assert_eq!(
+        pipeline.user.avatar_url,
+        Some(
+            "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png"
+                .to_owned(),
+        ),
+    );
     assert_eq!(pipeline.user.id, UserId::new(35));
     assert_eq!(pipeline.user.name, "buildbot");
     assert_eq!(pipeline.user.username, "buildbot");
