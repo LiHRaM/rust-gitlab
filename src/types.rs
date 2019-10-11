@@ -748,7 +748,7 @@ impl From<u64> for AccessLevel {
 
 impl Display for AccessLevel {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}", Into::<u64>::into(self.clone()))
+        write!(f, "{}", Into::<u64>::into(*self))
     }
 }
 
