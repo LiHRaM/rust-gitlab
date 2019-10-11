@@ -5,7 +5,7 @@
 // except according to those terms.
 
 use crates::itertools::Itertools;
-use crates::percent_encoding::{utf8_percent_encode, PercentEncode, PATH_SEGMENT_ENCODE_SET};
+use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use crates::reqwest::header::HeaderValue;
 use crates::reqwest::{Client, RequestBuilder, Url};
 use crates::serde::de::Error as SerdeError;
@@ -19,6 +19,19 @@ use types::*;
 
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
+
+const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b'#')
+    .add(b'<')
+    .add(b'>')
+    .add(b'`')
+    .add(b'?')
+    .add(b'{')
+    .add(b'}')
+    .add(b'%')
+    .add(b'/');
 
 /// A Gitlab API token
 ///
@@ -249,7 +262,7 @@ impl Gitlab {
     }
 
     /// A URL-safe name for projects.
-    fn url_name(name: &str) -> PercentEncode<PATH_SEGMENT_ENCODE_SET> {
+    fn url_name(name: &str) -> PercentEncode {
         utf8_percent_encode(name, PATH_SEGMENT_ENCODE_SET)
     }
 
