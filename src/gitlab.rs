@@ -686,10 +686,18 @@ impl Gitlab {
 
         let mut params = vec![("state", state.as_str())];
 
-        info.refname.map(|v| params.push(("ref", v)));
-        info.name.map(|v| params.push(("name", v)));
-        info.target_url.map(|v| params.push(("target_url", v)));
-        info.description.map(|v| params.push(("description", v)));
+        if let Some(v) = info.refname {
+            params.push(("ref", v))
+        }
+        if let Some(v) = info.name {
+            params.push(("name", v))
+        }
+        if let Some(v) = info.target_url {
+            params.push(("target_url", v))
+        }
+        if let Some(v) = info.description {
+            params.push(("description", v))
+        }
 
         self.post_with_param(&path, &params)
     }
@@ -714,10 +722,18 @@ impl Gitlab {
 
         let mut params = vec![("state", state.as_str())];
 
-        info.refname.map(|v| params.push(("ref", v)));
-        info.name.map(|v| params.push(("name", v)));
-        info.target_url.map(|v| params.push(("target_url", v)));
-        info.description.map(|v| params.push(("description", v)));
+        if let Some(v) = info.refname {
+            params.push(("ref", v))
+        }
+        if let Some(v) = info.name {
+            params.push(("name", v))
+        }
+        if let Some(v) = info.target_url {
+            params.push(("target_url", v))
+        }
+        if let Some(v) = info.description {
+            params.push(("description", v))
+        }
 
         self.post_with_param(&path, &params)
     }
