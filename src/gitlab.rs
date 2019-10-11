@@ -161,8 +161,8 @@ impl Gitlab {
 
         let api = Gitlab {
             client: Client::new(),
-            base_url: base_url,
-            token: token,
+            base_url,
+            token,
         };
 
         // Ensure the API is working.
@@ -1011,8 +1011,8 @@ impl Gitlab {
         self.post_with_param(
             &format!("projects/{}/pipeline", project),
             CreatePipelineParams {
-                ref_: ref_,
-                variables: variables,
+                ref_,
+                variables,
             },
         )
     }
