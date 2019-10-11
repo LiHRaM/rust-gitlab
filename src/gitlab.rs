@@ -747,7 +747,7 @@ impl Gitlab {
     pub fn labels_with_counts(&self, project: ProjectId) -> Result<Vec<Label>> {
         self.get_paged_with_param(
             &format!("projects/{}/labels", project),
-            vec![("with_counts", "true")],
+            &[("with_counts", "true")],
         )
     }
 
