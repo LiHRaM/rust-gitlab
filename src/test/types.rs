@@ -53,7 +53,7 @@ fn test_read_award_emoji() {
     );
     assert_eq!(
         award_emoji.awardable_id(),
-        AwardableId::Note(NoteId::new(177359)),
+        AwardableId::Note(NoteId::new(177_359)),
     );
     assert_eq!(award_emoji.awardable_type, AwardableType::Note);
 }
@@ -91,7 +91,7 @@ fn test_read_commit_note() {
 fn test_read_commit_status() {
     let commit_status: CommitStatus = read_test_file("commit_status");
 
-    assert_eq!(commit_status.id, CommitStatusId::new(931434));
+    assert_eq!(commit_status.id, CommitStatusId::new(931_434));
     assert_eq!(
         commit_status.sha,
         ObjectId::new("de4ac3cf96cb8a0893be22b03f5171d934f9d392"),
@@ -418,7 +418,7 @@ fn test_read_merge_request() {
 fn test_read_note() {
     let note: Note = read_test_file("note");
 
-    assert_eq!(note.id, NoteId::new(177373));
+    assert_eq!(note.id, NoteId::new(177_373));
     assert_eq!(note.body, "Status changed to merged");
     assert_eq!(note.attachment, None);
     assert_eq!(note.author.username, "kwrobot");
@@ -492,8 +492,8 @@ fn test_read_nocode_discussion() {
     assert!(question.position.is_none());
     assert!(comment.position.is_none());
 
-    assert_eq!(question.id, NoteId::new(607911));
-    assert_eq!(comment.id, NoteId::new(607912));
+    assert_eq!(question.id, NoteId::new(607_911));
+    assert_eq!(comment.id, NoteId::new(607_912));
 
     assert_eq!(question.note_type, Some(DiscussionNoteType::DiscussionNote));
     assert_eq!(comment.note_type, Some(DiscussionNoteType::DiscussionNote));
@@ -511,7 +511,7 @@ fn test_read_code_discussion() {
     assert!(note.resolvable);
     assert!(note.resolved.is_some());
     assert_eq!(note.author.username, "brad.king");
-    assert_eq!(note.id, NoteId::new(619272));
+    assert_eq!(note.id, NoteId::new(619_272));
     assert_eq!(note.note_type, Some(DiscussionNoteType::DiffNote));
     assert!(note.position.is_some());
     if let Some(position) = &note.position {
@@ -895,7 +895,7 @@ fn test_read_resoruce_label_events() {
 fn test_read_pipelines() {
     let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
 
-    assert_eq!(pipeline_basic.id, PipelineId::new(145400));
+    assert_eq!(pipeline_basic.id, PipelineId::new(145_400));
     assert_eq!(pipeline_basic.status, StatusState::Success);
     assert_eq!(pipeline_basic.ref_, Some("master".into()));
     assert_eq!(
@@ -912,7 +912,7 @@ fn test_read_pipelines() {
 fn test_read_pipeline() {
     let pipeline: Pipeline = read_test_file("pipeline");
 
-    assert_eq!(pipeline.id, PipelineId::new(145400));
+    assert_eq!(pipeline.id, PipelineId::new(145_400));
     assert_eq!(pipeline.status, StatusState::Success);
     assert_eq!(pipeline.ref_, Some("master".into()));
     assert_eq!(
@@ -924,7 +924,7 @@ fn test_read_pipeline() {
     assert_eq!(pipeline.yaml_errors, None);
     assert_eq!(
         pipeline.created_at,
-        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 09, 47, 178)),
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 9, 47, 178)),
     );
     assert_eq!(
         pipeline.updated_at,
@@ -932,7 +932,7 @@ fn test_read_pipeline() {
     );
     assert_eq!(
         pipeline.started_at,
-        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 09, 51, 465)),
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 9, 51, 465)),
     );
     assert_eq!(
         pipeline.finished_at,
