@@ -13,7 +13,7 @@ keywords = ["gitlab", "api"]
 categories = ["web-programming", "api-bindings"]
 
 [dependencies]
-itertools = "~0.7"
+itertools = "~0.8"
 log = "~0.4"
 percent-encoding = "^1.0"
 reqwest = "~0.9"
