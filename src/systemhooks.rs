@@ -387,7 +387,8 @@ impl<'de> Deserialize<'de> for SystemHook {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         let event_name = match val.pointer("/event_name") {
-            Some(&Value::String(ref name)) => name.to_string(),
+            // XXX(1.36.0): NLL makes this clone unnecessary.
+            Some(&Value::String(ref name)) => name.clone(),
             Some(_) => {
                 return Err(D::Error::invalid_type(
                     Unexpected::Other("JSON value"),
@@ -399,7 +400,7 @@ impl<'de> Deserialize<'de> for SystemHook {
             },
         };
 
-        let hook_res = match event_name.as_str() {
+        let hook_res = match event_name.as_ref() {
             "project_create" | "project_destroy" | "project_rename" | "project_transfer" => {
                 serde_json::from_value(val).map(SystemHook::Project)
             },

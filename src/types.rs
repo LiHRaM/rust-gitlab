@@ -1493,7 +1493,7 @@ impl Issue {
             has_tasks: None,
             confidential: false,
             discussion_locked: None,
-            web_url: "".to_string(),
+            web_url: "".into(),
             _links: None,
         }
     }
@@ -2388,7 +2388,7 @@ impl Event {
             EventTargetType::Commit => {
                 self.target_id
                     .as_str()
-                    .map(|id| EventTargetId::Commit(ObjectId(id.to_string())))
+                    .map(|id| EventTargetId::Commit(ObjectId(id.into())))
             },
             EventTargetType::Issue => {
                 self.target_id

@@ -760,7 +760,8 @@ impl<'de> Deserialize<'de> for WebHook {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         let object_kind = match val.pointer("/object_kind") {
-            Some(&Value::String(ref kind)) => kind.to_string(),
+            // XXX(1.36.0): NLL makes this clone unnecessary.
+            Some(&Value::String(ref kind)) => kind.clone(),
             Some(_) => {
                 return Err(D::Error::invalid_type(
                     Unexpected::Other("JSON value"),
@@ -772,7 +773,7 @@ impl<'de> Deserialize<'de> for WebHook {
             },
         };
 
-        let hook_res = match object_kind.as_str() {
+        let hook_res = match object_kind.as_ref() {
             "push" | "tag_push" => serde_json::from_value(val).map(WebHook::Push),
 
             "issue" => serde_json::from_value(val).map(WebHook::Issue),
