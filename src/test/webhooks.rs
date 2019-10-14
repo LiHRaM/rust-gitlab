@@ -9,7 +9,7 @@ use crates::serde_json::from_str;
 use webhooks::*;
 
 #[test]
-fn test_hookdate_deseriazlie() {
+fn test_hookdate_deserialize() {
     let _hook: HookDate = from_str("\"2019-01-20 15:00:12 UTC\"").unwrap();
     let _hook: HookDate = from_str("\"2019-03-01T19:39:17Z\"").unwrap();
     let _hook: HookDate = from_str("\"2019-03-01T17:50:02.036-05:00\"").unwrap();
