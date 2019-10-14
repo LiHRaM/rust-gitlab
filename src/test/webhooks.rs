@@ -4,13 +4,26 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crates::chrono::{TimeZone, Utc};
 use crates::serde_json::from_str;
 
 use webhooks::*;
 
 #[test]
 fn test_hookdate_deserialize() {
-    let _hook: HookDate = from_str("\"2019-01-20 15:00:12 UTC\"").unwrap();
-    let _hook: HookDate = from_str("\"2019-03-01T19:39:17Z\"").unwrap();
-    let _hook: HookDate = from_str("\"2019-03-01T17:50:02.036-05:00\"").unwrap();
+    let hook: HookDate = from_str("\"2019-01-20 15:00:12 UTC\"").unwrap();
+    assert_eq!(
+        *hook.as_ref(),
+        Utc.ymd(2019, 1, 20).and_hms_milli(15, 00, 12, 0),
+    );
+    let hook: HookDate = from_str("\"2019-03-01T19:39:17Z\"").unwrap();
+    assert_eq!(
+        *hook.as_ref(),
+        Utc.ymd(2019, 3, 1).and_hms_milli(19, 39, 17, 0),
+    );
+    let hook: HookDate = from_str("\"2019-03-01T17:50:02.036-05:00\"").unwrap();
+    assert_eq!(
+        *hook.as_ref(),
+        Utc.ymd(2019, 3, 1).and_hms_milli(22, 50, 2, 36),
+    );
 }
