@@ -39,7 +39,7 @@ fn test_read_award_emoji() {
         award_emoji.user.avatar_url,
         Some(
             "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
-                .to_string()
+                .into()
         ),
     );
     assert_eq!(award_emoji.user.id, UserId::new(13));
@@ -53,7 +53,7 @@ fn test_read_award_emoji() {
     );
     assert_eq!(
         award_emoji.awardable_id(),
-        AwardableId::Note(NoteId::new(177359)),
+        AwardableId::Note(NoteId::new(177_359)),
     );
     assert_eq!(award_emoji.awardable_type, AwardableType::Note);
 }
@@ -77,7 +77,7 @@ fn test_read_commit_note() {
         commit_note.author.avatar_url,
         Some(
             "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
-                .to_string()
+                .into()
         ),
     );
     assert_eq!(commit_note.author.id, UserId::new(13));
@@ -91,22 +91,21 @@ fn test_read_commit_note() {
 fn test_read_commit_status() {
     let commit_status: CommitStatus = read_test_file("commit_status");
 
-    assert_eq!(commit_status.id, CommitStatusId::new(931434));
+    assert_eq!(commit_status.id, CommitStatusId::new(931_434));
     assert_eq!(
         commit_status.sha,
-        ObjectId::new("de4ac3cf96cb8a0893be22b03f5171d934f9d392".to_string()),
+        ObjectId::new("de4ac3cf96cb8a0893be22b03f5171d934f9d392"),
     );
-    assert_eq!(commit_status.ref_, Some("master".to_string()));
+    assert_eq!(commit_status.ref_, Some("master".into()));
     assert_eq!(commit_status.status, StatusState::Success);
     assert_eq!(commit_status.name, "rust-gitlab-megas-linux-debug");
     assert_eq!(
         commit_status.target_url,
         Some(
-            "https://buildbot.kitware.com/builders/rust-gitlab-megas-linux-debug/builds/41"
-                .to_string()
+            "https://buildbot.kitware.com/builders/rust-gitlab-megas-linux-debug/builds/41".into()
         ),
     );
-    assert_eq!(commit_status.description, Some("expected".to_string()));
+    assert_eq!(commit_status.description, Some("expected".into()));
     assert_eq!(
         commit_status.created_at,
         Utc.ymd(2016, 11, 8).and_hms_milli(14, 35, 32, 627),
@@ -126,10 +125,7 @@ fn test_read_commit_status() {
     assert_eq!(commit_status.author.state, UserState::Active);
     assert_eq!(
         commit_status.author.avatar_url,
-        Some(
-            "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png"
-                .to_string()
-        ),
+        Some("https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png".into()),
     );
     assert_eq!(commit_status.author.id, UserId::new(35));
     assert_eq!(commit_status.coverage, None);
@@ -143,7 +139,7 @@ fn test_read_issue() {
     assert_eq!(issue.iid, IssueInternalId::new(6));
     assert_eq!(issue.project_id, ProjectId::new(855));
     assert_eq!(issue.title, "fix documentation warnings");
-    assert_eq!(issue.description, Some("".to_string()));
+    assert_eq!(issue.description, Some("".into()));
     assert_eq!(issue.state, IssueState::Closed);
     assert_eq!(
         issue.created_at,
@@ -169,7 +165,7 @@ fn test_read_issue() {
         issue.author.avatar_url,
         Some(
             "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
-                .to_string()
+                .into()
         ),
     );
     assert_eq!(issue.author.id, UserId::new(13));
@@ -179,7 +175,7 @@ fn test_read_issue() {
         assert_eq!(assignee.name, "Ben Boeckel");
         assert_eq!(assignee.state, UserState::Active);
         assert_eq!(assignee.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
+                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".into()));
         assert_eq!(assignee.id, UserId::new(13));
     } else {
         panic!("expected to have an assignee for the issue");
@@ -192,7 +188,7 @@ fn test_read_issue() {
         assert_eq!(assignee.name, "Ben Boeckel");
         assert_eq!(assignee.state, UserState::Active);
         assert_eq!(assignee.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
+                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".into()));
         assert_eq!(assignee.id, UserId::new(13));
     } else {
         panic!("expected to have assignees for the issue");
@@ -227,7 +223,7 @@ fn test_read_issue_reference() {
             Some(
                 "The workflow currently requires that the robot be able to register itself as a \
                  webhook for new projects. An API needs added for this.\n\nCc: @brad.king"
-                    .to_string()
+                    .into()
             ),
         );
         assert_eq!(issue.state, IssueState::Closed);
@@ -251,7 +247,7 @@ fn test_read_issue_reference() {
         assert_eq!(issue.author.name, "Ben Boeckel");
         assert_eq!(issue.author.state, UserState::Active);
         assert_eq!(issue.author.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
+                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".into()));
         assert_eq!(issue.author.id, UserId::new(13));
         if let Some(ref assignee) = issue.assignee {
             assert_eq!(assignee.username, "ben.boeckel");
@@ -259,7 +255,7 @@ fn test_read_issue_reference() {
             assert_eq!(assignee.name, "Ben Boeckel");
             assert_eq!(assignee.state, UserState::Active);
             assert_eq!(assignee.avatar_url,
-                       Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".to_string()));
+                       Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".into()));
             assert_eq!(assignee.id, UserId::new(13));
         } else {
             panic!("expected to have an assignee for the issue");
@@ -297,7 +293,7 @@ fn test_read_member() {
         member.avatar_url,
         Some(
             "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon"
-                .to_string()
+                .into()
         ),
     );
     assert_eq!(member.web_url, "https://gitlab.kitware.com/kwrobot");
@@ -313,7 +309,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.iid, MergeRequestInternalId::new(35));
     assert_eq!(merge_request.project_id, ProjectId::new(855));
     assert_eq!(merge_request.title, "gitlab: expose hook addition API");
-    assert_eq!(merge_request.description, Some("Fixes #5.".to_string()));
+    assert_eq!(merge_request.description, Some("Fixes #5.".into()));
     assert_eq!(merge_request.state, MergeRequestState::Merged);
     assert_eq!(
         merge_request.created_at,
@@ -344,7 +340,7 @@ fn test_read_merge_request() {
         merge_request.author.avatar_url,
         Some(
             "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
-                .to_string()
+                .into()
         ),
     );
     assert_eq!(merge_request.author.id, UserId::new(13));
@@ -354,7 +350,7 @@ fn test_read_merge_request() {
         assert_eq!(assignee.name, "Brad King");
         assert_eq!(assignee.state, UserState::Active);
         assert_eq!(assignee.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon".to_string()));
+                   Some("https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon".into()));
         assert_eq!(assignee.id, UserId::new(10));
     } else {
         panic!("expected to have an assignee for the merge request");
@@ -367,7 +363,7 @@ fn test_read_merge_request() {
         assert_eq!(assignee.name, "Brad King");
         assert_eq!(assignee.state, UserState::Active);
         assert_eq!(assignee.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon".to_string()));
+                   Some("https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon".into()));
         assert_eq!(assignee.id, UserId::new(10));
     } else {
         panic!("expected to have assignees for the merge request");
@@ -406,7 +402,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.time_stats.total_time_spent, 0);
     assert_eq!(merge_request.time_stats.human_time_estimate, None);
     assert_eq!(merge_request.time_stats.human_total_time_spent, None);
-    assert_eq!(merge_request.changes_count, Some("3".to_string()));
+    assert_eq!(merge_request.changes_count, Some("3".into()));
     assert_eq!(merge_request.user_notes_count, 3);
     assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
@@ -422,7 +418,7 @@ fn test_read_merge_request() {
 fn test_read_note() {
     let note: Note = read_test_file("note");
 
-    assert_eq!(note.id, NoteId::new(177373));
+    assert_eq!(note.id, NoteId::new(177_373));
     assert_eq!(note.body, "Status changed to merged");
     assert_eq!(note.attachment, None);
     assert_eq!(note.author.username, "kwrobot");
@@ -433,7 +429,7 @@ fn test_read_note() {
         note.author.avatar_url,
         Some(
             "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon"
-                .to_string()
+                .into()
         ),
     );
     assert_eq!(note.author.id, UserId::new(11));
@@ -465,7 +461,10 @@ fn test_read_note() {
 #[test]
 fn test_read_singlenote_discussion() {
     let discussions: Vec<Discussion> = read_test_file("discussion");
-    let discussion = discussions.iter().find(|x| x.id.value() == "18ea341cb10e952889e277836ba638c6b17ff26c").unwrap();
+    let discussion = discussions
+        .iter()
+        .find(|x| x.id.value() == "18ea341cb10e952889e277836ba638c6b17ff26c")
+        .unwrap();
     assert!(discussion.individual_note);
     assert_eq!(discussion.notes.len(), 1);
     let note = discussion.notes.get(0).unwrap();
@@ -477,7 +476,10 @@ fn test_read_singlenote_discussion() {
 #[test]
 fn test_read_nocode_discussion() {
     let discussions: Vec<Discussion> = read_test_file("discussion");
-    let discussion = discussions.iter().find(|x| x.id.value() == "a4d5505b3556eaa45edbe567af7aebc1760dedd7").unwrap();
+    let discussion = discussions
+        .iter()
+        .find(|x| x.id.value() == "a4d5505b3556eaa45edbe567af7aebc1760dedd7")
+        .unwrap();
     assert!(!(discussion.individual_note));
     assert_eq!(discussion.notes.len(), 3);
     let question = discussion.notes.get(0).unwrap();
@@ -490,8 +492,8 @@ fn test_read_nocode_discussion() {
     assert!(question.position.is_none());
     assert!(comment.position.is_none());
 
-    assert_eq!(question.id, NoteId::new(607911));
-    assert_eq!(comment.id, NoteId::new(607912));
+    assert_eq!(question.id, NoteId::new(607_911));
+    assert_eq!(comment.id, NoteId::new(607_912));
 
     assert_eq!(question.note_type, Some(DiscussionNoteType::DiscussionNote));
     assert_eq!(comment.note_type, Some(DiscussionNoteType::DiscussionNote));
@@ -500,18 +502,24 @@ fn test_read_nocode_discussion() {
 #[test]
 fn test_read_code_discussion() {
     let discussions: Vec<Discussion> = read_test_file("discussion");
-    let discussion = discussions.into_iter().find(|x| x.id.value() == "9f4998b2308728b95cff52af97019479e1269183").unwrap();
+    let discussion = discussions
+        .into_iter()
+        .find(|x| x.id.value() == "9f4998b2308728b95cff52af97019479e1269183")
+        .unwrap();
     assert!(!(discussion.individual_note));
     let note = discussion.notes.get(0).unwrap();
     assert!(note.resolvable);
     assert!(note.resolved.is_some());
     assert_eq!(note.author.username, "brad.king");
-    assert_eq!(note.id, NoteId::new(619272));
+    assert_eq!(note.id, NoteId::new(619_272));
     assert_eq!(note.note_type, Some(DiscussionNoteType::DiffNote));
     assert!(note.position.is_some());
     if let Some(position) = &note.position {
         assert_eq!(position.position_type, NotePositionType::Text);
-        assert_eq!(position.head_sha.value(), "04e94ae667024a62a90179f395bfdc2b35f3efd2");
+        assert_eq!(
+            position.head_sha.value(),
+            "04e94ae667024a62a90179f395bfdc2b35f3efd2",
+        );
         assert_eq!(position.new_line, Some(156));
         assert_eq!(position.new_path, "src/gitlab.rs");
     } else {
@@ -526,9 +534,9 @@ fn test_read_project() {
     assert_eq!(project.id, ProjectId::new(855));
     assert_eq!(
         project.description,
-        Some("Rust library for communicating with a Gitlab instance.".to_string()),
+        Some("Rust library for communicating with a Gitlab instance.".into()),
     );
-    assert_eq!(project.default_branch, Some("master".to_string()));
+    assert_eq!(project.default_branch, Some("master".into()));
     assert!(project.tag_list.is_empty());
     assert_eq!(project.archived, false);
     assert_eq!(project.empty_repo, false);
@@ -547,7 +555,7 @@ fn test_read_project() {
     );
     assert_eq!(
         project.readme_url,
-        Some("https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md".to_string()),
+        Some("https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md".into()),
     );
     assert!(project.owner.is_none());
     assert_eq!(project.name, "rust-gitlab");
@@ -576,7 +584,10 @@ fn test_read_project() {
     assert_eq!(project.namespace.kind, NamespaceKind::Group);
     assert_eq!(project.namespace.full_path, "utils");
     assert_eq!(project.namespace.avatar_url, None);
-    assert_eq!(project.namespace.web_url, "https://gitlab.kitware.com/groups/utils");
+    assert_eq!(
+        project.namespace.web_url,
+        "https://gitlab.kitware.com/groups/utils",
+    );
     assert!(project.namespace.members_count_with_descendants.is_none());
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
@@ -601,14 +612,26 @@ fn test_read_project() {
     assert_eq!(project.snippets_enabled, false);
     assert_eq!(project.wiki_enabled, true);
 
-    assert_eq!(project.builds_access_level, FeatureVisibilityLevel::Disabled);
+    assert_eq!(
+        project.builds_access_level,
+        FeatureVisibilityLevel::Disabled,
+    );
     assert_eq!(project.issues_access_level, FeatureVisibilityLevel::Enabled);
-    assert_eq!(project.merge_requests_access_level, FeatureVisibilityLevel::Enabled);
-    assert_eq!(project.repository_access_level, FeatureVisibilityLevel::Enabled);
-    assert_eq!(project.snippets_access_level, FeatureVisibilityLevel::Disabled);
+    assert_eq!(
+        project.merge_requests_access_level,
+        FeatureVisibilityLevel::Enabled,
+    );
+    assert_eq!(
+        project.repository_access_level,
+        FeatureVisibilityLevel::Enabled,
+    );
+    assert_eq!(
+        project.snippets_access_level,
+        FeatureVisibilityLevel::Disabled,
+    );
     assert_eq!(project.wiki_access_level, FeatureVisibilityLevel::Enabled);
 
-    assert_eq!(project.merge_method, Some("merge".to_string()));
+    assert_eq!(project.merge_method, Some("merge".into()));
     if let Some(ref permissions) = project.permissions {
         if let Some(ref group_access) = permissions.group_access {
             assert_eq!(group_access.access_level, 50);
@@ -740,7 +763,7 @@ fn test_read_repo_commit_detail() {
     }
     if let Some(ref last_pipeline) = repo_commit_detail.last_pipeline {
         assert_eq!(last_pipeline.id, PipelineId::new(34289));
-        assert_eq!(last_pipeline.ref_, Some("master".to_string()));
+        assert_eq!(last_pipeline.ref_, Some("master".into()));
         assert_eq!(
             last_pipeline.sha,
             ObjectId::new("de4ac3cf96cb8a0893be22b03f5171d934f9d392"),
@@ -748,7 +771,7 @@ fn test_read_repo_commit_detail() {
         assert_eq!(last_pipeline.status, StatusState::Success);
         assert_eq!(
             last_pipeline.web_url,
-            "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/34289".to_string(),
+            "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/34289",
         );
     } else {
         panic!("expected to have a last_pipeline for this commit");
@@ -768,7 +791,7 @@ fn test_read_user() {
         user.avatar_url,
         Some(
             "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon"
-                .to_string()
+                .into()
         ),
     );
     assert_eq!(user.web_url, "https://gitlab.kitware.com/kwrobot");
@@ -778,10 +801,10 @@ fn test_read_user() {
     );
     assert_eq!(user.is_admin, None);
     assert_eq!(user.highest_role, Some(AccessLevel::Owner));
-    assert_eq!(user.bio, Some("".to_string()));
+    assert_eq!(user.bio, Some("".into()));
     assert_eq!(user.private_profile, Some(false));
     assert_eq!(user.location, None);
-    assert_eq!(user.public_email, Some("".to_string()));
+    assert_eq!(user.public_email, Some("".into()));
     assert_eq!(user.skype, "");
     assert_eq!(user.linkedin, "");
     assert_eq!(user.twitter, "");
@@ -801,7 +824,7 @@ fn test_read_user_public() {
         user_public.avatar_url,
         Some(
             "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon"
-                .to_string()
+                .into()
         ),
     );
     assert_eq!(user_public.web_url, "https://gitlab.kitware.com/kwrobot");
@@ -810,10 +833,10 @@ fn test_read_user_public() {
         Some(Utc.ymd(2015, 2, 26).and_hms_milli(15, 58, 34, 670)),
     );
     assert_eq!(user_public.is_admin, Some(true));
-    assert_eq!(user_public.bio, Some("".to_string()));
+    assert_eq!(user_public.bio, Some("".into()));
     assert_eq!(user_public.private_profile, Some(false));
     assert_eq!(user_public.location, None);
-    assert_eq!(user_public.public_email, Some("".to_string()));
+    assert_eq!(user_public.public_email, Some("".into()));
     assert_eq!(user_public.skype, "");
     assert_eq!(user_public.linkedin, "");
     assert_eq!(user_public.twitter, "");
@@ -858,49 +881,79 @@ fn test_read_resoruce_label_events() {
         Some(ResourceLabelEventTarget::Issue(id)) if id.value() == 69328 => {
             // this is the expected value
         },
-        x => panic!("Unexpected resource_target: {:?}", x)
+        x => panic!("Unexpected resource_target: {:?}", x),
     }
 
     let label = event.label.unwrap();
     assert_eq!(label.id, LabelId::new(1720));
     assert_eq!(label.name, "area:doc");
     assert_eq!(label.color, LabelColor::from_rgb(0x58, 0x43, 0xAD));
-    assert_eq!(label.description, Some("Documentation issues".to_string()));
+    assert_eq!(label.description, Some("Documentation issues".into()));
 }
 
 #[test]
 fn test_read_pipelines() {
     let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
 
-    assert_eq!(pipeline_basic.id, PipelineId::new(145400));
-    assert_eq!(pipeline_basic.status,StatusState::Success);
-    assert_eq!(pipeline_basic.ref_, Some("master".to_string()));
-    assert_eq!(pipeline_basic.sha, ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14".to_string()));
-    assert_eq!(pipeline_basic.web_url, "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400");
+    assert_eq!(pipeline_basic.id, PipelineId::new(145_400));
+    assert_eq!(pipeline_basic.status, StatusState::Success);
+    assert_eq!(pipeline_basic.ref_, Some("master".into()));
+    assert_eq!(
+        pipeline_basic.sha,
+        ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14"),
+    );
+    assert_eq!(
+        pipeline_basic.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400",
+    );
 }
 
 #[test]
 fn test_read_pipeline() {
     let pipeline: Pipeline = read_test_file("pipeline");
 
-    assert_eq!(pipeline.id, PipelineId::new(145400));
+    assert_eq!(pipeline.id, PipelineId::new(145_400));
     assert_eq!(pipeline.status, StatusState::Success);
-    assert_eq!(pipeline.ref_, Some("master".to_string()));
-    assert_eq!(pipeline.sha, ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14".to_string()));
+    assert_eq!(pipeline.ref_, Some("master".into()));
+    assert_eq!(
+        pipeline.sha,
+        ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14"),
+    );
     assert_eq!(pipeline.before_sha, None);
     assert_eq!(pipeline.tag, false);
     assert_eq!(pipeline.yaml_errors, None);
-    assert_eq!(pipeline.created_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,09,47,178)));
-    assert_eq!(pipeline.updated_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,15,47,18)));
-    assert_eq!(pipeline.started_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,09,51,465)));
-    assert_eq!(pipeline.finished_at, Some(Utc.ymd(2019,9,3).and_hms_milli(18,15,47,13)));
+    assert_eq!(
+        pipeline.created_at,
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 9, 47, 178)),
+    );
+    assert_eq!(
+        pipeline.updated_at,
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 15, 47, 18)),
+    );
+    assert_eq!(
+        pipeline.started_at,
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 9, 51, 465)),
+    );
+    assert_eq!(
+        pipeline.finished_at,
+        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 15, 47, 13)),
+    );
     assert_eq!(pipeline.committed_at, None);
     assert_eq!(pipeline.duration, Some(0));
     assert_eq!(pipeline.coverage, None);
-    assert_eq!(pipeline.web_url, "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400");
+    assert_eq!(
+        pipeline.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400",
+    );
 
     // nested user
-    assert_eq!(pipeline.user.avatar_url, Some("https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png".to_owned()));
+    assert_eq!(
+        pipeline.user.avatar_url,
+        Some(
+            "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png"
+                .to_owned(),
+        ),
+    );
     assert_eq!(pipeline.user.id, UserId::new(35));
     assert_eq!(pipeline.user.name, "buildbot");
     assert_eq!(pipeline.user.username, "buildbot");

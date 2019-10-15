@@ -748,7 +748,7 @@ impl From<u64> for AccessLevel {
 
 impl Display for AccessLevel {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}", Into::<u64>::into(self.clone()))
+        write!(f, "{}", Into::<u64>::into(*self))
     }
 }
 
@@ -1221,11 +1221,11 @@ impl Milestone {
             iid: MilestoneInternalId::new(0),
             project_id: Some(project_id),
             group_id: None,
-            title: title,
+            title,
             description: None,
             state: MilestoneState::Active,
-            created_at: DateTime::from(Utc::now()),
-            updated_at: DateTime::from(Utc::now()),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
             due_date: None,
             start_date: None,
         }
@@ -1325,8 +1325,8 @@ impl Label {
     pub fn new(name: String, color: LabelColor) -> Label {
         Label {
             id: LabelId::new(0),
-            name: name,
-            color: color,
+            name,
+            color,
             description: None,
             open_issues_count: None,
             closed_issues_count: None,
@@ -1465,17 +1465,17 @@ impl Issue {
         Issue {
             id: IssueId::new(0),
             iid: IssueInternalId::new(0),
-            project_id: project_id,
-            title: title,
+            project_id,
+            title,
             description: None,
             state: IssueState::Opened,
-            created_at: DateTime::from(Utc::now()),
-            updated_at: DateTime::from(Utc::now()),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
             closed_at: None,
             closed_by: None,
             labels: Vec::new(),
             milestone: None,
-            author: author,
+            author,
             assignee: None,
             assignees: None,
             subscribed: None,
@@ -1493,7 +1493,7 @@ impl Issue {
             has_tasks: None,
             confidential: false,
             discussion_locked: None,
-            web_url: "".to_string(),
+            web_url: "".into(),
             _links: None,
         }
     }
@@ -2388,7 +2388,7 @@ impl Event {
             EventTargetType::Commit => {
                 self.target_id
                     .as_str()
-                    .map(|id| EventTargetId::Commit(ObjectId(id.to_string())))
+                    .map(|id| EventTargetId::Commit(ObjectId(id.into())))
             },
             EventTargetType::Issue => {
                 self.target_id
@@ -2658,21 +2658,27 @@ pub struct ResourceLabelEvent {
     resource_type: String,
     /// The label may be None if the label has been deleted.
     pub label: Option<EventLabel>,
-    pub action: String
+    pub action: String,
 }
 
 impl ResourceLabelEvent {
     /// Returns the id of the merge request or issue that this event is from
     pub fn event_target(&self) -> Option<ResourceLabelEventTarget> {
         match self.resource_type.as_ref() {
-            "MergeRequest" => Some(ResourceLabelEventTarget::MergeRequest(MergeRequestId::new(self.resource_id))),
-            "Issue" => Some(ResourceLabelEventTarget::Issue(IssueId::new(self.resource_id))),
-            _ => None
+            "MergeRequest" => {
+                Some(ResourceLabelEventTarget::MergeRequest(MergeRequestId::new(
+                    self.resource_id,
+                )))
+            },
+            "Issue" => {
+                Some(ResourceLabelEventTarget::Issue(IssueId::new(
+                    self.resource_id,
+                )))
+            },
+            _ => None,
         }
-
     }
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// The type of object that on which the resource label event was created
@@ -2682,7 +2688,6 @@ pub enum ResourceLabelEventTarget {
     /// The ID of a merge request event target.
     MergeRequest(MergeRequestId),
 }
-
 
 #[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]

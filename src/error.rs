@@ -46,6 +46,6 @@ impl Error {
             .and_then(|s| s.as_str())
             .unwrap_or_else(|| "unknown error");
 
-        Error::from_kind(ErrorKind::Gitlab(msg.to_string()))
+        Error::from_kind(ErrorKind::Gitlab(msg.into()))
     }
 }

@@ -5,7 +5,7 @@
 // except according to those terms.
 
 use crates::itertools::Itertools;
-use crates::percent_encoding::{utf8_percent_encode, PercentEncode, PATH_SEGMENT_ENCODE_SET};
+use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use crates::reqwest::header::HeaderValue;
 use crates::reqwest::{Client, RequestBuilder, Url};
 use crates::serde::de::Error as SerdeError;
@@ -19,6 +19,19 @@ use types::*;
 
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
+
+const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b'#')
+    .add(b'<')
+    .add(b'>')
+    .add(b'`')
+    .add(b'?')
+    .add(b'{')
+    .add(b'}')
+    .add(b'%')
+    .add(b'/');
 
 /// A Gitlab API token
 ///
@@ -161,8 +174,8 @@ impl Gitlab {
 
         let api = Gitlab {
             client: Client::new(),
-            base_url: base_url,
-            token: token,
+            base_url,
+            token,
         };
 
         // Ensure the API is working.
@@ -206,7 +219,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(&format!("users/{}", user), params)
+        self.get_with_param(format!("users/{}", user), params)
     }
 
     /// Find a user by username.
@@ -218,7 +231,7 @@ impl Gitlab {
         let mut users = self.get_paged_with_param("users", &[("username", name.as_ref())])?;
         users
             .pop()
-            .ok_or_else(|| Error::from_kind(ErrorKind::Gitlab("no such user".to_string())))
+            .ok_or_else(|| Error::from_kind(ErrorKind::Gitlab("no such user".into())))
     }
 
     /// Get all accessible projects.
@@ -245,11 +258,11 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(&format!("projects/{}", project), params)
+        self.get_with_param(format!("projects/{}", project), params)
     }
 
     /// A URL-safe name for projects.
-    fn url_name(name: &str) -> PercentEncode<PATH_SEGMENT_ENCODE_SET> {
+    fn url_name(name: &str) -> PercentEncode {
         utf8_percent_encode(name, PATH_SEGMENT_ENCODE_SET)
     }
 
@@ -263,7 +276,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_with_param(
-            &format!("projects/{}", Self::url_name(name.as_ref())),
+            format!("projects/{}", Self::url_name(name.as_ref())),
             params,
         )
     }
@@ -287,7 +300,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(&format!("projects/{}/hooks", project), params)
+        self.get_paged_with_param(format!("projects/{}/hooks", project), params)
     }
 
     /// Get a project hook.
@@ -298,7 +311,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(&format!("projects/{}/hooks/{}", project, hook), params)
+        self.get_with_param(format!("projects/{}/hooks/{}", project, hook), params)
     }
 
     /// Convert a boolean parameter into an HTTP request value.
@@ -346,7 +359,7 @@ impl Gitlab {
         let mut flags = Self::event_flags(events);
         flags.push(("url", url.as_ref()));
 
-        self.post_with_param(&format!("projects/{}/hooks", project), &flags)
+        self.post_with_param(format!("projects/{}/hooks", project), &flags)
     }
 
     /// Get the team members of a group.
@@ -357,7 +370,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(&format!("groups/{}/members", group), params)
+        self.get_paged_with_param(format!("groups/{}/members", group), params)
     }
 
     /// Get a team member of a group.
@@ -368,7 +381,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(&format!("groups/{}/members/{}", group, user), params)
+        self.get_with_param(format!("groups/{}/members/{}", group, user), params)
     }
 
     /// Get the team members of a project.
@@ -379,7 +392,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(&format!("projects/{}/members", project), params)
+        self.get_paged_with_param(format!("projects/{}/members", project), params)
     }
 
     /// Get a team member of a project.
@@ -395,7 +408,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(&format!("projects/{}/members/{}", project, user), params)
+        self.get_with_param(format!("projects/{}/members/{}", project, user), params)
     }
 
     /// Add a user to a project.
@@ -409,7 +422,7 @@ impl Gitlab {
         let access_str = format!("{}", access);
 
         self.post_with_param(
-            &format!("projects/{}/members", project),
+            format!("projects/{}/members", project),
             &[("user", &user_str), ("access", &access_str)],
         )
     }
@@ -428,7 +441,7 @@ impl Gitlab {
         let access_str = format!("{}", access);
 
         self.post_with_param(
-            &format!("projects/{}/members", Self::url_name(project.as_ref())),
+            format!("projects/{}/members", Self::url_name(project.as_ref())),
             &[("user_id", &user_str), ("access_level", &access_str)],
         )
     }
@@ -441,7 +454,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(&format!("projects/{}/branches", project), params)
+        self.get_paged_with_param(format!("projects/{}/branches", project), params)
     }
 
     /// Get a branch.
@@ -454,7 +467,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/branches/{}",
                 project,
                 Self::url_name(branch.as_ref()),
@@ -469,7 +482,7 @@ impl Gitlab {
         C: AsRef<str>,
     {
         self.get_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}",
                 project,
                 commit.as_ref(),
@@ -493,7 +506,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}/comments",
                 project,
                 commit.as_ref(),
@@ -514,7 +527,7 @@ impl Gitlab {
         B: AsRef<str>,
     {
         self.post_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}/comment",
                 project,
                 commit.as_ref(),
@@ -536,7 +549,7 @@ impl Gitlab {
         B: AsRef<str>,
     {
         self.post_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}/comment",
                 Self::url_name(project.as_ref()),
                 commit.as_ref(),
@@ -558,7 +571,7 @@ impl Gitlab {
         let line_type = LineType::New;
 
         self.post_with_param(
-            &format!("projects/{}/repository/commits/{}/comment", project, commit),
+            format!("projects/{}/repository/commits/{}/comment", project, commit),
             &[
                 ("note", body),
                 ("path", path),
@@ -583,7 +596,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}/statuses",
                 project,
                 commit.as_ref(),
@@ -608,7 +621,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}/statuses",
                 Self::url_name(project.as_ref()),
                 commit.as_ref(),
@@ -623,7 +636,7 @@ impl Gitlab {
         C: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}/statuses",
                 project,
                 commit.as_ref(),
@@ -647,7 +660,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}/builds",
                 project,
                 commit.as_ref(),
@@ -662,7 +675,7 @@ impl Gitlab {
         C: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/repository/commits/{}/builds",
                 project,
                 commit.as_ref(),
@@ -686,12 +699,20 @@ impl Gitlab {
 
         let mut params = vec![("state", state.as_str())];
 
-        info.refname.map(|v| params.push(("ref", v)));
-        info.name.map(|v| params.push(("name", v)));
-        info.target_url.map(|v| params.push(("target_url", v)));
-        info.description.map(|v| params.push(("description", v)));
+        if let Some(v) = info.refname {
+            params.push(("ref", v))
+        }
+        if let Some(v) = info.name {
+            params.push(("name", v))
+        }
+        if let Some(v) = info.target_url {
+            params.push(("target_url", v))
+        }
+        if let Some(v) = info.description {
+            params.push(("description", v))
+        }
 
-        self.post_with_param(&path, &params)
+        self.post_with_param(path, &params)
     }
 
     /// Create a status message for a commit.
@@ -706,7 +727,7 @@ impl Gitlab {
         P: AsRef<str>,
         S: AsRef<str>,
     {
-        let path = &format!(
+        let path = format!(
             "projects/{}/statuses/{}",
             Self::url_name(project.as_ref()),
             sha.as_ref(),
@@ -714,27 +735,38 @@ impl Gitlab {
 
         let mut params = vec![("state", state.as_str())];
 
-        info.refname.map(|v| params.push(("ref", v)));
-        info.name.map(|v| params.push(("name", v)));
-        info.target_url.map(|v| params.push(("target_url", v)));
-        info.description.map(|v| params.push(("description", v)));
+        if let Some(v) = info.refname {
+            params.push(("ref", v))
+        }
+        if let Some(v) = info.name {
+            params.push(("name", v))
+        }
+        if let Some(v) = info.target_url {
+            params.push(("target_url", v))
+        }
+        if let Some(v) = info.description {
+            params.push(("description", v))
+        }
 
-        self.post_with_param(&path, &params)
+        self.post_with_param(path, &params)
     }
 
     /// Get the labels for a project.
     pub fn labels(&self, project: ProjectId) -> Result<Vec<Label>> {
-        self.get_paged(&format!("projects/{}/labels", project))
+        self.get_paged(format!("projects/{}/labels", project))
     }
 
     /// Get the labels with open/closed/merge requests count
     pub fn labels_with_counts(&self, project: ProjectId) -> Result<Vec<Label>> {
-        self.get_paged_with_param(&format!("projects/{}/labels", project), vec![("with_counts", "true")])
+        self.get_paged_with_param(
+            format!("projects/{}/labels", project),
+            &[("with_counts", "true")],
+        )
     }
 
     /// Get label by ID.
     pub fn label(&self, project: ProjectId, label: LabelId) -> Result<Label> {
-        self.get(&format!("projects/{}/labels/{}", project, label))
+        self.get(format!("projects/{}/labels/{}", project, label))
     }
 
     /// Get the issues for a project.
@@ -745,7 +777,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(&format!("projects/{}/issues", project), params)
+        self.get_paged_with_param(format!("projects/{}/issues", project), params)
     }
 
     /// Get issues.
@@ -761,7 +793,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(&format!("projects/{}/issues/{}", project, issue), params)
+        self.get_with_param(format!("projects/{}/issues/{}", project, issue), params)
     }
 
     /// Get the notes from a issue.
@@ -778,7 +810,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!("projects/{}/issues/{}/notes", project, issue),
+            format!("projects/{}/issues/{}/notes", project, issue),
             params,
         )
     }
@@ -798,7 +830,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/issues/{}/notes",
                 Self::url_name(project.as_ref()),
                 issue,
@@ -809,7 +841,7 @@ impl Gitlab {
 
     /// Create a new label
     pub fn create_label(&self, project: ProjectId, label: Label) -> Result<Label> {
-        let path = &format!("projects/{}/labels", project);
+        let path = format!("projects/{}/labels", project);
 
         let mut params: Vec<(&str, String)> = Vec::new();
 
@@ -829,7 +861,7 @@ impl Gitlab {
 
     /// Create a new milestone
     pub fn create_milestone(&self, project: ProjectId, milestone: Milestone) -> Result<Milestone> {
-        let path = &format!("projects/{}/milestones", project);
+        let path = format!("projects/{}/milestones", project);
 
         let mut params: Vec<(&str, String)> = Vec::new();
 
@@ -852,7 +884,7 @@ impl Gitlab {
 
     /// Create a new issue
     pub fn create_issue(&self, project: ProjectId, issue: Issue) -> Result<Issue> {
-        let path = &format!("projects/{}/issues", project);
+        let path = format!("projects/{}/issues", project);
 
         let mut params: Vec<(&str, String)> = Vec::new();
 
@@ -897,14 +929,11 @@ impl Gitlab {
         &self,
         project: ProjectId,
         issue: IssueInternalId,
-    ) -> Result<Vec<ResourceLabelEvent>>
-    {
-        self.get_paged(
-            &format!(
-                "projects/{}/issues/{}/resource_label_events",
-                project, issue,
-            )
-        )
+    ) -> Result<Vec<ResourceLabelEvent>> {
+        self.get_paged(format!(
+            "projects/{}/issues/{}/resource_label_events",
+            project, issue,
+        ))
     }
 
     /// Create a note on a issue.
@@ -919,7 +948,7 @@ impl Gitlab {
     {
         let path = format!("projects/{}/issues/{}/notes", project, issue);
 
-        self.post_with_param(&path, &[("body", content.as_ref())])
+        self.post_with_param(path, &[("body", content.as_ref())])
     }
 
     /// Create a note on a issue.
@@ -933,13 +962,13 @@ impl Gitlab {
         P: AsRef<str>,
         C: AsRef<str>,
     {
-        let path = &format!(
+        let path = format!(
             "projects/{}/issues/{}/notes",
             Self::url_name(project.as_ref()),
             issue,
         );
 
-        self.post_with_param(&path, &[("body", content.as_ref())])
+        self.post_with_param(path, &[("body", content.as_ref())])
     }
 
     /// Get the merge requests for a project.
@@ -954,7 +983,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(&format!("projects/{}/merge_requests", project), params)
+        self.get_paged_with_param(format!("projects/{}/merge_requests", project), params)
     }
 
     /// Get the merge requests with a given state.
@@ -964,7 +993,7 @@ impl Gitlab {
         state: MergeRequestStateFilter,
     ) -> Result<Vec<MergeRequest>> {
         self.get_paged_with_param(
-            &format!("projects/{}/merge_requests", project),
+            format!("projects/{}/merge_requests", project),
             &[("state", state.as_str())],
         )
     }
@@ -977,91 +1006,61 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            &format!(
-                "projects/{}/pipelines",
-                project,
-            ),
-            params,
-        )
+        self.get_paged_with_param(format!("projects/{}/pipelines", project), params)
     }
 
     /// Get a single pipeline.
-    pub fn pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline>
-    {
-        self.get(
-            &format!(
-                "projects/{}/pipelines/{}",
-                project,
-                id,
-            ),
-        )
+    pub fn pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline> {
+        self.get(format!("projects/{}/pipelines/{}", project, id))
     }
 
     /// Get variables of a pipeline.
-    pub fn pipeline_variables(&self, project: ProjectId, id: PipelineId) -> Result<Vec<PipelineVariable>>
-    {
-        self.get(
-            &format!(
-                "projects/{}/pipelines/{}/variables",
-                project,
-                id,
-            ),
-        )
+    pub fn pipeline_variables(
+        &self,
+        project: ProjectId,
+        id: PipelineId,
+    ) -> Result<Vec<PipelineVariable>> {
+        self.get(format!("projects/{}/pipelines/{}/variables", project, id))
     }
 
     /// Create a new pipeline.
-    pub fn create_pipeline(&self, project: ProjectId, ref_: ObjectId, variables: &[PipelineVariable]) -> Result<Pipeline>
-    {
+    pub fn create_pipeline(
+        &self,
+        project: ProjectId,
+        ref_: ObjectId,
+        variables: &[PipelineVariable],
+    ) -> Result<Pipeline> {
         use crates::serde::Serialize;
         #[derive(Debug, Serialize)]
         struct CreatePipelineParams<'a> {
             ref_: ObjectId,
-            variables:  &'a[PipelineVariable],
+            variables: &'a [PipelineVariable],
         }
 
         self.post_with_param(
-            &format!(
-                "projects/{}/pipeline",
-                project,
-            ),
-            CreatePipelineParams{
-                ref_: ref_,
-                variables: variables,
+            format!("projects/{}/pipeline", project),
+            CreatePipelineParams {
+                ref_,
+                variables,
             },
         )
     }
 
     /// Retry jobs in a pipeline.
-    pub fn retry_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline>
-    {
-        self.post(
-            &format!(
-                "projects/{}/pipelines/{}/retry",
-                project,
-                id,
-            ),
-        )
+    pub fn retry_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline> {
+        self.post(format!("projects/{}/pipelines/{}/retry", project, id))
     }
 
     /// Cancel a pipeline.
-    pub fn cancel_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline>
-    {
-        self.post(
-            &format!(
-                "projects/{}/pipelines/{}/cancel",
-                project,
-                id,
-            ),
-        )
+    pub fn cancel_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline> {
+        self.post(format!("projects/{}/pipelines/{}/cancel", project, id))
     }
 
     #[allow(unused)]
     /// Delete a pipeline.
     ///
     /// NOTE Not implemented.
-    fn delete_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline>
-    {
+    fn delete_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline> {
         unimplemented!();
     }
 
@@ -1079,7 +1078,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_with_param(
-            &format!("projects/{}/merge_requests/{}", project, merge_request),
+            format!("projects/{}/merge_requests/{}", project, merge_request),
             params,
         )
     }
@@ -1098,7 +1097,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/closes_issues",
                 project, merge_request,
             ),
@@ -1120,7 +1119,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/discussions",
                 project, merge_request,
             ),
@@ -1142,7 +1141,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/notes",
                 project, merge_request,
             ),
@@ -1165,7 +1164,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/notes",
                 Self::url_name(project.as_ref()),
                 merge_request,
@@ -1182,7 +1181,7 @@ impl Gitlab {
         note: NoteId,
         award: &str,
     ) -> Result<AwardEmoji> {
-        let path = &format!(
+        let path = format!(
             "projects/{}/merge_requests/{}/notes/{}/award_emoji",
             project, merge_request, note,
         );
@@ -1200,7 +1199,7 @@ impl Gitlab {
     where
         P: AsRef<str>,
     {
-        let path = &format!(
+        let path = format!(
             "projects/{}/merge_requests/{}/notes/{}/award_emoji",
             Self::url_name(project.as_ref()),
             merge_request,
@@ -1223,7 +1222,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/award_emoji",
                 project, merge_request,
             ),
@@ -1246,7 +1245,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/award_emoji",
                 Self::url_name(project.as_ref()),
                 merge_request,
@@ -1270,7 +1269,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/notes/{}/award_emoji",
                 project, merge_request, note,
             ),
@@ -1294,7 +1293,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/notes/{}/award_emoji",
                 Self::url_name(project.as_ref()),
                 merge_request,
@@ -1309,14 +1308,11 @@ impl Gitlab {
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-    ) -> Result<Vec<ResourceLabelEvent>>
-    {
-        self.get_paged(
-            &format!(
-                "projects/{}/merge_requests/{}/resource_label_events",
-                project, merge_request,
-            )
-        )
+    ) -> Result<Vec<ResourceLabelEvent>> {
+        self.get_paged(format!(
+            "projects/{}/merge_requests/{}/resource_label_events",
+            project, merge_request,
+        ))
     }
 
     pub fn create_merge_request_discussion(
@@ -1325,7 +1321,7 @@ impl Gitlab {
         merge_request: MergeRequestInternalId,
         content: &str,
     ) -> Result<Discussion> {
-        let path = &format!(
+        let path = format!(
             "projects/{}/merge_requests/{}/discussions",
             project, merge_request
         );
@@ -1338,7 +1334,7 @@ impl Gitlab {
         merge_request: MergeRequestInternalId,
         content: &str,
     ) -> Result<Note> {
-        let path = &format!(
+        let path = format!(
             "projects/{}/merge_requests/{}/notes",
             project, merge_request,
         );
@@ -1355,7 +1351,7 @@ impl Gitlab {
     where
         P: AsRef<str>,
     {
-        let path = &format!(
+        let path = format!(
             "projects/{}/merge_requests/{}/notes",
             Self::url_name(project.as_ref()),
             merge_request,
@@ -1377,7 +1373,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/closes_issues",
                 project, merge_request,
             ),
@@ -1400,7 +1396,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         self.get_paged_with_param(
-            &format!(
+            format!(
                 "projects/{}/merge_requests/{}/closes_issues",
                 Self::url_name(project.as_ref()),
                 merge_request,
@@ -1420,7 +1416,7 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = &format!("projects/{}/issues/{}", project, issue);
+        let path = format!("projects/{}/issues/{}", project, issue);
         self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
     }
 
@@ -1436,7 +1432,7 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = &format!(
+        let path = format!(
             "projects/{}/issues/{}",
             Self::url_name(project.as_ref()),
             issue,
@@ -1455,25 +1451,31 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = &format!("projects/{}/merge_requests/{}", project, merge_request);
+        let path = format!("projects/{}/merge_requests/{}", project, merge_request);
         self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
     }
 
     /// Create a URL to an API endpoint.
-    fn create_url(&self, url: &str) -> Result<Url> {
-        debug!(target: "gitlab", "api call {}", url);
-        self.base_url.join(url).chain_err(|| ErrorKind::UrlParse)
+    fn create_url<U>(&self, url: U) -> Result<Url>
+    where
+        U: AsRef<str>,
+    {
+        debug!(target: "gitlab", "api call {}", url.as_ref());
+        self.base_url
+            .join(url.as_ref())
+            .chain_err(|| ErrorKind::UrlParse)
     }
 
     /// Create a URL to an API endpoint with query parameters.
-    fn create_url_with_param<I, K, V>(&self, url: &str, param: I) -> Result<Url>
+    fn create_url_with_param<U, I, K, V>(&self, url: U, param: I) -> Result<Url>
     where
+        U: AsRef<str>,
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        let mut full_url = self.create_url(url)?;
+        let mut full_url = self.create_url(url.as_ref())?;
         full_url.query_pairs_mut().extend_pairs(param);
         Ok(full_url)
     }
@@ -1483,7 +1485,9 @@ impl Gitlab {
     where
         T: DeserializeOwned,
     {
-        let rsp = self.token.set_header(req)?
+        let rsp = self
+            .token
+            .set_header(req)?
             .send()
             .chain_err(|| ErrorKind::Communication)?;
         let status = rsp.status();
@@ -1508,17 +1512,19 @@ impl Gitlab {
     }
 
     /// Create a `GET` request to an API endpoint.
-    fn get<T>(&self, url: &str) -> Result<T>
+    fn get<T, U>(&self, url: U) -> Result<T>
     where
         T: DeserializeOwned,
+        U: AsRef<str>,
     {
         self.get_with_param(url, query_param_slice![])
     }
 
     /// Create a `GET` request to an API endpoint with query parameters.
-    fn get_with_param<T, I, K, V>(&self, url: &str, params: I) -> Result<T>
+    fn get_with_param<T, U, I, K, V>(&self, url: U, params: I) -> Result<T>
     where
         T: DeserializeOwned,
+        U: AsRef<str>,
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
         K: AsRef<str>,
@@ -1530,46 +1536,51 @@ impl Gitlab {
     }
 
     /// Create a `POST` request to an API endpoint.
-    fn post<T>(&self, url: &str) -> Result<T>
-        where T: DeserializeOwned
+    fn post<T, U>(&self, url: U) -> Result<T>
+    where
+        T: DeserializeOwned,
+        U: AsRef<str>,
     {
         let param: &[(&str, &str)] = &[];
         self.post_with_param(url, param)
     }
 
-
     /// Create a `POST` request to an API endpoint with query parameters.
-    fn post_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
+    fn post_with_param<T, U, P>(&self, url: U, param: P) -> Result<T>
     where
         T: DeserializeOwned,
-        U: Serialize,
+        U: AsRef<str>,
+        P: Serialize,
     {
         let full_url = self.create_url(url)?;
         self.send(self.client.post(full_url).form(&param))
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.
-    fn put_with_param<T, U>(&self, url: &str, param: U) -> Result<T>
+    fn put_with_param<T, U, P>(&self, url: U, param: P) -> Result<T>
     where
         T: DeserializeOwned,
-        U: Serialize,
+        U: AsRef<str>,
+        P: Serialize,
     {
         let full_url = self.create_url(url)?;
         self.send(self.client.put(full_url).form(&param))
     }
 
     /// Handle paginated queries. Returns all results.
-    fn get_paged<T>(&self, url: &str) -> Result<Vec<T>>
+    fn get_paged<T, U>(&self, url: U) -> Result<Vec<T>>
     where
         T: DeserializeOwned,
+        U: AsRef<str>,
     {
         self.get_paged_with_param(url, query_param_slice![])
     }
 
     /// Handle paginated queries with query parameters. Returns all results.
-    fn get_paged_with_param<T, I, K, V>(&self, url: &str, params: I) -> Result<Vec<T>>
+    fn get_paged_with_param<T, U, I, K, V>(&self, url: U, params: I) -> Result<Vec<T>>
     where
         T: DeserializeOwned,
+        U: AsRef<str>,
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
         K: AsRef<str>,
