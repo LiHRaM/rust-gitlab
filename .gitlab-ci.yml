@@ -105,7 +105,8 @@ build:cargo-clippy:
         - *cargo_cache_newest
     script:
         - rustup component add clippy
-        - cargo clippy --frozen --tests --all --verbose -- -D warnings
+        #- cargo clippy --frozen --tests --all --verbose -- -D warnings
+        - cargo clippy --frozen --tests --all --verbose
 
 build:cargo-minimum:
     <<:
