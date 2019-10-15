@@ -20,7 +20,6 @@ use crates::serde_json::{self, Value};
 use std::fmt::{self, Display, Formatter};
 
 // This is only used in internal API calls.
-//#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 //#[derive(Serialize, Deserialize, Debug, Clone)]
 //pub struct UserSafe {
 //    pub username: String,
@@ -33,7 +32,6 @@ pub type QueryParamSlice<'a> = &'a [(&'a str, &'a str)];
 /// Type alias for Vec of string two-tuples
 pub type QueryParamVec<'a> = Vec<(&'a str, &'a str)>;
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe user ID.
 pub struct UserId(u64);
@@ -55,7 +53,6 @@ enum_serialize!(UserState -> "user state",
     LdapBlocked => "ldap_blocked",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Basic user information.
 pub struct UserBasic {
@@ -81,7 +78,6 @@ pub struct UserBasic {
 pub trait UserResult: DeserializeOwned {}
 impl<T: DeserializeOwned + Into<UserBasic>> UserResult for T {}
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// More detailed information only accessible to administrators.
 pub struct User {
@@ -141,7 +137,6 @@ impl From<User> for UserBasic {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// External authentication tokens.
 pub struct Identity {
@@ -151,19 +146,16 @@ pub struct Identity {
     pub extern_uid: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe theme ID.
 pub struct ThemeId(u64);
 impl_id!(ThemeId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe color scheme ID.
 pub struct ColorSchemeId(u64);
 impl_id!(ColorSchemeId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Full user structure information.
 pub struct UserPublic {
@@ -278,13 +270,11 @@ impl From<UserPublic> for User {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe email ID.
 pub struct EmailId(u64);
 impl_id!(EmailId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Email address.
 pub struct Email {
@@ -294,13 +284,11 @@ pub struct Email {
     pub email: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe hook ID.
 pub struct HookId(u64);
 impl_id!(HookId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A web hook to notify of events.
 pub struct Hook {
@@ -318,7 +306,6 @@ pub struct Hook {
     pub enable_ssl_verification: bool,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A web hook to notify of project events.
 pub struct ProjectHook {
@@ -426,13 +413,11 @@ impl WebhookEvents {
     get_event! {wiki_page}
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe project ID.
 pub struct ProjectId(u64);
 impl_id!(ProjectId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Basic project information.
 pub struct BasicProjectDetails {
@@ -489,7 +474,6 @@ enum_serialize!(FeatureVisibilityLevel -> "feature visibility level",
 
 // TODO: enum for NotificationLevel
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Structure for a group a project has been shared with.
 pub struct SharedGroup {
@@ -501,7 +485,6 @@ pub struct SharedGroup {
     pub group_access_level: u64,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Access information to a project.
 // Called `MemberAccess` in entities.rb, but it is just a base class for `ProjectAccess` and
@@ -513,7 +496,6 @@ pub struct MemberAccess {
     pub notification_level: Option<u64>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Permissions granted to the current user to a project.
 pub struct Permissions {
@@ -523,7 +505,6 @@ pub struct Permissions {
     pub group_access: Option<MemberAccess>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// The avatar of a project's namespace.
 pub struct ProjectNamespaceAvatar {
@@ -531,7 +512,6 @@ pub struct ProjectNamespaceAvatar {
     pub url: Option<String>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct ProjectLinks {
     #[serde(rename = "self")]
@@ -551,7 +531,6 @@ struct ProjectLinks {
     members: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information.
 pub struct Project {
@@ -682,7 +661,6 @@ impl Project {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Statistics about a project.
 pub struct ProjectStatistics {
@@ -767,7 +745,6 @@ impl<'de> Deserialize<'de> for AccessLevel {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A member with extra permissions on a project.
 pub struct Member {
@@ -802,7 +779,6 @@ impl From<Member> for UserBasic {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A member with extra permissions on a project.
 pub struct AccessRequester {
@@ -835,13 +811,11 @@ impl From<AccessRequester> for UserBasic {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe group ID.
 pub struct GroupId(u64);
 impl_id!(GroupId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Group information.
 pub struct Group {
@@ -870,7 +844,6 @@ pub struct Group {
     pub statistics: Option<GroupStatistics>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Statistics about a group.
 pub struct GroupStatistics {
@@ -884,7 +857,6 @@ pub struct GroupStatistics {
     pub job_artifacts_size: u64,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Group information with a project listing.
 pub struct GroupDetail {
@@ -937,7 +909,6 @@ impl From<GroupDetail> for Group {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A branch on a repository.
 pub struct RepoBranch {
@@ -959,7 +930,6 @@ pub struct RepoBranch {
     pub default: Option<bool>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// The ID of a git object.
 pub struct ObjectId(String);
@@ -989,7 +959,6 @@ enum_serialize!(ObjectType -> "object type",
     Blob => "blob",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An object inside of a repository.
 pub struct RepoTreeObject {
@@ -1006,7 +975,6 @@ pub struct RepoTreeObject {
     pub mode: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A commit in a project.
 pub struct RepoCommit {
@@ -1035,7 +1003,6 @@ pub struct RepoCommit {
     pub message: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Stats about a commit.
 pub struct RepoCommitStats {
@@ -1047,7 +1014,6 @@ pub struct RepoCommitStats {
     pub total: u64,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A commit in a project with statistics.
 pub struct RepoCommitDetail {
@@ -1085,13 +1051,11 @@ pub struct RepoCommitDetail {
     status: Value,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe snippet ID.
 pub struct SnippetId(u64);
 impl_id!(SnippetId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A project-specific snippet.
 pub struct ProjectSnippet {
@@ -1114,7 +1078,6 @@ pub struct ProjectSnippet {
 }
 
 // This is just used as a common "base class" in Ruby.
-//#[cfg_attr(feature="strict", serde(deny_unknown_fields))]
 //#[derive(Serialize, Deserialize, Debug, Clone)]
 //pub struct ProjectEntity {
 //    pub id: ProjectEntityId,
@@ -1127,7 +1090,6 @@ pub struct ProjectSnippet {
 //    pub updated_at: DateTime<Utc>,
 //}
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A diff within a repository.
 pub struct RepoDiff {
@@ -1148,7 +1110,6 @@ pub struct RepoDiff {
     pub deleted_file: bool,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct DiffRefs {
     /// SHA referencing base commit in the source branch
@@ -1159,13 +1120,11 @@ pub struct DiffRefs {
     pub start_sha: Option<ObjectId>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe milestone ID.
 pub struct MilestoneId(u64);
 impl_id!(MilestoneId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe milestone internal ID (internal to a project).
 pub struct MilestoneInternalId(u64);
@@ -1184,7 +1143,6 @@ enum_serialize!(MilestoneState -> "milestone type",
     Closed => "closed",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A milestone in a project.
 pub struct Milestone {
@@ -1247,13 +1205,11 @@ impl Milestone {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe label ID.
 pub struct LabelId(u64);
 impl_id!(LabelId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// Type-safe label color.
 pub struct LabelColor(String);
@@ -1295,7 +1251,6 @@ impl LabelColor {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An label on a project.
 pub struct Label {
@@ -1348,13 +1303,11 @@ impl Label {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe issue ID.
 pub struct IssueId(u64);
 impl_id!(IssueId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe issue internal ID (internal to a project).
 pub struct IssueInternalId(u64);
@@ -1376,7 +1329,6 @@ enum_serialize!(IssueState -> "issue type",
     Reopened => "reopened",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct IssueLinks {
     #[serde(rename = "self")]
@@ -1390,7 +1342,6 @@ struct IssueLinks {
     project: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An issue on a project.
 pub struct Issue {
@@ -1542,7 +1493,6 @@ impl Issue {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A time estimate on an issue or merge request.
 pub struct IssuableTimeStats {
@@ -1556,12 +1506,10 @@ pub struct IssuableTimeStats {
     pub human_total_time_spent: Option<String>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe external issue ID.
 pub struct ExternalIssueId(u64);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An external issue reference.
 pub struct ExternalIssue {
@@ -1603,13 +1551,11 @@ impl<'de> Deserialize<'de> for IssueReference {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe merge request ID.
 pub struct MergeRequestId(u64);
 impl_id!(MergeRequestId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe merge request internal ID (internal to a project).
 pub struct MergeRequestInternalId(u64);
@@ -1657,7 +1603,6 @@ enum_serialize!(MergeRequestState -> "merge request state",
     Locked => "locked",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Information about current user's access to the merge request.
 pub struct MergeRequestUser {
@@ -1665,7 +1610,6 @@ pub struct MergeRequestUser {
     pub can_merge: bool,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A merge request.
 pub struct MergeRequest {
@@ -1764,7 +1708,6 @@ pub struct MergeRequest {
     pub web_url: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A merge request with changes.
 pub struct MergeRequestChanges {
@@ -1910,13 +1853,11 @@ impl From<MergeRequestChanges> for MergeRequest {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe SSH key ID.
 pub struct SshKeyId(u64);
 impl_id!(SshKeyId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An uploaded SSH key.
 pub struct SshKey {
@@ -1932,7 +1873,6 @@ pub struct SshKey {
     pub can_push: bool,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An uploaded SSH key with its owner.
 pub struct SshKeyWithUser {
@@ -2004,7 +1944,6 @@ pub enum NoteableInternalId {
     MergeRequest(MergeRequestInternalId),
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe note (comment) ID.
 pub struct NoteId(u64);
@@ -2022,7 +1961,6 @@ enum_serialize!(NotePositionType -> "note position type",
     Image => "image",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// When a note is against a diff, the position of the note
 pub struct NotePosition {
@@ -2045,7 +1983,6 @@ pub struct NotePosition {
     pub new_line: Option<u64>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A comment on an entity.
 pub struct Note {
@@ -2134,7 +2071,6 @@ impl Note {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A threaded discussion
 pub struct Discussion {
@@ -2146,7 +2082,6 @@ pub struct Discussion {
     pub notes: Vec<Note>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe award ID.
 pub struct AwardId(u64);
@@ -2184,7 +2119,6 @@ enum_serialize!(AwardableType -> "awardable type",
     Note => "Note",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An awarded emoji on an entity.
 pub struct AwardEmoji {
@@ -2230,7 +2164,6 @@ enum_serialize!(LineType -> "line type",
     Old => "old",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A note on a commit diff.
 pub struct CommitNote {
@@ -2248,7 +2181,6 @@ pub struct CommitNote {
     pub created_at: DateTime<Utc>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe commit status ID.
 pub struct CommitStatusId(u64);
@@ -2286,7 +2218,6 @@ enum_serialize!(StatusState -> "status state",
     Manual => "manual",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A status of a commit.
 pub struct CommitStatus {
@@ -2353,7 +2284,6 @@ pub enum EventTargetId {
     Snippet(SnippetId),
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An event on a project.
 pub struct Event {
@@ -2436,7 +2366,6 @@ pub enum NamespaceId {
     Group(GroupId),
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An entity which can own projects.
 pub struct Namespace {
@@ -2468,13 +2397,11 @@ impl Namespace {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe runner ID.
 pub struct RunnerId(u64);
 impl_id!(RunnerId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A Gitlab CI runner.
 pub struct Runner {
@@ -2490,7 +2417,6 @@ pub struct Runner {
     pub name: Option<String>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An uploaded artifact from a job.
 pub struct JobArtifactFile {
@@ -2500,13 +2426,11 @@ pub struct JobArtifactFile {
     pub size: usize,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe job ID.
 pub struct JobId(u64);
 impl_id!(JobId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Information about a job in Gitlab CI.
 pub struct Job {
@@ -2540,13 +2464,11 @@ pub struct Job {
     pub pipeline: PipelineBasic,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe pipeline ID.
 pub struct PipelineId(u64);
 impl_id!(PipelineId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Information about a pipeline in Gitlab CI.
 pub struct PipelineBasic {
@@ -2604,7 +2526,6 @@ pub struct Pipeline {
     pub detailed_status: Value,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PipelineVariableType {
     EnvVar,
@@ -2621,7 +2542,6 @@ impl Default for PipelineVariableType {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A pipeline variable.
 pub struct PipelineVariable {
@@ -2635,13 +2555,11 @@ pub struct PipelineVariable {
     pub variable_type: PipelineVariableType,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 /// Type-safe label event ID.
 pub struct LabelEventId(u64);
 impl_id!(LabelEventId);
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A resource label event
 ///
@@ -2689,7 +2607,6 @@ pub enum ResourceLabelEventTarget {
     MergeRequest(MergeRequestId),
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An label on a project.
 ///
