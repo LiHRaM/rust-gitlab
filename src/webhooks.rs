@@ -315,8 +315,11 @@ impl MergeRequestParams {
                 } else if let Some(as_bool) = val.as_bool() {
                     as_bool
                 } else {
-                    error!(target: "gitlab",
-                           "unknown value for force_remove_source_branch: {}", val);
+                    error!(
+                        target: "gitlab",
+                        "unknown value for force_remove_source_branch: {}",
+                        val,
+                    );
                     false
                 }
             })
