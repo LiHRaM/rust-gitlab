@@ -9,15 +9,11 @@
 //! A library for communicating with Gitlab instances.
 
 #[macro_use]
-extern crate error_chain;
-
-#[macro_use]
 extern crate log;
 
 mod crates {
     // public
     pub extern crate chrono;
-    // pub extern crate error_chain;
     pub extern crate serde;
     pub extern crate serde_json;
 
@@ -26,9 +22,10 @@ mod crates {
     pub extern crate log;
     pub extern crate percent_encoding;
     pub extern crate reqwest;
+    // pub extern crate rustversion;
+    pub extern crate thiserror;
 }
 
-mod error;
 #[macro_use]
 mod macros;
 mod gitlab;
@@ -38,11 +35,12 @@ pub mod systemhooks;
 pub mod types;
 pub mod webhooks;
 
-pub use error::*;
 pub use gitlab::CommitStatusInfo;
 pub use gitlab::Gitlab;
 pub use gitlab::GitlabBuilder;
+pub use gitlab::GitlabError;
 pub use gitlab::MergeRequestStateFilter;
+pub use gitlab::TokenError;
 pub use types::*;
 
 #[cfg(test)]
