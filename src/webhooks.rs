@@ -64,7 +64,6 @@ impl AsRef<DateTime<Utc>> for HookDate {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information exposed in hooks.
 pub struct ProjectHookAttrs {
@@ -94,7 +93,6 @@ pub struct ProjectHookAttrs {
     url: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Wiki project information exposed in hooks.
 pub struct ProjectWikiHookAttrs {
@@ -110,7 +108,6 @@ pub struct ProjectWikiHookAttrs {
     pub default_branch: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// User information exposed in hooks.
 pub struct UserHookAttrs {
@@ -122,7 +119,6 @@ pub struct UserHookAttrs {
     pub avatar_url: Option<String>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// The identity of a user exposed through a hook.
 pub struct HookCommitIdentity {
@@ -132,7 +128,6 @@ pub struct HookCommitIdentity {
     pub email: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Commit information exposed in hooks.
 pub struct CommitHookAttrs {
@@ -150,7 +145,6 @@ pub struct CommitHookAttrs {
     pub removed: Option<Vec<String>>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A push hook.
 pub struct PushHook {
@@ -211,7 +205,6 @@ enum_serialize!(IssueAction -> "issue action",
     Reopen => "reopen",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Issue information exposed in hooks.
 pub struct IssueHookAttrs {
@@ -266,7 +259,6 @@ pub struct IssueHookAttrs {
     pub action: Option<IssueAction>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// An issue hook.
 pub struct IssueHook {
@@ -304,7 +296,6 @@ enum_serialize!(MergeRequestAction -> "merge request action",
     Merge => "merge",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Merge parameters for a merge request.
 pub struct MergeRequestParams {
@@ -332,7 +323,6 @@ impl MergeRequestParams {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Merge request information exposed in hooks.
 pub struct MergeRequestHookAttrs {
@@ -406,7 +396,6 @@ pub struct MergeRequestHookAttrs {
     lock_version: Option<u64>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A merge request hook.
 pub struct MergeRequestHook {
@@ -436,7 +425,6 @@ enum_serialize!(SnippetType -> "snippet type",
     Personal => "PersonalSnippet",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Snippet information exposed in hooks.
 pub struct SnippetHookAttrs {
@@ -474,7 +462,6 @@ enum_serialize!(WikiPageAction -> "wiki page action",
     Update => "update",
 );
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Wiki information exposed in hooks.
 pub struct WikiPageHookAttrs {
@@ -493,7 +480,6 @@ pub struct WikiPageHookAttrs {
     pub action: WikiPageAction,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Diff information exposed in hooks.
 pub struct DiffHookAttrs {
@@ -516,7 +502,6 @@ pub struct DiffHookAttrs {
     pub too_large: bool,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 // FIXME(gitlab#21467): This can apparently be a string sometimes.
 // https://gitlab.com/gitlab-org/gitlab-ce/issues/21467
@@ -532,7 +517,6 @@ pub struct PositionHookAttrs {
     pub new_path: String,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Note (comment) information exposed in hooks.
 pub struct NoteHookAttrs {
@@ -608,7 +592,6 @@ impl NoteHookAttrs {
     }
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A note hook.
 pub struct NoteHook {
@@ -633,7 +616,6 @@ pub struct NoteHook {
     repository: Value,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Build user information exposed in hooks.
 pub struct BuildUserHookAttrs {
@@ -645,7 +627,6 @@ pub struct BuildUserHookAttrs {
     pub email: Option<String>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Build commit information exposed in hooks.
 pub struct BuildCommitHookAttrs {
@@ -666,7 +647,6 @@ pub struct BuildCommitHookAttrs {
     pub finished_at: Option<HookDate>,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information exposed in build hooks.
 pub struct BuildProjectHookAttrs {
@@ -684,7 +664,6 @@ pub struct BuildProjectHookAttrs {
     pub visibility_level: u64,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A build hook.
 pub struct BuildHook {
@@ -719,7 +698,6 @@ pub struct BuildHook {
     pub repository: BuildProjectHookAttrs,
 }
 
-#[cfg_attr(feature = "strict", serde(deny_unknown_fields))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 /// A wiki page hook.
 pub struct WikiPageHook {
