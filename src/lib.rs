@@ -4,7 +4,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![warn(missing_docs)]
+// TODO: Document API entities.
+// #![warn(missing_docs)]
 
 //! A library for communicating with Gitlab instances.
 
