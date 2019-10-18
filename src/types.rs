@@ -1523,7 +1523,7 @@ pub struct ExternalIssue {
 #[derive(Debug, Clone)]
 pub enum IssueReference {
     /// A reference to an issue on the same Gitlab host.
-    Internal(Issue),
+    Internal(Box<Issue>),
     /// An external issue reference.
     External(ExternalIssue),
 }
@@ -1545,7 +1545,7 @@ impl<'de> Deserialize<'de> for IssueReference {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         serde_json::from_value::<Issue>(val.clone())
-            .map(IssueReference::Internal)
+            .map(|issue| IssueReference::Internal(Box::new(issue)))
             .or_else(|_| serde_json::from_value::<ExternalIssue>(val).map(IssueReference::External))
             .map_err(|err| D::Error::custom(format!("invalid issue reference: {:?}", err)))
     }
