@@ -6,17 +6,19 @@
 
 use crates::itertools::Itertools;
 use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
-use crates::reqwest::header::HeaderValue;
-use crates::reqwest::{Client, RequestBuilder, Url};
+use crates::reqwest::header::{self, HeaderValue};
+use crates::reqwest::{self, Client, RequestBuilder, Url};
 use crates::serde::de::Error as SerdeError;
 use crates::serde::de::{DeserializeOwned, Unexpected};
 use crates::serde::ser::Serialize;
 use crates::serde::{Deserialize, Deserializer, Serializer};
 use crates::serde_json;
+use crates::thiserror::Error;
 
-use error::*;
 use types::*;
 
+#[rustversion::since(1.38)]
+use std::any;
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
 
@@ -32,6 +34,17 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b'}')
     .add(b'%')
     .add(b'/');
+
+#[derive(Debug, Error)]
+pub enum TokenError {
+    #[error("header value error: {}", source)]
+    HeaderValue {
+        #[from]
+        source: header::InvalidHeaderValue,
+    },
+}
+
+type TokenResult<T> = Result<T, TokenError>;
 
 /// A Gitlab API token
 ///
@@ -50,24 +63,108 @@ impl Token {
     /// Depending on the token type, this will be either the Private-Token header
     /// or the Authorization header.
     /// Returns an error if the token string cannot be parsed as a header value.
-    pub fn set_header(&self, req: RequestBuilder) -> Result<RequestBuilder> {
+    pub fn set_header(&self, req: RequestBuilder) -> TokenResult<RequestBuilder> {
         Ok(match self {
             Token::Private(token) => {
-                let mut token_header_value =
-                    HeaderValue::from_str(&token).map_err(|_| ErrorKind::HeaderValueParse)?;
+                let mut token_header_value = HeaderValue::from_str(&token)?;
                 token_header_value.set_sensitive(true);
                 req.header("PRIVATE-TOKEN", token_header_value)
             },
             Token::OAuth2(token) => {
                 let value = format!("Bearer {}", token);
-                let mut token_header_value =
-                    HeaderValue::from_str(&value).map_err(|_| ErrorKind::HeaderValueParse)?;
+                let mut token_header_value = HeaderValue::from_str(&value)?;
                 token_header_value.set_sensitive(true);
                 req.header("Authorization", token_header_value)
             },
         })
     }
 }
+
+#[derive(Debug, Error)]
+pub enum GitlabError {
+    #[error("failed to parse url: {}", source)]
+    UrlParse {
+        #[from]
+        source: reqwest::UrlError,
+    },
+    #[error("no such user: {}", user)]
+    NoSuchUser { user: String },
+    #[error("error setting token header: {}", source)]
+    TokenError {
+        #[from]
+        source: TokenError,
+    },
+    #[error("communication with gitlab: {}", source)]
+    Communication {
+        #[from]
+        source: reqwest::Error,
+    },
+    #[error("gitlab HTTP error: {}", status)]
+    Http { status: reqwest::StatusCode },
+    #[error("could not parse JSON response: {}", source)]
+    Json {
+        #[source]
+        source: serde_json::Error,
+    },
+    #[error("gitlab server error: {}", msg)]
+    Gitlab { msg: String },
+    #[error("could not parse {} data from JSON: {}", typename.unwrap_or("<unknown>"), source)]
+    DataType {
+        #[source]
+        source: serde_json::Error,
+        typename: Option<&'static str>,
+    },
+}
+
+impl GitlabError {
+    fn no_such_user(user: &str) -> Self {
+        GitlabError::NoSuchUser {
+            user: user.into(),
+        }
+    }
+
+    fn http(status: reqwest::StatusCode) -> Self {
+        GitlabError::Http {
+            status,
+        }
+    }
+
+    fn json(source: serde_json::Error) -> Self {
+        GitlabError::Json {
+            source,
+        }
+    }
+
+    fn from_gitlab(value: serde_json::Value) -> Self {
+        let msg = value
+            .pointer("/message")
+            .or_else(|| value.pointer("/error"))
+            .and_then(|s| s.as_str())
+            .unwrap_or_else(|| "<unknown error>");
+
+        GitlabError::Gitlab {
+            msg: msg.into(),
+        }
+    }
+
+    #[rustversion::since(1.38)]
+    fn data_type<T>(source: serde_json::Error) -> Self {
+        GitlabError::DataType {
+            source,
+            typename: Some(any::type_name::<T>()),
+        }
+    }
+
+    #[rustversion::before(1.38)]
+    fn data_type<T>(source: serde_json::Error) -> Self {
+        GitlabError::DataType {
+            source,
+            typename: None,
+        }
+    }
+}
+
+type GitlabResult<T> = Result<T, GitlabError>;
 
 /// A representation of the Gitlab API for a single user.
 ///
@@ -124,7 +221,7 @@ impl Gitlab {
     ///
     /// The `token` should be a valid [personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html).
     /// Errors out if `token` is invalid.
-    pub fn new<H, T>(host: H, token: T) -> Result<Self>
+    pub fn new<H, T>(host: H, token: T) -> GitlabResult<Self>
     where
         H: AsRef<str>,
         T: ToString,
@@ -135,7 +232,7 @@ impl Gitlab {
     /// Create a new non-SSL Gitlab API representation.
     ///
     /// Errors out if `token` is invalid.
-    pub fn new_insecure<H, T>(host: H, token: T) -> Result<Self>
+    pub fn new_insecure<H, T>(host: H, token: T) -> GitlabResult<Self>
     where
         H: AsRef<str>,
         T: ToString,
@@ -147,7 +244,7 @@ impl Gitlab {
     ///
     /// The `token` should be a valid [OAuth2 token](https://docs.gitlab.com/ee/api/oauth2.html).
     /// Errors out if `token` is invalid.
-    pub fn with_oauth2<H, T>(host: H, token: T) -> Result<Self>
+    pub fn with_oauth2<H, T>(host: H, token: T) -> GitlabResult<Self>
     where
         H: AsRef<str>,
         T: ToString,
@@ -159,7 +256,7 @@ impl Gitlab {
     ///
     /// The `token` should be a valid [OAuth2 token](https://docs.gitlab.com/ee/api/oauth2.html).
     /// Errors out if `token` is invalid.
-    pub fn with_oauth2_insecure<H, T>(host: H, token: T) -> Result<Self>
+    pub fn with_oauth2_insecure<H, T>(host: H, token: T) -> GitlabResult<Self>
     where
         H: AsRef<str>,
         T: ToString,
@@ -168,9 +265,8 @@ impl Gitlab {
     }
 
     /// Internal method to create a new Gitlab client.
-    fn new_impl(protocol: &str, host: &str, token: Token) -> Result<Self> {
-        let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))
-            .chain_err(|| ErrorKind::UrlParse)?;
+    fn new_impl(protocol: &str, host: &str, token: Token) -> GitlabResult<Self> {
+        let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
 
         let api = Gitlab {
             client: Client::new(),
@@ -194,12 +290,12 @@ impl Gitlab {
     }
 
     /// The user the API is acting as.
-    pub fn current_user(&self) -> Result<UserPublic> {
+    pub fn current_user(&self) -> GitlabResult<UserPublic> {
         self.get_with_param("user", query_param_slice![])
     }
 
     /// Get all user accounts
-    pub fn users<T, I, K, V>(&self, params: I) -> Result<Vec<T>>
+    pub fn users<T, I, K, V>(&self, params: I) -> GitlabResult<Vec<T>>
     where
         T: UserResult,
         I: IntoIterator,
@@ -211,7 +307,7 @@ impl Gitlab {
     }
 
     /// Find a user by id.
-    pub fn user<T, I, K, V>(&self, user: UserId, params: I) -> Result<T>
+    pub fn user<T, I, K, V>(&self, user: UserId, params: I) -> GitlabResult<T>
     where
         T: UserResult,
         I: IntoIterator,
@@ -223,7 +319,7 @@ impl Gitlab {
     }
 
     /// Find a user by username.
-    pub fn user_by_name<T, N>(&self, name: N) -> Result<T>
+    pub fn user_by_name<T, N>(&self, name: N) -> GitlabResult<T>
     where
         T: UserResult,
         N: AsRef<str>,
@@ -231,11 +327,11 @@ impl Gitlab {
         let mut users = self.get_paged_with_param("users", &[("username", name.as_ref())])?;
         users
             .pop()
-            .ok_or_else(|| Error::from_kind(ErrorKind::Gitlab("no such user".into())))
+            .ok_or_else(|| GitlabError::no_such_user(name.as_ref()))
     }
 
     /// Get all accessible projects.
-    pub fn projects<I, K, V>(&self, params: I) -> Result<Vec<Project>>
+    pub fn projects<I, K, V>(&self, params: I) -> GitlabResult<Vec<Project>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -246,12 +342,12 @@ impl Gitlab {
     }
 
     /// Get all owned projects.
-    pub fn owned_projects(&self) -> Result<Vec<Project>> {
+    pub fn owned_projects(&self) -> GitlabResult<Vec<Project>> {
         self.get_paged_with_param("projects", &[("owned", "true")])
     }
 
     /// Find a project by id.
-    pub fn project<I, K, V>(&self, project: ProjectId, params: I) -> Result<Project>
+    pub fn project<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Project>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -267,7 +363,7 @@ impl Gitlab {
     }
 
     /// Find a project by name.
-    pub fn project_by_name<N, I, K, V>(&self, name: N, params: I) -> Result<Project>
+    pub fn project_by_name<N, I, K, V>(&self, name: N, params: I) -> GitlabResult<Project>
     where
         N: AsRef<str>,
         I: IntoIterator,
@@ -282,7 +378,7 @@ impl Gitlab {
     }
 
     /// Get all accessible groups.
-    pub fn groups<I, K, V>(&self, params: I) -> Result<Vec<Group>>
+    pub fn groups<I, K, V>(&self, params: I) -> GitlabResult<Vec<Group>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -293,7 +389,7 @@ impl Gitlab {
     }
 
     /// Get a project's hooks.
-    pub fn hooks<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<ProjectHook>>
+    pub fn hooks<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<ProjectHook>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -304,7 +400,12 @@ impl Gitlab {
     }
 
     /// Get a project hook.
-    pub fn hook<I, K, V>(&self, project: ProjectId, hook: HookId, params: I) -> Result<ProjectHook>
+    pub fn hook<I, K, V>(
+        &self,
+        project: ProjectId,
+        hook: HookId,
+        params: I,
+    ) -> GitlabResult<ProjectHook>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -352,7 +453,7 @@ impl Gitlab {
         project: ProjectId,
         url: U,
         events: WebhookEvents,
-    ) -> Result<ProjectHook>
+    ) -> GitlabResult<ProjectHook>
     where
         U: AsRef<str>,
     {
@@ -363,7 +464,7 @@ impl Gitlab {
     }
 
     /// Get the team members of a group.
-    pub fn group_members<I, K, V>(&self, group: GroupId, params: I) -> Result<Vec<Member>>
+    pub fn group_members<I, K, V>(&self, group: GroupId, params: I) -> GitlabResult<Vec<Member>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -374,7 +475,12 @@ impl Gitlab {
     }
 
     /// Get a team member of a group.
-    pub fn group_member<I, K, V>(&self, group: GroupId, user: UserId, params: I) -> Result<Member>
+    pub fn group_member<I, K, V>(
+        &self,
+        group: GroupId,
+        user: UserId,
+        params: I,
+    ) -> GitlabResult<Member>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -385,7 +491,11 @@ impl Gitlab {
     }
 
     /// Get the team members of a project.
-    pub fn project_members<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<Member>>
+    pub fn project_members<I, K, V>(
+        &self,
+        project: ProjectId,
+        params: I,
+    ) -> GitlabResult<Vec<Member>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -401,7 +511,7 @@ impl Gitlab {
         project: ProjectId,
         user: UserId,
         params: I,
-    ) -> Result<Member>
+    ) -> GitlabResult<Member>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -417,7 +527,7 @@ impl Gitlab {
         project: ProjectId,
         user: UserId,
         access: AccessLevel,
-    ) -> Result<Member> {
+    ) -> GitlabResult<Member> {
         let user_str = format!("{}", user);
         let access_str = format!("{}", access);
 
@@ -433,7 +543,7 @@ impl Gitlab {
         project: P,
         user: UserId,
         access: AccessLevel,
-    ) -> Result<Member>
+    ) -> GitlabResult<Member>
     where
         P: AsRef<str>,
     {
@@ -447,7 +557,7 @@ impl Gitlab {
     }
 
     /// Get branches for a project.
-    pub fn branches<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<RepoBranch>>
+    pub fn branches<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<RepoBranch>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -458,7 +568,12 @@ impl Gitlab {
     }
 
     /// Get a branch.
-    pub fn branch<B, I, K, V>(&self, project: ProjectId, branch: B, params: I) -> Result<RepoBranch>
+    pub fn branch<B, I, K, V>(
+        &self,
+        project: ProjectId,
+        branch: B,
+        params: I,
+    ) -> GitlabResult<RepoBranch>
     where
         B: AsRef<str>,
         I: IntoIterator,
@@ -477,7 +592,7 @@ impl Gitlab {
     }
 
     /// Get a commit.
-    pub fn commit<C>(&self, project: ProjectId, commit: C) -> Result<RepoCommitDetail>
+    pub fn commit<C>(&self, project: ProjectId, commit: C) -> GitlabResult<RepoCommitDetail>
     where
         C: AsRef<str>,
     {
@@ -497,7 +612,7 @@ impl Gitlab {
         project: ProjectId,
         commit: C,
         params: I,
-    ) -> Result<Vec<CommitNote>>
+    ) -> GitlabResult<Vec<CommitNote>>
     where
         C: AsRef<str>,
         I: IntoIterator,
@@ -521,7 +636,7 @@ impl Gitlab {
         project: ProjectId,
         commit: C,
         body: B,
-    ) -> Result<CommitNote>
+    ) -> GitlabResult<CommitNote>
     where
         C: AsRef<str>,
         B: AsRef<str>,
@@ -542,7 +657,7 @@ impl Gitlab {
         project: P,
         commit: C,
         body: B,
-    ) -> Result<CommitNote>
+    ) -> GitlabResult<CommitNote>
     where
         P: AsRef<str>,
         C: AsRef<str>,
@@ -566,7 +681,7 @@ impl Gitlab {
         body: &str,
         path: &str,
         line: u64,
-    ) -> Result<CommitNote> {
+    ) -> GitlabResult<CommitNote> {
         let line_str = format!("{}", line);
         let line_type = LineType::New;
 
@@ -587,7 +702,7 @@ impl Gitlab {
         project: ProjectId,
         commit: C,
         params: I,
-    ) -> Result<Vec<CommitStatus>>
+    ) -> GitlabResult<Vec<CommitStatus>>
     where
         C: AsRef<str>,
         I: IntoIterator,
@@ -611,7 +726,7 @@ impl Gitlab {
         project: P,
         commit: C,
         params: I,
-    ) -> Result<Vec<CommitStatus>>
+    ) -> GitlabResult<Vec<CommitStatus>>
     where
         P: AsRef<str>,
         C: AsRef<str>,
@@ -631,7 +746,11 @@ impl Gitlab {
     }
 
     /// Get the all statuses of a commit.
-    pub fn commit_all_statuses<C>(&self, project: ProjectId, commit: C) -> Result<Vec<CommitStatus>>
+    pub fn commit_all_statuses<C>(
+        &self,
+        project: ProjectId,
+        commit: C,
+    ) -> GitlabResult<Vec<CommitStatus>>
     where
         C: AsRef<str>,
     {
@@ -651,7 +770,7 @@ impl Gitlab {
         project: ProjectId,
         commit: C,
         params: I,
-    ) -> Result<Vec<Job>>
+    ) -> GitlabResult<Vec<Job>>
     where
         C: AsRef<str>,
         I: IntoIterator,
@@ -670,7 +789,7 @@ impl Gitlab {
     }
 
     /// Get the all builds of a commit.
-    pub fn commit_all_builds<C>(&self, project: ProjectId, commit: C) -> Result<Vec<Job>>
+    pub fn commit_all_builds<C>(&self, project: ProjectId, commit: C) -> GitlabResult<Vec<Job>>
     where
         C: AsRef<str>,
     {
@@ -691,7 +810,7 @@ impl Gitlab {
         sha: S,
         state: StatusState,
         info: &CommitStatusInfo,
-    ) -> Result<CommitStatus>
+    ) -> GitlabResult<CommitStatus>
     where
         S: AsRef<str>,
     {
@@ -722,7 +841,7 @@ impl Gitlab {
         sha: S,
         state: StatusState,
         info: &CommitStatusInfo,
-    ) -> Result<CommitStatus>
+    ) -> GitlabResult<CommitStatus>
     where
         P: AsRef<str>,
         S: AsRef<str>,
@@ -752,12 +871,12 @@ impl Gitlab {
     }
 
     /// Get the labels for a project.
-    pub fn labels(&self, project: ProjectId) -> Result<Vec<Label>> {
+    pub fn labels(&self, project: ProjectId) -> GitlabResult<Vec<Label>> {
         self.get_paged(format!("projects/{}/labels", project))
     }
 
     /// Get the labels with open/closed/merge requests count
-    pub fn labels_with_counts(&self, project: ProjectId) -> Result<Vec<Label>> {
+    pub fn labels_with_counts(&self, project: ProjectId) -> GitlabResult<Vec<Label>> {
         self.get_paged_with_param(
             format!("projects/{}/labels", project),
             &[("with_counts", "true")],
@@ -765,12 +884,12 @@ impl Gitlab {
     }
 
     /// Get label by ID.
-    pub fn label(&self, project: ProjectId, label: LabelId) -> Result<Label> {
+    pub fn label(&self, project: ProjectId, label: LabelId) -> GitlabResult<Label> {
         self.get(format!("projects/{}/labels/{}", project, label))
     }
 
     /// Get the issues for a project.
-    pub fn issues<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<Issue>>
+    pub fn issues<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<Issue>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -786,7 +905,7 @@ impl Gitlab {
         project: ProjectId,
         issue: IssueInternalId,
         params: I,
-    ) -> Result<Issue>
+    ) -> GitlabResult<Issue>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -802,7 +921,7 @@ impl Gitlab {
         project: ProjectId,
         issue: IssueInternalId,
         params: I,
-    ) -> Result<Vec<Note>>
+    ) -> GitlabResult<Vec<Note>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -821,7 +940,7 @@ impl Gitlab {
         project: P,
         issue: IssueInternalId,
         params: I,
-    ) -> Result<Vec<Note>>
+    ) -> GitlabResult<Vec<Note>>
     where
         P: AsRef<str>,
         I: IntoIterator,
@@ -840,7 +959,7 @@ impl Gitlab {
     }
 
     /// Create a new label
-    pub fn create_label(&self, project: ProjectId, label: Label) -> Result<Label> {
+    pub fn create_label(&self, project: ProjectId, label: Label) -> GitlabResult<Label> {
         let path = format!("projects/{}/labels", project);
 
         let mut params: Vec<(&str, String)> = Vec::new();
@@ -860,7 +979,11 @@ impl Gitlab {
     }
 
     /// Create a new milestone
-    pub fn create_milestone(&self, project: ProjectId, milestone: Milestone) -> Result<Milestone> {
+    pub fn create_milestone(
+        &self,
+        project: ProjectId,
+        milestone: Milestone,
+    ) -> GitlabResult<Milestone> {
         let path = format!("projects/{}/milestones", project);
 
         let mut params: Vec<(&str, String)> = Vec::new();
@@ -883,7 +1006,7 @@ impl Gitlab {
     }
 
     /// Create a new issue
-    pub fn create_issue(&self, project: ProjectId, issue: Issue) -> Result<Issue> {
+    pub fn create_issue(&self, project: ProjectId, issue: Issue) -> GitlabResult<Issue> {
         let path = format!("projects/{}/issues", project);
 
         let mut params: Vec<(&str, String)> = Vec::new();
@@ -929,7 +1052,7 @@ impl Gitlab {
         &self,
         project: ProjectId,
         issue: IssueInternalId,
-    ) -> Result<Vec<ResourceLabelEvent>> {
+    ) -> GitlabResult<Vec<ResourceLabelEvent>> {
         self.get_paged(format!(
             "projects/{}/issues/{}/resource_label_events",
             project, issue,
@@ -942,7 +1065,7 @@ impl Gitlab {
         project: ProjectId,
         issue: IssueInternalId,
         content: C,
-    ) -> Result<Note>
+    ) -> GitlabResult<Note>
     where
         C: AsRef<str>,
     {
@@ -957,7 +1080,7 @@ impl Gitlab {
         project: P,
         issue: IssueInternalId,
         content: C,
-    ) -> Result<Note>
+    ) -> GitlabResult<Note>
     where
         P: AsRef<str>,
         C: AsRef<str>,
@@ -976,7 +1099,7 @@ impl Gitlab {
         &self,
         project: ProjectId,
         params: I,
-    ) -> Result<Vec<MergeRequest>>
+    ) -> GitlabResult<Vec<MergeRequest>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -991,7 +1114,7 @@ impl Gitlab {
         &self,
         project: ProjectId,
         state: MergeRequestStateFilter,
-    ) -> Result<Vec<MergeRequest>> {
+    ) -> GitlabResult<Vec<MergeRequest>> {
         self.get_paged_with_param(
             format!("projects/{}/merge_requests", project),
             &[("state", state.as_str())],
@@ -999,7 +1122,11 @@ impl Gitlab {
     }
 
     /// Get all pipelines for a project.
-    pub fn pipelines<I, K, V>(&self, project: ProjectId, params: I) -> Result<Vec<PipelineBasic>>
+    pub fn pipelines<I, K, V>(
+        &self,
+        project: ProjectId,
+        params: I,
+    ) -> GitlabResult<Vec<PipelineBasic>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -1010,7 +1137,7 @@ impl Gitlab {
     }
 
     /// Get a single pipeline.
-    pub fn pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline> {
+    pub fn pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
         self.get(format!("projects/{}/pipelines/{}", project, id))
     }
 
@@ -1019,7 +1146,7 @@ impl Gitlab {
         &self,
         project: ProjectId,
         id: PipelineId,
-    ) -> Result<Vec<PipelineVariable>> {
+    ) -> GitlabResult<Vec<PipelineVariable>> {
         self.get(format!("projects/{}/pipelines/{}/variables", project, id))
     }
 
@@ -1029,7 +1156,7 @@ impl Gitlab {
         project: ProjectId,
         ref_: ObjectId,
         variables: &[PipelineVariable],
-    ) -> Result<Pipeline> {
+    ) -> GitlabResult<Pipeline> {
         use crates::serde::Serialize;
         #[derive(Debug, Serialize)]
         struct CreatePipelineParams<'a> {
@@ -1047,12 +1174,12 @@ impl Gitlab {
     }
 
     /// Retry jobs in a pipeline.
-    pub fn retry_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline> {
+    pub fn retry_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
         self.post(format!("projects/{}/pipelines/{}/retry", project, id))
     }
 
     /// Cancel a pipeline.
-    pub fn cancel_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline> {
+    pub fn cancel_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
         self.post(format!("projects/{}/pipelines/{}/cancel", project, id))
     }
 
@@ -1060,7 +1187,7 @@ impl Gitlab {
     /// Delete a pipeline.
     ///
     /// NOTE Not implemented.
-    fn delete_pipeline(&self, project: ProjectId, id: PipelineId) -> Result<Pipeline> {
+    fn delete_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
         unimplemented!();
     }
 
@@ -1070,7 +1197,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<MergeRequest>
+    ) -> GitlabResult<MergeRequest>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -1089,7 +1216,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<Vec<IssueReference>>
+    ) -> GitlabResult<Vec<IssueReference>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -1111,7 +1238,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<Vec<Discussion>>
+    ) -> GitlabResult<Vec<Discussion>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -1133,7 +1260,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<Vec<Note>>
+    ) -> GitlabResult<Vec<Note>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -1155,7 +1282,7 @@ impl Gitlab {
         project: P,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<Vec<Note>>
+    ) -> GitlabResult<Vec<Note>>
     where
         P: AsRef<str>,
         I: IntoIterator,
@@ -1180,7 +1307,7 @@ impl Gitlab {
         merge_request: MergeRequestInternalId,
         note: NoteId,
         award: &str,
-    ) -> Result<AwardEmoji> {
+    ) -> GitlabResult<AwardEmoji> {
         let path = format!(
             "projects/{}/merge_requests/{}/notes/{}/award_emoji",
             project, merge_request, note,
@@ -1195,7 +1322,7 @@ impl Gitlab {
         merge_request: MergeRequestInternalId,
         note: NoteId,
         award: &str,
-    ) -> Result<AwardEmoji>
+    ) -> GitlabResult<AwardEmoji>
     where
         P: AsRef<str>,
     {
@@ -1214,7 +1341,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<Vec<AwardEmoji>>
+    ) -> GitlabResult<Vec<AwardEmoji>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -1236,7 +1363,7 @@ impl Gitlab {
         project: P,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<Vec<AwardEmoji>>
+    ) -> GitlabResult<Vec<AwardEmoji>>
     where
         P: AsRef<str>,
         I: IntoIterator,
@@ -1261,7 +1388,7 @@ impl Gitlab {
         merge_request: MergeRequestInternalId,
         note: NoteId,
         params: I,
-    ) -> Result<Vec<AwardEmoji>>
+    ) -> GitlabResult<Vec<AwardEmoji>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -1284,7 +1411,7 @@ impl Gitlab {
         merge_request: MergeRequestInternalId,
         note: NoteId,
         params: I,
-    ) -> Result<Vec<AwardEmoji>>
+    ) -> GitlabResult<Vec<AwardEmoji>>
     where
         P: AsRef<str>,
         I: IntoIterator,
@@ -1308,7 +1435,7 @@ impl Gitlab {
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-    ) -> Result<Vec<ResourceLabelEvent>> {
+    ) -> GitlabResult<Vec<ResourceLabelEvent>> {
         self.get_paged(format!(
             "projects/{}/merge_requests/{}/resource_label_events",
             project, merge_request,
@@ -1320,7 +1447,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         content: &str,
-    ) -> Result<Discussion> {
+    ) -> GitlabResult<Discussion> {
         let path = format!(
             "projects/{}/merge_requests/{}/discussions",
             project, merge_request
@@ -1333,7 +1460,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         content: &str,
-    ) -> Result<Note> {
+    ) -> GitlabResult<Note> {
         let path = format!(
             "projects/{}/merge_requests/{}/notes",
             project, merge_request,
@@ -1347,7 +1474,7 @@ impl Gitlab {
         project: P,
         merge_request: MergeRequestInternalId,
         content: &str,
-    ) -> Result<Note>
+    ) -> GitlabResult<Note>
     where
         P: AsRef<str>,
     {
@@ -1365,7 +1492,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<Vec<Issue>>
+    ) -> GitlabResult<Vec<Issue>>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
@@ -1387,7 +1514,7 @@ impl Gitlab {
         project: P,
         merge_request: MergeRequestInternalId,
         params: I,
-    ) -> Result<Vec<Issue>>
+    ) -> GitlabResult<Vec<Issue>>
     where
         P: AsRef<str>,
         I: IntoIterator,
@@ -1411,7 +1538,7 @@ impl Gitlab {
         project: ProjectId,
         issue: IssueInternalId,
         labels: I,
-    ) -> Result<Issue>
+    ) -> GitlabResult<Issue>
     where
         I: IntoIterator<Item = L>,
         L: Display,
@@ -1426,7 +1553,7 @@ impl Gitlab {
         project: P,
         issue: IssueInternalId,
         labels: I,
-    ) -> Result<Issue>
+    ) -> GitlabResult<Issue>
     where
         P: AsRef<str>,
         I: IntoIterator<Item = L>,
@@ -1446,7 +1573,7 @@ impl Gitlab {
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         labels: I,
-    ) -> Result<MergeRequest>
+    ) -> GitlabResult<MergeRequest>
     where
         I: IntoIterator<Item = L>,
         L: Display,
@@ -1456,18 +1583,16 @@ impl Gitlab {
     }
 
     /// Create a URL to an API endpoint.
-    fn create_url<U>(&self, url: U) -> Result<Url>
+    fn create_url<U>(&self, url: U) -> GitlabResult<Url>
     where
         U: AsRef<str>,
     {
         debug!(target: "gitlab", "api call {}", url.as_ref());
-        self.base_url
-            .join(url.as_ref())
-            .chain_err(|| ErrorKind::UrlParse)
+        Ok(self.base_url.join(url.as_ref())?)
     }
 
     /// Create a URL to an API endpoint with query parameters.
-    fn create_url_with_param<U, I, K, V>(&self, url: U, param: I) -> Result<Url>
+    fn create_url_with_param<U, I, K, V>(&self, url: U, param: I) -> GitlabResult<Url>
     where
         U: AsRef<str>,
         I: IntoIterator,
@@ -1481,38 +1606,29 @@ impl Gitlab {
     }
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
-    fn send<T>(&self, req: RequestBuilder) -> Result<T>
+    fn send<T>(&self, req: RequestBuilder) -> GitlabResult<T>
     where
         T: DeserializeOwned,
     {
-        let rsp = self
-            .token
-            .set_header(req)?
-            .send()
-            .chain_err(|| ErrorKind::Communication)?;
+        let rsp = self.token.set_header(req)?.send()?;
         let status = rsp.status();
         if status.is_server_error() {
-            return Err(ErrorKind::Gitlab(format!(
-                "server error: {} {:?}",
-                status.as_u16(),
-                status.canonical_reason(),
-            ))
-            .into());
+            return Err(GitlabError::http(status));
         }
         let success = status.is_success();
-        let v = serde_json::from_reader(rsp).chain_err(|| ErrorKind::Deserialize)?;
+        let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
         if !success {
-            return Err(Error::from_gitlab(v));
+            return Err(GitlabError::from_gitlab(v));
         }
 
         debug!(target: "gitlab",
                "received data: {:?}",
                v);
-        serde_json::from_value::<T>(v).chain_err(|| ErrorKind::Deserialize)
+        serde_json::from_value::<T>(v).map_err(GitlabError::data_type::<T>)
     }
 
     /// Create a `GET` request to an API endpoint.
-    fn get<T, U>(&self, url: U) -> Result<T>
+    fn get<T, U>(&self, url: U) -> GitlabResult<T>
     where
         T: DeserializeOwned,
         U: AsRef<str>,
@@ -1521,7 +1637,7 @@ impl Gitlab {
     }
 
     /// Create a `GET` request to an API endpoint with query parameters.
-    fn get_with_param<T, U, I, K, V>(&self, url: U, params: I) -> Result<T>
+    fn get_with_param<T, U, I, K, V>(&self, url: U, params: I) -> GitlabResult<T>
     where
         T: DeserializeOwned,
         U: AsRef<str>,
@@ -1536,7 +1652,7 @@ impl Gitlab {
     }
 
     /// Create a `POST` request to an API endpoint.
-    fn post<T, U>(&self, url: U) -> Result<T>
+    fn post<T, U>(&self, url: U) -> GitlabResult<T>
     where
         T: DeserializeOwned,
         U: AsRef<str>,
@@ -1546,7 +1662,7 @@ impl Gitlab {
     }
 
     /// Create a `POST` request to an API endpoint with query parameters.
-    fn post_with_param<T, U, P>(&self, url: U, param: P) -> Result<T>
+    fn post_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
     where
         T: DeserializeOwned,
         U: AsRef<str>,
@@ -1557,7 +1673,7 @@ impl Gitlab {
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.
-    fn put_with_param<T, U, P>(&self, url: U, param: P) -> Result<T>
+    fn put_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
     where
         T: DeserializeOwned,
         U: AsRef<str>,
@@ -1568,7 +1684,7 @@ impl Gitlab {
     }
 
     /// Handle paginated queries. Returns all results.
-    fn get_paged<T, U>(&self, url: U) -> Result<Vec<T>>
+    fn get_paged<T, U>(&self, url: U) -> GitlabResult<Vec<T>>
     where
         T: DeserializeOwned,
         U: AsRef<str>,
@@ -1577,7 +1693,7 @@ impl Gitlab {
     }
 
     /// Handle paginated queries with query parameters. Returns all results.
-    fn get_paged_with_param<T, U, I, K, V>(&self, url: U, params: I) -> Result<Vec<T>>
+    fn get_paged_with_param<T, U, I, K, V>(&self, url: U, params: I) -> GitlabResult<Vec<T>>
     where
         T: DeserializeOwned,
         U: AsRef<str>,
@@ -1654,7 +1770,7 @@ impl GitlabBuilder {
         self
     }
 
-    pub fn build(&self) -> Result<Gitlab> {
+    pub fn build(&self) -> GitlabResult<Gitlab> {
         Gitlab::new_impl(self.protocol, &self.host, self.token.clone())
     }
 }
