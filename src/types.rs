@@ -2249,6 +2249,52 @@ pub struct CommitStatus {
     pub author: UserBasic,
 }
 
+/// Type-safe environment ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct EnvironmentId(u64);
+impl_id!(EnvironmentId);
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Environment {
+    pub id: EnvironmentId,
+    pub name: String,
+    pub slug: String,
+    pub external_url: Option<String>,
+    pub state: Option<String>,
+    pub last_deployment: Option<Deployment>,
+}
+
+/// Type-safe deployment ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct DeploymentId(u64);
+impl_id!(DeploymentId);
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Deployment {
+    pub id: DeploymentId,
+    pub iid: u64,
+    pub r#ref: String,
+    pub sha: String,
+    pub created_at: String,
+    pub status: Option<String>,
+    pub user: UserBasic,
+    pub deployable: Deployable,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Deployable {
+    pub commit: Commit,
+    pub status: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Commit {
+    pub id: Option<String>,
+    pub short_id: Option<String>,
+    pub created_at: Option<String>,
+    pub title: Option<String>,
+}
+
 /// The target of an event.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EventTargetType {

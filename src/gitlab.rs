@@ -377,6 +377,39 @@ impl Gitlab {
         )
     }
 
+    /// Get all accessible environments.
+    pub fn environments<I, K, V>(
+        &self,
+        project: ProjectId,
+        params: I,
+    ) -> GitlabResult<Vec<Environment>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(format!("projects/{}/environments", project), params)
+    }
+
+    pub fn environment<I, K, V>(
+        &self,
+        project: ProjectId,
+        environment: EnvironmentId,
+        params: I,
+    ) -> GitlabResult<Environment>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_with_param(
+            format!("projects/{}/environments/{}", project, environment),
+            params,
+        )
+    }
+
     /// Get all accessible groups.
     pub fn groups<I, K, V>(&self, params: I) -> GitlabResult<Vec<Group>>
     where
