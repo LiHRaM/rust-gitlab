@@ -12,12 +12,12 @@
 //! problems when the types and names change inside of those. If found, issues should be filed
 //! upstream.
 
+use std::fmt::{self, Display, Formatter};
+
 use crates::chrono::{DateTime, NaiveDate, Utc};
 use crates::serde::de::{DeserializeOwned, Error, Unexpected};
 use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde_json::{self, Value};
-
-use std::fmt::{self, Display, Formatter};
 
 // This is only used in internal API calls.
 //#[derive(Serialize, Deserialize, Debug, Clone)]

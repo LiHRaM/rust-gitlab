@@ -4,6 +4,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#[rustversion::since(1.38)]
+use std::any;
+use std::borrow::Borrow;
+use std::fmt::{self, Debug, Display};
+
 use crates::itertools::Itertools;
 use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use crates::reqwest::header::{self, HeaderValue};
@@ -16,11 +21,6 @@ use crates::serde_json;
 use crates::thiserror::Error;
 
 use types::*;
-
-#[rustversion::since(1.38)]
-use std::any;
-use std::borrow::Borrow;
-use std::fmt::{self, Debug, Display};
 
 const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b' ')
