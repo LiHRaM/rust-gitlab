@@ -18,8 +18,8 @@ use crates::serde_json::{self, Value};
 use systemhooks::SystemHook;
 use webhooks::WebHook;
 
-#[derive(Debug, Clone)]
 /// A deserializable structure for all Gitlab hooks.
+#[derive(Debug, Clone)]
 pub enum GitlabHook {
     /// A system hook.
     System(SystemHook),

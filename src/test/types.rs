@@ -4,13 +4,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::fs::File;
+
 use crates::chrono::{NaiveDate, TimeZone, Utc};
 use crates::serde::de::DeserializeOwned;
 use crates::serde_json::{from_reader, json};
 
 use types::*;
-
-use std::fs::File;
 
 fn read_test_file<T: DeserializeOwned>(name: &str) -> T {
     let fin = File::open(format!(

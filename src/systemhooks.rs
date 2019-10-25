@@ -20,8 +20,8 @@ use crates::serde_json::{self, Value};
 use types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
 use webhooks::{CommitHookAttrs, ProjectHookAttrs};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Events which occur at the project level.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectEvent {
     /// A project was created.
     Create,
@@ -39,8 +39,8 @@ enum_serialize!(ProjectEvent -> "project event",
     Transfer => "project_transfer",
 );
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Visibility levels for projects.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectVisibility {
     /// The project is only visible to users who are logged in.
     Internal,
@@ -55,8 +55,8 @@ enum_serialize!(ProjectVisibility -> "project visibility",
     Public => "public" ; "visibilitylevel|public",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A hook for a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectSystemHook {
     /// The event which occurred.
     pub event_name: ProjectEvent,
@@ -83,8 +83,8 @@ pub struct ProjectSystemHook {
     pub old_path_with_namespace: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Events which occur when users are added and removed from projects.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectMemberEvent {
     /// A user was added to a project.
     Add,
@@ -96,8 +96,8 @@ enum_serialize!(ProjectMemberEvent -> "project member event",
     Remove => "user_remove_from_team",
 );
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 /// Access levels for groups and projects.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum HumanAccessLevel {
     /// Guest access (can see the project).
     Guest,
@@ -130,8 +130,8 @@ impl From<HumanAccessLevel> for AccessLevel {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A project membership hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectMemberSystemHook {
     /// The event which occurred.
     pub event_name: ProjectMemberEvent,
@@ -161,8 +161,8 @@ pub struct ProjectMemberSystemHook {
     pub project_visibility: ProjectVisibility,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Events which occur for user accounts.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserEvent {
     /// The user account was created.
     Create,
@@ -174,8 +174,8 @@ enum_serialize!(UserEvent -> "user event",
     Destroy => "user_destroy",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A user hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserSystemHook {
     /// The event which occurred.
     pub event_name: UserEvent,
@@ -193,8 +193,8 @@ pub struct UserSystemHook {
     pub username: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Events which occur for SSH keys.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyEvent {
     /// An SSH key was uploaded.
     Create,
@@ -206,8 +206,8 @@ enum_serialize!(KeyEvent -> "key event",
     Destroy => "key_destroy",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An SSH key hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct KeySystemHook {
     /// The event which occurred.
     pub event_name: KeyEvent,
@@ -223,8 +223,8 @@ pub struct KeySystemHook {
     pub id: SshKeyId,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Events which occur for groups.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GroupEvent {
     /// The group was created.
     Create,
@@ -236,8 +236,8 @@ enum_serialize!(GroupEvent -> "group event",
     Destroy => "group_destroy",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A group hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GroupSystemHook {
     /// The event which occurred.
     pub event_name: GroupEvent,
@@ -257,8 +257,8 @@ pub struct GroupSystemHook {
     pub owner_name: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Events which occur for group memberships.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GroupMemberEvent {
     /// A user was added to the group.
     Add,
@@ -270,8 +270,8 @@ enum_serialize!(GroupMemberEvent -> "group member event",
     Remove => "user_remove_from_group",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A group membership hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GroupMemberSystemHook {
     /// The event which occurred.
     pub event_name: GroupMemberEvent,
@@ -297,8 +297,8 @@ pub struct GroupMemberSystemHook {
     pub group_access: HumanAccessLevel,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Events which occur when a push happens.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PushEvent {
     /// A non-tag push occurred.
     Push,
@@ -310,8 +310,8 @@ enum_serialize!(PushEvent -> "push event",
     TagPush => "tag_push",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A push hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PushSystemHook {
     /// The event which occurred.
     pub event_name: PushEvent,
@@ -353,8 +353,8 @@ pub struct PushSystemHook {
     repository: Value,
 }
 
-#[derive(Debug, Clone)]
 /// A deserializable structure for all Gitlab system hooks.
+#[derive(Debug, Clone)]
 pub enum SystemHook {
     /// A project hook.
     Project(ProjectSystemHook),

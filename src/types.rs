@@ -12,12 +12,12 @@
 //! problems when the types and names change inside of those. If found, issues should be filed
 //! upstream.
 
+use std::fmt::{self, Display, Formatter};
+
 use crates::chrono::{DateTime, NaiveDate, Utc};
 use crates::serde::de::{DeserializeOwned, Error, Unexpected};
 use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde_json::{self, Value};
-
-use std::fmt::{self, Display, Formatter};
 
 // This is only used in internal API calls.
 //#[derive(Serialize, Deserialize, Debug, Clone)]
@@ -32,13 +32,13 @@ pub type QueryParamSlice<'a> = &'a [(&'a str, &'a str)];
 /// Type alias for Vec of string two-tuples
 pub type QueryParamVec<'a> = Vec<(&'a str, &'a str)>;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe user ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct UserId(u64);
 impl_id!(UserId);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The states a user account can be in.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserState {
     /// The user is active and may perform actions.
     Active,
@@ -53,8 +53,8 @@ enum_serialize!(UserState -> "user state",
     LdapBlocked => "ldap_blocked",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Basic user information.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserBasic {
     /// The username.
     pub username: String,
@@ -78,8 +78,8 @@ pub struct UserBasic {
 pub trait UserResult: DeserializeOwned {}
 impl<T: DeserializeOwned + Into<UserBasic>> UserResult for T {}
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// More detailed information only accessible to administrators.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
     /// The username.
     pub username: String,
@@ -137,8 +137,8 @@ impl From<User> for UserBasic {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// External authentication tokens.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Identity {
     /// The provider of the token.
     pub provider: String,
@@ -146,18 +146,18 @@ pub struct Identity {
     pub extern_uid: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe theme ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct ThemeId(u64);
 impl_id!(ThemeId);
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe color scheme ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct ColorSchemeId(u64);
 impl_id!(ColorSchemeId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Full user structure information.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserPublic {
     /// The username.
     pub username: String,
@@ -270,13 +270,13 @@ impl From<UserPublic> for User {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe email ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct EmailId(u64);
 impl_id!(EmailId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Email address.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Email {
     /// ID of the email.
     pub id: EmailId,
@@ -284,13 +284,13 @@ pub struct Email {
     pub email: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe hook ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct HookId(u64);
 impl_id!(HookId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A web hook to notify of events.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Hook {
     /// The ID of the hook.
     pub id: HookId,
@@ -306,8 +306,8 @@ pub struct Hook {
     pub enable_ssl_verification: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A web hook to notify of project events.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectHook {
     /// The ID of the hook.
     pub id: HookId,
@@ -358,8 +358,8 @@ impl From<ProjectHook> for Hook {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
 /// The events a webhook listener may receive.
+#[derive(Debug, Default, Clone, Copy)]
 pub struct WebhookEvents {
     /// Whether to receive job events of not.
     job: bool,
@@ -413,13 +413,13 @@ impl WebhookEvents {
     get_event! {wiki_page}
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe project ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct ProjectId(u64);
 impl_id!(ProjectId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Basic project information.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BasicProjectDetails {
     /// The ID of the project.
     pub id: ProjectId,
@@ -453,8 +453,8 @@ enum_serialize!(VisibilityLevel -> "visibility level",
     Private => "private",
 );
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 /// Visibility levels for project features.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum FeatureVisibilityLevel {
     /// Feature is disabled.
     Disabled,
@@ -474,8 +474,8 @@ enum_serialize!(FeatureVisibilityLevel -> "feature visibility level",
 
 // TODO: enum for NotificationLevel
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Structure for a group a project has been shared with.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SharedGroup {
     /// The ID of the group.
     pub group_id: GroupId,
@@ -485,8 +485,8 @@ pub struct SharedGroup {
     pub group_access_level: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Access information to a project.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 // Called `MemberAccess` in entities.rb, but it is just a base class for `ProjectAccess` and
 // `GroupAccess`. Combine them here.
 pub struct MemberAccess {
@@ -496,8 +496,8 @@ pub struct MemberAccess {
     pub notification_level: Option<u64>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Permissions granted to the current user to a project.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct Permissions {
     /// The access granted by the project to the current user.
     pub project_access: Option<MemberAccess>,
@@ -505,8 +505,8 @@ pub struct Permissions {
     pub group_access: Option<MemberAccess>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// The avatar of a project's namespace.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectNamespaceAvatar {
     /// The URL of the namespace avatar.
     pub url: Option<String>,
@@ -531,8 +531,8 @@ struct ProjectLinks {
     members: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Project {
     /// The ID of the project.
     pub id: ProjectId,
@@ -661,8 +661,8 @@ impl Project {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Statistics about a project.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct ProjectStatistics {
     /// The number of commits in the repository.
     pub commit_count: u64,
@@ -676,8 +676,8 @@ pub struct ProjectStatistics {
     pub job_artifacts_size: u64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 /// Access levels for groups and projects.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AccessLevel {
     /// Anonymous access.
     Anonymous,
@@ -745,8 +745,8 @@ impl<'de> Deserialize<'de> for AccessLevel {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A member with extra permissions on a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Member {
     /// The username.
     pub username: String,
@@ -779,8 +779,8 @@ impl From<Member> for UserBasic {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A member with extra permissions on a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AccessRequester {
     /// The username.
     pub username: String,
@@ -811,13 +811,13 @@ impl From<AccessRequester> for UserBasic {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe group ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct GroupId(u64);
 impl_id!(GroupId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Group information.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Group {
     /// The ID of the group.
     pub id: GroupId,
@@ -844,8 +844,8 @@ pub struct Group {
     pub statistics: Option<GroupStatistics>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Statistics about a group.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct GroupStatistics {
     /// The size, in bytes, of the total storage required for the group.
     pub storage_size: u64,
@@ -857,8 +857,8 @@ pub struct GroupStatistics {
     pub job_artifacts_size: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Group information with a project listing.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GroupDetail {
     /// The ID of the group.
     pub id: GroupId,
@@ -909,8 +909,8 @@ impl From<GroupDetail> for Group {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A branch on a repository.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoBranch {
     /// The name of the branch.
     pub name: String,
@@ -930,8 +930,8 @@ pub struct RepoBranch {
     pub default: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq)]
 /// The ID of a git object.
+#[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq)]
 pub struct ObjectId(String);
 
 impl ObjectId {
@@ -946,8 +946,8 @@ impl ObjectId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The kinds of objects Gitlab can return.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ObjectType {
     /// A `tree` object.
     Tree,
@@ -959,8 +959,8 @@ enum_serialize!(ObjectType -> "object type",
     Blob => "blob",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An object inside of a repository.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoTreeObject {
     /// The ID of the object.
     pub id: ObjectId,
@@ -975,8 +975,8 @@ pub struct RepoTreeObject {
     pub mode: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A commit in a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoCommit {
     /// The ID of the commit.
     pub id: ObjectId,
@@ -1003,8 +1003,8 @@ pub struct RepoCommit {
     pub message: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 /// Stats about a commit.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct RepoCommitStats {
     /// The number of lines added by the commit.
     pub additions: u64,
@@ -1014,8 +1014,8 @@ pub struct RepoCommitStats {
     pub total: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A commit in a project with statistics.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoCommitDetail {
     /// The ID of the commit.
     pub id: ObjectId,
@@ -1051,13 +1051,13 @@ pub struct RepoCommitDetail {
     status: Value,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe snippet ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct SnippetId(u64);
 impl_id!(SnippetId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A project-specific snippet.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectSnippet {
     /// The ID of the snippet.
     pub id: SnippetId,
@@ -1090,8 +1090,8 @@ pub struct ProjectSnippet {
 //    pub updated_at: DateTime<Utc>,
 //}
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A diff within a repository.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepoDiff {
     /// The path on the old side of the diff.
     pub old_path: String,
@@ -1120,18 +1120,18 @@ pub struct DiffRefs {
     pub start_sha: Option<ObjectId>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe milestone ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct MilestoneId(u64);
 impl_id!(MilestoneId);
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe milestone internal ID (internal to a project).
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct MilestoneInternalId(u64);
 impl_id!(MilestoneInternalId);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The states a milestone may be in.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MilestoneState {
     /// The milestone is active.
     Active,
@@ -1143,8 +1143,8 @@ enum_serialize!(MilestoneState -> "milestone type",
     Closed => "closed",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A milestone in a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Milestone {
     /// The ID of the milestone.
     pub id: MilestoneId,
@@ -1205,13 +1205,13 @@ impl Milestone {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe label ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct LabelId(u64);
 impl_id!(LabelId);
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// Type-safe label color.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct LabelColor(String);
 
 impl LabelColor {
@@ -1251,8 +1251,8 @@ impl LabelColor {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An label on a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Label {
     /// The Id of the label.
     pub id: LabelId,
@@ -1303,18 +1303,18 @@ impl Label {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe issue ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct IssueId(u64);
 impl_id!(IssueId);
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe issue internal ID (internal to a project).
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct IssueInternalId(u64);
 impl_id!(IssueInternalId);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The states an issue may be in.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IssueState {
     /// The issue is open.
     Opened,
@@ -1342,8 +1342,8 @@ struct IssueLinks {
     project: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An issue on a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Issue {
     /// The ID of the issue.
     pub id: IssueId,
@@ -1493,8 +1493,8 @@ impl Issue {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A time estimate on an issue or merge request.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct IssuableTimeStats {
     /// The time estimate, in seconds.
     pub time_estimate: u64,
@@ -1506,12 +1506,12 @@ pub struct IssuableTimeStats {
     pub human_total_time_spent: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe external issue ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct ExternalIssueId(u64);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An external issue reference.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ExternalIssue {
     /// The ID of the issue.
     pub id: ExternalIssueId,
@@ -1519,8 +1519,8 @@ pub struct ExternalIssue {
     pub title: String,
 }
 
-#[derive(Debug, Clone)]
 /// A reference to an issue.
+#[derive(Debug, Clone)]
 pub enum IssueReference {
     /// A reference to an issue on the same Gitlab host.
     Internal(Issue),
@@ -1551,18 +1551,18 @@ impl<'de> Deserialize<'de> for IssueReference {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe merge request ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct MergeRequestId(u64);
 impl_id!(MergeRequestId);
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe merge request internal ID (internal to a project).
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct MergeRequestInternalId(u64);
 impl_id!(MergeRequestInternalId);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The status of the possible merge for a merge request.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeStatus {
     /// The merge request has not been checked yet.
     Unchecked,
@@ -1581,8 +1581,8 @@ enum_serialize!(MergeStatus -> "merge status",
     CannotBeMergedRecheck => "cannot_be_merged_recheck",
 );
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The states a merge request may be in.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestState {
     /// The merge request is open.
     Opened,
@@ -1603,15 +1603,15 @@ enum_serialize!(MergeRequestState -> "merge request state",
     Locked => "locked",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Information about current user's access to the merge request.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestUser {
     /// Whether the current user can merge the MR.
     pub can_merge: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A merge request.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequest {
     /// The ID of the merge request.
     pub id: MergeRequestId,
@@ -1708,8 +1708,8 @@ pub struct MergeRequest {
     pub web_url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A merge request with changes.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestChanges {
     /// The ID of the merge request.
     pub id: MergeRequestId,
@@ -1853,13 +1853,13 @@ impl From<MergeRequestChanges> for MergeRequest {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe SSH key ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct SshKeyId(u64);
 impl_id!(SshKeyId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An uploaded SSH key.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SshKey {
     /// The ID of the SSH key.
     pub id: SshKeyId,
@@ -1873,8 +1873,8 @@ pub struct SshKey {
     pub can_push: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An uploaded SSH key with its owner.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SshKeyWithUser {
     /// The ID of the SSH key.
     pub id: SshKeyId,
@@ -1888,8 +1888,8 @@ pub struct SshKeyWithUser {
     pub user: UserPublic,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The entities a note may be added to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NoteType {
     /// A note on a commit.
     Commit,
@@ -1907,8 +1907,8 @@ enum_serialize!(NoteType -> "note type",
     Snippet => "Snippet",
 );
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The various types a note can have
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiscussionNoteType {
     /// A note in a standard discussion
     DiscussionNote,
@@ -1921,8 +1921,8 @@ enum_serialize!(DiscussionNoteType -> "discussion note type",
     DiffNote => "DiffNote",
 );
 
-#[derive(Debug, Clone, PartialEq, Eq)]
 /// The ID of an entity a note is attached to.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NoteableId {
     /// The ID of the commit for a commit note.
     Commit(ObjectId),
@@ -1934,9 +1934,9 @@ pub enum NoteableId {
     Snippet(SnippetId),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
 /// The internal ID of an entity a note is attached to (internal to a project).
 /// GitLab only has this for notes attached to issues and merge requests.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NoteableInternalId {
     /// The internal ID of the issue for an issue note.
     Issue(IssueInternalId),
@@ -1944,13 +1944,13 @@ pub enum NoteableInternalId {
     MergeRequest(MergeRequestInternalId),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe note (comment) ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct NoteId(u64);
 impl_id!(NoteId);
 
-#[derive(Debug, Clone, PartialEq, Eq)]
 /// A note can be attached to text or an image
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NotePositionType {
     Text,
     Image,
@@ -1961,8 +1961,8 @@ enum_serialize!(NotePositionType -> "note position type",
     Image => "image",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// When a note is against a diff, the position of the note
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NotePosition {
     /// Base commit in the source branch
     pub base_sha: ObjectId,
@@ -1983,8 +1983,8 @@ pub struct NotePosition {
     pub new_line: Option<u64>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A comment on an entity.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Note {
     /// The ID of the note.
     pub id: NoteId,
@@ -2071,8 +2071,8 @@ impl Note {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A threaded discussion
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Discussion {
     /// The discussion ID, a SHA hash
     pub id: ObjectId,
@@ -2082,13 +2082,13 @@ pub struct Discussion {
     pub notes: Vec<Note>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe award ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct AwardId(u64);
 impl_id!(AwardId);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// An ID of an entity which may receive an award.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AwardableId {
     /// The ID of an awarded issue.
     Issue(IssueId),
@@ -2100,8 +2100,8 @@ pub enum AwardableId {
     Note(NoteId),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The entities which may be awarded.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AwardableType {
     /// An award on an issue.
     Issue,
@@ -2119,8 +2119,8 @@ enum_serialize!(AwardableType -> "awardable type",
     Note => "Note",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An awarded emoji on an entity.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AwardEmoji {
     /// The ID of the award.
     pub id: AwardId,
@@ -2151,8 +2151,8 @@ impl AwardEmoji {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The type of line commented on.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LineType {
     /// An added line was commented on.
     New,
@@ -2164,8 +2164,8 @@ enum_serialize!(LineType -> "line type",
     Old => "old",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A note on a commit diff.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CommitNote {
     /// The content of the note.
     pub note: String,
@@ -2181,13 +2181,13 @@ pub struct CommitNote {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe commit status ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct CommitStatusId(u64);
 impl_id!(CommitStatusId);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// States for commit statuses.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StatusState {
     /// The check was created.
     Created,
@@ -2218,8 +2218,8 @@ enum_serialize!(StatusState -> "status state",
     Manual => "manual",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A status of a commit.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CommitStatus {
     /// The ID of the commit status.
     pub id: CommitStatusId,
@@ -2249,8 +2249,8 @@ pub struct CommitStatus {
     pub author: UserBasic,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The target of an event.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EventTargetType {
     /// An event targeted a commit.
     Commit,
@@ -2271,8 +2271,8 @@ enum_serialize!(EventTargetType -> "event target type",
     ProjectSnippet => "project_snippet",
 );
 
-#[derive(Debug, Clone, PartialEq, Eq)]
 /// The ID of an event target.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EventTargetId {
     /// The object ID of a commit event target.
     Commit(ObjectId),
@@ -2284,8 +2284,8 @@ pub enum EventTargetId {
     Snippet(SnippetId),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An event on a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Event {
     /// The title of the event.
     pub title: Option<String>,
@@ -2344,8 +2344,8 @@ impl Event {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The kinds of namespaces supported by Gitlab.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NamespaceKind {
     /// A user namespace.
     User,
@@ -2357,8 +2357,8 @@ enum_serialize!(NamespaceKind -> "namespace kind",
     Group => "group",
 );
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The ID of a namespace.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NamespaceId {
     /// A user namespace ID.
     User(UserId),
@@ -2366,8 +2366,8 @@ pub enum NamespaceId {
     Group(GroupId),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An entity which can own projects.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Namespace {
     id: u64,
     /// The URL of the namespace.
@@ -2397,13 +2397,13 @@ impl Namespace {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe runner ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct RunnerId(u64);
 impl_id!(RunnerId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A Gitlab CI runner.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Runner {
     /// The ID of the runner.
     pub id: RunnerId,
@@ -2417,8 +2417,8 @@ pub struct Runner {
     pub name: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An uploaded artifact from a job.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct JobArtifactFile {
     /// The name of the artifact.
     pub filename: String,
@@ -2426,13 +2426,13 @@ pub struct JobArtifactFile {
     pub size: usize,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe job ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct JobId(u64);
 impl_id!(JobId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Information about a job in Gitlab CI.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Job {
     /// The ID of the job.
     pub id: JobId,
@@ -2464,13 +2464,13 @@ pub struct Job {
     pub pipeline: PipelineBasic,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe pipeline ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct PipelineId(u64);
 impl_id!(PipelineId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Information about a pipeline in Gitlab CI.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PipelineBasic {
     /// The ID of the pipeline.
     pub id: PipelineId,
@@ -2485,8 +2485,8 @@ pub struct PipelineBasic {
     pub web_url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// More information about a pipeline in Gitlab CI.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Pipeline {
     /// The ID of the pipeline.
     pub id: PipelineId,
@@ -2542,8 +2542,8 @@ impl Default for PipelineVariableType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A pipeline variable.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PipelineVariable {
     /// Name of the variable.
     pub key: String,
@@ -2555,16 +2555,16 @@ pub struct PipelineVariable {
     pub variable_type: PipelineVariableType,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Type-safe label event ID.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct LabelEventId(u64);
 impl_id!(LabelEventId);
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A resource label event
 ///
 /// Note that resource events were added in Gitlab 11.2.  Any labels added or
 /// removed before then will not be returned by the API.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ResourceLabelEvent {
     /// The ID for the label event
     pub id: LabelEventId,
@@ -2598,8 +2598,8 @@ impl ResourceLabelEvent {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
 /// The type of object that on which the resource label event was created
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ResourceLabelEventTarget {
     /// The ID of an issue event target.
     Issue(IssueId),
@@ -2607,10 +2607,10 @@ pub enum ResourceLabelEventTarget {
     MergeRequest(MergeRequestId),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An label on a project.
 ///
 /// This is like [Label], except that it doesn't have all the same fields
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventLabel {
     /// The Id of the label.
     pub id: LabelId,

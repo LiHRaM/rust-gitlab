@@ -4,6 +4,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#[rustversion::since(1.38)]
+use std::any;
+use std::borrow::Borrow;
+use std::fmt::{self, Debug, Display};
+
 use crates::itertools::Itertools;
 use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use crates::reqwest::header::{self, HeaderValue};
@@ -16,11 +21,6 @@ use crates::serde_json;
 use crates::thiserror::Error;
 
 use types::*;
-
-#[rustversion::since(1.38)]
-use std::any;
-use std::borrow::Borrow;
-use std::fmt::{self, Debug, Display};
 
 const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b' ')
@@ -186,8 +186,8 @@ impl Debug for Gitlab {
     }
 }
 
-#[derive(Debug)]
 /// Optional information for commit statuses.
+#[derive(Debug)]
 pub struct CommitStatusInfo<'a> {
     /// The refname of the commit being tested.
     pub refname: Option<&'a str>,
@@ -199,8 +199,8 @@ pub struct CommitStatusInfo<'a> {
     pub description: Option<&'a str>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Optional information for merge requests.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestStateFilter {
     /// Get the opened/reopened merge requests.
     Opened,
@@ -1183,10 +1183,10 @@ impl Gitlab {
         self.post(format!("projects/{}/pipelines/{}/cancel", project, id))
     }
 
-    #[allow(unused)]
     /// Delete a pipeline.
     ///
     /// NOTE Not implemented.
+    #[allow(unused)]
     fn delete_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
         unimplemented!();
     }
