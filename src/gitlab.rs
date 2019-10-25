@@ -186,8 +186,8 @@ impl Debug for Gitlab {
     }
 }
 
-#[derive(Debug)]
 /// Optional information for commit statuses.
+#[derive(Debug)]
 pub struct CommitStatusInfo<'a> {
     /// The refname of the commit being tested.
     pub refname: Option<&'a str>,
@@ -199,8 +199,8 @@ pub struct CommitStatusInfo<'a> {
     pub description: Option<&'a str>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Optional information for merge requests.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestStateFilter {
     /// Get the opened/reopened merge requests.
     Opened,
@@ -1183,10 +1183,10 @@ impl Gitlab {
         self.post(format!("projects/{}/pipelines/{}/cancel", project, id))
     }
 
-    #[allow(unused)]
     /// Delete a pipeline.
     ///
     /// NOTE Not implemented.
+    #[allow(unused)]
     fn delete_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
         unimplemented!();
     }

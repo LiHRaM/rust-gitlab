@@ -22,11 +22,11 @@ use types::{
     SnippetId, UserId,
 };
 
-#[derive(Debug, Clone, Copy)]
 /// A wrapper struct for dates in web hooks.
 ///
 /// Gitlab does not use a standard date format for dates in web hooks. This structure supports
 /// deserializing the formats that have been observed.
+#[derive(Debug, Clone, Copy)]
 pub struct HookDate(DateTime<Utc>);
 
 impl Serialize for HookDate {
@@ -64,8 +64,8 @@ impl AsRef<DateTime<Utc>> for HookDate {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectHookAttrs {
     /// The display name of the project.
     pub name: String,
@@ -93,8 +93,8 @@ pub struct ProjectHookAttrs {
     url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Wiki project information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProjectWikiHookAttrs {
     /// The URL for the project's homepage.
     pub web_url: String,
@@ -108,8 +108,8 @@ pub struct ProjectWikiHookAttrs {
     pub default_branch: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// User information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserHookAttrs {
     /// The name of the user.
     pub name: String,
@@ -119,8 +119,8 @@ pub struct UserHookAttrs {
     pub avatar_url: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// The identity of a user exposed through a hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HookCommitIdentity {
     /// The name of the author or committer.
     pub name: String,
@@ -128,8 +128,8 @@ pub struct HookCommitIdentity {
     pub email: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Commit information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CommitHookAttrs {
     /// The commit's ID.
     pub id: ObjectId,
@@ -145,8 +145,8 @@ pub struct CommitHookAttrs {
     pub removed: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A push hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PushHook {
     /// The event which occurred.
     pub object_kind: String,
@@ -186,8 +186,8 @@ pub struct PushHook {
     repository: Value,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Actions which may occur on an issue.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IssueAction {
     /// The issue was updated.
     Update,
@@ -205,8 +205,8 @@ enum_serialize!(IssueAction -> "issue action",
     Reopen => "reopen",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Issue information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct IssueHookAttrs {
     /// The ID of the issue.
     pub id: IssueId,
@@ -259,8 +259,8 @@ pub struct IssueHookAttrs {
     pub action: Option<IssueAction>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// An issue hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct IssueHook {
     /// The event which occurred.
     pub object_kind: String,
@@ -274,8 +274,8 @@ pub struct IssueHook {
     pub assignee: Option<UserHookAttrs>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Actions which may occur on a merge request.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestAction {
     /// The merge request was updated.
     Update,
@@ -296,8 +296,8 @@ enum_serialize!(MergeRequestAction -> "merge request action",
     Merge => "merge",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Merge parameters for a merge request.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestParams {
     force_remove_source_branch: Option<Value>, // sigh
 }
@@ -323,8 +323,8 @@ impl MergeRequestParams {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Merge request information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestHookAttrs {
     /// The source project of the merge request.
     ///
@@ -396,8 +396,8 @@ pub struct MergeRequestHookAttrs {
     lock_version: Option<u64>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A merge request hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequestHook {
     /// The event which occurred.
     pub object_kind: String,
@@ -412,8 +412,8 @@ pub struct MergeRequestHook {
     repository: Value,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// The type of a snippet.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SnippetType {
     /// A project-owned snippet.
     Project,
@@ -425,8 +425,8 @@ enum_serialize!(SnippetType -> "snippet type",
     Personal => "PersonalSnippet",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Snippet information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SnippetHookAttrs {
     /// The title of the snippet.
     pub title: String,
@@ -449,8 +449,8 @@ pub struct SnippetHookAttrs {
     pub visibility_level: u64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// Actions which may occur on a wiki page.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WikiPageAction {
     /// A wiki page was created.
     Create,
@@ -462,8 +462,8 @@ enum_serialize!(WikiPageAction -> "wiki page action",
     Update => "update",
 );
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Wiki information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WikiPageHookAttrs {
     /// The title of the wiki page.
     pub title: String,
@@ -480,8 +480,8 @@ pub struct WikiPageHookAttrs {
     pub action: WikiPageAction,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Diff information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DiffHookAttrs {
     pub diff: String,
     /// The path on the new side of the diff.
@@ -517,8 +517,8 @@ pub struct PositionHookAttrs {
     pub new_path: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Note (comment) information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NoteHookAttrs {
     /// The ID of the note.
     pub id: NoteId,
@@ -592,8 +592,8 @@ impl NoteHookAttrs {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A note hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NoteHook {
     /// The event which occurred.
     pub object_kind: String,
@@ -616,8 +616,8 @@ pub struct NoteHook {
     repository: Value,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Build user information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildUserHookAttrs {
     /// The ID of the user.
     pub id: Option<UserId>,
@@ -627,8 +627,8 @@ pub struct BuildUserHookAttrs {
     pub email: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Build commit information exposed in hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildCommitHookAttrs {
     pub id: String,
     /// The object ID of the commit.
@@ -647,8 +647,8 @@ pub struct BuildCommitHookAttrs {
     pub finished_at: Option<HookDate>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// Project information exposed in build hooks.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildProjectHookAttrs {
     /// The display name of the project.
     pub name: String,
@@ -664,8 +664,8 @@ pub struct BuildProjectHookAttrs {
     pub visibility_level: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A build hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuildHook {
     /// The event which occurred.
     pub object_kind: String,
@@ -698,8 +698,8 @@ pub struct BuildHook {
     pub repository: BuildProjectHookAttrs,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 /// A wiki page hook.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WikiPageHook {
     /// The event which occurred.
     pub object_kind: String,
@@ -713,8 +713,8 @@ pub struct WikiPageHook {
     pub object_attributes: WikiPageHookAttrs,
 }
 
-#[derive(Debug, Clone)]
 /// A deserializable structure for all Gitlab web hooks.
+#[derive(Debug, Clone)]
 pub enum WebHook {
     /// A push hook.
     Push(PushHook),
