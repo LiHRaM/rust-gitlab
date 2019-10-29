@@ -2527,6 +2527,10 @@ pub struct PipelineBasic {
     pub sha: ObjectId,
     /// The status of the pipeline.
     pub status: StatusState,
+    /// When the pipeline was created.
+    pub created_at: Option<DateTime<Utc>>,
+    /// When the pipeline was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
     /// The URL to the pipeline page.
     pub web_url: String,
 }
