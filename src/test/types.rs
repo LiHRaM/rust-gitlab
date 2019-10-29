@@ -770,6 +770,14 @@ fn test_read_repo_commit_detail() {
         );
         assert_eq!(last_pipeline.status, StatusState::Success);
         assert_eq!(
+            last_pipeline.created_at,
+            Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 30, 16, 81)),
+        );
+        assert_eq!(
+            last_pipeline.updated_at,
+            Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 35, 32, 670)),
+        );
+        assert_eq!(
             last_pipeline.web_url,
             "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/34289",
         );
@@ -895,16 +903,24 @@ fn test_read_resoruce_label_events() {
 fn test_read_pipelines() {
     let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
 
-    assert_eq!(pipeline_basic.id, PipelineId::new(145_400));
+    assert_eq!(pipeline_basic.id, PipelineId::new(149_249));
     assert_eq!(pipeline_basic.status, StatusState::Success);
     assert_eq!(pipeline_basic.ref_, Some("master".into()));
     assert_eq!(
         pipeline_basic.sha,
-        ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14"),
+        ObjectId::new("f6ebd73d4a8f42f6a642030c27b66330023b7a88"),
+    );
+    assert_eq!(
+        pipeline_basic.created_at,
+        Some(Utc.ymd(2019, 10, 25).and_hms_milli(19, 22, 38, 463)),
+    );
+    assert_eq!(
+        pipeline_basic.updated_at,
+        Some(Utc.ymd(2019, 10, 25).and_hms_milli(19, 35, 24, 570)),
     );
     assert_eq!(
         pipeline_basic.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400",
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/149249",
     );
 }
 

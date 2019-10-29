@@ -1,7 +1,9 @@
 {
-  "id": 145400,
+  "created_at": "2019-10-25T15:22:38.463-04:00",
+  "id": 149249,
   "ref": "master",
-  "sha": "7134adce4522c399cdab16e128b0a1af15b93f14",
+  "sha": "f6ebd73d4a8f42f6a642030c27b66330023b7a88",
   "status": "success",
-  "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400"
+  "updated_at": "2019-10-25T15:35:24.570-04:00",
+  "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/149249"
 }
