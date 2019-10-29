@@ -36,12 +36,19 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b'/');
 
 #[derive(Debug, Error)]
+// TODO #[non_exhaustive]
 pub enum TokenError {
     #[error("header value error: {}", source)]
     HeaderValue {
         #[from]
         source: header::InvalidHeaderValue,
     },
+    /// This is here to force `_` matching right now.
+    ///
+    /// **DO NOT USE**
+    #[doc(hidden)]
+    #[error("unreachable...")]
+    _NonExhaustive,
 }
 
 type TokenResult<T> = Result<T, TokenError>;
@@ -81,6 +88,7 @@ impl Token {
 }
 
 #[derive(Debug, Error)]
+// TODO #[non_exhaustive]
 pub enum GitlabError {
     #[error("failed to parse url: {}", source)]
     UrlParse {
@@ -114,6 +122,12 @@ pub enum GitlabError {
         source: serde_json::Error,
         typename: Option<&'static str>,
     },
+    /// This is here to force `_` matching right now.
+    ///
+    /// **DO NOT USE**
+    #[doc(hidden)]
+    #[error("unreachable...")]
+    _NonExhaustive,
 }
 
 impl GitlabError {
