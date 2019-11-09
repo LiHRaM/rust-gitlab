@@ -12,6 +12,81 @@ use crates::serde_json::{from_reader, json};
 
 use types::*;
 
+fn check_user_brad_king(user: &UserBasic) {
+    assert_eq!(user.username, "brad.king");
+    assert_eq!(user.web_url, "https://gitlab.kitware.com/brad.king");
+    assert_eq!(user.name, "Brad King");
+    assert_eq!(user.state, UserState::Active);
+    assert_eq!(
+        user.avatar_url,
+        Some(
+            "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon"
+                .into(),
+        ),
+    );
+    assert_eq!(user.id, UserId::new(10));
+}
+
+fn check_user_ben_boeckel(user: &UserBasic) {
+    assert_eq!(user.username, "ben.boeckel");
+    assert_eq!(user.web_url, "https://gitlab.kitware.com/ben.boeckel");
+    assert_eq!(user.name, "Ben Boeckel");
+    assert_eq!(user.state, UserState::Active);
+    assert_eq!(
+        user.avatar_url,
+        Some(
+            "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
+                .into(),
+        ),
+    );
+    assert_eq!(user.id, UserId::new(13));
+}
+
+fn check_user_kwrobot(user: &UserBasic) {
+    assert_eq!(user.username, "kwrobot");
+    assert_eq!(user.web_url, "https://gitlab.kitware.com/kwrobot");
+    assert_eq!(user.name, "Kitware Robot");
+    assert_eq!(user.state, UserState::Active);
+    assert_eq!(
+        user.avatar_url,
+        Some(
+            "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon"
+                .into(),
+        ),
+    );
+    assert_eq!(user.id, UserId::new(11));
+}
+
+fn check_user_buildbot(user: &UserBasic) {
+    assert_eq!(
+        user.avatar_url,
+        Some("https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png".into()),
+    );
+    assert_eq!(user.id, UserId::new(35));
+    assert_eq!(user.name, "buildbot");
+    assert_eq!(user.username, "buildbot");
+    assert_eq!(user.state, UserState::Active);
+    assert_eq!(user.web_url, "https://gitlab.kitware.com/buildbot");
+}
+
+fn check_namespace_utils(namespace: &Namespace) {
+    assert_eq!(namespace.name, "Utils");
+    assert_eq!(namespace.path, "utils");
+    assert_eq!(namespace.id(), NamespaceId::Group(GroupId::new(498)));
+    assert_eq!(namespace.kind, NamespaceKind::Group);
+    assert_eq!(namespace.full_path, "utils");
+    assert_eq!(namespace.avatar_url, None);
+    assert_eq!(namespace.web_url, "https://gitlab.kitware.com/groups/utils");
+    assert_eq!(namespace.members_count_with_descendants, None);
+}
+
+fn check_empty_time_stats(time_stats: &IssuableTimeStats) {
+    assert_eq!(time_stats.time_estimate, 0);
+    assert_eq!(time_stats.total_time_spent, 0);
+    assert_eq!(time_stats.human_time_estimate, None);
+    assert_eq!(time_stats.human_total_time_spent, None);
+}
+
 fn read_test_file<T: DeserializeOwned>(name: &str) -> T {
     let fin = File::open(format!(
         concat!(env!("CARGO_MANIFEST_DIR"), "/data/{}.json"),
@@ -28,21 +103,7 @@ fn test_read_award_emoji() {
 
     assert_eq!(award_emoji.id, AwardId::new(335));
     assert_eq!(award_emoji.name, "8ball");
-    assert_eq!(award_emoji.user.username, "ben.boeckel");
-    assert_eq!(
-        award_emoji.user.web_url,
-        "https://gitlab.kitware.com/ben.boeckel",
-    );
-    assert_eq!(award_emoji.user.name, "Ben Boeckel");
-    assert_eq!(award_emoji.user.state, UserState::Active);
-    assert_eq!(
-        award_emoji.user.avatar_url,
-        Some(
-            "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
-                .into()
-        ),
-    );
-    assert_eq!(award_emoji.user.id, UserId::new(13));
+    check_user_ben_boeckel(&award_emoji.user);
     assert_eq!(
         award_emoji.created_at,
         Utc.ymd(2016, 12, 7).and_hms_milli(16, 23, 46, 742),
@@ -66,21 +127,7 @@ fn test_read_commit_note() {
     assert_eq!(commit_note.path, None);
     assert_eq!(commit_note.line, None);
     assert_eq!(commit_note.line_type, None);
-    assert_eq!(commit_note.author.username, "ben.boeckel");
-    assert_eq!(
-        commit_note.author.web_url,
-        "https://gitlab.kitware.com/ben.boeckel",
-    );
-    assert_eq!(commit_note.author.name, "Ben Boeckel");
-    assert_eq!(commit_note.author.state, UserState::Active);
-    assert_eq!(
-        commit_note.author.avatar_url,
-        Some(
-            "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
-                .into()
-        ),
-    );
-    assert_eq!(commit_note.author.id, UserId::new(13));
+    check_user_ben_boeckel(&commit_note.author);
     assert_eq!(
         commit_note.created_at,
         Utc.ymd(2016, 12, 7).and_hms_milli(16, 28, 33, 966),
@@ -116,18 +163,7 @@ fn test_read_commit_status() {
         Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 35, 32, 629)),
     );
     assert_eq!(commit_status.allow_failure, false);
-    assert_eq!(commit_status.author.username, "buildbot");
-    assert_eq!(
-        commit_status.author.web_url,
-        "https://gitlab.kitware.com/buildbot",
-    );
-    assert_eq!(commit_status.author.name, "buildbot");
-    assert_eq!(commit_status.author.state, UserState::Active);
-    assert_eq!(
-        commit_status.author.avatar_url,
-        Some("https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png".into()),
-    );
-    assert_eq!(commit_status.author.id, UserId::new(35));
+    check_user_buildbot(&commit_status.author);
     assert_eq!(commit_status.coverage, None);
 }
 
@@ -154,42 +190,16 @@ fn test_read_issue() {
     assert_eq!(issue.labels.len(), 1);
     assert_eq!(issue.labels[0], "area:doc");
     assert!(issue.milestone.is_none());
-    assert_eq!(issue.author.username, "ben.boeckel");
-    assert_eq!(
-        issue.author.web_url,
-        "https://gitlab.kitware.com/ben.boeckel",
-    );
-    assert_eq!(issue.author.name, "Ben Boeckel");
-    assert_eq!(issue.author.state, UserState::Active);
-    assert_eq!(
-        issue.author.avatar_url,
-        Some(
-            "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
-                .into()
-        ),
-    );
-    assert_eq!(issue.author.id, UserId::new(13));
+    check_user_ben_boeckel(&issue.author);
     if let Some(ref assignee) = issue.assignee {
-        assert_eq!(assignee.username, "ben.boeckel");
-        assert_eq!(assignee.web_url, "https://gitlab.kitware.com/ben.boeckel");
-        assert_eq!(assignee.name, "Ben Boeckel");
-        assert_eq!(assignee.state, UserState::Active);
-        assert_eq!(assignee.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".into()));
-        assert_eq!(assignee.id, UserId::new(13));
+        check_user_ben_boeckel(assignee);
     } else {
         panic!("expected to have an assignee for the issue");
     }
     if let Some(ref assignees) = issue.assignees {
         assert_eq!(assignees.len(), 1);
         let assignee = &assignees[0];
-        assert_eq!(assignee.username, "ben.boeckel");
-        assert_eq!(assignee.web_url, "https://gitlab.kitware.com/ben.boeckel");
-        assert_eq!(assignee.name, "Ben Boeckel");
-        assert_eq!(assignee.state, UserState::Active);
-        assert_eq!(assignee.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".into()));
-        assert_eq!(assignee.id, UserId::new(13));
+        check_user_ben_boeckel(assignee);
     } else {
         panic!("expected to have assignees for the issue");
     }
@@ -239,32 +249,14 @@ fn test_read_issue_reference() {
         assert!(issue.closed_by.is_none());
         assert!(issue.labels.is_empty());
         assert!(issue.milestone.is_none());
-        assert_eq!(issue.author.username, "ben.boeckel");
-        assert_eq!(
-            issue.author.web_url,
-            "https://gitlab.kitware.com/ben.boeckel",
-        );
-        assert_eq!(issue.author.name, "Ben Boeckel");
-        assert_eq!(issue.author.state, UserState::Active);
-        assert_eq!(issue.author.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".into()));
-        assert_eq!(issue.author.id, UserId::new(13));
+        check_user_ben_boeckel(&issue.author);
         if let Some(ref assignee) = issue.assignee {
-            assert_eq!(assignee.username, "ben.boeckel");
-            assert_eq!(assignee.web_url, "https://gitlab.kitware.com/ben.boeckel");
-            assert_eq!(assignee.name, "Ben Boeckel");
-            assert_eq!(assignee.state, UserState::Active);
-            assert_eq!(assignee.avatar_url,
-                       Some("https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon".into()));
-            assert_eq!(assignee.id, UserId::new(13));
+            check_user_ben_boeckel(assignee);
         } else {
             panic!("expected to have an assignee for the issue");
         }
         assert_eq!(issue.subscribed, None);
-        assert_eq!(issue.time_stats.time_estimate, 0);
-        assert_eq!(issue.time_stats.total_time_spent, 0);
-        assert_eq!(issue.time_stats.human_time_estimate, None);
-        assert_eq!(issue.time_stats.human_total_time_spent, None);
+        check_empty_time_stats(&issue.time_stats);
         assert_eq!(issue.user_notes_count, 0);
         assert_eq!(issue.merge_requests_count, 1);
         assert_eq!(issue.upvotes, 0);
@@ -329,42 +321,16 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.source_branch, "add_hook-api");
     assert_eq!(merge_request.upvotes, 0);
     assert_eq!(merge_request.downvotes, 0);
-    assert_eq!(merge_request.author.username, "ben.boeckel");
-    assert_eq!(
-        merge_request.author.web_url,
-        "https://gitlab.kitware.com/ben.boeckel",
-    );
-    assert_eq!(merge_request.author.name, "Ben Boeckel");
-    assert_eq!(merge_request.author.state, UserState::Active);
-    assert_eq!(
-        merge_request.author.avatar_url,
-        Some(
-            "https://secure.gravatar.com/avatar/2f5f7e99190174edb5a2f66b8653b0b2?s=80&d=identicon"
-                .into()
-        ),
-    );
-    assert_eq!(merge_request.author.id, UserId::new(13));
+    check_user_ben_boeckel(&merge_request.author);
     if let Some(ref assignee) = merge_request.assignee {
-        assert_eq!(assignee.username, "brad.king");
-        assert_eq!(assignee.web_url, "https://gitlab.kitware.com/brad.king");
-        assert_eq!(assignee.name, "Brad King");
-        assert_eq!(assignee.state, UserState::Active);
-        assert_eq!(assignee.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon".into()));
-        assert_eq!(assignee.id, UserId::new(10));
+        check_user_brad_king(assignee);
     } else {
         panic!("expected to have an assignee for the merge request");
     }
     if let Some(ref assignees) = merge_request.assignees {
         assert_eq!(assignees.len(), 1);
         let assignee = &assignees[0];
-        assert_eq!(assignee.username, "brad.king");
-        assert_eq!(assignee.web_url, "https://gitlab.kitware.com/brad.king");
-        assert_eq!(assignee.name, "Brad King");
-        assert_eq!(assignee.state, UserState::Active);
-        assert_eq!(assignee.avatar_url,
-                   Some("https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon".into()));
-        assert_eq!(assignee.id, UserId::new(10));
+        check_user_brad_king(assignee);
     } else {
         panic!("expected to have assignees for the merge request");
     }
@@ -398,10 +364,7 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.rebase_in_progress, None);
     assert_eq!(merge_request.merge_commit_sha, None);
     assert_eq!(merge_request.subscribed, Some(true));
-    assert_eq!(merge_request.time_stats.time_estimate, 0);
-    assert_eq!(merge_request.time_stats.total_time_spent, 0);
-    assert_eq!(merge_request.time_stats.human_time_estimate, None);
-    assert_eq!(merge_request.time_stats.human_total_time_spent, None);
+    check_empty_time_stats(&merge_request.time_stats);
     assert_eq!(merge_request.changes_count, Some("3".into()));
     assert_eq!(merge_request.user_notes_count, 3);
     assert_eq!(merge_request.discussion_locked, None);
@@ -421,18 +384,7 @@ fn test_read_note() {
     assert_eq!(note.id, NoteId::new(177_373));
     assert_eq!(note.body, "Status changed to merged");
     assert_eq!(note.attachment, None);
-    assert_eq!(note.author.username, "kwrobot");
-    assert_eq!(note.author.web_url, "https://gitlab.kitware.com/kwrobot");
-    assert_eq!(note.author.name, "Kitware Robot");
-    assert_eq!(note.author.state, UserState::Active);
-    assert_eq!(
-        note.author.avatar_url,
-        Some(
-            "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon"
-                .into()
-        ),
-    );
-    assert_eq!(note.author.id, UserId::new(11));
+    check_user_kwrobot(&note.author);
     assert_eq!(
         note.created_at,
         Utc.ymd(2016, 10, 4).and_hms_milli(20, 18, 57, 937),
@@ -510,7 +462,7 @@ fn test_read_code_discussion() {
     let note = discussion.notes.get(0).unwrap();
     assert!(note.resolvable);
     assert!(note.resolved.is_some());
-    assert_eq!(note.author.username, "brad.king");
+    check_user_brad_king(&note.author);
     assert_eq!(note.id, NoteId::new(619_272));
     assert_eq!(note.note_type, Some(DiscussionNoteType::DiffNote));
     assert!(note.position.is_some());
@@ -575,20 +527,7 @@ fn test_read_project() {
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
     assert_eq!(project.creator_id, UserId::new(13));
-    assert_eq!(project.namespace.name, "Utils");
-    assert_eq!(project.namespace.path, "utils");
-    assert_eq!(
-        project.namespace.id(),
-        NamespaceId::Group(GroupId::new(498)),
-    );
-    assert_eq!(project.namespace.kind, NamespaceKind::Group);
-    assert_eq!(project.namespace.full_path, "utils");
-    assert_eq!(project.namespace.avatar_url, None);
-    assert_eq!(
-        project.namespace.web_url,
-        "https://gitlab.kitware.com/groups/utils",
-    );
-    assert!(project.namespace.members_count_with_descendants.is_none());
+    check_namespace_utils(&project.namespace);
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
@@ -791,18 +730,7 @@ fn test_read_repo_commit_detail() {
 fn test_read_user() {
     let user: User = read_test_file("user");
 
-    assert_eq!(user.username, "kwrobot");
-    assert_eq!(user.name, "Kitware Robot");
-    assert_eq!(user.id, UserId::new(11));
-    assert_eq!(user.state, UserState::Active);
-    assert_eq!(
-        user.avatar_url,
-        Some(
-            "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon"
-                .into()
-        ),
-    );
-    assert_eq!(user.web_url, "https://gitlab.kitware.com/kwrobot");
+    check_user_kwrobot(&user.clone().into());
     assert_eq!(
         user.created_at,
         Some(Utc.ymd(2015, 2, 26).and_hms_milli(15, 58, 34, 670)),
@@ -824,18 +752,7 @@ fn test_read_user() {
 fn test_read_user_public() {
     let user_public: UserPublic = read_test_file("user_public");
 
-    assert_eq!(user_public.username, "kwrobot");
-    assert_eq!(user_public.name, "Kitware Robot");
-    assert_eq!(user_public.id, UserId::new(11));
-    assert_eq!(user_public.state, UserState::Active);
-    assert_eq!(
-        user_public.avatar_url,
-        Some(
-            "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon"
-                .into()
-        ),
-    );
-    assert_eq!(user_public.web_url, "https://gitlab.kitware.com/kwrobot");
+    check_user_kwrobot(&user_public.clone().into());
     assert_eq!(
         user_public.created_at,
         Some(Utc.ymd(2015, 2, 26).and_hms_milli(15, 58, 34, 670)),
@@ -882,8 +799,7 @@ fn test_read_resoruce_label_events() {
     let event: ResourceLabelEvent = read_test_file("resource_label_event");
 
     assert_eq!(event.id, LabelEventId::new(10945));
-    assert_eq!(event.user.id, UserId::new(10));
-    assert_eq!(event.user.username, "brad.king");
+    check_user_brad_king(&event.user);
 
     match &event.event_target() {
         Some(ResourceLabelEventTarget::Issue(id)) if id.value() == 69328 => {
@@ -963,18 +879,7 @@ fn test_read_pipeline() {
     );
 
     // nested user
-    assert_eq!(
-        pipeline.user.avatar_url,
-        Some(
-            "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png"
-                .to_owned(),
-        ),
-    );
-    assert_eq!(pipeline.user.id, UserId::new(35));
-    assert_eq!(pipeline.user.name, "buildbot");
-    assert_eq!(pipeline.user.username, "buildbot");
-    assert_eq!(pipeline.user.state, UserState::Active);
-    assert_eq!(pipeline.user.web_url, "https://gitlab.kitware.com/buildbot");
+    check_user_buildbot(&pipeline.user);
 
     // nested detailed status
     assert_eq!(
