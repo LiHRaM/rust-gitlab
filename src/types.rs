@@ -13,6 +13,7 @@
 //! upstream.
 
 use std::fmt::{self, Display, Formatter};
+use std::str::FromStr;
 
 use crates::chrono::{DateTime, NaiveDate, Utc};
 use crates::serde::de::{DeserializeOwned, Error, Unexpected};
@@ -1220,8 +1221,17 @@ impl LabelColor {
         LabelColor(format!("#{:02X}{:02X}{:02X}", r, g, b))
     }
 
+    /// Get the value from a LabelColor
+    pub fn value(self) -> String {
+        self.0
+    }
+}
+
+impl FromStr for LabelColor {
+    type Err = ();
+
     /// Creates a LabelColor from standard HTML values
-    pub fn from_str(stdcolor: &str) -> LabelColor {
+    fn from_str(stdcolor: &str) -> Result<Self, Self::Err> {
         let hex = match stdcolor {
             "white" => "FFFFFF",
             "silver" => "C0C0C0",
@@ -1242,12 +1252,7 @@ impl LabelColor {
             _ => "808080",
         };
 
-        LabelColor(format!("#{}", hex))
-    }
-
-    /// Get the value from a LabelColor
-    pub fn value(self) -> String {
-        self.0
+        Ok(LabelColor(format!("#{}", hex)))
     }
 }
 
