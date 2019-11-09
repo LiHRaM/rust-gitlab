@@ -795,7 +795,7 @@ fn test_read_user_public() {
 }
 
 #[test]
-fn test_read_resoruce_label_events() {
+fn test_read_resource_label_events() {
     let event: ResourceLabelEvent = read_test_file("resource_label_event");
 
     assert_eq!(event.id, LabelEventId::new(10945));
