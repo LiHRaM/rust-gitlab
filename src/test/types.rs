@@ -7,6 +7,7 @@
 use std::fs::File;
 
 use crates::chrono::{NaiveDate, TimeZone, Utc};
+use crates::itertools;
 use crates::serde::de::DeserializeOwned;
 use crates::serde_json::{from_reader, json};
 
@@ -187,8 +188,7 @@ fn test_read_issue() {
     );
     assert_eq!(issue.closed_at, None);
     assert!(issue.closed_by.is_none());
-    assert_eq!(issue.labels.len(), 1);
-    assert_eq!(issue.labels[0], "area:doc");
+    itertools::assert_equal(&issue.labels, &["area:doc"]);
     assert!(issue.milestone.is_none());
     check_user_ben_boeckel(&issue.author);
     let assignee = issue.assignee.as_ref().unwrap();
@@ -616,9 +616,9 @@ fn test_read_repo_branch() {
     assert_eq!(commit.short_id, ObjectId::new("e59db4b1"));
     assert_eq!(commit.title, "cargo: prep for 0.1100.1");
     assert_eq!(commit.message, "cargo: prep for 0.1100.1\n");
-    assert_eq!(
-        commit.parent_ids,
-        vec![ObjectId::new("5c81cc05661dcbb5fd923cca093920816c21ef7e")],
+    itertools::assert_equal(
+        &commit.parent_ids,
+        &[ObjectId::new("5c81cc05661dcbb5fd923cca093920816c21ef7e")],
     );
     assert_eq!(repo_branch.merged, Some(false));
     assert_eq!(repo_branch.protected, Some(true));
@@ -652,9 +652,9 @@ fn test_read_repo_commit_detail() {
          queries\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nReviewed-by: Brad King \
          <brad.king@kitware.com>\nMerge-request: !46\n",
     );
-    assert_eq!(
-        repo_commit_detail.parent_ids,
-        vec![
+    itertools::assert_equal(
+        &repo_commit_detail.parent_ids,
+        &[
             ObjectId::new("559f5f4a2bfe1f48e9e95afa09c029deb655cf7d"),
             ObjectId::new("a222c5539569cda6999b8069f1e51a5202c30711")
         ],
