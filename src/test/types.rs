@@ -657,7 +657,7 @@ fn test_read_repo_commit_detail() {
         &repo_commit_detail.parent_ids,
         &[
             ObjectId::new("559f5f4a2bfe1f48e9e95afa09c029deb655cf7d"),
-            ObjectId::new("a222c5539569cda6999b8069f1e51a5202c30711")
+            ObjectId::new("a222c5539569cda6999b8069f1e51a5202c30711"),
         ],
     );
     assert_eq!(
@@ -862,7 +862,7 @@ fn test_read_pipeline() {
             "illustration": null,
             "label": "passed",
             "text": "passed",
-            "tooltip": "passed"
+            "tooltip": "passed",
         }),
     );
 }
