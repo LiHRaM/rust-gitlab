@@ -191,18 +191,12 @@ fn test_read_issue() {
     assert_eq!(issue.labels[0], "area:doc");
     assert!(issue.milestone.is_none());
     check_user_ben_boeckel(&issue.author);
-    if let Some(ref assignee) = issue.assignee {
-        check_user_ben_boeckel(assignee);
-    } else {
-        panic!("expected to have an assignee for the issue");
-    }
-    if let Some(ref assignees) = issue.assignees {
-        assert_eq!(assignees.len(), 1);
-        let assignee = &assignees[0];
-        check_user_ben_boeckel(assignee);
-    } else {
-        panic!("expected to have assignees for the issue");
-    }
+    let assignee = issue.assignee.as_ref().unwrap();
+    check_user_ben_boeckel(assignee);
+    let assignees = issue.assignees.as_ref().unwrap();
+    assert_eq!(assignees.len(), 1);
+    let assignee = &assignees[0];
+    check_user_ben_boeckel(assignee);
     assert_eq!(issue.subscribed, Some(true));
     assert_eq!(issue.user_notes_count, 0);
     assert_eq!(issue.merge_requests_count, 1);
@@ -223,54 +217,53 @@ fn test_read_issue() {
 fn test_read_issue_reference() {
     let issue_reference: IssueReference = read_test_file("issue_reference");
 
-    if let IssueReference::Internal(issue) = issue_reference {
-        assert_eq!(issue.id, IssueId::new(69075));
-        assert_eq!(issue.iid, IssueInternalId::new(5));
-        assert_eq!(issue.project_id, ProjectId::new(855));
-        assert_eq!(issue.title, "Add project hook APIs");
-        assert_eq!(
-            issue.description,
-            Some(
-                "The workflow currently requires that the robot be able to register itself as a \
-                 webhook for new projects. An API needs added for this.\n\nCc: @brad.king"
-                    .into()
-            ),
-        );
-        assert_eq!(issue.state, IssueState::Closed);
-        assert_eq!(
-            issue.created_at,
-            Utc.ymd(2016, 10, 4).and_hms_milli(18, 59, 37, 178),
-        );
-        assert_eq!(
-            issue.updated_at,
-            Utc.ymd(2017, 7, 7).and_hms_milli(6, 31, 5, 370),
-        );
-        assert_eq!(issue.closed_at, None);
-        assert!(issue.closed_by.is_none());
-        assert!(issue.labels.is_empty());
-        assert!(issue.milestone.is_none());
-        check_user_ben_boeckel(&issue.author);
-        if let Some(ref assignee) = issue.assignee {
-            check_user_ben_boeckel(assignee);
-        } else {
-            panic!("expected to have an assignee for the issue");
-        }
-        assert_eq!(issue.subscribed, None);
-        check_empty_time_stats(&issue.time_stats);
-        assert_eq!(issue.user_notes_count, 0);
-        assert_eq!(issue.merge_requests_count, 1);
-        assert_eq!(issue.upvotes, 0);
-        assert_eq!(issue.downvotes, 0);
-        assert_eq!(issue.due_date, None);
-        assert_eq!(issue.confidential, false);
-        assert_eq!(issue.discussion_locked, None);
-        assert_eq!(
-            issue.web_url,
-            "https://gitlab.kitware.com/utils/rust-gitlab/issues/5",
-        );
+    let issue = if let IssueReference::Internal(issue) = issue_reference {
+        issue
     } else {
         panic!("expected to have an internal issue reference");
-    }
+    };
+
+    assert_eq!(issue.id, IssueId::new(69075));
+    assert_eq!(issue.iid, IssueInternalId::new(5));
+    assert_eq!(issue.project_id, ProjectId::new(855));
+    assert_eq!(issue.title, "Add project hook APIs");
+    assert_eq!(
+        issue.description,
+        Some(
+            "The workflow currently requires that the robot be able to register itself as a \
+             webhook for new projects. An API needs added for this.\n\nCc: @brad.king"
+                .into()
+        ),
+    );
+    assert_eq!(issue.state, IssueState::Closed);
+    assert_eq!(
+        issue.created_at,
+        Utc.ymd(2016, 10, 4).and_hms_milli(18, 59, 37, 178),
+    );
+    assert_eq!(
+        issue.updated_at,
+        Utc.ymd(2017, 7, 7).and_hms_milli(6, 31, 5, 370),
+    );
+    assert_eq!(issue.closed_at, None);
+    assert!(issue.closed_by.is_none());
+    assert!(issue.labels.is_empty());
+    assert!(issue.milestone.is_none());
+    check_user_ben_boeckel(&issue.author);
+    let assignee = issue.assignee.as_ref().unwrap();
+    check_user_ben_boeckel(assignee);
+    assert_eq!(issue.subscribed, None);
+    check_empty_time_stats(&issue.time_stats);
+    assert_eq!(issue.user_notes_count, 0);
+    assert_eq!(issue.merge_requests_count, 1);
+    assert_eq!(issue.upvotes, 0);
+    assert_eq!(issue.downvotes, 0);
+    assert_eq!(issue.due_date, None);
+    assert_eq!(issue.confidential, false);
+    assert_eq!(issue.discussion_locked, None);
+    assert_eq!(
+        issue.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/issues/5",
+    );
 }
 
 #[test]
@@ -322,18 +315,12 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.upvotes, 0);
     assert_eq!(merge_request.downvotes, 0);
     check_user_ben_boeckel(&merge_request.author);
-    if let Some(ref assignee) = merge_request.assignee {
-        check_user_brad_king(assignee);
-    } else {
-        panic!("expected to have an assignee for the merge request");
-    }
-    if let Some(ref assignees) = merge_request.assignees {
-        assert_eq!(assignees.len(), 1);
-        let assignee = &assignees[0];
-        check_user_brad_king(assignee);
-    } else {
-        panic!("expected to have assignees for the merge request");
-    }
+    let assignee = merge_request.assignee.as_ref().unwrap();
+    check_user_brad_king(assignee);
+    let assignees = merge_request.assignees.as_ref().unwrap();
+    assert_eq!(assignees.len(), 1);
+    let assignee = &assignees[0];
+    check_user_brad_king(assignee);
     assert_eq!(merge_request.source_project_id, ProjectId::new(856));
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
@@ -465,18 +452,14 @@ fn test_read_code_discussion() {
     check_user_brad_king(&note.author);
     assert_eq!(note.id, NoteId::new(619_272));
     assert_eq!(note.note_type, Some(DiscussionNoteType::DiffNote));
-    assert!(note.position.is_some());
-    if let Some(position) = &note.position {
-        assert_eq!(position.position_type, NotePositionType::Text);
-        assert_eq!(
-            position.head_sha.value(),
-            "04e94ae667024a62a90179f395bfdc2b35f3efd2",
-        );
-        assert_eq!(position.new_line, Some(156));
-        assert_eq!(position.new_path, "src/gitlab.rs");
-    } else {
-        unreachable!();
-    }
+    let position = note.position.as_ref().unwrap();
+    assert_eq!(position.position_type, NotePositionType::Text);
+    assert_eq!(
+        position.head_sha.value(),
+        "04e94ae667024a62a90179f395bfdc2b35f3efd2",
+    );
+    assert_eq!(position.new_line, Some(156));
+    assert_eq!(position.new_path, "src/gitlab.rs");
 }
 
 #[test]
@@ -571,18 +554,12 @@ fn test_read_project() {
     assert_eq!(project.wiki_access_level, FeatureVisibilityLevel::Enabled);
 
     assert_eq!(project.merge_method, Some("merge".into()));
-    if let Some(ref permissions) = project.permissions {
-        if let Some(ref group_access) = permissions.group_access {
-            assert_eq!(group_access.access_level, 50);
-            assert_eq!(group_access.notification_level, Some(3));
-        } else {
-            panic!("expected to have group access on the permissions");
-        }
-        assert!(permissions.project_access.is_none());
-        assert!(project.has_links());
-    } else {
-        panic!("expected to have permissions available");
-    }
+    let permissions = project.permissions.as_ref().unwrap();
+    let group_access = permissions.group_access.as_ref().unwrap();
+    assert_eq!(group_access.access_level, 50);
+    assert_eq!(group_access.notification_level, Some(3));
+    assert!(permissions.project_access.is_none());
+    assert!(project.has_links());
 }
 
 #[test]
@@ -615,37 +592,34 @@ fn test_read_repo_branch() {
     let repo_branch: RepoBranch = read_test_file("repo_branch");
 
     assert_eq!(repo_branch.name, "master");
-    if let Some(ref commit) = repo_branch.commit {
-        assert_eq!(commit.author_email, "brad.king@kitware.com");
-        assert_eq!(commit.author_name, "Brad King");
-        assert_eq!(
-            commit.authored_date,
-            Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
-        );
-        assert_eq!(
-            commit.committed_date,
-            Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
-        );
-        assert_eq!(
-            commit.created_at,
-            Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
-        );
-        assert_eq!(commit.committer_email, "brad.king@kitware.com");
-        assert_eq!(commit.committer_name, "Brad King");
-        assert_eq!(
-            commit.id,
-            ObjectId::new("e59db4b129b29df220ecec6119ed2130207a0397"),
-        );
-        assert_eq!(commit.short_id, ObjectId::new("e59db4b1"));
-        assert_eq!(commit.title, "cargo: prep for 0.1100.1");
-        assert_eq!(commit.message, "cargo: prep for 0.1100.1\n");
-        assert_eq!(
-            commit.parent_ids,
-            vec![ObjectId::new("5c81cc05661dcbb5fd923cca093920816c21ef7e")],
-        );
-    } else {
-        panic!("expected to have a commit for the branch");
-    }
+    let commit = repo_branch.commit.as_ref().unwrap();
+    assert_eq!(commit.author_email, "brad.king@kitware.com");
+    assert_eq!(commit.author_name, "Brad King");
+    assert_eq!(
+        commit.authored_date,
+        Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
+    );
+    assert_eq!(
+        commit.committed_date,
+        Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
+    );
+    assert_eq!(
+        commit.created_at,
+        Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
+    );
+    assert_eq!(commit.committer_email, "brad.king@kitware.com");
+    assert_eq!(commit.committer_name, "Brad King");
+    assert_eq!(
+        commit.id,
+        ObjectId::new("e59db4b129b29df220ecec6119ed2130207a0397"),
+    );
+    assert_eq!(commit.short_id, ObjectId::new("e59db4b1"));
+    assert_eq!(commit.title, "cargo: prep for 0.1100.1");
+    assert_eq!(commit.message, "cargo: prep for 0.1100.1\n");
+    assert_eq!(
+        commit.parent_ids,
+        vec![ObjectId::new("5c81cc05661dcbb5fd923cca093920816c21ef7e")],
+    );
     assert_eq!(repo_branch.merged, Some(false));
     assert_eq!(repo_branch.protected, Some(true));
     assert_eq!(repo_branch.developers_can_push, Some(false));
@@ -693,36 +667,30 @@ fn test_read_repo_commit_detail() {
         repo_commit_detail.authored_date,
         Utc.ymd(2016, 11, 8).and_hms_milli(14, 30, 13, 0),
     );
-    if let Some(ref stats) = repo_commit_detail.stats {
-        assert_eq!(stats.additions, 8);
-        assert_eq!(stats.deletions, 0);
-        assert_eq!(stats.total, 8);
-    } else {
-        panic!("expected to have stats for this commit");
-    }
-    if let Some(ref last_pipeline) = repo_commit_detail.last_pipeline {
-        assert_eq!(last_pipeline.id, PipelineId::new(34289));
-        assert_eq!(last_pipeline.ref_, Some("master".into()));
-        assert_eq!(
-            last_pipeline.sha,
-            ObjectId::new("de4ac3cf96cb8a0893be22b03f5171d934f9d392"),
-        );
-        assert_eq!(last_pipeline.status, StatusState::Success);
-        assert_eq!(
-            last_pipeline.created_at,
-            Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 30, 16, 81)),
-        );
-        assert_eq!(
-            last_pipeline.updated_at,
-            Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 35, 32, 670)),
-        );
-        assert_eq!(
-            last_pipeline.web_url,
-            "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/34289",
-        );
-    } else {
-        panic!("expected to have a last_pipeline for this commit");
-    }
+    let stats = repo_commit_detail.stats.as_ref().unwrap();
+    assert_eq!(stats.additions, 8);
+    assert_eq!(stats.deletions, 0);
+    assert_eq!(stats.total, 8);
+    let last_pipeline = repo_commit_detail.last_pipeline.as_ref().unwrap();
+    assert_eq!(last_pipeline.id, PipelineId::new(34289));
+    assert_eq!(last_pipeline.ref_, Some("master".into()));
+    assert_eq!(
+        last_pipeline.sha,
+        ObjectId::new("de4ac3cf96cb8a0893be22b03f5171d934f9d392"),
+    );
+    assert_eq!(last_pipeline.status, StatusState::Success);
+    assert_eq!(
+        last_pipeline.created_at,
+        Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 30, 16, 81)),
+    );
+    assert_eq!(
+        last_pipeline.updated_at,
+        Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 35, 32, 670)),
+    );
+    assert_eq!(
+        last_pipeline.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/34289",
+    );
     assert_eq!(repo_commit_detail.project_id, ProjectId::new(855));
 }
 
