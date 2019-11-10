@@ -24,7 +24,7 @@ pub enum GitlabHook {
     /// A system hook.
     System(SystemHook),
     /// A web hook from a specific project.
-    Web(WebHook),
+    Web(Box<WebHook>),
 }
 
 impl<'de> Deserialize<'de> for GitlabHook {
@@ -37,7 +37,7 @@ impl<'de> Deserialize<'de> for GitlabHook {
         // Look for `object_kind` first because some web hooks also have `event_name` which would
         // cause a false match here.
         let hook_res = if val.pointer("/object_kind").is_some() {
-            serde_json::from_value(val).map(GitlabHook::Web)
+            serde_json::from_value(val).map(|hook| GitlabHook::Web(Box::new(hook)))
         } else if val.pointer("/event_name").is_some() {
             serde_json::from_value(val).map(GitlabHook::System)
         } else {

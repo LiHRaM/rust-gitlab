@@ -24,8 +24,7 @@ before_script:
     # gone wrong here.
     - .gitlab/ci/sccache.sh && export RUSTC_WRAPPER=$PWD/.gitlab/sccache
     - rustup component add clippy
-    # - cargo clippy --frozen --tests --all --verbose -- -D warnings
-    - cargo clippy --frozen --tests --all --verbose
+    - cargo clippy --frozen --tests --all --verbose -- -D warnings
     - ".gitlab/sccache --show-stats || :"
 
 .cargo_build: &cargo_build

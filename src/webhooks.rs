@@ -315,8 +315,11 @@ impl MergeRequestParams {
                 } else if let Some(as_bool) = val.as_bool() {
                     as_bool
                 } else {
-                    error!(target: "gitlab",
-                           "unknown value for force_remove_source_branch: {}", val);
+                    error!(
+                        target: "gitlab",
+                        "unknown value for force_remove_source_branch: {}",
+                        val,
+                    );
                     false
                 }
             })
@@ -717,17 +720,17 @@ pub struct WikiPageHook {
 #[derive(Debug, Clone)]
 pub enum WebHook {
     /// A push hook.
-    Push(PushHook),
+    Push(Box<PushHook>),
     /// An issue hook.
-    Issue(IssueHook),
+    Issue(Box<IssueHook>),
     /// A merge request hook.
-    MergeRequest(MergeRequestHook),
+    MergeRequest(Box<MergeRequestHook>),
     /// A note hook.
-    Note(NoteHook),
+    Note(Box<NoteHook>),
     /// A build hook.
-    Build(BuildHook),
+    Build(Box<BuildHook>),
     /// A wiki page hook.
-    WikiPage(WikiPageHook),
+    WikiPage(Box<WikiPageHook>),
 }
 
 impl<'de> Deserialize<'de> for WebHook {
@@ -752,15 +755,19 @@ impl<'de> Deserialize<'de> for WebHook {
         };
 
         let hook_res = match object_kind.as_ref() {
-            "push" | "tag_push" => serde_json::from_value(val).map(WebHook::Push),
+            "push" | "tag_push" => {
+                serde_json::from_value(val).map(|hook| WebHook::Push(Box::new(hook)))
+            },
 
-            "issue" => serde_json::from_value(val).map(WebHook::Issue),
+            "issue" => serde_json::from_value(val).map(|hook| WebHook::Issue(Box::new(hook))),
 
-            "merge_request" => serde_json::from_value(val).map(WebHook::MergeRequest),
+            "merge_request" => {
+                serde_json::from_value(val).map(|hook| WebHook::MergeRequest(Box::new(hook)))
+            },
 
-            "note" => serde_json::from_value(val).map(WebHook::Note),
+            "note" => serde_json::from_value(val).map(|hook| WebHook::Note(Box::new(hook))),
 
-            "build" => serde_json::from_value(val).map(WebHook::Build),
+            "build" => serde_json::from_value(val).map(|hook| WebHook::Build(Box::new(hook))),
 
             _ => {
                 return Err(D::Error::invalid_value(

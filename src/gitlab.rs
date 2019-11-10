@@ -1668,9 +1668,7 @@ impl Gitlab {
             return Err(GitlabError::from_gitlab(v));
         }
 
-        debug!(target: "gitlab",
-               "received data: {:?}",
-               v);
+        debug!(target: "gitlab", "received data: {:?}", v);
         serde_json::from_value::<T>(v).map_err(GitlabError::data_type::<T>)
     }
 

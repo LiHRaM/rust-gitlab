@@ -369,7 +369,7 @@ pub enum SystemHook {
     /// A group membership hook.
     GroupMember(GroupMemberSystemHook),
     /// A push hook.
-    Push(PushSystemHook),
+    Push(Box<PushSystemHook>),
 }
 
 impl<'de> Deserialize<'de> for SystemHook {
@@ -412,7 +412,9 @@ impl<'de> Deserialize<'de> for SystemHook {
                 serde_json::from_value(val).map(SystemHook::GroupMember)
             },
 
-            "push" | "tag_push" => serde_json::from_value(val).map(SystemHook::Push),
+            "push" | "tag_push" => {
+                serde_json::from_value(val).map(|hook| SystemHook::Push(Box::new(hook)))
+            },
 
             _ => {
                 return Err(D::Error::custom(format!(

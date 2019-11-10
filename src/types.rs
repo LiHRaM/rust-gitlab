@@ -13,6 +13,7 @@
 //! upstream.
 
 use std::fmt::{self, Display, Formatter};
+use std::str::FromStr;
 
 use crates::chrono::{DateTime, NaiveDate, Utc};
 use crates::serde::de::{DeserializeOwned, Error, Unexpected};
@@ -1220,8 +1221,17 @@ impl LabelColor {
         LabelColor(format!("#{:02X}{:02X}{:02X}", r, g, b))
     }
 
+    /// Get the value from a LabelColor
+    pub fn value(self) -> String {
+        self.0
+    }
+}
+
+impl FromStr for LabelColor {
+    type Err = ();
+
     /// Creates a LabelColor from standard HTML values
-    pub fn from_str(stdcolor: &str) -> LabelColor {
+    fn from_str(stdcolor: &str) -> Result<Self, Self::Err> {
         let hex = match stdcolor {
             "white" => "FFFFFF",
             "silver" => "C0C0C0",
@@ -1242,12 +1252,7 @@ impl LabelColor {
             _ => "808080",
         };
 
-        LabelColor(format!("#{}", hex))
-    }
-
-    /// Get the value from a LabelColor
-    pub fn value(self) -> String {
-        self.0
+        Ok(LabelColor(format!("#{}", hex)))
     }
 }
 
@@ -1523,7 +1528,7 @@ pub struct ExternalIssue {
 #[derive(Debug, Clone)]
 pub enum IssueReference {
     /// A reference to an issue on the same Gitlab host.
-    Internal(Issue),
+    Internal(Box<Issue>),
     /// An external issue reference.
     External(ExternalIssue),
 }
@@ -1545,7 +1550,7 @@ impl<'de> Deserialize<'de> for IssueReference {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         serde_json::from_value::<Issue>(val.clone())
-            .map(IssueReference::Internal)
+            .map(|issue| IssueReference::Internal(Box::new(issue)))
             .or_else(|_| serde_json::from_value::<ExternalIssue>(val).map(IssueReference::External))
             .map_err(|err| D::Error::custom(format!("invalid issue reference: {:?}", err)))
     }
