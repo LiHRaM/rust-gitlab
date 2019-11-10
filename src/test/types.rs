@@ -6,7 +6,7 @@
 
 use std::fs::File;
 
-use crates::chrono::{NaiveDate, TimeZone, Utc};
+use crates::chrono::{DateTime, NaiveDate, TimeZone, Utc};
 use crates::itertools;
 use crates::serde::de::DeserializeOwned;
 use crates::serde_json::{from_reader, json};
@@ -88,6 +88,11 @@ fn check_empty_time_stats(time_stats: &IssuableTimeStats) {
     assert_eq!(time_stats.human_total_time_spent, None);
 }
 
+fn datetime(ymd: (i32, u32, u32), time: (u32, u32, u32, u32)) -> DateTime<Utc> {
+    Utc.ymd(ymd.0, ymd.1, ymd.2)
+        .and_hms_milli(time.0, time.1, time.2, time.3)
+}
+
 fn read_test_file<T: DeserializeOwned>(name: &str) -> T {
     let fin = File::open(format!(
         concat!(env!("CARGO_MANIFEST_DIR"), "/data/{}.json"),
@@ -107,11 +112,11 @@ fn test_read_award_emoji() {
     check_user_ben_boeckel(&award_emoji.user);
     assert_eq!(
         award_emoji.created_at,
-        Utc.ymd(2016, 12, 7).and_hms_milli(16, 23, 46, 742),
+        datetime((2016, 12, 7), (16, 23, 46, 742)),
     );
     assert_eq!(
         award_emoji.updated_at,
-        Utc.ymd(2016, 12, 7).and_hms_milli(16, 23, 46, 742),
+        datetime((2016, 12, 7), (16, 23, 46, 742)),
     );
     assert_eq!(
         award_emoji.awardable_id(),
@@ -131,7 +136,7 @@ fn test_read_commit_note() {
     check_user_ben_boeckel(&commit_note.author);
     assert_eq!(
         commit_note.created_at,
-        Utc.ymd(2016, 12, 7).and_hms_milli(16, 28, 33, 966),
+        datetime((2016, 12, 7), (16, 28, 33, 966)),
     );
 }
 
@@ -156,12 +161,12 @@ fn test_read_commit_status() {
     assert_eq!(commit_status.description, Some("expected".into()));
     assert_eq!(
         commit_status.created_at,
-        Utc.ymd(2016, 11, 8).and_hms_milli(14, 35, 32, 627),
+        datetime((2016, 11, 8), (14, 35, 32, 627)),
     );
     assert_eq!(commit_status.started_at, None);
     assert_eq!(
         commit_status.finished_at,
-        Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 35, 32, 629)),
+        Some(datetime((2016, 11, 8), (14, 35, 32, 629))),
     );
     assert_eq!(commit_status.allow_failure, false);
     check_user_buildbot(&commit_status.author);
@@ -180,12 +185,9 @@ fn test_read_issue() {
     assert_eq!(issue.state, IssueState::Closed);
     assert_eq!(
         issue.created_at,
-        Utc.ymd(2016, 10, 30).and_hms_milli(18, 54, 28, 954),
+        datetime((2016, 10, 30), (18, 54, 28, 954)),
     );
-    assert_eq!(
-        issue.updated_at,
-        Utc.ymd(2019, 7, 17).and_hms_milli(13, 53, 48, 869),
-    );
+    assert_eq!(issue.updated_at, datetime((2019, 7, 17), (13, 53, 48, 869)));
     assert_eq!(issue.closed_at, None);
     assert!(issue.closed_by.is_none());
     itertools::assert_equal(&issue.labels, &["area:doc"]);
@@ -236,14 +238,8 @@ fn test_read_issue_reference() {
         ),
     );
     assert_eq!(issue.state, IssueState::Closed);
-    assert_eq!(
-        issue.created_at,
-        Utc.ymd(2016, 10, 4).and_hms_milli(18, 59, 37, 178),
-    );
-    assert_eq!(
-        issue.updated_at,
-        Utc.ymd(2017, 7, 7).and_hms_milli(6, 31, 5, 370),
-    );
+    assert_eq!(issue.created_at, datetime((2016, 10, 4), (18, 59, 37, 178)));
+    assert_eq!(issue.updated_at, datetime((2017, 7, 7), (6, 31, 5, 370)));
     assert_eq!(issue.closed_at, None);
     assert!(issue.closed_by.is_none());
     assert!(issue.labels.is_empty());
@@ -298,15 +294,15 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.state, MergeRequestState::Merged);
     assert_eq!(
         merge_request.created_at,
-        Utc.ymd(2016, 10, 4).and_hms_milli(19, 56, 43, 276),
+        datetime((2016, 10, 4), (19, 56, 43, 276)),
     );
     assert_eq!(
         merge_request.updated_at,
-        Utc.ymd(2016, 10, 4).and_hms_milli(20, 18, 57, 940),
+        datetime((2016, 10, 4), (20, 18, 57, 940)),
     );
     assert_eq!(
         merge_request.merged_at,
-        Some(Utc.ymd(2016, 10, 4).and_hms_milli(20, 18, 57, 914)),
+        Some(datetime((2016, 10, 4), (20, 18, 57, 914))),
     );
     assert!(merge_request.merged_by.is_none());
     assert!(merge_request.closed_by.is_none());
@@ -373,14 +369,8 @@ fn test_read_note() {
     assert_eq!(note.body, "Status changed to merged");
     assert_eq!(note.attachment, None);
     check_user_kwrobot(&note.author);
-    assert_eq!(
-        note.created_at,
-        Utc.ymd(2016, 10, 4).and_hms_milli(20, 18, 57, 937),
-    );
-    assert_eq!(
-        note.updated_at,
-        Utc.ymd(2016, 10, 4).and_hms_milli(20, 18, 57, 937),
-    );
+    assert_eq!(note.created_at, datetime((2016, 10, 4), (20, 18, 57, 937)));
+    assert_eq!(note.updated_at, datetime((2016, 10, 4), (20, 18, 57, 937)));
     assert_eq!(note.resolvable, false);
     assert_eq!(note.resolved, None);
     assert!(note.resolved_by.is_none());
@@ -501,11 +491,11 @@ fn test_read_project() {
     assert_eq!(project.container_registry_enabled, Some(true));
     assert_eq!(
         project.created_at,
-        Utc.ymd(2016, 6, 29).and_hms_milli(17, 35, 12, 495),
+        datetime((2016, 6, 29), (17, 35, 12, 495)),
     );
     assert_eq!(
         project.last_activity_at,
-        Utc.ymd(2019, 7, 30).and_hms_milli(16, 42, 57, 649),
+        datetime((2019, 7, 30), (16, 42, 57, 649)),
     );
     assert_eq!(project.import_error, None);
     assert_eq!(project.shared_runners_enabled, true);
@@ -571,7 +561,7 @@ fn test_read_project_hook() {
     assert_eq!(project_hook.url, "http://kwrobot02:8082/gitlab.kitware.com");
     assert_eq!(
         project_hook.created_at,
-        Utc.ymd(2016, 12, 16).and_hms_milli(16, 37, 24, 589),
+        datetime((2016, 12, 16), (16, 37, 24, 589)),
     );
     assert_eq!(project_hook.push_events, true);
     assert_eq!(project_hook.push_events_branch_filter, None);
@@ -598,16 +588,13 @@ fn test_read_repo_branch() {
     assert_eq!(commit.author_name, "Brad King");
     assert_eq!(
         commit.authored_date,
-        Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
+        datetime((2018, 7, 12), (12, 50, 24, 0)),
     );
     assert_eq!(
         commit.committed_date,
-        Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
+        datetime((2018, 7, 12), (12, 50, 24, 0)),
     );
-    assert_eq!(
-        commit.created_at,
-        Utc.ymd(2018, 7, 12).and_hms_milli(12, 50, 24, 0),
-    );
+    assert_eq!(commit.created_at, datetime((2018, 7, 12), (12, 50, 24, 0)));
     assert_eq!(commit.committer_email, "brad.king@kitware.com");
     assert_eq!(commit.committer_name, "Brad King");
     assert_eq!(
@@ -645,7 +632,7 @@ fn test_read_repo_commit_detail() {
     assert_eq!(repo_commit_detail.committer_email, "kwrobot@kitware.com");
     assert_eq!(
         repo_commit_detail.created_at,
-        Utc.ymd(2016, 11, 8).and_hms_milli(14, 30, 13, 0),
+        datetime((2016, 11, 8), (14, 30, 13, 0)),
     );
     assert_eq!(
         repo_commit_detail.message,
@@ -662,11 +649,11 @@ fn test_read_repo_commit_detail() {
     );
     assert_eq!(
         repo_commit_detail.committed_date,
-        Utc.ymd(2016, 11, 8).and_hms_milli(14, 30, 13, 0),
+        datetime((2016, 11, 8), (14, 30, 13, 0)),
     );
     assert_eq!(
         repo_commit_detail.authored_date,
-        Utc.ymd(2016, 11, 8).and_hms_milli(14, 30, 13, 0),
+        datetime((2016, 11, 8), (14, 30, 13, 0)),
     );
     let stats = repo_commit_detail.stats.as_ref().unwrap();
     assert_eq!(stats.additions, 8);
@@ -682,11 +669,11 @@ fn test_read_repo_commit_detail() {
     assert_eq!(last_pipeline.status, StatusState::Success);
     assert_eq!(
         last_pipeline.created_at,
-        Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 30, 16, 81)),
+        Some(datetime((2016, 11, 8), (14, 30, 16, 81))),
     );
     assert_eq!(
         last_pipeline.updated_at,
-        Some(Utc.ymd(2016, 11, 8).and_hms_milli(14, 35, 32, 670)),
+        Some(datetime((2016, 11, 8), (14, 35, 32, 670))),
     );
     assert_eq!(
         last_pipeline.web_url,
@@ -702,7 +689,7 @@ fn test_read_user() {
     check_user_kwrobot(&user.clone().into());
     assert_eq!(
         user.created_at,
-        Some(Utc.ymd(2015, 2, 26).and_hms_milli(15, 58, 34, 670)),
+        Some(datetime((2015, 2, 26), (15, 58, 34, 670))),
     );
     assert_eq!(user.is_admin, None);
     assert_eq!(user.highest_role, Some(AccessLevel::Owner));
@@ -724,7 +711,7 @@ fn test_read_user_public() {
     check_user_kwrobot(&user_public.clone().into());
     assert_eq!(
         user_public.created_at,
-        Some(Utc.ymd(2015, 2, 26).and_hms_milli(15, 58, 34, 670)),
+        Some(datetime((2015, 2, 26), (15, 58, 34, 670))),
     );
     assert_eq!(user_public.is_admin, Some(true));
     assert_eq!(user_public.bio, Some("".into()));
@@ -738,7 +725,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.organization, None);
     assert_eq!(
         user_public.last_sign_in_at,
-        Some(Utc.ymd(2018, 10, 8).and_hms_milli(17, 25, 29, 86)),
+        Some(datetime((2018, 10, 8), (17, 25, 29, 86))),
     );
     assert_eq!(
         user_public.last_activity_on,
@@ -746,7 +733,7 @@ fn test_read_user_public() {
     );
     assert_eq!(
         user_public.confirmed_at,
-        Some(Utc.ymd(2015, 2, 26).and_hms_milli(15, 58, 34, 660)),
+        Some(datetime((2015, 2, 26), (15, 58, 34, 660))),
     );
     assert_eq!(user_public.email, "kwrobot@kitware.com");
     assert_eq!(user_public.theme_id, None);
@@ -754,7 +741,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(
         user_public.current_sign_in_at,
-        Some(Utc.ymd(2018, 10, 11).and_hms_milli(12, 36, 9, 687)),
+        Some(datetime((2018, 10, 11), (12, 36, 9, 687))),
     );
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);
@@ -797,11 +784,11 @@ fn test_read_pipelines() {
     );
     assert_eq!(
         pipeline_basic.created_at,
-        Some(Utc.ymd(2019, 10, 25).and_hms_milli(19, 22, 38, 463)),
+        Some(datetime((2019, 10, 25), (19, 22, 38, 463))),
     );
     assert_eq!(
         pipeline_basic.updated_at,
-        Some(Utc.ymd(2019, 10, 25).and_hms_milli(19, 35, 24, 570)),
+        Some(datetime((2019, 10, 25), (19, 35, 24, 570))),
     );
     assert_eq!(
         pipeline_basic.web_url,
@@ -825,19 +812,19 @@ fn test_read_pipeline() {
     assert_eq!(pipeline.yaml_errors, None);
     assert_eq!(
         pipeline.created_at,
-        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 9, 47, 178)),
+        Some(datetime((2019, 9, 3), (18, 9, 47, 178))),
     );
     assert_eq!(
         pipeline.updated_at,
-        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 15, 47, 18)),
+        Some(datetime((2019, 9, 3), (18, 15, 47, 18))),
     );
     assert_eq!(
         pipeline.started_at,
-        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 9, 51, 465)),
+        Some(datetime((2019, 9, 3), (18, 9, 51, 465))),
     );
     assert_eq!(
         pipeline.finished_at,
-        Some(Utc.ymd(2019, 9, 3).and_hms_milli(18, 15, 47, 13)),
+        Some(datetime((2019, 9, 3), (18, 15, 47, 13))),
     );
     assert_eq!(pipeline.committed_at, None);
     assert_eq!(pipeline.duration, Some(0));
