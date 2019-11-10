@@ -303,6 +303,10 @@ fn check_merge_request_a(merge_request: &MergeRequest) {
 }
 
 fn check_merge_request_b(merge_request: &MergeRequest) {
+    let check_sha = |oid: Option<&ObjectId>, value| {
+        assert_eq!(oid.unwrap().value(), value);
+    };
+
     assert_eq!(merge_request.work_in_progress, false);
     assert_eq!(merge_request.allow_collaboration, None);
     assert_eq!(merge_request.allow_maintainer_to_push, None);
@@ -310,23 +314,11 @@ fn check_merge_request_b(merge_request: &MergeRequest) {
     assert_eq!(merge_request.squash, false);
     assert_eq!(merge_request.merge_when_pipeline_succeeds, false);
     assert_eq!(merge_request.merge_status, MergeStatus::CanBeMerged);
-    assert_eq!(
-        merge_request.sha.as_ref().unwrap().value(),
-        "04e94ae667024a62a90179f395bfdc2b35f3efd2",
-    );
+    check_sha(merge_request.sha.as_ref(), "04e94ae667024a62a90179f395bfdc2b35f3efd2");
     let diff_refs = merge_request.diff_refs.as_ref().unwrap();
-    assert_eq!(
-        diff_refs.base_sha.as_ref().unwrap().value(),
-        "981262b03fc0149c1677ca51ea47b570e30d6a90",
-    );
-    assert_eq!(
-        diff_refs.head_sha.as_ref().unwrap().value(),
-        "04e94ae667024a62a90179f395bfdc2b35f3efd2",
-    );
-    assert_eq!(
-        diff_refs.start_sha.as_ref().unwrap().value(),
-        "981262b03fc0149c1677ca51ea47b570e30d6a90",
-    );
+    check_sha(diff_refs.base_sha.as_ref(), "981262b03fc0149c1677ca51ea47b570e30d6a90");
+    check_sha(diff_refs.head_sha.as_ref(), "04e94ae667024a62a90179f395bfdc2b35f3efd2");
+    check_sha(diff_refs.start_sha.as_ref(), "981262b03fc0149c1677ca51ea47b570e30d6a90");
     assert_eq!(merge_request.merge_error, None);
     assert_eq!(merge_request.rebase_in_progress, None);
     assert_eq!(merge_request.merge_commit_sha, None);
