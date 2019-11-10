@@ -265,10 +265,7 @@ fn test_read_member() {
     assert_eq!(member.expires_at, None);
 }
 
-#[test]
-fn test_read_merge_request() {
-    let merge_request: MergeRequest = read_test_file("merge_request");
-
+fn check_merge_request_a(merge_request: &MergeRequest) {
     assert_eq!(merge_request.id, MergeRequestId::new(20215));
     assert_eq!(merge_request.iid, MergeRequestInternalId::new(35));
     assert_eq!(merge_request.project_id, ProjectId::new(855));
@@ -303,6 +300,9 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.source_project_id, ProjectId::new(856));
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
+}
+
+fn check_merge_request_b(merge_request: &MergeRequest) {
     assert_eq!(merge_request.work_in_progress, false);
     assert_eq!(merge_request.allow_collaboration, None);
     assert_eq!(merge_request.allow_maintainer_to_push, None);
@@ -337,11 +337,20 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
-    assert_eq!(merge_request.user.unwrap().can_merge, true);
+    assert_eq!(merge_request.user.as_ref().unwrap().can_merge, true);
     assert_eq!(
         merge_request.web_url,
         "https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35",
     );
+}
+
+#[test]
+fn test_read_merge_request() {
+    let merge_request: MergeRequest = read_test_file("merge_request");
+
+    // Split for clippy's complexity checks.
+    check_merge_request_a(&merge_request);
+    check_merge_request_b(&merge_request);
 }
 
 #[test]
@@ -434,10 +443,7 @@ fn test_read_code_discussion() {
     assert_eq!(position.new_path, "src/gitlab.rs");
 }
 
-#[test]
-fn test_read_project() {
-    let project: Project = read_test_file("project");
-
+fn check_project_a(project: &Project) {
     assert_eq!(project.id, ProjectId::new(855));
     assert_eq!(
         project.description.as_ref().unwrap(),
@@ -478,6 +484,9 @@ fn test_read_project() {
         project.last_activity_at,
         datetime((2019, 7, 30), (16, 42, 57, 649)),
     );
+}
+
+fn check_project_b(project: &Project) {
     assert_eq!(project.import_error, None);
     assert_eq!(project.shared_runners_enabled, true);
     assert_eq!(project.lfs_enabled, true);
@@ -505,7 +514,9 @@ fn test_read_project() {
     assert_eq!(project.merge_requests_enabled, true);
     assert_eq!(project.snippets_enabled, false);
     assert_eq!(project.wiki_enabled, true);
+}
 
+fn check_project_c(project: &Project) {
     assert_eq!(
         project.builds_access_level,
         FeatureVisibilityLevel::Disabled,
@@ -532,6 +543,16 @@ fn test_read_project() {
     assert_eq!(group_access.notification_level, Some(3));
     assert!(permissions.project_access.is_none());
     assert!(project.has_links());
+}
+
+#[test]
+fn test_read_project() {
+    let project: Project = read_test_file("project");
+
+    // Split for clippy's complexity checks.
+    check_project_a(&project);
+    check_project_b(&project);
+    check_project_c(&project);
 }
 
 #[test]
