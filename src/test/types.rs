@@ -175,7 +175,7 @@ fn test_read_issue() {
     assert_eq!(issue.iid, IssueInternalId::new(6));
     assert_eq!(issue.project_id, ProjectId::new(855));
     assert_eq!(issue.title, "fix documentation warnings");
-    assert_eq!(issue.description, Some("".into()));
+    assert_eq!(issue.description, Some(String::new()));
     assert_eq!(issue.state, IssueState::Closed);
     assert_eq!(
         issue.created_at,
@@ -737,10 +737,10 @@ fn test_read_user() {
     );
     assert_eq!(user.is_admin, None);
     assert_eq!(user.highest_role, Some(AccessLevel::Owner));
-    assert_eq!(user.bio, Some("".into()));
+    assert_eq!(user.bio, Some(String::new()));
     assert_eq!(user.private_profile, Some(false));
     assert_eq!(user.location, None);
-    assert_eq!(user.public_email, Some("".into()));
+    assert_eq!(user.public_email, Some(String::new()));
     assert_eq!(user.skype, "");
     assert_eq!(user.linkedin, "");
     assert_eq!(user.twitter, "");
