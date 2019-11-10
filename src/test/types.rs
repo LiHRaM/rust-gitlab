@@ -325,8 +325,8 @@ fn test_read_merge_request() {
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
     assert_eq!(merge_request.work_in_progress, false);
-    assert!(merge_request.allow_collaboration.is_none());
-    assert!(merge_request.allow_maintainer_to_push.is_none());
+    assert_eq!(merge_request.allow_collaboration, None);
+    assert_eq!(merge_request.allow_maintainer_to_push, None);
     assert!(merge_request.milestone.is_none());
     assert_eq!(merge_request.squash, false);
     assert_eq!(merge_request.merge_when_pipeline_succeeds, false);
@@ -407,9 +407,9 @@ fn test_read_singlenote_discussion() {
     assert!(discussion.individual_note);
     assert_eq!(discussion.notes.len(), 1);
     let note = discussion.notes.get(0).unwrap();
-    assert!(!(note.resolvable));
+    assert!(!note.resolvable);
     assert!(note.position.is_none());
-    assert!(note.note_type.is_none())
+    assert_eq!(note.note_type, None)
 }
 
 #[test]
@@ -419,14 +419,14 @@ fn test_read_nocode_discussion() {
         .iter()
         .find(|x| x.id.value() == "a4d5505b3556eaa45edbe567af7aebc1760dedd7")
         .unwrap();
-    assert!(!(discussion.individual_note));
+    assert!(!discussion.individual_note);
     assert_eq!(discussion.notes.len(), 3);
     let question = discussion.notes.get(0).unwrap();
     let comment = discussion.notes.get(1).unwrap();
     assert!(question.resolvable);
     assert!(comment.resolvable);
 
-    assert!(question.resolved.is_some());
+    assert_eq!(question.resolved, Some(true));
 
     assert!(question.position.is_none());
     assert!(comment.position.is_none());
@@ -445,10 +445,10 @@ fn test_read_code_discussion() {
         .into_iter()
         .find(|x| x.id.value() == "9f4998b2308728b95cff52af97019479e1269183")
         .unwrap();
-    assert!(!(discussion.individual_note));
+    assert!(!discussion.individual_note);
     let note = discussion.notes.get(0).unwrap();
     assert!(note.resolvable);
-    assert!(note.resolved.is_some());
+    assert_eq!(note.resolved, Some(true));
     check_user_brad_king(&note.author);
     assert_eq!(note.id, NoteId::new(619_272));
     assert_eq!(note.note_type, Some(DiscussionNoteType::DiffNote));
@@ -573,7 +573,7 @@ fn test_read_project_hook() {
         Utc.ymd(2016, 12, 16).and_hms_milli(16, 37, 24, 589),
     );
     assert_eq!(project_hook.push_events, true);
-    assert!(project_hook.push_events_branch_filter.is_none());
+    assert_eq!(project_hook.push_events_branch_filter, None);
     assert_eq!(project_hook.tag_push_events, true);
     assert_eq!(project_hook.issues_events, true);
     assert_eq!(project_hook.confidential_issues_events, Some(true));
