@@ -856,3 +856,22 @@ fn test_read_pipeline_variables() {
     assert_eq!(var.variable_type, PipelineVariableType::EnvVar);
     assert_eq!(var.value, "true");
 }
+
+#[test]
+fn test_read_group() {
+    let group: Group = read_test_file("group");
+
+    assert_eq!(group.id, GroupId::new(498));
+    assert_eq!(group.name, "Utils");
+    assert_eq!(group.path, "utils");
+    assert_eq!(group.description.as_ref().unwrap(), "");
+    assert_eq!(group.visibility, VisibilityLevel::Public);
+    assert_eq!(group.lfs_enabled, true);
+    assert_eq!(group.avatar_url, None);
+    assert_eq!(group.web_url, "https://gitlab.kitware.com/groups/utils");
+    assert_eq!(group.request_access_enabled, false);
+    assert_eq!(group.full_name, "Utils");
+    assert_eq!(group.full_path, "utils");
+    assert_eq!(group.parent_id, None);
+    assert!(group.statistics.is_none());
+}

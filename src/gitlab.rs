@@ -435,6 +435,18 @@ impl Gitlab {
         self.get_paged_with_param("groups", params)
     }
 
+    /// Find a group by its name.
+    pub fn group_by_name<N>(&self, name: N) -> GitlabResult<Group>
+    where
+        N: AsRef<str>,
+    {
+        let param: &[(&str, &str)] = &[];
+        self.get_with_param(
+            format!("groups/{}", Self::url_name(name.as_ref())),
+            param,
+        )
+    }
+
     /// Get a project's hooks.
     pub fn hooks<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<ProjectHook>>
     where
