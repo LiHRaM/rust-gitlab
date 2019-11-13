@@ -2249,7 +2249,7 @@ pub struct CommitStatus {
     pub finished_at: Option<DateTime<Utc>>,
     /// Whether the commit status is allowed to fail.
     pub allow_failure: bool,
-    pub coverage: Option<u64>,
+    pub coverage: Option<f64>,
     /// The author of the commit status.
     pub author: UserBasic,
 }
