@@ -31,7 +31,7 @@ before_script:
     # Only use it if it's available; no need to fail the build due to something
     # gone wrong here.
     - .gitlab/ci/sccache.sh && export RUSTC_WRAPPER=$PWD/.gitlab/sccache
-    - cargo build $CARGO_BUILD_FROZEN --all --verbose
+    - cargo build --frozen --all --verbose
     - cargo test --frozen --all --no-run --verbose
     - ".gitlab/sccache --show-stats || :"
 
@@ -39,12 +39,9 @@ before_script:
     - cargo test --frozen --all --verbose
 
 .rust_minimum: &rust_minimum
-    image: "rust:1.34.2"
+    image: "rust:1.36.0"
 
     variables:
-        # Not supported yet here? If updating to a version where this works,
-        # remove this variable.
-        #CARGO_BUILD_FROZEN: --frozen
         CARGO_UPDATE_POLICY: newest
         SCCACHE_REDIS: redis://minmus:6379
 
@@ -52,7 +49,6 @@ before_script:
     image: "rust:latest"
 
     variables:
-        CARGO_BUILD_FROZEN: --frozen
         CARGO_UPDATE_POLICY: newest
         SCCACHE_REDIS: redis://minmus:6379
 
