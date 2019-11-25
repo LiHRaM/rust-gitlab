@@ -27,6 +27,7 @@
     "username": "ben.boeckel",
     "web_url": "https://gitlab.kitware.com/ben.boeckel"
   },
+  "blocking_discussions_resolved": true,
   "changes_count": "3",
   "closed_at": null,
   "closed_by": null,
@@ -41,6 +42,7 @@
   "downvotes": 0,
   "first_deployed_to_production_at": null,
   "force_remove_source_branch": true,
+  "has_conflicts": false,
   "head_pipeline": {
     "before_sha": null,
     "committed_at": null,
@@ -97,6 +99,7 @@
   "source_branch": "add_hook-api",
   "source_project_id": 856,
   "squash": false,
+  "squash_commit_sha": null,
   "state": "merged",
   "subscribed": true,
   "target_branch": "master",

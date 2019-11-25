@@ -65,6 +65,7 @@
   "printing_merge_request_link_enabled": true,
   "public_jobs": true,
   "readme_url": "https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md",
+  "remove_source_branch_after_merge": null,
   "repository_access_level": "enabled",
   "request_access_enabled": false,
   "resolve_outdated_diff_discussions": null,
