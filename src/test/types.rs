@@ -336,11 +336,13 @@ fn check_merge_request_b(merge_request: &MergeRequest) {
     assert_eq!(merge_request.merge_commit_sha, None);
     assert_eq!(merge_request.subscribed, Some(true));
     check_empty_time_stats(&merge_request.time_stats);
+    assert_eq!(merge_request.blocking_discussions_resolved, true);
     assert_eq!(merge_request.changes_count.as_ref().unwrap(), "3");
     assert_eq!(merge_request.user_notes_count, 3);
     assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
+    assert_eq!(merge_request.has_conflicts, false);
     assert_eq!(merge_request.user.as_ref().unwrap().can_merge, true);
     assert_eq!(
         merge_request.web_url,
@@ -509,6 +511,7 @@ fn check_project_b(project: &Project) {
         project.only_allow_merge_if_all_discussions_are_resolved,
         None,
     );
+    assert_eq!(project.remove_source_branch_after_merge, None);
     assert_eq!(project.printing_merge_request_link_enabled, Some(true));
     assert_eq!(project.request_access_enabled, false);
     assert_eq!(project.resolve_outdated_diff_discussions, None);

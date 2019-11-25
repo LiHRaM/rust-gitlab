@@ -608,6 +608,8 @@ pub struct Project {
     pub only_allow_merge_if_pipeline_succeeds: Option<bool>,
     /// Whether the project only enables the merge button if all discussions are resolved.
     pub only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
+    /// Whether enable 'Delete source branch' option by default for all new merge requests.
+    pub remove_source_branch_after_merge: Option<bool>,
     /// Whether to show the link to create/view merge request when pusing from command line.
     pub printing_merge_request_link_enabled: Option<bool>,
     /// Whether access to the project may be requested.
@@ -1688,12 +1690,16 @@ pub struct MergeRequest {
     pub rebase_in_progress: Option<bool>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
+    /// The object ID of the merge request squash commit.
+    pub squash_commit_sha: Option<ObjectId>,
     /// Whether the current user is subscribed or not.
     /// GitLab does not include this in responses with lists of merge requests but
     /// does on an individual merge request.
     pub subscribed: Option<bool>,
     /// Time estimates.
     pub time_stats: IssuableTimeStats,
+    /// Whether or not all blocking discussions are resolved.
+    pub blocking_discussions_resolved: bool,
     /// The number of paths changed by the merge request.
     ///
     /// This is an integer suffixed by `+` if there are more files changed than some threshold
@@ -1707,6 +1713,8 @@ pub struct MergeRequest {
     pub should_remove_source_branch: Option<bool>,
     /// Whether the merge request should be deleted or not (set by the author).
     pub force_remove_source_branch: Option<bool>,
+    /// Whether the merge request currently has conflicts with the target branch.
+    pub has_conflicts: bool,
     /// Information about current user's access to the merge request.
     pub user: Option<MergeRequestUser>,
     /// The URL of the merge request.
@@ -1786,11 +1794,15 @@ pub struct MergeRequestChanges {
     pub rebase_in_progress: Option<bool>,
     /// The object ID of the commit which merged the merge request.
     pub merge_commit_sha: Option<ObjectId>,
+    /// The object ID of the merge request squash commit.
+    pub squash_commit_sha: Option<ObjectId>,
     /// GitLab does not include this in responses with lists of merge requests but
     /// does on an individual merge request.
     pub subscribed: Option<bool>,
     /// Time estimates.
     pub time_stats: IssuableTimeStats,
+    /// Whether or not all blocking discussions are resolved.
+    pub blocking_discussions_resolved: bool,
     /// The number of paths changed by the merge request.
     pub changes_count: Option<String>,
     /// The number of comments on the merge request.
@@ -1801,6 +1813,8 @@ pub struct MergeRequestChanges {
     pub should_remove_source_branch: Option<bool>,
     /// Whether the merge request should be deleted or not (set by the author).
     pub force_remove_source_branch: Option<bool>,
+    /// Whether the merge request currently has conflicts with the target branch.
+    pub has_conflicts: bool,
     /// Information about current user's access to the merge request.
     pub user: MergeRequestUser,
     /// The URL of the merge request.
@@ -1845,13 +1859,16 @@ impl From<MergeRequestChanges> for MergeRequest {
             merge_error: mr.merge_error,
             rebase_in_progress: mr.rebase_in_progress,
             merge_commit_sha: mr.merge_commit_sha,
+            squash_commit_sha: mr.squash_commit_sha,
             subscribed: mr.subscribed,
             time_stats: mr.time_stats,
+            blocking_discussions_resolved: mr.blocking_discussions_resolved,
             changes_count: mr.changes_count,
             user_notes_count: mr.user_notes_count,
             discussion_locked: mr.discussion_locked,
             should_remove_source_branch: mr.should_remove_source_branch,
             force_remove_source_branch: mr.force_remove_source_branch,
+            has_conflicts: mr.has_conflicts,
             user: Some(mr.user),
             web_url: mr.web_url,
         }
