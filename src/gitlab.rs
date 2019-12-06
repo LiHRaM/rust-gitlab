@@ -441,10 +441,7 @@ impl Gitlab {
         N: AsRef<str>,
     {
         let param: &[(&str, &str)] = &[];
-        self.get_with_param(
-            format!("groups/{}", Self::url_name(name.as_ref())),
-            param,
-        )
+        self.get_with_param(format!("groups/{}", Self::url_name(name.as_ref())), param)
     }
 
     /// Get a project's hooks.
@@ -1153,6 +1150,22 @@ impl Gitlab {
         self.post_with_param(path, &[("body", content.as_ref())])
     }
 
+    /// Edit a note on an issue.
+    pub fn set_issue_note<C>(
+        &self,
+        project: ProjectId,
+        issue: IssueInternalId,
+        note: NoteId,
+        content: C,
+    ) -> GitlabResult<Note>
+    where
+        C: AsRef<str>,
+    {
+        let path = format!("projects/{}/issues/{}/notes/{}", project, issue, note);
+
+        self.put_with_param(path, &[("body", content.as_ref())])
+    }
+
     /// Get the merge requests for a project.
     pub fn merge_requests<I, K, V>(
         &self,
@@ -1543,6 +1556,24 @@ impl Gitlab {
             merge_request,
         );
         self.post_with_param(path, &[("body", content)])
+    }
+
+    /// Edit a note on a merge request.
+    pub fn set_merge_request_note<C>(
+        &self,
+        project: ProjectId,
+        merge_request: MergeRequestInternalId,
+        note: NoteId,
+        content: C,
+    ) -> GitlabResult<Note>
+    where
+        C: AsRef<str>,
+    {
+        let path = format!(
+            "projects/{}/merge_requests/{}/notes/{}",
+            project, merge_request, note,
+        );
+        self.put_with_param(path, &[("body", content.as_ref())])
     }
 
     /// Get issues closed by a merge request.
