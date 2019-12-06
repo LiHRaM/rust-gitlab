@@ -441,10 +441,7 @@ impl Gitlab {
         N: AsRef<str>,
     {
         let param: &[(&str, &str)] = &[];
-        self.get_with_param(
-            format!("groups/{}", Self::url_name(name.as_ref())),
-            param,
-        )
+        self.get_with_param(format!("groups/{}", Self::url_name(name.as_ref())), param)
     }
 
     /// Get a project's hooks.
