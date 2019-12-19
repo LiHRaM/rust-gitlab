@@ -230,6 +230,14 @@ enum_serialize!(MergeRequestStateFilter -> "state",
     Merged => "merged",
 );
 
+/// Should a certificate be validated in tls connections.
+/// The Insecure option is used for self-signed certificates.
+#[derive(Debug, Clone)]
+enum CertPolicy {
+    Default,
+    Insecure,
+}
+
 impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
@@ -240,7 +248,12 @@ impl Gitlab {
         H: AsRef<str>,
         T: ToString,
     {
-        Self::new_impl("https", host.as_ref(), Token::Private(token.to_string()))
+        Self::new_impl(
+            "https",
+            host.as_ref(),
+            Token::Private(token.to_string()),
+            CertPolicy::Default,
+        )
     }
 
     /// Create a new non-SSL Gitlab API representation.
@@ -251,7 +264,12 @@ impl Gitlab {
         H: AsRef<str>,
         T: ToString,
     {
-        Self::new_impl("http", host.as_ref(), Token::Private(token.to_string()))
+        Self::new_impl(
+            "http",
+            host.as_ref(),
+            Token::Private(token.to_string()),
+            CertPolicy::Insecure,
+        )
     }
 
     /// Create a new Gitlab API representation.
@@ -263,7 +281,12 @@ impl Gitlab {
         H: AsRef<str>,
         T: ToString,
     {
-        Self::new_impl("https", host.as_ref(), Token::OAuth2(token.to_string()))
+        Self::new_impl(
+            "https",
+            host.as_ref(),
+            Token::OAuth2(token.to_string()),
+            CertPolicy::Default,
+        )
     }
 
     /// Create a new non-SSL Gitlab API representation.
@@ -275,15 +298,34 @@ impl Gitlab {
         H: AsRef<str>,
         T: ToString,
     {
-        Self::new_impl("http", host.as_ref(), Token::OAuth2(token.to_string()))
+        Self::new_impl(
+            "http",
+            host.as_ref(),
+            Token::OAuth2(token.to_string()),
+            CertPolicy::Default,
+        )
     }
 
     /// Internal method to create a new Gitlab client.
-    fn new_impl(protocol: &str, host: &str, token: Token) -> GitlabResult<Self> {
+    fn new_impl(
+        protocol: &str,
+        host: &str,
+        token: Token,
+        cert_validation: CertPolicy,
+    ) -> GitlabResult<Self> {
         let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
 
+        let client = match cert_validation {
+            CertPolicy::Insecure => {
+                Client::builder()
+                    .danger_accept_invalid_certs(true)
+                    .build()?
+            },
+            CertPolicy::Default => Client::new(),
+        };
+
         let api = Gitlab {
-            client: Client::new(),
+            client,
             base_url,
             token,
         };
@@ -342,6 +384,89 @@ impl Gitlab {
         users
             .pop()
             .ok_or_else(|| GitlabError::no_such_user(name.as_ref()))
+    }
+
+    /// Create a project (Needs admin access)
+    pub fn create_project<N: AsRef<str>, P: AsRef<str>>(
+        &self,
+        name: N,
+        path: Option<P>,
+        namespace_id: GroupId,
+    ) -> GitlabResult<Project> {
+        let url = "projects";
+        let path = match path.as_ref() {
+            None => name.as_ref(),
+            Some(s) => s.as_ref(),
+        };
+
+        self.post_with_param(
+            url,
+            &[
+                ("name", name.as_ref()),
+                ("path", path),
+                ("namespace_id", namespace_id.to_string().as_str()),
+            ],
+        )
+    }
+
+    /// Create a new file in repository
+    pub fn create_file<F, B, C, M>(
+        &self,
+        project: ProjectId,
+        file_path: F,
+        branch: B,
+        content: C,
+        commit_message: M,
+    ) -> GitlabResult<RepoFile>
+    where
+        F: AsRef<str>,
+        B: AsRef<str>,
+        C: AsRef<str>,
+        M: AsRef<str>,
+    {
+        let url = format!(
+            "projects/{}/repository/files/{}",
+            project,
+            file_path.as_ref()
+        );
+        self.post_with_param(
+            url,
+            &[
+                ("branch", branch.as_ref()),
+                ("content", content.as_ref()),
+                ("commit_message", commit_message.as_ref()),
+            ],
+        )
+    }
+
+    /// Set project description
+    pub fn set_project_description<T: AsRef<str>>(
+        &self,
+        project: ProjectId,
+        description: T,
+    ) -> GitlabResult<Project> {
+        let url = format!("projects/{}", project);
+        self.put_with_param(url, &[("description", description.as_ref())])
+    }
+
+    /// Set project default branch
+    pub fn set_project_default_branch<T: AsRef<str>>(
+        &self,
+        project: ProjectId,
+        branch: T,
+    ) -> GitlabResult<Project> {
+        let url = format!("projects/{}", project);
+        self.put_with_param(url, &[("default_branch", branch.as_ref())])
+    }
+
+    /// Set project features access level
+    pub fn set_project_feature_access_level(
+        &self,
+        project: ProjectId,
+        feature: ProjectFeatures,
+    ) -> GitlabResult<Project> {
+        let url = format!("projects/{}", project);
+        self.put_with_param(url, &[(feature.name(), feature.access_level())])
     }
 
     /// Get all accessible projects.
@@ -421,6 +546,30 @@ impl Gitlab {
         self.get_with_param(
             format!("projects/{}/environments/{}", project, environment),
             params,
+        )
+    }
+
+    /// Create a group
+    pub fn create_group<T: AsRef<str>, P: AsRef<str>>(
+        &self,
+        name: T,
+        path: P,
+        parent_id: GroupId,
+        project_creation_level: AccessLevel,
+        auto_devops_enabled: T,
+        subgroup_creation_level: AccessLevel,
+    ) -> GitlabResult<Group> {
+        let url = String::from("groups");
+        self.post_with_param(
+            url,
+            &[
+                ("name", name.as_ref()),
+                ("path", path.as_ref()),
+                ("parent_id", &parent_id.to_string()),
+                ("project_creation_level", project_creation_level.as_str()),
+                ("auto_devops enabled", auto_devops_enabled.as_ref()),
+                ("subgroup_creation_level", subgroup_creation_level.as_str()),
+            ],
         )
     }
 
@@ -612,6 +761,20 @@ impl Gitlab {
         )
     }
 
+    /// Create a branch for a project
+    pub fn create_branch<V: AsRef<str>>(
+        &self,
+        project: ProjectId,
+        name: V,
+        reference: V,
+    ) -> GitlabResult<RepoBranch> {
+        let url = format!("projects/{}/repository/branches", project);
+        self.post_with_param(
+            url,
+            &[("branch", name.as_ref()), ("ref", reference.as_ref())],
+        )
+    }
+
     /// Get branches for a project.
     pub fn branches<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<RepoBranch>>
     where
@@ -620,7 +783,7 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(format!("projects/{}/branches", project), params)
+        self.get_paged_with_param(format!("projects/{}/repository/branches", project), params)
     }
 
     /// Get a branch.
@@ -1807,9 +1970,9 @@ impl Gitlab {
             let req = self.client.get(page_url);
 
             let page: Vec<T> = self.send(req)?;
+
             let page_len = page.len();
             results.extend(page);
-
             // Gitlab used to have issues returning paginated results; these have been fixed since,
             // but if it is needed, the bug manifests as Gitlab returning *all* results instead of
             // just the requested results. This can cause an infinite loop here if the number of
@@ -1828,6 +1991,7 @@ pub struct GitlabBuilder {
     protocol: &'static str,
     host: String,
     token: Token,
+    cert_validation: CertPolicy,
 }
 
 impl GitlabBuilder {
@@ -1841,12 +2005,18 @@ impl GitlabBuilder {
             protocol: "https",
             host: host.to_string(),
             token: Token::Private(token.to_string()),
+            cert_validation: CertPolicy::Default,
         }
     }
 
     /// Switch to an insecure protocol (http instead of https).
     pub fn insecure(&mut self) -> &mut Self {
         self.protocol = "http";
+        self
+    }
+
+    pub fn cert_insecure(&mut self) -> &mut Self {
+        self.cert_validation = CertPolicy::Insecure;
         self
     }
 
@@ -1859,6 +2029,11 @@ impl GitlabBuilder {
     }
 
     pub fn build(&self) -> GitlabResult<Gitlab> {
-        Gitlab::new_impl(self.protocol, &self.host, self.token.clone())
+        Gitlab::new_impl(
+            self.protocol,
+            &self.host,
+            self.token.clone(),
+            self.cert_validation.clone(),
+        )
     }
 }
