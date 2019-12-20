@@ -810,6 +810,46 @@ impl Gitlab {
         )
     }
 
+    /// Protect a branch
+    ///
+    /// # Arguments
+    /// * project: The project id
+    /// * branch: The name of the branch or wildcard
+    /// * push_access_level: Access level allowed to push (defaults: maintainers)
+    /// * merge_access_level: Access level allowed to merge (defaults:  maintainers)
+    /// * unprotect_access_level: Access level allowed to unproctect (defaults: mainainers)
+    pub fn protect_branch<B: AsRef<str>>(
+        &self,
+        project: ProjectId,
+        branch: B,
+        push_access_level: Option<AccessLevel>,
+        merge_access_level: Option<AccessLevel>,
+        unprotect_access_level: Option<AccessLevel>,
+    ) -> GitlabResult<ProtectedRepoBranch> {
+        let url = format!("projects/{}/protected_branches", project);
+        self.post_with_param(
+            url,
+            &[
+                ("name", branch.as_ref()),
+                (
+                    "push_access_level",
+                    &u64::from(push_access_level.map_or(AccessLevel::Maintainer, |al| al))
+                        .to_string(),
+                ),
+                (
+                    "merge_access_level",
+                    &u64::from(merge_access_level.map_or(AccessLevel::Maintainer, |al| al))
+                        .to_string(),
+                ),
+                (
+                    "unprotect_access_level",
+                    &u64::from(unprotect_access_level.map_or(AccessLevel::Maintainer, |al| al))
+                        .to_string(),
+                ),
+            ],
+        )
+    }
+
     /// Get a commit.
     pub fn commit<C>(&self, project: ProjectId, commit: C) -> GitlabResult<RepoCommitDetail>
     where
