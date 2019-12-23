@@ -9,8 +9,8 @@ before_script:
 
 .only_settings: &only_settings
     - merge_requests
-    - branches@utils/rust-git-workarea
-    - tags@utils/rust-git-workarea
+    - branches@utils/rust-gitlab
+    - tags@utils/rust-gitlab
 
 .cargo_update: &cargo_update
     - cargo generate-lockfile $GENERATE_LOCKFILE_ARGS
