@@ -1785,6 +1785,12 @@ impl Gitlab {
         )
     }
 
+    /// Closes an issue
+    pub fn close_issue(&self, project: ProjectId, issue: IssueInternalId) -> GitlabResult<Issue> {
+        let path = format!("projects/{}/issues/{}", project, issue);
+        self.put_with_param(path, &[("state_event", "close")])
+    }
+
     /// Set the labels on an issue.
     pub fn set_issue_labels<I, L>(
         &self,
