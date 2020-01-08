@@ -44,7 +44,7 @@
   "force_remove_source_branch": true,
   "has_conflicts": false,
   "head_pipeline": {
-    "before_sha": null,
+    "before_sha": "0000000000000000000000000000000000000000",
     "committed_at": null,
     "coverage": null,
     "created_at": "2016-10-04T15:56:53.822-04:00",

@@ -816,7 +816,10 @@ fn test_read_pipeline() {
         pipeline.sha,
         ObjectId::new("7134adce4522c399cdab16e128b0a1af15b93f14"),
     );
-    assert_eq!(pipeline.before_sha, None);
+    assert_eq!(
+        pipeline.before_sha,
+        Some(ObjectId::new("0000000000000000000000000000000000000000"))
+    );
     assert_eq!(pipeline.tag, false);
     assert_eq!(pipeline.yaml_errors, None);
     assert_eq!(
