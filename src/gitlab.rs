@@ -1576,6 +1576,24 @@ impl Gitlab {
         self.put_with_param(path, &[("body", content.as_ref())])
     }
 
+    /// Edit a note on a merge request.
+    pub fn modify_merge_request_note<C>(
+        &self,
+        project: ProjectId,
+        merge_request: MergeRequestInternalId,
+        note: NoteId,
+        content: C,
+    ) -> GitlabResult<Note>
+    where
+        C: AsRef<str>,
+    {
+        let path = &format!(
+            "projects/{}/merge_requests/{}/notes/{}",
+            project, merge_request, note,
+        );
+        self.put_with_param(path, &[("body", content.as_ref())])
+    }
+
     /// Get issues closed by a merge request.
     pub fn get_issues_closed_by_merge_request<I, K, V>(
         &self,
