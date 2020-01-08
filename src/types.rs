@@ -727,6 +727,19 @@ impl From<u64> for AccessLevel {
     }
 }
 
+impl AccessLevel {
+    pub fn as_str(&self) -> &str {
+        match self {
+            AccessLevel::Owner => "owner",
+            AccessLevel::Developer => "developer",
+            AccessLevel::Anonymous => "anonymous",
+            AccessLevel::Guest => "guest",
+            AccessLevel::Maintainer => "maintainer",
+            AccessLevel::Reporter => "reporter",
+        }
+    }
+}
+
 impl Display for AccessLevel {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{}", Into::<u64>::into(*self))
@@ -2692,4 +2705,44 @@ pub struct EventLabel {
     pub color: LabelColor,
     /// The description of the label.
     pub description: Option<String>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct RepoFile {
+    pub file_path: String,
+    pub branch: String,
+}
+
+#[derive(Debug, Clone)]
+pub enum ProjectFeatures {
+    Issues(FeatureVisibilityLevel),
+    Repository(FeatureVisibilityLevel),
+    MergeRequests(FeatureVisibilityLevel),
+    Builds(FeatureVisibilityLevel),
+    Wiki(FeatureVisibilityLevel),
+    Snippets(FeatureVisibilityLevel),
+}
+
+impl ProjectFeatures {
+    pub fn name(&self) -> &'static str {
+        match self {
+            ProjectFeatures::Issues(_) => "issues_access_level",
+            ProjectFeatures::Repository(_) => "repository_access_level",
+            ProjectFeatures::MergeRequests(_) => "merge_requests_access_level",
+            ProjectFeatures::Builds(_) => "builds_access_level",
+            ProjectFeatures::Wiki(_) => "wiki_access_level",
+            ProjectFeatures::Snippets(_) => "snippets_access_level",
+        }
+    }
+
+    pub fn access_level(&self) -> &FeatureVisibilityLevel {
+        match self {
+            ProjectFeatures::Issues(a)
+            | ProjectFeatures::Repository(a)
+            | ProjectFeatures::MergeRequests(a)
+            | ProjectFeatures::Builds(a)
+            | ProjectFeatures::Wiki(a)
+            | ProjectFeatures::Snippets(a) => a,
+        }
+    }
 }
