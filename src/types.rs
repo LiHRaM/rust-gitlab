@@ -344,6 +344,8 @@ pub struct ProjectHook {
     pub pipeline_events: bool,
     /// Whether the hook is contacted for wiki page events.
     pub wiki_page_events: bool,
+    /// Secret token to validate received payloads
+    pub token: Option<String>,
 }
 
 impl From<ProjectHook> for Hook {
