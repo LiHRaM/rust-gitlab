@@ -1268,6 +1268,25 @@ impl Gitlab {
     ) -> GitlabResult<Milestone> {
         let path = format!("projects/{}/milestones", project);
 
+        self.create_generic_milestone(path, milestone)
+    }
+
+    /// Create a new group milestone
+    pub fn create_group_milestone(
+        &self,
+        group: GroupId,
+        milestone: Milestone,
+    ) -> GitlabResult<Milestone> {
+        let path = format!("groups/{}/milestones", group);
+
+        self.create_generic_milestone(path, milestone)
+    }
+
+    fn create_generic_milestone(
+        &self,
+        path: String,
+        milestone: Milestone,
+    ) -> GitlabResult<Milestone> {
         let mut params: Vec<(&str, String)> = Vec::new();
 
         params.push(("title", milestone.title));

@@ -1227,6 +1227,23 @@ impl Milestone {
             start_date: None,
         }
     }
+    /// Create a new blank group milestone: it needs at least the GroupId and title
+    /// GroupId and title are mandatory for new milestone API of Gitlab
+    pub fn new_group(group_id: GroupId, title: String) -> Milestone {
+        Milestone {
+            id: MilestoneId::new(0),
+            iid: MilestoneInternalId::new(0),
+            project_id: None,
+            group_id: Some(group_id),
+            title,
+            description: None,
+            state: MilestoneState::Active,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            due_date: None,
+            start_date: None,
+        }
+    }
     /// Complements the milestone with optional paramater: description
     pub fn with_description(mut self, description: String) -> Milestone {
         self.description = Some(description);
