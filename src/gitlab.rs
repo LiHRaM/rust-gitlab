@@ -1198,32 +1198,15 @@ impl Gitlab {
     }
 
     /// Create a new milestone
-    pub fn create_milestone(
-        &self,
-        project: ProjectId,
-        milestone: Milestone,
-    ) -> GitlabResult<Milestone> {
-        let path = format!("projects/{}/milestones", project);
+    pub fn create_milestone(&self, milestone: Milestone) -> GitlabResult<Milestone> {
+        let path: String;
 
-        self.create_generic_milestone(path, milestone)
-    }
+        if let Some(project) = milestone.project_id {
+            path = format!("projects/{}/milestones", project);
+        } else {
+            path = format!("groups/{}/milestones", milestone.group_id.unwrap());
+        }
 
-    /// Create a new group milestone
-    pub fn create_group_milestone(
-        &self,
-        group: GroupId,
-        milestone: Milestone,
-    ) -> GitlabResult<Milestone> {
-        let path = format!("groups/{}/milestones", group);
-
-        self.create_generic_milestone(path, milestone)
-    }
-
-    fn create_generic_milestone(
-        &self,
-        path: String,
-        milestone: Milestone,
-    ) -> GitlabResult<Milestone> {
         let mut params: Vec<(&str, String)> = Vec::new();
 
         params.push(("title", milestone.title));
