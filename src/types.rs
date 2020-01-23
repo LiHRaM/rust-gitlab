@@ -344,6 +344,8 @@ pub struct ProjectHook {
     pub pipeline_events: bool,
     /// Whether the hook is contacted for wiki page events.
     pub wiki_page_events: bool,
+    /// Secret token to validate received payloads
+    pub token: Option<String>,
 }
 
 impl From<ProjectHook> for Hook {
@@ -694,6 +696,8 @@ pub enum AccessLevel {
     Maintainer,
     /// Owner access (full rights).
     Owner,
+    /// Admin access (full rights).
+    Admin,
 }
 
 impl From<AccessLevel> for u64 {
@@ -705,13 +709,16 @@ impl From<AccessLevel> for u64 {
             AccessLevel::Developer => 30,
             AccessLevel::Maintainer => 40,
             AccessLevel::Owner => 50,
+            AccessLevel::Admin => 60,
         }
     }
 }
 
 impl From<u64> for AccessLevel {
     fn from(access: u64) -> Self {
-        if access >= 50 {
+        if access >= 60 {
+            AccessLevel::Admin
+        } else if access >= 50 {
             AccessLevel::Owner
         } else if access >= 40 {
             AccessLevel::Maintainer
@@ -730,6 +737,7 @@ impl From<u64> for AccessLevel {
 impl AccessLevel {
     pub fn as_str(&self) -> &str {
         match self {
+            AccessLevel::Admin => "admin",
             AccessLevel::Owner => "owner",
             AccessLevel::Developer => "developer",
             AccessLevel::Anonymous => "anonymous",
@@ -944,6 +952,21 @@ pub struct RepoBranch {
     pub can_push: Option<bool>,
     /// Whether the branch is the repository default branch.
     pub default: Option<bool>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct PRBAccessLevel {
+    access_level: u64,
+    access_level_description: String,
+}
+
+/// A protected branch on a repository
+#[derive(Deserialize, Debug, Clone)]
+pub struct ProtectedRepoBranch {
+    pub name: String,
+    pub push_access_levels: Vec<PRBAccessLevel>,
+    pub merge_access_levels: Vec<PRBAccessLevel>,
+    pub code_owner_approval_required: bool,
 }
 
 /// The ID of a git object.
