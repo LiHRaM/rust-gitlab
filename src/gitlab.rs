@@ -550,27 +550,41 @@ impl Gitlab {
     }
 
     /// Create a group
-    pub fn create_group<T: AsRef<str>, P: AsRef<str>>(
+    ///
+    /// # Arguments:
+    /// * name: the name of the group
+    /// * path: the path of the group
+    /// * params: optional arguments for group creation
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use gitlab::{Gitlab, CreateGroupParams, GitlabBuilder};
+    ///
+    /// let gitlab = GitlabBuilder::new("host", "token").build().unwrap();
+    /// let params = CreateGroupParams::builder()
+    ///                     .description("A description")
+    ///                     .auto_devops_enabled(false)
+    ///                     .build()
+    ///                     .unwrap();
+    /// gitlab.create_group("A group", "A path", Some(params));
+    /// ```
+    pub fn create_group<N: AsRef<str>, P: AsRef<str>>(
         &self,
-        name: T,
+        name: N,
         path: P,
-        parent_id: GroupId,
-        project_creation_level: AccessLevel,
-        auto_devops_enabled: T,
-        subgroup_creation_level: AccessLevel,
+        params: Option<CreateGroupParams>,
     ) -> GitlabResult<Group> {
         let url = String::from("groups");
-        self.post_with_param(
-            url,
-            &[
-                ("name", name.as_ref()),
-                ("path", path.as_ref()),
-                ("parent_id", &parent_id.to_string()),
-                ("project_creation_level", project_creation_level.as_str()),
-                ("auto_devops enabled", auto_devops_enabled.as_ref()),
-                ("subgroup_creation_level", subgroup_creation_level.as_str()),
-            ],
-        )
+
+        let mut merged_params = if let Some(p) = params {
+            p
+        } else {
+            CreateGroupParams::default()
+        };
+        merged_params.name = Some(name.as_ref().to_string());
+        merged_params.path = Some(path.as_ref().to_string());
+
+        self.post_with_param(url, &merged_params)
     }
 
     /// Get all accessible groups.

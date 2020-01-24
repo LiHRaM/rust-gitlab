@@ -2769,3 +2769,69 @@ impl ProjectFeatures {
         }
     }
 }
+
+/// Params for group creation.
+///
+/// Used with `create_group` method (see [doc here](../gitlab/struct.Gitlab.html#method.create_group))
+#[derive(Debug, Clone, Builder, Serialize, Default)]
+#[builder(default)]
+#[builder(field(private))]
+#[builder(setter(into, strip_option))]
+pub struct CreateGroupParams {
+    /// The group name
+    #[builder(setter(skip))]
+    pub(crate) name: Option<String>,
+    /// The path of the group
+    #[builder(setter(skip))]
+    pub(crate) path: Option<String>,
+    /// The group description
+    description: Option<String>,
+    /// The group visibility level, can be `private`, `internal` or `public`
+    visibility: Option<VisibilityLevel>,
+    /// Prevent sharing a project with another group within this group
+    share_with_group_lock: Option<bool>,
+    /// Require all users in this group to setup two-factor authentication
+    require_two_factor_authentication: Option<bool>,
+    /// Time before two-factor authentication is enforced
+    two_factor_grace_period: Option<u64>,
+    /// Determine if developers can create projects in the group
+    #[builder(setter(name = "_project_creation_level"))]
+    project_creation_level: Option<String>,
+    /// Default to Auto Devops pipeline for all projects within this group
+    auto_devops_enabled: Option<bool>,
+    /// Role allowed to create subgroups
+    #[builder(setter(name = "_subgroup_creation_level"))]
+    subgroup_creation_level: Option<String>,
+    /// Disable email notification
+    emails_disabled: Option<bool>,
+    /// Disable the capability of a group from getting mentioned
+    mentions_disabled: Option<bool>,
+    /// Enable/disable Large File Storage (LFS) for the projects in this group
+    lfs_enabled: Option<bool>,
+    /// Allow users to request membership
+    request_access_enabled: Option<bool>,
+    /// The parent group ID for creating a nesting group
+    parent_id: Option<GroupId>,
+    /// [Gitlab Starter and higher] pipeline minutes quota for this group
+    shared_runners_minutes_limit: Option<u64>,
+    /// [Gitlab Starter and higher] extra pipeline minutes quota for this group
+    extra_shared_runners_minutes_limit: Option<u64>,
+}
+
+impl CreateGroupParams {
+    pub fn builder() -> CreateGroupParamsBuilder {
+        CreateGroupParamsBuilder::default()
+    }
+}
+
+impl CreateGroupParamsBuilder {
+    pub fn project_creation_level(&mut self, level: AccessLevel) -> &mut Self {
+        self.project_creation_level = Some(Some(level.as_str().to_string()));
+        self
+    }
+
+    pub fn subgroup_creation_level(&mut self, level: AccessLevel) -> &mut Self {
+        self.subgroup_creation_level = Some(Some(level.as_str().to_string()));
+        self
+    }
+}
