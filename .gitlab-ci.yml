@@ -18,7 +18,7 @@ before_script:
     # of the to-be-written file. See
     # https://github.com/rust-lang/cargo/pull/7579#pullrequestreview-323640264
     - touch Cargo.lock
-    - cargo generate-lockfile $GENERATE_LOCKFILE_ARGS
+    - cargo update $GENERATE_LOCKFILE_ARGS
     - cargo fetch --locked
     - mkdir .cargo
     - cargo vendor > .cargo/config
@@ -173,7 +173,7 @@ stages:
 prepare:cargo-cache-newest:
     <<:
         - *cargo_fetch_job
-        - *rust_minimum
+        - *rust_stable
 
 # prepare:cargo-cache-mindeps:
 #     <<:
