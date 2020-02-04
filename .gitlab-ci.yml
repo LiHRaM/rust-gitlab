@@ -173,7 +173,7 @@ stages:
 prepare:cargo-cache-newest:
     <<:
         - *cargo_fetch_job
-        - *rust_stable
+        - *rust_minimum
 
 # prepare:cargo-cache-mindeps:
 #     <<:
