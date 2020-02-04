@@ -10,9 +10,10 @@
 //! A library for communicating with Gitlab instances.
 
 #[macro_use]
-extern crate log;
-#[macro_use]
 extern crate derive_builder;
+
+#[macro_use]
+extern crate log;
 
 mod crates {
     // public
