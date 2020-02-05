@@ -49,6 +49,11 @@
   "milestone": null,
   "moved_to_id": null,
   "project_id": 855,
+  "references": {
+    "full": "utils/rust-gitlab#6",
+    "relative": "#6",
+    "short": "#6"
+  },
   "state": "closed",
   "subscribed": true,
   "task_completion_status": {

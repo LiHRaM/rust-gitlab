@@ -94,6 +94,11 @@
   "pipeline": null,
   "project_id": 855,
   "reference": "!35",
+  "references": {
+    "full": "utils/rust-gitlab!35",
+    "relative": "!35",
+    "short": "!35"
+  },
   "sha": "04e94ae667024a62a90179f395bfdc2b35f3efd2",
   "should_remove_source_branch": null,
   "source_branch": "add_hook-api",
