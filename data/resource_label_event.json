@@ -5,6 +5,7 @@
   "label": {
     "color": "#5843AD",
     "description": "Documentation issues",
+    "description_html": "Documentation issues",
     "id": 1720,
     "name": "area:doc",
     "text_color": "#FFFFFF"
