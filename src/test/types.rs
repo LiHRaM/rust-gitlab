@@ -481,7 +481,7 @@ fn check_project_a(project: &Project) {
     assert_eq!(project.name_with_namespace, "Utils / rust-gitlab");
     assert_eq!(project.path, "rust-gitlab");
     assert_eq!(project.path_with_namespace, "utils/rust-gitlab");
-    assert_eq!(project.container_registry_enabled, Some(true));
+    assert_eq!(project.container_registry_enabled, Some(false));
     assert_eq!(
         project.created_at,
         datetime((2016, 6, 29), (17, 35, 12, 495)),
@@ -495,7 +495,7 @@ fn check_project_a(project: &Project) {
 fn check_project_b(project: &Project) {
     assert_eq!(project.import_error, None);
     assert_eq!(project.shared_runners_enabled, true);
-    assert_eq!(project.lfs_enabled, true);
+    assert_eq!(project.lfs_enabled, false);
     assert_eq!(project.creator_id, UserId::new(13));
     check_namespace_utils(&project.namespace);
     assert!(project.forked_from_project.is_none());
@@ -516,7 +516,7 @@ fn check_project_b(project: &Project) {
     assert_eq!(project.request_access_enabled, false);
     assert_eq!(project.resolve_outdated_diff_discussions, None);
 
-    assert_eq!(project.jobs_enabled, false);
+    assert_eq!(project.jobs_enabled, true);
     assert_eq!(project.issues_enabled, true);
     assert_eq!(project.merge_requests_enabled, true);
     assert_eq!(project.snippets_enabled, false);
@@ -524,10 +524,7 @@ fn check_project_b(project: &Project) {
 }
 
 fn check_project_c(project: &Project) {
-    assert_eq!(
-        project.builds_access_level,
-        FeatureVisibilityLevel::Disabled,
-    );
+    assert_eq!(project.builds_access_level, FeatureVisibilityLevel::Enabled);
     assert_eq!(project.issues_access_level, FeatureVisibilityLevel::Enabled);
     assert_eq!(
         project.merge_requests_access_level,
