@@ -16,6 +16,7 @@ use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
 use crates::chrono::{DateTime, NaiveDate, Utc};
+use crates::reqwest::Url;
 use crates::serde::de::{DeserializeOwned, Error, Unexpected};
 use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crates::serde_json::{self, Value};
@@ -2857,3 +2858,180 @@ impl CreateGroupParamsBuilder {
         self
     }
 }
+
+/// Params for project creation.
+///
+/// Used with `create_project` method (see [doc here](../gitlab/struct.Gitlab.html#method.create_project))
+#[derive(Debug, Clone, Builder, Serialize, Default)]
+#[builder(default)]
+#[builder(field(private))]
+#[builder(setter(into, strip_option))]
+pub struct CreateProjectParams {
+    /// The name of the project
+    #[builder(setter(skip))]
+    pub(crate) name: Option<String>,
+    /// The path of the project
+    #[builder(setter(skip))]
+    pub(crate) path: Option<String>,
+    /// Namespace for the new projects (defaults to current user namespaces)
+    namespace_id: Option<u64>,
+    /// `master` by default
+    default_branch: Option<String>,
+    /// Short project description
+    description: Option<String>,
+    /// One of `disabled`, `private`, `enabled`
+    issues_access_level: Option<FeatureVisibilityLevel>,
+    /// One of `disabled`, `private`, `enabled`
+    repository_access_level: Option<FeatureVisibilityLevel>,
+    /// One of `disabled`, `private`, `enabled`
+    merge_requests_access_level: Option<FeatureVisibilityLevel>,
+    /// One of `disabled`, `private`, `enabled`
+    builds_access_level: Option<FeatureVisibilityLevel>,
+    /// One of `disabled`, `private`, `enabled`
+    wiki_access_level: Option<FeatureVisibilityLevel>,
+    /// One of `disabled`, `private`, `enabled`
+    snippets_access_level: Option<FeatureVisibilityLevel>,
+    /// One of `disabled`, `private`, `enabled`, `public`
+    pages_access_level: Option<FeatureVisibilityLevel>,
+    /// Automatically resolve merge requests diffs discussions on lines changed with a push
+    resolve_outdated_diff_discussions: Option<bool>,
+    /// Enable container registry for this project
+    container_registry_enabled: Option<bool>,
+    /// Update the container expiration for this project.
+    container_expiration_policy_attributes: Option<Vec<String>>,
+    /// Enable shared runners for this project
+    shared_runners_enabled: Option<bool>,
+    /// Project visibility level
+    visibility: Option<VisibilityLevel>,
+    /// URL to import repository from
+    #[builder(setter(name = "_import_url"))]
+    import_url: Option<String>,
+    /// If `true` jobs can be viewed by non-project members
+    public_builds: Option<bool>,
+    /// Set wether merge requests can only be merged with successful jobs
+    only_allow_merge_if_pipeline_succeeds: Option<bool>,
+    /// Set wether merge requests can only be merged when all the discussions are resolved
+    only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
+    /// Set the merge method used
+    merge_method: Option<MergeMethod>,
+    /// Set wether auto-closing referenced issues on default branch
+    autoclose_referenced_issues: Option<bool>,
+    /// Enable LFS
+    lfs_enabled: Option<bool>,
+    /// Allow user to request member access
+    request_access_enabled: Option<bool>,
+    /// The list of tags for a project
+    tag_list: Option<Vec<String>>,
+    /// Image file for avatar of the project
+    // TODO: Handle the mixed type for avatar data
+    #[builder(setter(skip))]
+    avatar: Option<Vec<u8>>,
+    /// Show link to create/view merge request wehen pushing from the command line
+    printing_merge_request_link_enabled: Option<bool>,
+    /// The git strategy. Defaults to fetch
+    build_git_strategy: Option<BuildGitStrategy>,
+    /// The maximum amount of time in minutes a job is allowed to run
+    build_timeout: Option<u64>,
+    /// Auto-cancel pending pipeline
+    auto_cancel_pending_pipelines: Option<bool>,
+    /// Test coverage parsing
+    build_coverage_regex: Option<String>,
+    /// The path to CI config file
+    ci_config_path: Option<String>,
+    /// Enable Auto DevOps for this project
+    auto_devops_enabled: Option<bool>,
+    /// Auto Deploy strategy (`continuous`, `manual` or `timed_incremental`)
+    auto_devops_deploy_strategy: Option<String>,
+    /// [Gitlab starter and higher]
+    /// Which storage shard the repository is on. Available only to admins
+    repository_storage: Option<String>,
+    /// [Gitlab starter and higher]
+    /// How many approvers should approve merge requests by default
+    approvals_before_merge: Option<u64>,
+    /// [Gitlab starter and higher]
+    /// The classification label for the project
+    external_authorization_classification_label: Option<String>,
+    /// [Gitlab starter and higher] Enables pull mirroring in a project
+    mirror: Option<bool>,
+    /// [Gitlab starter and higher]
+    /// Pull mirroring triggers builds
+    mirror_trigger_builds: Option<String>,
+    /// `false` by default
+    initialize_with_readme: Option<bool>,
+    /// When used without `use_custom_template`, name of a built-in project template.
+    /// When used with `use_custom_template`, name of a custom project template
+    template_name: Option<String>,
+    /// [Gitlab silver and higher]
+    /// When used with `use_custom_template`, project ID of a custom project template.
+    /// This is preferable to using `template_name` since `template_name` may be ambiguous
+    template_project_id: Option<u64>,
+    /// [Gitlab silver and higher]
+    /// When used with `use_custom_template`, project ID of a custom project template.
+    /// This is preferable to using `template_name` since `template_name` may be ambiguous
+    use_custom_template: Option<bool>,
+    /// [Gitlab silver and higher]
+    /// For group-level custom templates, specifies ID of group from which all the custom project templates are sourced.
+    /// Leave empty for instance-level templates. Requires `use_custom_template` to be true
+    group_with_project_templates_id: Option<u64>,
+    /// [Gitlab silver and higher]
+    /// Enable or disable packages repository feature
+    packages_enabled: Option<bool>,
+}
+
+impl CreateProjectParams {
+    pub fn builder() -> CreateProjectParamsBuilder {
+        CreateProjectParamsBuilder::default()
+    }
+}
+
+impl CreateProjectParamsBuilder {
+    pub fn import_url(&mut self, url: Url) -> &mut Self {
+        self.import_url = Some(Some(url.as_str().to_string()));
+        self
+    }
+}
+
+/// Merge methods
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeMethod {
+    /// A merge commit is created for every merge,
+    /// and merging is allowed as long as there are no conflicts
+    Merge,
+    /// A merge commit is created for every merge, but merging is possible only if
+    /// fast-forward merge is possible
+    RebaseMerge,
+    /// No merge commit create, all merges are fast-forwarded
+    FastForward,
+}
+
+enum_serialize!(MergeMethod -> "merge_method",
+    Merge => "merge",
+    RebaseMerge => "rebase_merge",
+    FastForward => "ff",
+);
+
+/// Build git strategy
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BuildGitStrategy {
+    Fetch,
+    Clone,
+}
+
+enum_serialize!(BuildGitStrategy -> "build_git_strategy",
+    Fetch => "fetch",
+    Clone => "clone",
+);
+
+/// Auto devops deply strategy
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AutoDeployStrategy {
+    Continuous,
+    Manual,
+    TimedIncremental,
+}
+
+enum_serialize!(AutoDeployStrategy -> "auto_devops_deploy_strategy",
+    Continuous => "continuos",
+    Manual => "manual",
+    TimedIncremental => "timed_incremental",
+);
