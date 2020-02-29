@@ -433,9 +433,9 @@ impl Gitlab {
     /// Create a project
     ///
     /// # Arguments:
-    /// * name: the name of the group
-    /// * path: the path of the group. Optional: name is used if None
-    /// * params: optional arguments for group creation
+    /// * name: the name of the project
+    /// * path: the path of the project. Optional: name is used if None
+    /// * params: optional arguments for project creation
     ///
     /// # Example
     /// ```rust, no_run
@@ -454,7 +454,7 @@ impl Gitlab {
         path: Option<P>,
         params: Option<CreateProjectParams>,
     ) -> GitlabResult<Project> {
-        let url = String::from("projects");
+        let url = "projects";
 
         let mut merged_params = params.unwrap_or_default();
 
@@ -633,7 +633,7 @@ impl Gitlab {
         path: P,
         params: Option<CreateGroupParams>,
     ) -> GitlabResult<Group> {
-        let url = String::from("groups");
+        let url = "groups";
 
         let mut merged_params = params.unwrap_or_default();
         merged_params.name = Some(name.as_ref().to_string());
