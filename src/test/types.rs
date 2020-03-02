@@ -474,7 +474,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.readme_url.as_ref().unwrap(),
-        "https://gitlab.kitware.com/utils/rust-gitlab/blob/master/README.md",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/blob/master/README.md",
     );
     assert!(project.owner.is_none());
     assert_eq!(project.name, "rust-gitlab");
@@ -488,7 +488,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.last_activity_at,
-        datetime((2019, 7, 30), (16, 42, 57, 649)),
+        datetime((2020, 2, 29), (6, 30, 35, 515)),
     );
 }
 
@@ -502,8 +502,8 @@ fn check_project_b(project: &Project) {
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
     assert_eq!(project.star_count, 6);
-    assert_eq!(project.forks_count, 17);
-    assert_eq!(project.open_issues_count, Some(8));
+    assert_eq!(project.forks_count, 24);
+    assert_eq!(project.open_issues_count, Some(9));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
