@@ -1934,6 +1934,45 @@ impl From<MergeRequestChanges> for MergeRequest {
     }
 }
 
+/// param to create a merge request.
+#[derive(Serialize, Deserialize, Builder, Debug, Clone, Default)]
+#[builder(default)]
+#[builder(field(private))]
+#[builder(setter(into, strip_option))]
+pub struct CreateMergeRequestParams {
+    /// The source branch on source project
+    pub source_branch: String,
+    /// The target branch
+    pub target_branch: String,
+    /// Title of MR
+    pub title: String,
+    /// assignee user ID
+    pub assignee_id: Option<UserId>,
+    /// The ID of the user(s) to assign the MR to.
+    /// Set to 0 or provide an empty value to unassign all assignees.
+    pub assignee_ids: Option<Vec<UserId>>,
+    /// Description of MR
+    pub description: Option<String>,
+    /// The target project (numeric id) if different from source project
+    pub target_project_id: Option<ProjectId>,
+    /// Labels for MR as a comma-separated list
+    pub labels: Option<String>,
+    /// The global ID of a milestone
+    pub milestone_id: Option<MilestoneId>,
+    /// Flag indicating if a merge request should remove the source branch when merging
+    pub remove_source_branch: Option<bool>,
+    /// Allow commits from members who can merge to the target branch
+    pub allow_collaboration: Option<bool>,
+    /// Squash commits into a single commit when merging
+    pub squash: Option<bool>,
+}
+
+impl CreateMergeRequestParams {
+    pub fn builder() -> CreateMergeRequestParamsBuilder {
+        CreateMergeRequestParamsBuilder::default()
+    }
+}
+
 /// Type-safe SSH key ID.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct SshKeyId(u64);
