@@ -1212,12 +1212,29 @@ pub struct Milestone {
 impl Milestone {
     /// Create a new blank milestone: it needs at least the ProjectId and title
     /// ProjectId and title are mandatory for new milestone API of Gitlab
-    pub fn new(project_id: ProjectId, title: String) -> Milestone {
+    pub fn new_for_project(project_id: ProjectId, title: String) -> Milestone {
         Milestone {
             id: MilestoneId::new(0),
             iid: MilestoneInternalId::new(0),
             project_id: Some(project_id),
             group_id: None,
+            title,
+            description: None,
+            state: MilestoneState::Active,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            due_date: None,
+            start_date: None,
+        }
+    }
+    /// Create a new blank group milestone: it needs at least the GroupId and title
+    /// GroupId and title are mandatory for new milestone API of Gitlab
+    pub fn new_for_group(group_id: GroupId, title: String) -> Milestone {
+        Milestone {
+            id: MilestoneId::new(0),
+            iid: MilestoneInternalId::new(0),
+            project_id: None,
+            group_id: Some(group_id),
             title,
             description: None,
             state: MilestoneState::Active,

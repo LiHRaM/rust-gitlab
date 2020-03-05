@@ -1261,12 +1261,14 @@ impl Gitlab {
     }
 
     /// Create a new milestone
-    pub fn create_milestone(
-        &self,
-        project: ProjectId,
-        milestone: Milestone,
-    ) -> GitlabResult<Milestone> {
-        let path = format!("projects/{}/milestones", project);
+    pub fn create_milestone(&self, milestone: Milestone) -> GitlabResult<Milestone> {
+        let path: String;
+
+        if let Some(project) = milestone.project_id {
+            path = format!("projects/{}/milestones", project);
+        } else {
+            path = format!("groups/{}/milestones", milestone.group_id.unwrap());
+        }
 
         let mut params: Vec<(&str, String)> = Vec::new();
 
