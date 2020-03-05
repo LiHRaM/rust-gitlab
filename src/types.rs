@@ -1755,6 +1755,8 @@ pub struct MergeRequest {
     pub user: Option<MergeRequestUser>,
     /// The URL of the merge request.
     pub web_url: String,
+    /// Basic pipeline information for the MR.
+    pub pipeline: Option<PipelineBasic>,
 }
 
 /// A merge request with changes.
@@ -1855,6 +1857,8 @@ pub struct MergeRequestChanges {
     pub user: MergeRequestUser,
     /// The URL of the merge request.
     pub web_url: String,
+    /// Basic pipeline information for the MR.
+    pub pipeline: Option<PipelineBasic>,
     pub changes: Vec<RepoDiff>,
 }
 
@@ -1907,6 +1911,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             has_conflicts: mr.has_conflicts,
             user: Some(mr.user),
             web_url: mr.web_url,
+            pipeline: mr.pipeline,
         }
     }
 }
