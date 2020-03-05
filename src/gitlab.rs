@@ -114,6 +114,8 @@ pub enum GitlabError {
         #[source]
         source: serde_json::Error,
     },
+    #[error("milestone without an ID found")]
+    InvalidMilestone,
     #[error("gitlab server error: {}", msg)]
     Gitlab { msg: String },
     #[error("could not parse {} data from JSON: {}", typename.unwrap_or("<unknown>"), source)]
@@ -1262,13 +1264,13 @@ impl Gitlab {
 
     /// Create a new milestone
     pub fn create_milestone(&self, milestone: Milestone) -> GitlabResult<Milestone> {
-        let path: String;
-
-        if let Some(project) = milestone.project_id {
-            path = format!("projects/{}/milestones", project);
+        let path = if let Some(project) = milestone.project_id {
+            format!("projects/{}/milestones", project)
+        } else if let Some(group) = milestone.group_id {
+            format!("groups/{}/milestones", group)
         } else {
-            path = format!("groups/{}/milestones", milestone.group_id.unwrap());
-        }
+            return Err(GitlabError::InvalidMilestone);
+        };
 
         let mut params: Vec<(&str, String)> = Vec::new();
 
