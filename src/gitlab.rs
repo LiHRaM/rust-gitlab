@@ -9,6 +9,7 @@ use std::any;
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
 
+use crates::graphql_client::{GraphQLQuery, QueryBody, Response};
 use crates::itertools::Itertools;
 use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use crates::reqwest::header::{self, HeaderValue};
@@ -118,6 +119,10 @@ pub enum GitlabError {
     InvalidMilestone,
     #[error("gitlab server error: {}", msg)]
     Gitlab { msg: String },
+    #[error("graphql error: [\"{}\"]", message.iter().format("\", \""))]
+    GraphQL { message: Vec<graphql_client::Error> },
+    #[error("no response from gitlab")]
+    NoResponse {},
     #[error("could not parse {} data from JSON: {}", typename.unwrap_or("<unknown>"), source)]
     DataType {
         #[source]
@@ -163,6 +168,16 @@ impl GitlabError {
         }
     }
 
+    fn graphql(message: Vec<graphql_client::Error>) -> Self {
+        GitlabError::GraphQL {
+            message,
+        }
+    }
+
+    fn no_response() -> Self {
+        GitlabError::NoResponse {}
+    }
+
     #[rustversion::since(1.38)]
     fn data_type<T>(source: serde_json::Error) -> Self {
         GitlabError::DataType {
@@ -190,6 +205,8 @@ pub struct Gitlab {
     client: Client,
     /// The base URL to use for API calls.
     base_url: Url,
+    /// The URL to use for GraphQL API calls.
+    graphql_url: Url,
     /// The secret token to use when communicating with Gitlab.
     token: Token,
 }
@@ -198,6 +215,7 @@ impl Debug for Gitlab {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Gitlab")
             .field("base_url", &self.base_url)
+            .field("graphql_url", &self.graphql_url)
             .finish()
     }
 }
@@ -316,6 +334,7 @@ impl Gitlab {
         cert_validation: CertPolicy,
     ) -> GitlabResult<Self> {
         let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
+        let graphql_url = Url::parse(&format!("{}://{}/api/graphql", protocol, host))?;
 
         let client = match cert_validation {
             CertPolicy::Insecure => {
@@ -329,6 +348,7 @@ impl Gitlab {
         let api = Gitlab {
             client,
             base_url,
+            graphql_url,
             token,
         };
 
@@ -345,6 +365,28 @@ impl Gitlab {
         T: ToString,
     {
         GitlabBuilder::new(host, token)
+    }
+
+    /// Send a GraphQL query.
+    pub fn graphql<Q>(&self, query: &QueryBody<Q::Variables>) -> GitlabResult<Q::ResponseData>
+    where
+        Q: GraphQLQuery,
+        Q::Variables: Debug,
+        for<'d> Q::ResponseData: Deserialize<'d>,
+    {
+        info!(
+            target: "gitlab",
+            "sending GraphQL query '{}' {:?}",
+            query.operation_name,
+            query.variables,
+        );
+        let rsp: Response<Q::ResponseData> =
+            self.send(self.client.post(self.graphql_url.clone()).json(query))?;
+
+        if let Some(errs) = rsp.errors {
+            return Err(GitlabError::graphql(errs));
+        }
+        rsp.data.ok_or_else(GitlabError::no_response)
     }
 
     /// The user the API is acting as.

@@ -18,6 +18,7 @@ extern crate log;
 mod crates {
     // public
     pub extern crate chrono;
+    pub extern crate graphql_client;
     pub extern crate serde;
     pub extern crate serde_json;
 
