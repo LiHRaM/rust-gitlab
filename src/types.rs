@@ -3031,7 +3031,7 @@ pub enum AutoDeployStrategy {
 }
 
 enum_serialize!(AutoDeployStrategy -> "auto_devops_deploy_strategy",
-    Continuous => "continuos",
+    Continuous => "continuous",
     Manual => "manual",
     TimedIncremental => "timed_incremental",
 );
