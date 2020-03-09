@@ -1476,6 +1476,15 @@ impl Gitlab {
         )
     }
 
+    /// Create a new merge request
+    pub fn create_merge_request(
+        &self,
+        project: ProjectId,
+        params: CreateMergeRequestParams,
+    ) -> GitlabResult<MergeRequest> {
+        self.post_with_param(format!("projects/{}/merge_requests", project), &params)
+    }
+
     /// Get all pipelines for a project.
     pub fn pipelines<I, K, V>(
         &self,
