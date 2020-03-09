@@ -430,27 +430,42 @@ impl Gitlab {
             .ok_or_else(|| GitlabError::no_such_user(name.as_ref()))
     }
 
-    /// Create a project (Needs admin access)
+    /// Create a project
+    ///
+    /// # Arguments:
+    /// * name: the name of the project
+    /// * path: the path of the project. Optional: name is used if None
+    /// * params: optional arguments for project creation
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use gitlab::{Gitlab, CreateProjectParams, GitlabBuilder};
+    ///
+    /// let gitlab = GitlabBuilder::new("host", "token").build().unwrap();
+    /// let params = CreateProjectParams::builder()
+    ///                     .description("Splendid project")
+    ///                     .build()
+    ///                     .unwrap();
+    /// gitlab.create_project("My Project", Some("project"), Some(params));
+    /// ```
     pub fn create_project<N: AsRef<str>, P: AsRef<str>>(
         &self,
         name: N,
         path: Option<P>,
-        namespace_id: GroupId,
+        params: Option<CreateProjectParams>,
     ) -> GitlabResult<Project> {
         let url = "projects";
+
+        let mut merged_params = params.unwrap_or_default();
+
         let path = match path.as_ref() {
             None => name.as_ref(),
             Some(s) => s.as_ref(),
         };
+        merged_params.name = Some(name.as_ref().to_string());
+        merged_params.path = Some(path.to_string());
 
-        self.post_with_param(
-            url,
-            &[
-                ("name", name.as_ref()),
-                ("path", path),
-                ("namespace_id", namespace_id.to_string().as_str()),
-            ],
-        )
+        self.post_with_param(url, &merged_params)
     }
 
     /// Create a new file in repository
@@ -618,13 +633,9 @@ impl Gitlab {
         path: P,
         params: Option<CreateGroupParams>,
     ) -> GitlabResult<Group> {
-        let url = String::from("groups");
+        let url = "groups";
 
-        let mut merged_params = if let Some(p) = params {
-            p
-        } else {
-            CreateGroupParams::default()
-        };
+        let mut merged_params = params.unwrap_or_default();
         merged_params.name = Some(name.as_ref().to_string());
         merged_params.path = Some(path.as_ref().to_string());
 
