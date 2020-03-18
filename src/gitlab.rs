@@ -12,8 +12,10 @@ use std::fmt::{self, Debug, Display};
 use crates::graphql_client::{GraphQLQuery, QueryBody, Response};
 use crates::itertools::Itertools;
 use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
+use crates::reqwest::blocking::{Client, RequestBuilder};
 use crates::reqwest::header::{self, HeaderValue};
-use crates::reqwest::{self, Client, RequestBuilder, Url};
+use crates::reqwest::IntoUrl;
+use crates::reqwest::Url;
 use crates::serde::de::Error as SerdeError;
 use crates::serde::de::{DeserializeOwned, Unexpected};
 use crates::serde::ser::Serialize;
@@ -91,11 +93,6 @@ impl Token {
 #[derive(Debug, Error)]
 // TODO #[non_exhaustive]
 pub enum GitlabError {
-    #[error("failed to parse url: {}", source)]
-    UrlParse {
-        #[from]
-        source: reqwest::UrlError,
-    },
     #[error("no such user: {}", user)]
     NoSuchUser { user: String },
     #[error("error setting token header: {}", source)]
@@ -258,6 +255,10 @@ enum CertPolicy {
     Insecure,
 }
 
+fn parse_url<T: IntoUrl>(url: T) -> GitlabResult<Url> {
+    Ok(url.into_url()?)
+}
+
 impl Gitlab {
     /// Create a new Gitlab API representation.
     ///
@@ -333,8 +334,8 @@ impl Gitlab {
         token: Token,
         cert_validation: CertPolicy,
     ) -> GitlabResult<Self> {
-        let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
-        let graphql_url = Url::parse(&format!("{}://{}/api/graphql", protocol, host))?;
+        let base_url: Url = parse_url(&format!("{}://{}/api/v4/", protocol, host))?;
+        let graphql_url = parse_url(&format!("{}://{}/api/graphql", protocol, host))?;
 
         let client = match cert_validation {
             CertPolicy::Insecure => {
@@ -1994,7 +1995,11 @@ impl Gitlab {
         U: AsRef<str>,
     {
         debug!(target: "gitlab", "api call {}", url.as_ref());
-        Ok(self.base_url.join(url.as_ref())?)
+        Ok(parse_url(&format!(
+            "{}/{}",
+            self.base_url.as_str(),
+            url.as_ref()
+        ))?)
     }
 
     /// Create a URL to an API endpoint with query parameters.
