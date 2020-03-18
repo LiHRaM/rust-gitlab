@@ -11,12 +11,12 @@
 //! Gitlab does not have consistent structures for its hooks, so they often change from
 //! version to version.
 
-use crates::chrono::{DateTime, NaiveDate, TimeZone, Utc};
-use crates::serde::de::{Error, Unexpected};
-use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
-use crates::serde_json::{self, Value};
+use chrono::{DateTime, NaiveDate, TimeZone, Utc};
+use serde::de::{Error, Unexpected};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::{self, Value};
 
-use types::{
+use crate::types::{
     IssueId, IssueInternalId, IssueState, JobId, MergeRequestId, MergeRequestInternalId,
     MergeRequestState, MergeStatus, MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId,
     SnippetId, UserId,

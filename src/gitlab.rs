@@ -9,20 +9,19 @@ use std::any;
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
 
-use crates::graphql_client::{GraphQLQuery, QueryBody, Response};
-use crates::itertools::Itertools;
-use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
-use crates::reqwest::blocking::{Client, RequestBuilder};
-use crates::reqwest::header::{self, HeaderValue};
-use crates::serde::de::Error as SerdeError;
-use crates::serde::de::{DeserializeOwned, Unexpected};
-use crates::serde::ser::Serialize;
-use crates::serde::{Deserialize, Deserializer, Serializer};
-use crates::serde_json;
-use crates::thiserror::Error;
-use crates::url::{self, Url};
+use graphql_client::{GraphQLQuery, QueryBody, Response};
+use itertools::Itertools;
+use percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
+use reqwest::blocking::{Client, RequestBuilder};
+use reqwest::header::{self, HeaderValue};
+use reqwest::Url;
+use serde::de::Error as SerdeError;
+use serde::de::{DeserializeOwned, Unexpected};
+use serde::ser::Serialize;
+use serde::{Deserialize, Deserializer, Serializer};
+use thiserror::Error;
 
-use types::*;
+use crate::types::*;
 
 const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b' ')
@@ -1522,7 +1521,7 @@ impl Gitlab {
         ref_: ObjectId,
         variables: &[PipelineVariable],
     ) -> GitlabResult<Pipeline> {
-        use crates::serde::Serialize;
+        use serde::Serialize;
         #[derive(Debug, Serialize)]
         struct CreatePipelineParams<'a> {
             ref_: ObjectId,

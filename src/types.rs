@@ -15,11 +15,11 @@
 use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
-use crates::chrono::{DateTime, NaiveDate, Utc};
-use crates::reqwest::Url;
-use crates::serde::de::{DeserializeOwned, Error, Unexpected};
-use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
-use crates::serde_json::{self, Value};
+use chrono::{DateTime, NaiveDate, Utc};
+use reqwest::Url;
+use serde::de::{DeserializeOwned, Error, Unexpected};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::{self, Value};
 
 // This is only used in internal API calls.
 //#[derive(Serialize, Deserialize, Debug, Clone)]

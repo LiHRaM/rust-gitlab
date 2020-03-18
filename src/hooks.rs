@@ -11,12 +11,12 @@
 //! Gitlab does not have consistent structures for its hooks, so they often change from
 //! version to version.
 
-use crates::serde::de::{Error, Unexpected};
-use crates::serde::{Deserialize, Deserializer};
-use crates::serde_json::{self, Value};
+use serde::de::{Error, Unexpected};
+use serde::{Deserialize, Deserializer};
+use serde_json::{self, Value};
 
-use systemhooks::SystemHook;
-use webhooks::WebHook;
+use crate::systemhooks::SystemHook;
+use crate::webhooks::WebHook;
 
 /// A deserializable structure for all Gitlab hooks.
 #[derive(Debug, Clone)]

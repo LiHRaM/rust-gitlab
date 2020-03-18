@@ -6,12 +6,12 @@
 
 use std::fs::File;
 
-use crates::chrono::{DateTime, NaiveDate, TimeZone, Utc};
-use crates::itertools;
-use crates::serde::de::DeserializeOwned;
-use crates::serde_json::{from_reader, json};
+use chrono::{DateTime, NaiveDate, TimeZone, Utc};
+use itertools;
+use serde::de::DeserializeOwned;
+use serde_json::{from_reader, json};
 
-use types::*;
+use crate::types::*;
 
 fn check_user_brad_king(user: &UserBasic) {
     assert_eq!(user.username, "brad.king");

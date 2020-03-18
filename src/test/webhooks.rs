@@ -4,10 +4,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crates::chrono::{TimeZone, Utc};
-use crates::serde_json::from_str;
+use chrono::{TimeZone, Utc};
+use serde_json::from_str;
 
-use webhooks::*;
+use crate::webhooks::*;
 
 #[test]
 fn test_hookdate_deserialize() {
