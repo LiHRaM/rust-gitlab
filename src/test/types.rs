@@ -7,7 +7,6 @@
 use std::fs::File;
 
 use chrono::{DateTime, NaiveDate, TimeZone, Utc};
-use itertools;
 use serde::de::DeserializeOwned;
 use serde_json::{from_reader, json};
 
