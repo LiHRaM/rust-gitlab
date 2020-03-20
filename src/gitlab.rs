@@ -12,14 +12,15 @@ use std::fmt::{self, Debug, Display};
 use crates::graphql_client::{GraphQLQuery, QueryBody, Response};
 use crates::itertools::Itertools;
 use crates::percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
+use crates::reqwest::blocking::{Client, RequestBuilder};
 use crates::reqwest::header::{self, HeaderValue};
-use crates::reqwest::{self, Client, RequestBuilder, Url};
 use crates::serde::de::Error as SerdeError;
 use crates::serde::de::{DeserializeOwned, Unexpected};
 use crates::serde::ser::Serialize;
 use crates::serde::{Deserialize, Deserializer, Serializer};
 use crates::serde_json;
 use crates::thiserror::Error;
+use crates::url::{self, Url};
 
 use types::*;
 
@@ -94,7 +95,7 @@ pub enum GitlabError {
     #[error("failed to parse url: {}", source)]
     UrlParse {
         #[from]
-        source: reqwest::UrlError,
+        source: url::ParseError,
     },
     #[error("no such user: {}", user)]
     NoSuchUser { user: String },

@@ -29,6 +29,7 @@ mod crates {
     pub extern crate reqwest;
     // pub extern crate rustversion;
     pub extern crate thiserror;
+    pub extern crate url;
 }
 
 #[macro_use]
