@@ -12,13 +12,13 @@
 //! Gitlab does not have consistent structures for its hooks, so they often change from
 //! version to version.
 
-use crates::chrono::{DateTime, Utc};
-use crates::serde::de::{Error, Unexpected};
-use crates::serde::{Deserialize, Deserializer, Serialize, Serializer};
-use crates::serde_json::{self, Value};
+use chrono::{DateTime, Utc};
+use serde::de::{Error, Unexpected};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::{self, Value};
 
-use types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
-use webhooks::{CommitHookAttrs, ProjectHookAttrs};
+use crate::types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
+use crate::webhooks::{CommitHookAttrs, ProjectHookAttrs};
 
 /// Events which occur at the project level.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

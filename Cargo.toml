@@ -11,6 +11,7 @@ documentation = "https://docs.rs/gitlab/0.1208.1"
 readme = "README.md"
 keywords = ["gitlab", "api"]
 categories = ["web-programming", "api-bindings"]
+edition = "2018"
 
 [dependencies]
 derive_builder = "~0.9"

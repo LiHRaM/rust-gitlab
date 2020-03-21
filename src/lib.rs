@@ -15,23 +15,6 @@ extern crate derive_builder;
 #[macro_use]
 extern crate log;
 
-mod crates {
-    // public
-    pub extern crate chrono;
-    pub extern crate graphql_client;
-    pub extern crate serde;
-    pub extern crate serde_json;
-
-    // private
-    pub extern crate itertools;
-    pub extern crate log;
-    pub extern crate percent_encoding;
-    pub extern crate reqwest;
-    // pub extern crate rustversion;
-    pub extern crate thiserror;
-    pub extern crate url;
-}
-
 #[macro_use]
 mod macros;
 mod gitlab;
@@ -41,13 +24,13 @@ pub mod systemhooks;
 pub mod types;
 pub mod webhooks;
 
-pub use gitlab::CommitStatusInfo;
-pub use gitlab::Gitlab;
-pub use gitlab::GitlabBuilder;
-pub use gitlab::GitlabError;
-pub use gitlab::MergeRequestStateFilter;
-pub use gitlab::TokenError;
-pub use types::*;
+pub use crate::gitlab::CommitStatusInfo;
+pub use crate::gitlab::Gitlab;
+pub use crate::gitlab::GitlabBuilder;
+pub use crate::gitlab::GitlabError;
+pub use crate::gitlab::MergeRequestStateFilter;
+pub use crate::gitlab::TokenError;
+pub use crate::types::*;
 
 #[cfg(test)]
 mod test;
