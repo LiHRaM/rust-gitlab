@@ -19,9 +19,8 @@ itertools = "~0.8"
 log = "~0.4"
 percent-encoding = "^2.0"
 reqwest = { version = "~0.10", features = ["blocking", "json"] }
-rustversion = "^1.0"
 thiserror = "^1.0.2"
-url = "2.1"
+url = "^2.1"
 
 chrono = { version = "~0.4", features = ["serde"] }
 graphql_client = "~0.8"

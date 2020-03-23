@@ -4,7 +4,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[rustversion::since(1.38)]
 use std::any;
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
@@ -123,11 +122,11 @@ pub enum GitlabError {
     GraphQL { message: Vec<graphql_client::Error> },
     #[error("no response from gitlab")]
     NoResponse {},
-    #[error("could not parse {} data from JSON: {}", typename.unwrap_or("<unknown>"), source)]
+    #[error("could not parse {} data from JSON: {}", typename, source)]
     DataType {
         #[source]
         source: serde_json::Error,
-        typename: Option<&'static str>,
+        typename: &'static str,
     },
     /// This is here to force `_` matching right now.
     ///
@@ -178,19 +177,10 @@ impl GitlabError {
         GitlabError::NoResponse {}
     }
 
-    #[rustversion::since(1.38)]
     fn data_type<T>(source: serde_json::Error) -> Self {
         GitlabError::DataType {
             source,
-            typename: Some(any::type_name::<T>()),
-        }
-    }
-
-    #[rustversion::before(1.38)]
-    fn data_type<T>(source: serde_json::Error) -> Self {
-        GitlabError::DataType {
-            source,
-            typename: None,
+            typename: any::type_name::<T>(),
         }
     }
 }
