@@ -888,7 +888,7 @@ impl Gitlab {
     /// * branch: The name of the branch or wildcard
     /// * push_access_level: Access level allowed to push (defaults: maintainers)
     /// * merge_access_level: Access level allowed to merge (defaults:  maintainers)
-    /// * unprotect_access_level: Access level allowed to unproctect (defaults: mainainers)
+    /// * unprotect_access_level: Access level allowed to unproctect (defaults: maintainers)
     pub fn protect_branch<B: AsRef<str>>(
         &self,
         project: ProjectId,
