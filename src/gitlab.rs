@@ -919,6 +919,24 @@ impl Gitlab {
         )
     }
 
+    /// Unprotect a branch
+    ///
+    /// # Arguments
+    /// * project: The project id
+    /// * branch: The name of the branch or wildcard
+    pub fn unprotect_branch<B: AsRef<str>>(
+        &self,
+        project: ProjectId,
+        branch: B,
+    ) -> GitlabResult<()> {
+        let url = format!(
+            "projects/{}/protected_branches/{}",
+            project,
+            branch.as_ref(),
+        );
+        self.delete(url)
+    }
+
     /// Get a commit.
     pub fn commit<C>(&self, project: ProjectId, commit: C) -> GitlabResult<RepoCommitDetail>
     where
