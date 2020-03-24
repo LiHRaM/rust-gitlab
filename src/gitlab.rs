@@ -190,6 +190,7 @@ type GitlabResult<T> = Result<T, GitlabError>;
 /// A representation of the Gitlab API for a single user.
 ///
 /// Separate users should use separate instances of this.
+#[derive(Clone)]
 pub struct Gitlab {
     /// The client to use for API calls.
     client: Client,
