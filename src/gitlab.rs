@@ -2067,6 +2067,27 @@ impl Gitlab {
         self.send(self.client.post(full_url).form(&param))
     }
 
+    /// Create a `DELETE` request to an API endpoint.
+    fn delete<T, U>(&self, url: U) -> GitlabResult<T>
+    where
+        T: DeserializeOwned,
+        U: AsRef<str>,
+    {
+        let param: &[(&str, &str)] = &[];
+        self.delete_with_param(url, param)
+    }
+
+    /// Create a `DELETE` request to an API endpoint with query parameters.
+    fn delete_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
+    where
+        T: DeserializeOwned,
+        U: AsRef<str>,
+        P: Serialize,
+    {
+        let full_url = self.create_url(url)?;
+        self.send(self.client.delete(full_url).form(&param))
+    }
+
     /// Create a `PUT` request to an API endpoint with query parameters.
     fn put_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
     where
