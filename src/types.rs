@@ -16,6 +16,8 @@ use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
 use chrono::{DateTime, NaiveDate, Utc};
+use derive_builder::Builder;
+use log::error;
 use reqwest::Url;
 use serde::de::{DeserializeOwned, Error, Unexpected};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};

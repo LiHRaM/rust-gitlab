@@ -12,6 +12,7 @@
 //! version to version.
 
 use chrono::{DateTime, NaiveDate, TimeZone, Utc};
+use log::error;
 use serde::de::{Error, Unexpected};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{self, Value};
