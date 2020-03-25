@@ -87,9 +87,3 @@ macro_rules! get_event {
         }
     };
 }
-
-macro_rules! query_param_slice {
-    ( $( $x:expr ),* ) => (
-        &[$($x),*] as QueryParamSlice
-    )
-}

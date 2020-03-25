@@ -35,24 +35,24 @@ before_script:
     # Only use it if it's available; no need to fail the build due to something
     # gone wrong here.
     - .gitlab/ci/sccache.sh && export RUSTC_WRAPPER=$PWD/.gitlab/sccache
-    - cargo build --frozen --all --verbose
-    - cargo test --frozen --all --no-run --verbose
+    - cargo build $CARGO_FEATURES --frozen --all --verbose
+    - cargo test $CARGO_FEATURES --frozen --all --no-run --verbose
     - ".gitlab/sccache --show-stats || :"
 
 .cargo_test: &cargo_test
-    - cargo test --frozen --all --verbose
+    - cargo test $CARGO_FEATURES --frozen --all --verbose
 
 .cargo_tarpaulin_build: &cargo_tarpaulin_build
     - .gitlab/ci/sccache.sh && export RUSTC_WRAPPER=$PWD/.gitlab/sccache
     - .gitlab/ci/tarpaulin.sh
     - export PATH=$PWD/.gitlab:$PATH
-    - cargo tarpaulin --no-run --frozen --exclude-files vendor --ignore-panics --all --verbose
+    - cargo tarpaulin --no-run --frozen $CARGO_FEATURES --exclude-files vendor --ignore-panics --all --verbose
     - ".gitlab/sccache --show-stats || :"
 
 .cargo_tarpaulin_test: &cargo_tarpaulin_test
     - .gitlab/ci/tarpaulin.sh
     - export PATH=$PWD/.gitlab:$PATH
-    - cargo tarpaulin --frozen --exclude-files vendor --ignore-panics --all --verbose
+    - cargo tarpaulin --frozen $CARGO_FEATURES --exclude-files vendor --ignore-panics --all --verbose
 
 .rust_minimum: &rust_minimum
     image: "rust:1.39.0"
@@ -61,6 +61,13 @@ before_script:
         CARGO_UPDATE_POLICY: newest
         GIT_CLONE_PATH: $CI_BUILDS_DIR/rust
 
+.rust_minimum_no_default_features: &rust_minimum_no_default_features
+    extends: .rust_minimum
+
+    variables:
+        CARGO_FEATURES: --no-default-features
+
+
 .rust_stable: &rust_stable
     image: "rust:latest"
 
@@ -68,10 +75,24 @@ before_script:
         CARGO_UPDATE_POLICY: newest
         GIT_CLONE_PATH: $CI_BUILDS_DIR/rust
 
+.rust_stable_no_default_features: &rust_stable_no_default_features
+    extends: .rust_stable
+
+    variables:
+        CARGO_FEATURES: --no-default-features
+
+
 .rust_nightly: &rust_nightly
     extends: .rust_stable
 
     image: "rustlang/rust:nightly"
+
+.rust_nightly_no_default_features: &rust_nightly_no_default_features
+    extends: .rust_nightly
+
+    variables:
+        CARGO_FEATURES: --no-default-features
+
 
 .cargo_fetch_job: &cargo_fetch_job
     stage: prepare
@@ -210,6 +231,21 @@ test:cargo-minimum:
     needs:
         - build:cargo-minimum
 
+build:cargo-minimum-no-default-features:
+    <<:
+        - *cargo_build_job
+        - *rust_minimum_no_default_features
+        - *cargo_cache_newest
+
+test:cargo-minimum-no-default-features:
+    <<:
+        - *cargo_test_job
+        - *rust_minimum_no_default_features
+    dependencies:
+        - build:cargo-minimum-no-default-features
+    needs:
+        - build:cargo-minimum-no-default-features
+
 build:cargo-stable:
     <<:
         - *cargo_build_job
@@ -224,6 +260,21 @@ test:cargo-stable:
         - build:cargo-stable
     needs:
         - build:cargo-stable
+
+build:cargo-stable-no-default-features:
+    <<:
+        - *cargo_build_job
+        - *rust_stable_no_default_features
+        - *cargo_cache_newest
+
+test:cargo-stable-no-default-features:
+    <<:
+        - *cargo_test_job
+        - *rust_stable_no_default_features
+    dependencies:
+        - build:cargo-stable-no-default-features
+    needs:
+        - build:cargo-stable-no-default-features
 
 build:cargo-tarpaulin:
     <<:
@@ -254,6 +305,21 @@ test:cargo-nightly:
         - build:cargo-nightly
     needs:
         - build:cargo-nightly
+
+build:cargo-nightly-no-default-features:
+    <<:
+        - *cargo_build_job
+        - *rust_nightly_no_default_features
+        - *cargo_cache_newest
+
+test:cargo-nightly-no-default-features:
+    <<:
+        - *cargo_test_job
+        - *rust_nightly_no_default_features
+    dependencies:
+        - build:cargo-nightly-no-default-features
+    needs:
+        - build:cargo-nightly-no-default-features
 
 # build:cargo-mindeps:
 #     <<:

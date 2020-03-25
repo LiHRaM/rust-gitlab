@@ -13,16 +13,23 @@ keywords = ["gitlab", "api"]
 categories = ["web-programming", "api-bindings"]
 edition = "2018"
 
+[features]
+default = ["client_api"]
+client_api = ["itertools", "percent-encoding", "reqwest", "thiserror", "graphql_client"]
+
 [dependencies]
 derive_builder = "~0.9"
-itertools = "~0.8"
+itertools = { version = "~0.8", optional = true }
 log = "~0.4"
-percent-encoding = "^2.0"
-reqwest = { version = "~0.10", features = ["blocking", "json"] }
-thiserror = "^1.0.2"
+percent-encoding = { version = "^2.0", optional = true }
+reqwest = { version = "~0.10", features = ["blocking", "json"], optional = true }
+thiserror = { version = "^1.0.2", optional = true }
 url = "^2.1"
 
 chrono = { version = "~0.4", features = ["serde"] }
-graphql_client = "~0.8"
+graphql_client = { version = "~0.8", optional = true }
 serde = { version = "~1.0", features = ["derive"] }
 serde_json = "^1.0"
+
+[dev-dependencies]
+itertools = { version = "~0.8" }
