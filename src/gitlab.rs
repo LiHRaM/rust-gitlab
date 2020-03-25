@@ -889,7 +889,7 @@ impl Gitlab {
     /// * branch: The name of the branch or wildcard
     /// * push_access_level: Access level allowed to push (defaults: maintainers)
     /// * merge_access_level: Access level allowed to merge (defaults:  maintainers)
-    /// * unprotect_access_level: Access level allowed to unproctect (defaults: mainainers)
+    /// * unprotect_access_level: Access level allowed to unproctect (defaults: maintainers)
     pub fn protect_branch<B: AsRef<str>>(
         &self,
         project: ProjectId,
@@ -918,6 +918,24 @@ impl Gitlab {
                 ),
             ],
         )
+    }
+
+    /// Unprotect a branch
+    ///
+    /// # Arguments
+    /// * project: The project id
+    /// * branch: The name of the branch or wildcard
+    pub fn unprotect_branch<B: AsRef<str>>(
+        &self,
+        project: ProjectId,
+        branch: B,
+    ) -> GitlabResult<()> {
+        let url = format!(
+            "projects/{}/protected_branches/{}",
+            project,
+            branch.as_ref(),
+        );
+        self.delete(url)
     }
 
     /// Get a commit.
@@ -2066,6 +2084,27 @@ impl Gitlab {
     {
         let full_url = self.create_url(url)?;
         self.send(self.client.post(full_url).form(&param))
+    }
+
+    /// Create a `DELETE` request to an API endpoint.
+    fn delete<T, U>(&self, url: U) -> GitlabResult<T>
+    where
+        T: DeserializeOwned,
+        U: AsRef<str>,
+    {
+        let param: &[(&str, &str)] = &[];
+        self.delete_with_param(url, param)
+    }
+
+    /// Create a `DELETE` request to an API endpoint with query parameters.
+    fn delete_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
+    where
+        T: DeserializeOwned,
+        U: AsRef<str>,
+        P: Serialize,
+    {
+        let full_url = self.create_url(url)?;
+        self.send(self.client.delete(full_url).form(&param))
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.
