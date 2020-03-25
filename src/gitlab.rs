@@ -10,6 +10,7 @@ use std::fmt::{self, Debug, Display};
 
 use graphql_client::{GraphQLQuery, QueryBody, Response};
 use itertools::Itertools;
+use log::{debug, error, info};
 use percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use reqwest::blocking::{Client, RequestBuilder};
 use reqwest::header::{self, HeaderValue};
