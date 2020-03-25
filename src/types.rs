@@ -18,10 +18,10 @@ use std::str::FromStr;
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
 use log::error;
-use reqwest::Url;
 use serde::de::{DeserializeOwned, Error, Unexpected};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{self, Value};
+use url::Url;
 
 // This is only used in internal API calls.
 //#[derive(Serialize, Deserialize, Debug, Clone)]

@@ -23,6 +23,12 @@ use thiserror::Error;
 
 use crate::types::*;
 
+macro_rules! query_param_slice {
+    ( $( $x:expr ),* ) => (
+        &[$($x),*] as QueryParamSlice
+    )
+}
+
 const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b' ')
     .add(b'"')

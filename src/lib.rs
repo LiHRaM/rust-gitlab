@@ -11,6 +11,7 @@
 
 #[macro_use]
 mod macros;
+#[cfg(feature = "client_api")]
 mod gitlab;
 
 pub mod hooks;
@@ -18,12 +19,10 @@ pub mod systemhooks;
 pub mod types;
 pub mod webhooks;
 
-pub use crate::gitlab::CommitStatusInfo;
-pub use crate::gitlab::Gitlab;
-pub use crate::gitlab::GitlabBuilder;
-pub use crate::gitlab::GitlabError;
-pub use crate::gitlab::MergeRequestStateFilter;
-pub use crate::gitlab::TokenError;
+#[cfg(feature = "client_api")]
+pub use crate::gitlab::{
+    CommitStatusInfo, Gitlab, GitlabBuilder, GitlabError, MergeRequestStateFilter, TokenError,
+};
 pub use crate::types::*;
 
 #[cfg(test)]
