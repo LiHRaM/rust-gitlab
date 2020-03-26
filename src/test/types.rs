@@ -198,7 +198,7 @@ fn test_read_issue() {
     assert_eq!(issue.discussion_locked, None);
     assert_eq!(
         issue.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/issues/6",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/issues/6",
     );
     assert!(issue.has_links());
 }
@@ -243,7 +243,7 @@ fn test_read_issue_reference() {
     assert_eq!(issue.discussion_locked, None);
     assert_eq!(
         issue.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/issues/5",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/issues/5",
     );
 }
 
@@ -345,7 +345,7 @@ fn check_merge_request_b(merge_request: &MergeRequest) {
     assert_eq!(merge_request.user.as_ref().unwrap().can_merge, true);
     assert_eq!(
         merge_request.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/merge_requests/35",
     );
 }
 
