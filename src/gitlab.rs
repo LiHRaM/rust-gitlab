@@ -12,7 +12,7 @@ use graphql_client::{GraphQLQuery, QueryBody, Response};
 use itertools::Itertools;
 use log::{debug, error, info};
 use percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
-use reqwest::blocking::{Client, RequestBuilder};
+use reqwest::blocking::{Client, RequestBuilder, Response as HttpResponse};
 use reqwest::header::{self, HeaderValue};
 use reqwest::Url;
 use serde::de::Error as SerdeError;
@@ -2028,18 +2028,39 @@ impl Gitlab {
     }
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
-    fn send<T>(&self, req: RequestBuilder) -> GitlabResult<T>
-    where
-        T: DeserializeOwned,
-    {
+    fn send_impl(&self, req: RequestBuilder) -> GitlabResult<HttpResponse> {
         let rsp = self.token.set_header(req)?.send()?;
         let status = rsp.status();
         if status.is_server_error() {
             return Err(GitlabError::http(status));
         }
-        let success = status.is_success();
+
+        Ok(rsp)
+    }
+
+    /// Refactored code which talks to Gitlab and transforms error messages properly.
+    fn send_no_answer<T>(&self, req: RequestBuilder) -> GitlabResult<T>
+    where
+        T: DeserializeOwned + Default,
+    {
+        let rsp = self.send_impl(req)?;
+        if !rsp.status().is_success() {
+            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
+            return Err(GitlabError::from_gitlab(v));
+        }
+
+        Ok(T::default())
+    }
+
+    /// Refactored code which talks to Gitlab and transforms error messages properly.
+    fn send<T>(&self, req: RequestBuilder) -> GitlabResult<T>
+    where
+        T: DeserializeOwned,
+    {
+        let rsp = self.send_impl(req)?;
+        let status = rsp.status();
         let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-        if !success {
+        if !status.is_success() {
             return Err(GitlabError::from_gitlab(v));
         }
 
@@ -2095,7 +2116,7 @@ impl Gitlab {
     /// Create a `DELETE` request to an API endpoint.
     fn delete<T, U>(&self, url: U) -> GitlabResult<T>
     where
-        T: DeserializeOwned,
+        T: DeserializeOwned + Default,
         U: AsRef<str>,
     {
         let param: &[(&str, &str)] = &[];
@@ -2105,12 +2126,12 @@ impl Gitlab {
     /// Create a `DELETE` request to an API endpoint with query parameters.
     fn delete_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
     where
-        T: DeserializeOwned,
+        T: DeserializeOwned + Default,
         U: AsRef<str>,
         P: Serialize,
     {
         let full_url = self.create_url(url)?;
-        self.send(self.client.delete(full_url).form(&param))
+        self.send_no_answer(self.client.delete(full_url).form(&param))
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.
