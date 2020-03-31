@@ -67,7 +67,6 @@ before_script:
     variables:
         CARGO_FEATURES: --no-default-features
 
-
 .rust_stable: &rust_stable
     image: "rust:latest"
 
@@ -81,7 +80,6 @@ before_script:
     variables:
         CARGO_FEATURES: --no-default-features
 
-
 .rust_nightly: &rust_nightly
     extends: .rust_stable
 
@@ -92,7 +90,6 @@ before_script:
 
     variables:
         CARGO_FEATURES: --no-default-features
-
 
 .cargo_fetch_job: &cargo_fetch_job
     stage: prepare
