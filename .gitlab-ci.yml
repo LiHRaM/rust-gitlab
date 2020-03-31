@@ -97,7 +97,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
 
     script: *cargo_update
@@ -119,7 +118,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
     script: *cargo_clippy
     interruptible: true
@@ -130,7 +128,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
     script: *cargo_build
     artifacts:
@@ -148,7 +145,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
     script: *cargo_test
     interruptible: true
@@ -159,7 +155,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
     script: *cargo_tarpaulin_build
     artifacts:
@@ -176,7 +171,6 @@ before_script:
     only: *only_settings
     tags:
         - docker
-        - ghostflow
         - linux
         - privileged
     artifacts:
