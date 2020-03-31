@@ -52,7 +52,7 @@ before_script:
 .cargo_tarpaulin_test: &cargo_tarpaulin_test
     - .gitlab/ci/tarpaulin.sh
     - export PATH=$PWD/.gitlab:$PATH
-    - cargo tarpaulin --frozen $CARGO_FEATURES --exclude-files vendor --ignore-panics --all --verbose
+    - cargo tarpaulin --frozen $CARGO_FEATURES --exclude-files vendor --ignore-panics --all --verbose --out Html
 
 .rust_minimum: &rust_minimum
     image: "rust:1.39.0"
@@ -67,7 +67,6 @@ before_script:
     variables:
         CARGO_FEATURES: --no-default-features
 
-
 .rust_stable: &rust_stable
     image: "rust:latest"
 
@@ -81,7 +80,6 @@ before_script:
     variables:
         CARGO_FEATURES: --no-default-features
 
-
 .rust_nightly: &rust_nightly
     extends: .rust_stable
 
@@ -93,14 +91,12 @@ before_script:
     variables:
         CARGO_FEATURES: --no-default-features
 
-
 .cargo_fetch_job: &cargo_fetch_job
     stage: prepare
     only: *only_settings
     tags:
         - build
         - docker
-        - ghostflow
         - linux
 
     script: *cargo_update
@@ -122,7 +118,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
     script: *cargo_clippy
     interruptible: true
@@ -133,7 +128,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
     script: *cargo_build
     artifacts:
@@ -151,7 +145,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
     script: *cargo_test
     interruptible: true
@@ -162,7 +155,6 @@ before_script:
     tags:
         - build
         - docker
-        - ghostflow
         - linux
     script: *cargo_tarpaulin_build
     artifacts:
@@ -179,9 +171,13 @@ before_script:
     only: *only_settings
     tags:
         - docker
-        - ghostflow
         - linux
         - privileged
+    artifacts:
+        expose_as: "Coverage report"
+        expire_in: 1 week
+        paths:
+            - tarpaulin-report.html
     script: *cargo_tarpaulin_test
     coverage: '/\d+.\d+% coverage, \d+\/\d+ lines covered/'
     interruptible: true
