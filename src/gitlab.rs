@@ -1571,6 +1571,38 @@ impl Gitlab {
         unimplemented!();
     }
 
+    /// Get a list of jobs for a pipeline.
+    pub fn pipeline_jobs<I, K, V>(
+        &self,
+        project: ProjectId,
+        pipeline_id: PipelineId,
+        params: I,
+    ) -> GitlabResult<Vec<Job>>
+    where
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+        K: AsRef<str>,
+        V: AsRef<str>,
+    {
+        self.get_paged_with_param(
+            format!("projects/{}/pipelines/{}/jobs", project, pipeline_id),
+            params,
+        )
+    }
+
+    /// Get a log for a specific job of a project.
+    pub fn job_log(&self, project: ProjectId, job_id: JobId) -> GitlabResult<Vec<u8>> {
+        let full_url = self.create_url(format!("projects/{}/jobs/{}/trace", project, job_id))?;
+        let req = self.client.get(full_url);
+        let rsp = self.send_impl(req)?;
+        let status = rsp.status();
+        if !status.is_success() {
+            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
+            return Err(GitlabError::from_gitlab(v));
+        }
+        Ok(rsp.bytes()?.to_vec())
+    }
+
     /// Get merge requests.
     pub fn merge_request<I, K, V>(
         &self,
