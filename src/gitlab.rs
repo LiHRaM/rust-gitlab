@@ -7,6 +7,7 @@
 use std::any;
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
+use std::iter;
 
 use graphql_client::{GraphQLQuery, QueryBody, Response};
 use itertools::Itertools;
@@ -1537,20 +1538,11 @@ impl Gitlab {
         ref_: ObjectId,
         variables: &[PipelineVariable],
     ) -> GitlabResult<Pipeline> {
-        use serde::Serialize;
-        #[derive(Debug, Serialize)]
-        struct CreatePipelineParams<'a> {
-            ref_: ObjectId,
-            variables: &'a [PipelineVariable],
-        }
+        let params = iter::once(("ref", ref_.value().clone()))
+            .chain(PipelineVariablesParamIter::from(variables.iter()))
+            .collect::<Vec<_>>();
 
-        self.post_with_param(
-            format!("projects/{}/pipeline", project),
-            CreatePipelineParams {
-                ref_,
-                variables,
-            },
-        )
+        self.post_with_param(format!("projects/{}/pipeline", project), params)
     }
 
     /// Retry jobs in a pipeline.
@@ -2279,4 +2271,84 @@ impl GitlabBuilder {
             self.cert_validation.clone(),
         )
     }
+}
+
+#[derive(Debug, Clone)]
+struct PipelineVariablesParamIter<T> {
+    next_value: Option<String>,
+    next_type: Option<PipelineVariableType>,
+    iter: T,
+}
+
+impl<'a, T> From<T> for PipelineVariablesParamIter<T>
+where
+    T: Iterator<Item = &'a PipelineVariable>,
+{
+    fn from(from: T) -> Self {
+        Self {
+            next_value: None,
+            next_type: None,
+            iter: from,
+        }
+    }
+}
+
+impl<'a, T> Iterator for PipelineVariablesParamIter<T>
+where
+    T: Iterator<Item = &'a PipelineVariable>,
+{
+    type Item = (&'static str, String);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(value) = self.next_value.take() {
+            return Some(("variables[][value]", value));
+        }
+
+        if let Some(var_type) = self.next_type.take() {
+            return Some(("variables[][variable_type]", var_type.as_str().into()));
+        }
+
+        if let Some(pipe_var) = self.iter.next() {
+            self.next_value = Some(pipe_var.value.clone());
+            self.next_type = Some(pipe_var.variable_type);
+            return Some(("variables[][key]", pipe_var.key.clone()));
+        }
+
+        None
+    }
+}
+
+#[test]
+fn test_pipeline_variables_iter() {
+    let vars = vec![
+        PipelineVariable {
+            key: "var1".into(),
+            value: "value1".into(),
+            variable_type: PipelineVariableType::EnvVar,
+        },
+        PipelineVariable {
+            key: "var2".into(),
+            value: "value2".into(),
+            variable_type: PipelineVariableType::EnvVar,
+        },
+        PipelineVariable {
+            key: "file".into(),
+            value: "content".into(),
+            variable_type: PipelineVariableType::File,
+        },
+    ];
+    let expected = vec![
+        ("variables[][key]", "var1".into()),
+        ("variables[][value]", "value1".into()),
+        ("variables[][variable_type]", "env_var".into()),
+        ("variables[][key]", "var2".into()),
+        ("variables[][value]", "value2".into()),
+        ("variables[][variable_type]", "env_var".into()),
+        ("variables[][key]", "file".into()),
+        ("variables[][value]", "content".into()),
+        ("variables[][variable_type]", "file".into()),
+    ];
+
+    let iter = PipelineVariablesParamIter::from(vars.iter());
+    itertools::assert_equal(iter, expected);
 }
