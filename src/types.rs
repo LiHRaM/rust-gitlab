@@ -2591,7 +2591,7 @@ pub struct JobArtifactFile {
     /// The name of the artifact.
     pub filename: String,
     /// The size (in bytes) of the artifact.
-    pub size: usize,
+    pub size: u64,
 }
 
 /// Type-safe job ID.
@@ -2613,7 +2613,7 @@ pub struct Job {
     /// The name of the reference that was tested.
     pub ref_: Option<String>,
     pub tag: bool,
-    pub coverage: Option<f32>,
+    pub coverage: Option<f64>,
     /// When the job was created or marked as pending.
     pub created_at: DateTime<Utc>,
     /// When the job was started.
