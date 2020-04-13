@@ -2594,6 +2594,17 @@ pub struct JobArtifactFile {
     pub size: u64,
 }
 
+/// An uploaded artifact from a job.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct JobArtifact {
+    pub file_type: String,
+    pub file_format: Option<String>,
+    /// The name of the artifact.
+    pub filename: String,
+    /// The size (in bytes) of the artifact.
+    pub size: u64,
+}
+
 /// Type-safe job ID.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct JobId(u64);
@@ -2630,6 +2641,11 @@ pub struct Job {
     pub runner: Option<Runner>,
     /// The pipeline the job belongs to.
     pub pipeline: PipelineBasic,
+    pub allow_failure: bool,
+    pub duration: Option<f64>,
+    pub artifacts: Vec<JobArtifact>,
+    pub artifacts_expire_at: Option<DateTime<Utc>>,
+    pub web_url: String,
 }
 
 /// Type-safe pipeline ID.
