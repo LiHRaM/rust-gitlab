@@ -213,12 +213,12 @@ impl Gitlab {
     pub fn new<H, T>(host: H, token: T) -> GitlabResult<Self>
     where
         H: AsRef<str>,
-        T: ToString,
+        T: Into<String>,
     {
         Self::new_impl(
             "https",
             host.as_ref(),
-            Auth::Token(token.to_string()),
+            Auth::Token(token.into()),
             CertPolicy::Default,
         )
     }
@@ -229,12 +229,12 @@ impl Gitlab {
     pub fn new_insecure<H, T>(host: H, token: T) -> GitlabResult<Self>
     where
         H: AsRef<str>,
-        T: ToString,
+        T: Into<String>,
     {
         Self::new_impl(
             "http",
             host.as_ref(),
-            Auth::Token(token.to_string()),
+            Auth::Token(token.into()),
             CertPolicy::Insecure,
         )
     }
@@ -246,12 +246,12 @@ impl Gitlab {
     pub fn with_oauth2<H, T>(host: H, token: T) -> GitlabResult<Self>
     where
         H: AsRef<str>,
-        T: ToString,
+        T: Into<String>,
     {
         Self::new_impl(
             "https",
             host.as_ref(),
-            Auth::OAuth2(token.to_string()),
+            Auth::OAuth2(token.into()),
             CertPolicy::Default,
         )
     }
@@ -263,12 +263,12 @@ impl Gitlab {
     pub fn with_oauth2_insecure<H, T>(host: H, token: T) -> GitlabResult<Self>
     where
         H: AsRef<str>,
-        T: ToString,
+        T: Into<String>,
     {
         Self::new_impl(
             "http",
             host.as_ref(),
-            Auth::OAuth2(token.to_string()),
+            Auth::OAuth2(token.into()),
             CertPolicy::Default,
         )
     }
@@ -308,8 +308,8 @@ impl Gitlab {
     /// Create a new Gitlab API client builder.
     pub fn builder<H, T>(host: H, token: T) -> GitlabBuilder
     where
-        H: ToString,
-        T: ToString,
+        H: Into<String>,
+        T: Into<String>,
     {
         GitlabBuilder::new(host, token)
     }
@@ -2181,13 +2181,13 @@ impl GitlabBuilder {
     /// Create a new Gitlab API client builder.
     pub fn new<H, T>(host: H, token: T) -> Self
     where
-        H: ToString,
-        T: ToString,
+        H: Into<String>,
+        T: Into<String>,
     {
         Self {
             protocol: "https",
-            host: host.to_string(),
-            token: Auth::Token(token.to_string()),
+            host: host.into(),
+            token: Auth::Token(token.into()),
             cert_validation: CertPolicy::Default,
         }
     }
