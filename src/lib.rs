@@ -20,8 +20,19 @@ pub mod types;
 pub mod webhooks;
 
 #[cfg(feature = "client_api")]
+pub mod api;
+#[cfg(feature = "client_api")]
+mod auth;
+#[cfg(feature = "client_api")]
+pub mod query;
+#[cfg(feature = "client_api")]
+pub mod query_prelude;
+
+#[cfg(feature = "client_api")]
+pub use crate::auth::AuthError;
+#[cfg(feature = "client_api")]
 pub use crate::gitlab::{
-    CommitStatusInfo, Gitlab, GitlabBuilder, GitlabError, MergeRequestStateFilter, TokenError,
+    CommitStatusInfo, Gitlab, GitlabBuilder, GitlabError, MergeRequestStateFilter,
 };
 pub use crate::types::*;
 
