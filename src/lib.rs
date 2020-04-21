@@ -20,6 +20,8 @@ pub mod types;
 pub mod webhooks;
 
 #[cfg(feature = "client_api")]
+pub mod api;
+#[cfg(feature = "client_api")]
 mod auth;
 #[cfg(feature = "client_api")]
 pub mod query;

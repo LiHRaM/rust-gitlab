@@ -21,7 +21,9 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
+use crate::api::users::CurrentUser;
 use crate::auth::{Auth, AuthError};
+use crate::query::Query;
 use crate::types::*;
 
 macro_rules! query_param_slice {
@@ -300,7 +302,7 @@ impl Gitlab {
         };
 
         // Ensure the API is working.
-        let _: UserPublic = api.current_user()?;
+        let _: UserPublic = CurrentUser.query(&api)?;
 
         Ok(api)
     }
@@ -356,8 +358,12 @@ impl Gitlab {
     }
 
     /// The user the API is acting as.
+    #[deprecated(
+        since = "0.1209.2",
+        note = "use `gitlab::api::users::CurrentUser.query()` instead"
+    )]
     pub fn current_user(&self) -> GitlabResult<UserPublic> {
-        self.get_with_param("user", query_param_slice![])
+        CurrentUser.query(self)
     }
 
     /// Get all user accounts
