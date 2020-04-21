@@ -151,7 +151,7 @@ pub struct Gitlab {
     /// The client to use for API calls.
     client: Client,
     /// The base URL to use for API calls.
-    base_url: Url,
+    rest_url: Url,
     /// The URL to use for GraphQL API calls.
     graphql_url: Url,
     /// The authentication information to use when communicating with Gitlab.
@@ -161,7 +161,7 @@ pub struct Gitlab {
 impl Debug for Gitlab {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Gitlab")
-            .field("base_url", &self.base_url)
+            .field("rest_url", &self.rest_url)
             .field("graphql_url", &self.graphql_url)
             .finish()
     }
@@ -280,7 +280,7 @@ impl Gitlab {
         auth: Auth,
         cert_validation: CertPolicy,
     ) -> GitlabResult<Self> {
-        let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
+        let rest_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
         let graphql_url = Url::parse(&format!("{}://{}/api/graphql", protocol, host))?;
 
         let client = match cert_validation {
@@ -294,7 +294,7 @@ impl Gitlab {
 
         let api = Gitlab {
             client,
-            base_url,
+            rest_url,
             graphql_url,
             auth,
         };
@@ -1982,7 +1982,7 @@ impl Gitlab {
         U: AsRef<str>,
     {
         debug!(target: "gitlab", "api call {}", url.as_ref());
-        Ok(self.base_url.join(url.as_ref())?)
+        Ok(self.rest_url.join(url.as_ref())?)
     }
 
     /// Create a URL to an API endpoint with query parameters.
