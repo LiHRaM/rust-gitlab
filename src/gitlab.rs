@@ -14,7 +14,7 @@ use itertools::Itertools;
 use log::{debug, error, info};
 use percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use reqwest::blocking::{Client, RequestBuilder, Response as HttpResponse};
-use reqwest::Url;
+use reqwest::{Method, Url};
 use serde::de::Error as SerdeError;
 use serde::de::{DeserializeOwned, Unexpected};
 use serde::ser::Serialize;
@@ -105,13 +105,13 @@ impl GitlabError {
         }
     }
 
-    fn json(source: serde_json::Error) -> Self {
+    pub(crate) fn json(source: serde_json::Error) -> Self {
         GitlabError::Json {
             source,
         }
     }
 
-    fn from_gitlab(value: serde_json::Value) -> Self {
+    pub(crate) fn from_gitlab(value: serde_json::Value) -> Self {
         let msg = value
             .pointer("/message")
             .or_else(|| value.pointer("/error"))
@@ -133,7 +133,7 @@ impl GitlabError {
         GitlabError::NoResponse {}
     }
 
-    fn data_type<T>(source: serde_json::Error) -> Self {
+    pub(crate) fn data_type<T>(source: serde_json::Error) -> Self {
         GitlabError::DataType {
             source,
             typename: any::type_name::<T>(),
@@ -312,6 +312,25 @@ impl Gitlab {
         T: Into<String>,
     {
         GitlabBuilder::new(host, token)
+    }
+
+    /// Create a URL to a REST API endpoint.
+    pub fn rest_endpoint<U>(&self, url: U) -> GitlabResult<Url>
+    where
+        U: AsRef<str>,
+    {
+        debug!(target: "gitlab", "REST api call {}", url.as_ref());
+        Ok(self.rest_url.join(url.as_ref())?)
+    }
+
+    /// Create a URL to a REST API endpoint.
+    pub fn build_rest(&self, method: Method, url: Url) -> RequestBuilder {
+        self.client.request(method, url)
+    }
+
+    /// Send a GraphQL query.
+    pub fn rest(&self, request: RequestBuilder) -> GitlabResult<HttpResponse> {
+        Ok(self.auth.set_header(request)?.send()?)
     }
 
     /// Send a GraphQL query.
