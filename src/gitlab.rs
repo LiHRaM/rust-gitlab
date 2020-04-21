@@ -14,7 +14,6 @@ use itertools::Itertools;
 use log::{debug, error, info};
 use percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use reqwest::blocking::{Client, RequestBuilder, Response as HttpResponse};
-use reqwest::header::{self, HeaderValue};
 use reqwest::Url;
 use serde::de::Error as SerdeError;
 use serde::de::{DeserializeOwned, Unexpected};
@@ -22,6 +21,7 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
+use crate::auth::{Auth, AuthError};
 use crate::types::*;
 
 macro_rules! query_param_slice {
@@ -45,58 +45,6 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
 
 #[derive(Debug, Error)]
 // TODO #[non_exhaustive]
-pub enum TokenError {
-    #[error("header value error: {}", source)]
-    HeaderValue {
-        #[from]
-        source: header::InvalidHeaderValue,
-    },
-    /// This is here to force `_` matching right now.
-    ///
-    /// **DO NOT USE**
-    #[doc(hidden)]
-    #[error("unreachable...")]
-    _NonExhaustive,
-}
-
-type TokenResult<T> = Result<T, TokenError>;
-
-/// A Gitlab API token
-///
-/// Gitlab supports two kinds of tokens
-#[derive(Debug, Clone)]
-enum Token {
-    /// A personal access token, obtained through Gitlab user settings
-    Private(String),
-    /// An OAuth2 token, obtained through the OAuth2 flow
-    OAuth2(String),
-}
-
-impl Token {
-    /// Sets the appropirate header on the request.
-    ///
-    /// Depending on the token type, this will be either the Private-Token header
-    /// or the Authorization header.
-    /// Returns an error if the token string cannot be parsed as a header value.
-    pub fn set_header(&self, req: RequestBuilder) -> TokenResult<RequestBuilder> {
-        Ok(match self {
-            Token::Private(token) => {
-                let mut token_header_value = HeaderValue::from_str(&token)?;
-                token_header_value.set_sensitive(true);
-                req.header("PRIVATE-TOKEN", token_header_value)
-            },
-            Token::OAuth2(token) => {
-                let value = format!("Bearer {}", token);
-                let mut token_header_value = HeaderValue::from_str(&value)?;
-                token_header_value.set_sensitive(true);
-                req.header("Authorization", token_header_value)
-            },
-        })
-    }
-}
-
-#[derive(Debug, Error)]
-// TODO #[non_exhaustive]
 pub enum GitlabError {
     #[error("failed to parse url: {}", source)]
     UrlParse {
@@ -105,10 +53,10 @@ pub enum GitlabError {
     },
     #[error("no such user: {}", user)]
     NoSuchUser { user: String },
-    #[error("error setting token header: {}", source)]
-    TokenError {
+    #[error("error setting auth header: {}", source)]
+    AuthError {
         #[from]
-        source: TokenError,
+        source: AuthError,
     },
     #[error("communication with gitlab: {}", source)]
     Communication {
@@ -206,8 +154,8 @@ pub struct Gitlab {
     base_url: Url,
     /// The URL to use for GraphQL API calls.
     graphql_url: Url,
-    /// The secret token to use when communicating with Gitlab.
-    token: Token,
+    /// The authentication information to use when communicating with Gitlab.
+    auth: Auth,
 }
 
 impl Debug for Gitlab {
@@ -270,7 +218,7 @@ impl Gitlab {
         Self::new_impl(
             "https",
             host.as_ref(),
-            Token::Private(token.to_string()),
+            Auth::Token(token.to_string()),
             CertPolicy::Default,
         )
     }
@@ -286,7 +234,7 @@ impl Gitlab {
         Self::new_impl(
             "http",
             host.as_ref(),
-            Token::Private(token.to_string()),
+            Auth::Token(token.to_string()),
             CertPolicy::Insecure,
         )
     }
@@ -303,7 +251,7 @@ impl Gitlab {
         Self::new_impl(
             "https",
             host.as_ref(),
-            Token::OAuth2(token.to_string()),
+            Auth::OAuth2(token.to_string()),
             CertPolicy::Default,
         )
     }
@@ -320,7 +268,7 @@ impl Gitlab {
         Self::new_impl(
             "http",
             host.as_ref(),
-            Token::OAuth2(token.to_string()),
+            Auth::OAuth2(token.to_string()),
             CertPolicy::Default,
         )
     }
@@ -329,7 +277,7 @@ impl Gitlab {
     fn new_impl(
         protocol: &str,
         host: &str,
-        token: Token,
+        auth: Auth,
         cert_validation: CertPolicy,
     ) -> GitlabResult<Self> {
         let base_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
@@ -348,7 +296,7 @@ impl Gitlab {
             client,
             base_url,
             graphql_url,
-            token,
+            auth,
         };
 
         // Ensure the API is working.
@@ -2053,7 +2001,7 @@ impl Gitlab {
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
     fn send_impl(&self, req: RequestBuilder) -> GitlabResult<HttpResponse> {
-        let rsp = self.token.set_header(req)?.send()?;
+        let rsp = self.auth.set_header(req)?.send()?;
         let status = rsp.status();
         if status.is_server_error() {
             return Err(GitlabError::http(status));
@@ -2225,7 +2173,7 @@ impl Gitlab {
 pub struct GitlabBuilder {
     protocol: &'static str,
     host: String,
-    token: Token,
+    token: Auth,
     cert_validation: CertPolicy,
 }
 
@@ -2239,7 +2187,7 @@ impl GitlabBuilder {
         Self {
             protocol: "https",
             host: host.to_string(),
-            token: Token::Private(token.to_string()),
+            token: Auth::Token(token.to_string()),
             cert_validation: CertPolicy::Default,
         }
     }
@@ -2257,8 +2205,8 @@ impl GitlabBuilder {
 
     /// Switch to using an OAuth2 token instead of a personal access token
     pub fn oauth2_token(&mut self) -> &mut Self {
-        if let Token::Private(token) = self.token.clone() {
-            self.token = Token::OAuth2(token);
+        if let Auth::Token(token) = self.token.clone() {
+            self.token = Auth::OAuth2(token);
         }
         self
     }
