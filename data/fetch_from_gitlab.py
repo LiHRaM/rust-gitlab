@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import json
 import requests
@@ -34,6 +34,7 @@ MR_ID = 35 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
 MR_DISCUSSION_ID = 158 # https://gitlab.kitware.com/utils/rust-gitlab/merge_requests/35
 NOTE_ID = 177359
 PIPELINE_ID = 145400
+PIPELINE2_ID = 168478
 GROUP_ID = 498 # https://gitlab.kitware.com/utils
 
 
@@ -59,5 +60,6 @@ if __name__ == '__main__':
     write_result(token, 'pipeline_basic', '/projects/%s/pipelines' % REPO)
     write_result(token, 'pipeline', '/projects/%s/pipelines/%d' % (REPO, PIPELINE_ID))
     write_result(token, 'group', '/groups/%s' % GROUP_ID)
+    write_result(token, 'job', '/projects/%s/pipelines/%s/jobs' % (REPO, PIPELINE2_ID), dumpall=True)
     # FIXME: these are hidden behind a `403 forbidden`, so we use a hardcoded example instead.
     # write_result(token, 'pipeline_variable', '/projects/%s/pipelines/%d/variables' % (REPO, PIPELINE_ID))

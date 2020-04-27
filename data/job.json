@@ -1,0 +1,1380 @@
+[
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 22759915
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 211007
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 35532
+      }
+    ],
+    "artifacts_expire_at": "2020-04-13T01:20:44.867-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 22759915
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:45.498-04:00",
+    "duration": 56.972323,
+    "finished_at": "2020-04-13T00:20:45.271-04:00",
+    "id": 4895218,
+    "name": "prepare:cargo-cache-newest",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "moho.build",
+      "id": 87,
+      "ip_address": "192.168.113.178",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "prepare",
+    "started_at": "2020-04-13T00:19:48.299-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895218"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 109884
+      }
+    ],
+    "artifacts_expire_at": null,
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:45.561-04:00",
+    "duration": 143.849725,
+    "finished_at": "2020-04-13T00:23:11.912-04:00",
+    "id": 4895219,
+    "name": "build:cargo-clippy",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "moho.build",
+      "id": 87,
+      "ip_address": "192.168.113.178",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "build",
+    "started_at": "2020-04-13T00:20:48.062-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895219"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 375418579
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 244663
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 99325
+      }
+    ],
+    "artifacts_expire_at": "2020-04-13T01:25:10.779-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 375418579
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:45.609-04:00",
+    "duration": 114.87834,
+    "finished_at": "2020-04-13T00:25:11.498-04:00",
+    "id": 4895220,
+    "name": "build:cargo-minimum",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "abeth.cuda-rt",
+      "id": 159,
+      "ip_address": "192.168.113.152",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "build",
+    "started_at": "2020-04-13T00:23:16.620-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895220"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 160552142
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 224805
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 36229
+      }
+    ],
+    "artifacts_expire_at": "2020-04-13T01:26:23.246-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 160552142
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:45.640-04:00",
+    "duration": 72.402665,
+    "finished_at": "2020-04-13T00:26:24.392-04:00",
+    "id": 4895221,
+    "name": "build:cargo-minimum-no-default-features",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "abeth.cuda-rt.large",
+      "id": 160,
+      "ip_address": "192.168.113.152",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "build",
+    "started_at": "2020-04-13T00:25:11.989-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895221"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 370560417
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 244726
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 100527
+      }
+    ],
+    "artifacts_expire_at": "2020-04-13T01:28:09.292-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 370560417
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:45.662-04:00",
+    "duration": 111.624624,
+    "finished_at": "2020-04-13T00:28:10.219-04:00",
+    "id": 4895222,
+    "name": "build:cargo-stable",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "minmus.build",
+      "id": 153,
+      "ip_address": "192.168.113.169",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "build",
+    "started_at": "2020-04-13T00:26:18.594-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895222"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 159578834
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 224791
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 36857
+      }
+    ],
+    "artifacts_expire_at": "2020-04-13T01:27:37.475-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 159578834
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:45.742-04:00",
+    "duration": 72.950015,
+    "finished_at": "2020-04-13T00:27:38.761-04:00",
+    "id": 4895223,
+    "name": "build:cargo-stable-no-default-features",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "abeth.cuda-rt.large",
+      "id": 160,
+      "ip_address": "192.168.113.152",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "build",
+    "started_at": "2020-04-13T00:26:25.811-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895223"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 420395684
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 246232
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 12424
+      }
+    ],
+    "artifacts_expire_at": "2020-04-13T01:29:53.892-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 420395684
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:45.804-04:00",
+    "duration": 136.471378,
+    "finished_at": "2020-04-13T00:29:55.645-04:00",
+    "id": 4895224,
+    "name": "build:cargo-tarpaulin",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "abeth.cuda-rt.large",
+      "id": 160,
+      "ip_address": "192.168.113.152",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "build",
+    "started_at": "2020-04-13T00:27:39.173-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895224"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 353891555
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 245048
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 100553
+      }
+    ],
+    "artifacts_expire_at": "2020-04-13T01:30:19.427-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 353891555
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:45.943-04:00",
+    "duration": 128.159871,
+    "finished_at": "2020-04-13T00:30:21.069-04:00",
+    "id": 4895225,
+    "name": "build:cargo-nightly",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "minmus.build",
+      "id": 153,
+      "ip_address": "192.168.113.169",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "build",
+    "started_at": "2020-04-13T00:28:12.909-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895225"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 150884646
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 224937
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 36887
+      }
+    ],
+    "artifacts_expire_at": "2020-04-13T01:31:45.413-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 150884646
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:46.051-04:00",
+    "duration": 113.795734,
+    "finished_at": "2020-04-13T00:31:50.186-04:00",
+    "id": 4895226,
+    "name": "build:cargo-nightly-no-default-features",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "abeth.cuda-rt",
+      "id": 159,
+      "ip_address": "192.168.113.152",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "build",
+    "started_at": "2020-04-13T00:29:56.390-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895226"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 8646
+      }
+    ],
+    "artifacts_expire_at": null,
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:46.113-04:00",
+    "duration": 64.767906,
+    "finished_at": "2020-04-13T00:32:32.553-04:00",
+    "id": 4895227,
+    "name": "test:cargo-minimum",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "dovim.shared.build",
+      "id": 82,
+      "ip_address": "192.168.113.200",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "test",
+    "started_at": "2020-04-13T00:31:27.785-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895227"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 11084
+      }
+    ],
+    "artifacts_expire_at": null,
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:46.145-04:00",
+    "duration": 34.096598,
+    "finished_at": "2020-04-13T00:32:24.789-04:00",
+    "id": 4895228,
+    "name": "test:cargo-minimum-no-default-features",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "abeth.cuda-rt.large",
+      "id": 160,
+      "ip_address": "192.168.113.152",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "test",
+    "started_at": "2020-04-13T00:31:50.693-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895228"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 15563
+      }
+    ],
+    "artifacts_expire_at": null,
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:46.198-04:00",
+    "duration": 36.819065,
+    "finished_at": "2020-04-13T00:33:02.007-04:00",
+    "id": 4895229,
+    "name": "test:cargo-stable",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "abeth.cuda-rt.large",
+      "id": 160,
+      "ip_address": "192.168.113.152",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "test",
+    "started_at": "2020-04-13T00:32:25.188-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895229"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [],
+    "artifacts_expire_at": null,
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:46.237-04:00",
+    "duration": 34.017769679,
+    "finished_at": null,
+    "id": 4895230,
+    "name": "test:cargo-stable-no-default-features",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "dovim.shared.build",
+      "id": 82,
+      "ip_address": "192.168.113.200",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "test",
+    "started_at": "2020-04-13T00:32:35.112-04:00",
+    "status": "running",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895230"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [
+      {
+        "file_format": "zip",
+        "file_type": "archive",
+        "filename": "artifacts.zip",
+        "size": 76517
+      },
+      {
+        "file_format": "gzip",
+        "file_type": "metadata",
+        "filename": "metadata.gz",
+        "size": 166
+      },
+      {
+        "file_format": null,
+        "file_type": "trace",
+        "filename": "job.log",
+        "size": 12238
+      }
+    ],
+    "artifacts_expire_at": "2020-04-20T00:30:57.046-04:00",
+    "artifacts_file": {
+      "filename": "artifacts.zip",
+      "size": 76517
+    },
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": 36.43,
+    "created_at": "2020-04-13T00:19:46.268-04:00",
+    "duration": 61.019904,
+    "finished_at": "2020-04-13T00:30:57.772-04:00",
+    "id": 4895231,
+    "name": "test:cargo-tarpaulin",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "minmus.priv-x11",
+      "id": 156,
+      "ip_address": "192.168.113.169",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "test",
+    "started_at": "2020-04-13T00:29:56.752-04:00",
+    "status": "success",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895231"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [],
+    "artifacts_expire_at": null,
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:46.302-04:00",
+    "duration": 6.604018343,
+    "finished_at": null,
+    "id": 4895232,
+    "name": "test:cargo-nightly",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": {
+      "active": true,
+      "description": "abeth.cuda-rt.large",
+      "id": 160,
+      "ip_address": "192.168.113.152",
+      "is_shared": true,
+      "name": "gitlab-runner",
+      "online": true,
+      "status": "online"
+    },
+    "stage": "test",
+    "started_at": "2020-04-13T00:33:02.536-04:00",
+    "status": "running",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895232"
+  },
+  {
+    "allow_failure": false,
+    "artifacts": [],
+    "artifacts_expire_at": null,
+    "commit": {
+      "author_email": "ben.boeckel@kitware.com",
+      "author_name": "Ben Boeckel",
+      "authored_date": "2020-04-08T17:28:40.000+00:00",
+      "committed_date": "2020-04-08T13:28:52.000-04:00",
+      "committer_email": "kwrobot@kitware.com",
+      "committer_name": "Kitware Robot",
+      "created_at": "2020-04-08T13:28:52.000-04:00",
+      "id": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "message": "Merge topic 'add-job-commands'\n\n31fb133 add jobs apis\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nAcked-by: Ben Boeckel <ben.boeckel@kitware.com>\nMerge-request: !213\n",
+      "parent_ids": [
+        "ddb2c675b0b28bdb792b94d6ab0dc0c98a912374",
+        "31fb1336aeaaaa0b22edda1a0938cb933ee575e4"
+      ],
+      "short_id": "0028f476",
+      "title": "Merge topic 'add-job-commands'",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/0028f47612b928d94e5e1a4329f3e74d6fdd7032"
+    },
+    "coverage": null,
+    "created_at": "2020-04-13T00:19:46.327-04:00",
+    "duration": null,
+    "finished_at": null,
+    "id": 4895233,
+    "name": "test:cargo-nightly-no-default-features",
+    "pipeline": {
+      "created_at": "2020-04-13T00:19:45.398-04:00",
+      "id": 168478,
+      "ref": "master",
+      "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "status": "running",
+      "updated_at": "2020-04-13T00:19:48.685-04:00",
+      "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    },
+    "ref": "master",
+    "runner": null,
+    "stage": "test",
+    "started_at": null,
+    "status": "pending",
+    "tag": false,
+    "user": {
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
+      "bio": "",
+      "created_at": "2015-03-05T17:28:27.013-05:00",
+      "id": 35,
+      "job_title": "",
+      "linkedin": "",
+      "location": null,
+      "name": "buildbot",
+      "organization": null,
+      "public_email": "",
+      "skype": "",
+      "state": "active",
+      "twitter": "",
+      "username": "buildbot",
+      "web_url": "https://gitlab.kitware.com/buildbot",
+      "website_url": ""
+    },
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895233"
+  }
+]

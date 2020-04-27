@@ -4,7 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::fs::File;
+use std::{fs::File, ops::Deref};
 
 use chrono::{DateTime, NaiveDate, TimeZone, Utc};
 use serde::de::DeserializeOwned;
@@ -888,4 +888,273 @@ fn test_read_group() {
     assert_eq!(group.full_path, "utils");
     assert_eq!(group.parent_id, None);
     assert!(group.statistics.is_none());
+}
+
+fn check_commit_add_job_commands(commit: &RepoCommit) {
+    assert_eq!(
+        commit.id,
+        ObjectId::new("0028f47612b928d94e5e1a4329f3e74d6fdd7032")
+    );
+    assert_eq!(commit.short_id, ObjectId::new("0028f476"));
+    assert_eq!(commit.title, "Merge topic \'add-job-commands\'");
+    itertools::assert_equal(
+        &commit.parent_ids,
+        &[
+            ObjectId::new("ddb2c675b0b28bdb792b94d6ab0dc0c98a912374"),
+            ObjectId::new("31fb1336aeaaaa0b22edda1a0938cb933ee575e4"),
+        ],
+    );
+    assert_eq!(commit.author_name, "Ben Boeckel");
+    assert_eq!(commit.author_email, "ben.boeckel@kitware.com");
+    assert_eq!(
+        commit.authored_date,
+        datetime((2020, 4, 8), (17, 28, 40, 0))
+    );
+    assert_eq!(commit.committer_name, "Kitware Robot");
+    assert_eq!(commit.committer_email, "kwrobot@kitware.com");
+    assert_eq!(
+        commit.committed_date,
+        datetime((2020, 4, 8), (17, 28, 52, 0))
+    );
+    assert_eq!(commit.created_at, datetime((2020, 4, 8), (17, 28, 52, 0)));
+    assert_eq!(
+        commit.message,
+        "Merge topic \'add-job-commands\'\n\
+         \n\
+         31fb133 add jobs apis\n\
+         \n\
+         Acked-by: Kitware Robot <kwrobot@kitware.com>\n\
+         Acked-by: Ben Boeckel <ben.boeckel@kitware.com>\n\
+         Merge-request: !213\n"
+    );
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct JobArtifactRef<'a> {
+    file_type: &'a str,
+    file_format: Option<&'a str>,
+    filename: &'a str,
+    size: u64,
+}
+
+impl<'a> JobArtifactRef<'a> {
+    fn from(artifact: &'a JobArtifact) -> Self {
+        let JobArtifact {
+            file_type,
+            file_format,
+            filename,
+            size,
+        } = artifact;
+        JobArtifactRef {
+            file_type,
+            file_format: file_format.as_ref().map(Deref::deref),
+            filename,
+            size: *size,
+        }
+    }
+}
+
+fn check_job_artifacts(artifacts: &[JobArtifact], expected: &[JobArtifactRef<'_>]) {
+    itertools::assert_equal(
+        artifacts.iter().map(JobArtifactRef::from),
+        expected.iter().cloned(),
+    );
+}
+
+#[test]
+fn test_read_pending_job() {
+    let jobs: Vec<Job> = read_test_file("job");
+    let job: Job = jobs
+        .into_iter()
+        .find(|job| job.id == JobId::new(4_895_233))
+        .unwrap();
+
+    assert_eq!(job.status, StatusState::Pending);
+    assert_eq!(job.stage, "test");
+    assert_eq!(job.name, "test:cargo-nightly-no-default-features");
+    assert_eq!(job.ref_.unwrap(), "master");
+    assert_eq!(job.tag, false);
+    assert_eq!(job.coverage, None);
+    assert_eq!(job.created_at, datetime((2020, 4, 13), (4, 19, 46, 327)));
+    assert_eq!(job.started_at, None);
+    assert_eq!(job.finished_at, None);
+    check_user_buildbot(&job.user.unwrap().into());
+    assert!(job.artifacts_file.is_none());
+    check_commit_add_job_commands(&job.commit);
+    assert!(job.runner.is_none());
+    assert_eq!(job.pipeline.id, PipelineId::new(168_478));
+    assert_eq!(job.pipeline.ref_.unwrap(), "master");
+    assert_eq!(
+        job.pipeline.sha,
+        ObjectId::new("0028f47612b928d94e5e1a4329f3e74d6fdd7032")
+    );
+    assert_eq!(job.pipeline.status, StatusState::Running);
+    assert_eq!(
+        job.pipeline.created_at,
+        Some(datetime((2020, 4, 13), (4, 19, 45, 398)))
+    );
+    assert_eq!(
+        job.pipeline.updated_at,
+        Some(datetime((2020, 4, 13), (4, 19, 48, 685)))
+    );
+    assert_eq!(
+        job.pipeline.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    );
+    assert_eq!(job.allow_failure, false);
+    assert_eq!(job.duration, None);
+    check_job_artifacts(&job.artifacts, &[]);
+    assert_eq!(job.artifacts_expire_at, None);
+    assert_eq!(
+        job.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895233"
+    );
+}
+
+#[allow(clippy::cognitive_complexity)]
+#[test]
+fn test_read_success_job() {
+    let jobs: Vec<Job> = read_test_file("job");
+    let job: Job = jobs
+        .into_iter()
+        .find(|job| job.id == JobId::new(4_895_231))
+        .unwrap();
+
+    assert_eq!(job.status, StatusState::Success);
+    assert_eq!(job.stage, "test");
+    assert_eq!(job.name, "test:cargo-tarpaulin");
+    assert_eq!(job.ref_.unwrap(), "master");
+    assert_eq!(job.tag, false);
+    assert_eq!(job.coverage, Some(36.43));
+    assert_eq!(job.created_at, datetime((2020, 4, 13), (4, 19, 46, 268)));
+    assert_eq!(
+        job.started_at,
+        Some(datetime((2020, 4, 13), (4, 29, 56, 752)))
+    );
+    assert_eq!(
+        job.finished_at,
+        Some(datetime((2020, 4, 13), (4, 30, 57, 772)))
+    );
+    check_user_buildbot(&job.user.unwrap().into());
+    let artifacts_file = job.artifacts_file.unwrap();
+    assert_eq!(artifacts_file.filename, "artifacts.zip");
+    assert_eq!(artifacts_file.size, 76517);
+    check_commit_add_job_commands(&job.commit);
+    let runner = job.runner.unwrap();
+    assert_eq!(runner.id, RunnerId::new(156));
+    assert_eq!(runner.description.unwrap(), "minmus.priv-x11");
+    assert_eq!(runner.active, true);
+    assert_eq!(runner.is_shared, true);
+    assert_eq!(runner.name.unwrap(), "gitlab-runner");
+    assert_eq!(job.pipeline.id, PipelineId::new(168_478));
+    assert_eq!(job.pipeline.ref_.unwrap(), "master");
+    assert_eq!(
+        job.pipeline.sha,
+        ObjectId::new("0028f47612b928d94e5e1a4329f3e74d6fdd7032")
+    );
+    assert_eq!(job.pipeline.status, StatusState::Running);
+    assert_eq!(
+        job.pipeline.created_at,
+        Some(datetime((2020, 4, 13), (4, 19, 45, 398)))
+    );
+    assert_eq!(
+        job.pipeline.updated_at,
+        Some(datetime((2020, 4, 13), (4, 19, 48, 685)))
+    );
+    assert_eq!(
+        job.pipeline.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    );
+    assert_eq!(job.allow_failure, false);
+    assert_eq!(job.duration, Some(61.019_904));
+    check_job_artifacts(
+        &job.artifacts,
+        &[
+            JobArtifactRef {
+                file_type: "archive",
+                file_format: Some("zip"),
+                filename: "artifacts.zip",
+                size: 76517,
+            },
+            JobArtifactRef {
+                file_type: "metadata",
+                file_format: Some("gzip"),
+                filename: "metadata.gz",
+                size: 166,
+            },
+            JobArtifactRef {
+                file_type: "trace",
+                file_format: None,
+                filename: "job.log",
+                size: 12238,
+            },
+        ],
+    );
+    assert_eq!(
+        job.artifacts_expire_at,
+        Some(datetime((2020, 4, 20), (4, 30, 57, 46)))
+    );
+    assert_eq!(
+        job.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895231"
+    );
+}
+
+#[allow(clippy::cognitive_complexity)]
+#[test]
+fn test_read_running_job() {
+    let jobs: Vec<Job> = read_test_file("job");
+    let job: Job = jobs
+        .into_iter()
+        .find(|job| job.id == JobId::new(4_895_232))
+        .unwrap();
+
+    assert_eq!(job.status, StatusState::Running);
+    assert_eq!(job.stage, "test");
+    assert_eq!(job.name, "test:cargo-nightly");
+    assert_eq!(job.ref_.unwrap(), "master");
+    assert_eq!(job.tag, false);
+    assert_eq!(job.coverage, None);
+    assert_eq!(job.created_at, datetime((2020, 4, 13), (4, 19, 46, 302)));
+    assert_eq!(
+        job.started_at,
+        Some(datetime((2020, 4, 13), (4, 33, 2, 536)))
+    );
+    assert_eq!(job.finished_at, None);
+    check_user_buildbot(&job.user.unwrap().into());
+    assert!(job.artifacts_file.is_none());
+    check_commit_add_job_commands(&job.commit);
+    let runner = job.runner.unwrap();
+    assert_eq!(runner.id, RunnerId::new(160));
+    assert_eq!(runner.description.unwrap(), "abeth.cuda-rt.large");
+    assert_eq!(runner.active, true);
+    assert_eq!(runner.is_shared, true);
+    assert_eq!(runner.name.unwrap(), "gitlab-runner");
+    assert_eq!(job.pipeline.id, PipelineId::new(168_478));
+    assert_eq!(job.pipeline.ref_.unwrap(), "master");
+    assert_eq!(
+        job.pipeline.sha,
+        ObjectId::new("0028f47612b928d94e5e1a4329f3e74d6fdd7032")
+    );
+    assert_eq!(job.pipeline.status, StatusState::Running);
+    assert_eq!(
+        job.pipeline.created_at,
+        Some(datetime((2020, 4, 13), (4, 19, 45, 398)))
+    );
+    assert_eq!(
+        job.pipeline.updated_at,
+        Some(datetime((2020, 4, 13), (4, 19, 48, 685)))
+    );
+    assert_eq!(
+        job.pipeline.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+    );
+    assert_eq!(job.allow_failure, false);
+    assert_eq!(job.duration, Some(6.604_018_343));
+    check_job_artifacts(&job.artifacts, &[]);
+    assert_eq!(job.artifacts_expire_at, None);
+    assert_eq!(
+        job.web_url,
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895232"
+    );
 }
