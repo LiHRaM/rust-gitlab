@@ -90,7 +90,8 @@
       "twitter": "",
       "username": "buildbot",
       "web_url": "https://gitlab.kitware.com/buildbot",
-      "website_url": ""
+      "website_url": "",
+      "work_information": null
     },
     "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895218"
   },
@@ -834,7 +835,8 @@
       "twitter": "",
       "username": "buildbot",
       "web_url": "https://gitlab.kitware.com/buildbot",
-      "website_url": ""
+      "website_url": "",
+      "work_information": null
     },
     "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895226"
   },
@@ -913,7 +915,8 @@
       "twitter": "",
       "username": "buildbot",
       "web_url": "https://gitlab.kitware.com/buildbot",
-      "website_url": ""
+      "website_url": "",
+      "work_information": null
     },
     "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895227"
   },
@@ -992,7 +995,8 @@
       "twitter": "",
       "username": "buildbot",
       "web_url": "https://gitlab.kitware.com/buildbot",
-      "website_url": ""
+      "website_url": "",
+      "work_information": null
     },
     "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895228"
   },
@@ -1373,7 +1377,8 @@
       "twitter": "",
       "username": "buildbot",
       "web_url": "https://gitlab.kitware.com/buildbot",
-      "website_url": ""
+      "website_url": "",
+      "work_information": null
     },
     "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/jobs/4895233"
   }

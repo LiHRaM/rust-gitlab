@@ -9,6 +9,8 @@
     "web_url": "https://gitlab.kitware.com/kwrobot"
   },
   "body": "Status changed to merged",
+  "commands_changes": {},
+  "confidential": null,
   "created_at": "2016-10-04T16:18:57.937-04:00",
   "id": 177373,
   "noteable_id": 20215,

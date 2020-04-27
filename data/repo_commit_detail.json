@@ -1,11 +1,11 @@
 {
   "author_email": "brad.king@kitware.com",
   "author_name": "Brad King",
-  "authored_date": "2016-11-08T14:30:13.000Z",
-  "committed_date": "2016-11-08T14:30:13.000Z",
+  "authored_date": "2016-11-08T09:30:13.000-05:00",
+  "committed_date": "2016-11-08T09:30:13.000-05:00",
   "committer_email": "kwrobot@kitware.com",
   "committer_name": "Kitware Robot",
-  "created_at": "2016-11-08T14:30:13.000Z",
+  "created_at": "2016-11-08T09:30:13.000-05:00",
   "id": "de4ac3cf96cb8a0893be22b03f5171d934f9d392",
   "last_pipeline": {
     "created_at": "2016-11-08T09:30:16.081-05:00",
