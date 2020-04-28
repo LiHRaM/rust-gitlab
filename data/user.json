@@ -29,5 +29,6 @@
   "two_factor_enabled": true,
   "username": "kwrobot",
   "web_url": "https://gitlab.kitware.com/kwrobot",
-  "website_url": ""
+  "website_url": "",
+  "work_information": null
 }

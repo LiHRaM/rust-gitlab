@@ -40,6 +40,7 @@
   },
   "discussion_locked": null,
   "downvotes": 0,
+  "first_contribution": false,
   "first_deployed_to_production_at": null,
   "force_remove_source_branch": true,
   "has_conflicts": false,
@@ -120,12 +121,12 @@
     "total_time_spent": 0
   },
   "title": "gitlab: expose hook addition API",
-  "updated_at": "2016-10-04T16:18:57.940-04:00",
+  "updated_at": "2019-08-29T13:30:19.352-04:00",
   "upvotes": 0,
   "user": {
     "can_merge": true
   },
-  "user_notes_count": 3,
+  "user_notes_count": 10,
   "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/merge_requests/35",
   "work_in_progress": false
 }

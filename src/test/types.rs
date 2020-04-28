@@ -277,7 +277,7 @@ fn check_merge_request_a(merge_request: &MergeRequest) {
     );
     assert_eq!(
         merge_request.updated_at,
-        datetime((2016, 10, 4), (20, 18, 57, 940)),
+        datetime((2019, 8, 29), (17, 30, 19, 352)),
     );
     assert_eq!(
         merge_request.merged_at.unwrap(),
@@ -337,7 +337,7 @@ fn check_merge_request_b(merge_request: &MergeRequest) {
     check_empty_time_stats(&merge_request.time_stats);
     assert_eq!(merge_request.blocking_discussions_resolved, true);
     assert_eq!(merge_request.changes_count.as_ref().unwrap(), "3");
-    assert_eq!(merge_request.user_notes_count, 3);
+    assert_eq!(merge_request.user_notes_count, 10);
     assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
@@ -487,7 +487,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.last_activity_at,
-        datetime((2020, 2, 29), (6, 30, 35, 515)),
+        datetime((2020, 4, 27), (19, 4, 8, 517)),
     );
 }
 
@@ -500,9 +500,9 @@ fn check_project_b(project: &Project) {
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
-    assert_eq!(project.star_count, 6);
-    assert_eq!(project.forks_count, 24);
-    assert_eq!(project.open_issues_count, Some(9));
+    assert_eq!(project.star_count, 8);
+    assert_eq!(project.forks_count, 29);
+    assert_eq!(project.open_issues_count, Some(15));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
