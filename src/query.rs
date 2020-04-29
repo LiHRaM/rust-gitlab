@@ -22,6 +22,12 @@ pub enum Pagination {
     Limit(usize),
 }
 
+impl Default for Pagination {
+    fn default() -> Self {
+        Pagination::All
+    }
+}
+
 impl Pagination {
     fn page_limit(self) -> usize {
         match self {
