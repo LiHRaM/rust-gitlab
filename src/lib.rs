@@ -26,6 +26,8 @@ mod auth;
 #[cfg(feature = "client_api")]
 pub mod query;
 #[cfg(feature = "client_api")]
+pub mod query_common;
+#[cfg(feature = "client_api")]
 pub mod query_prelude;
 
 #[cfg(feature = "client_api")]
