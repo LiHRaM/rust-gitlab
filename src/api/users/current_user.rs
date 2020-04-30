@@ -7,6 +7,7 @@
 use crate::query_prelude::*;
 use crate::types::UserResult;
 
+#[derive(Debug)]
 pub struct CurrentUser;
 
 impl<U> SingleQuery<U> for CurrentUser

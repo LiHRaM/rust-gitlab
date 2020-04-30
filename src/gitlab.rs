@@ -367,6 +367,10 @@ impl Gitlab {
     }
 
     /// Get all user accounts
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::users::Users.query()` instead"
+    )]
     pub fn users<T, I, K, V>(&self, params: I) -> GitlabResult<Vec<T>>
     where
         T: UserResult,

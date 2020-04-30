@@ -14,3 +14,6 @@ pub use crate::query::Pagination;
 pub use crate::query::Pairs;
 pub use crate::query::Query;
 pub use crate::query::SingleQuery;
+
+pub use crate::query_common::EnableState;
+pub use crate::query_common::SortOrder;
