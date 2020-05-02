@@ -22,7 +22,7 @@ use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
 use crate::api::projects::Projects;
-use crate::api::users::{CurrentUser, User};
+use crate::api::users::{CurrentUser, User, Users};
 use crate::auth::{Auth, AuthError};
 use crate::query::{LinkHeaderParseError, Query};
 use crate::types::*;
@@ -438,8 +438,11 @@ impl Gitlab {
         T: UserResult,
         N: AsRef<str>,
     {
-        let mut users = self.get_paged_with_param("users", &[("username", name.as_ref())])?;
-        users
+        Users::builder()
+            .username(name.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?
             .pop()
             .ok_or_else(|| GitlabError::no_such_user(name.as_ref()))
     }
