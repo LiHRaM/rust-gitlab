@@ -21,7 +21,7 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
-use crate::api::users::CurrentUser;
+use crate::api::users::{CurrentUser, User};
 use crate::auth::{Auth, AuthError};
 use crate::query::Query;
 use crate::types::*;
@@ -383,7 +383,11 @@ impl Gitlab {
     }
 
     /// Find a user by id.
-    pub fn user<T, I, K, V>(&self, user: UserId, params: I) -> GitlabResult<T>
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::users::User.query()` instead"
+    )]
+    pub fn user<T, I, K, V>(&self, user: UserId, _: I) -> GitlabResult<T>
     where
         T: UserResult,
         I: IntoIterator,
@@ -391,7 +395,10 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("users/{}", user), params)
+        User {
+            id: user.value(),
+        }
+        .query(self)
     }
 
     /// Find a user by username.

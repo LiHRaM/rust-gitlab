@@ -7,7 +7,10 @@
 #![allow(clippy::module_inception)]
 
 mod current_user;
+mod user;
 mod users;
+
+pub use self::user::User;
 
 pub use self::current_user::CurrentUser;
 
