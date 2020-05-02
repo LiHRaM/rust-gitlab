@@ -395,6 +395,10 @@ impl Gitlab {
     }
 
     /// Find a user by username.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::users::Users.query()` instead"
+    )]
     pub fn user_by_name<T, N>(&self, name: N) -> GitlabResult<T>
     where
         T: UserResult,
