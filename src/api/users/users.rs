@@ -98,7 +98,7 @@ pub struct Users {
     /// Order results by a given key.
     #[builder(default)]
     order_by: Option<UserOrderBy>,
-    /// The sort order for return results..
+    /// The sort order for return results.
     #[builder(default)]
     sort: Option<SortOrder>,
     /// Return users with a two-factor enabled or not.
