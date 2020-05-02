@@ -4,5 +4,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-pub mod projects;
-pub mod users;
+#![allow(clippy::module_inception)]
+
+mod projects;
+
+pub use self::projects::ProjectOrderBy;
+pub use self::projects::Projects;
+pub use self::projects::ProjectsBuilder;
