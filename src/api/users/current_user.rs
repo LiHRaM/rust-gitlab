@@ -5,14 +5,13 @@
 // except according to those terms.
 
 use crate::query_prelude::*;
-use crate::types::UserResult;
 
 #[derive(Debug)]
 pub struct CurrentUser;
 
-impl<U> SingleQuery<U> for CurrentUser
+impl<T> SingleQuery<T> for CurrentUser
 where
-    U: UserResult,
+    T: DeserializeOwned,
 {
     type FormData = ();
 
@@ -28,11 +27,11 @@ where
     fn form_data(&self) {}
 }
 
-impl<U> Query<U> for CurrentUser
+impl<T> Query<T> for CurrentUser
 where
-    U: UserResult,
+    T: DeserializeOwned,
 {
-    fn query(&self, client: &Gitlab) -> Result<U, GitlabError> {
+    fn query(&self, client: &Gitlab) -> Result<T, GitlabError> {
         self.single_query(client)
     }
 }

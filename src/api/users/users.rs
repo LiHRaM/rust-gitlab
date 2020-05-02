@@ -11,7 +11,6 @@ use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
 use crate::query_prelude::*;
-use crate::types::UserResult;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserOrderBy {
@@ -156,9 +155,9 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl<U> SingleQuery<Vec<U>> for Users
+impl<T> SingleQuery<Vec<T>> for Users
 where
-    U: UserResult,
+    T: DeserializeOwned,
 {
     type FormData = ();
 
@@ -211,20 +210,20 @@ where
     fn form_data(&self) {}
 }
 
-impl<U> PagedQuery<U, ()> for Users
+impl<T> PagedQuery<T, ()> for Users
 where
-    U: UserResult,
+    T: DeserializeOwned,
 {
     fn pagination(&self) -> Pagination {
         self.pagination
     }
 }
 
-impl<U> Query<Vec<U>> for Users
+impl<T> Query<Vec<T>> for Users
 where
-    U: UserResult,
+    T: DeserializeOwned,
 {
-    fn query(&self, client: &Gitlab) -> Result<Vec<U>, GitlabError> {
+    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
         self.paged_query(client)
     }
 }

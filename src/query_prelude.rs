@@ -5,6 +5,7 @@
 // except according to those terms.
 
 pub use reqwest::Method;
+pub use serde::de::DeserializeOwned;
 
 pub use crate::gitlab::Gitlab;
 pub use crate::gitlab::GitlabError;
