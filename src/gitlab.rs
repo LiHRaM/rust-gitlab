@@ -23,7 +23,7 @@ use thiserror::Error;
 
 use crate::api::users::{CurrentUser, User};
 use crate::auth::{Auth, AuthError};
-use crate::query::Query;
+use crate::query::{LinkHeaderParseError, Query};
 use crate::types::*;
 
 macro_rules! query_param_slice {
@@ -44,6 +44,27 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b'}')
     .add(b'%')
     .add(b'/');
+
+#[derive(Debug, Error)]
+// TODO #[non_exhaustive]
+pub enum PaginationError {
+    #[error("failed to parse a Link HTTP header: {}", source)]
+    LinkHeader {
+        #[from]
+        source: LinkHeaderParseError,
+    },
+    #[error("failed to parse a Link HTTP header URL: {}", source)]
+    InvalidUrl {
+        #[from]
+        source: url::ParseError,
+    },
+    /// This is here to force `_` matching right now.
+    ///
+    /// **DO NOT USE**
+    #[doc(hidden)]
+    #[error("unreachable...")]
+    _NonExhaustive,
+}
 
 #[derive(Debug, Error)]
 // TODO #[non_exhaustive]
@@ -85,6 +106,11 @@ pub enum GitlabError {
         #[source]
         source: serde_json::Error,
         typename: &'static str,
+    },
+    #[error("failed to handle for pagination: {}", source)]
+    Pagination {
+        #[from]
+        source: PaginationError,
     },
     /// This is here to force `_` matching right now.
     ///
