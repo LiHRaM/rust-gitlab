@@ -263,7 +263,7 @@ impl<'a, T> Query<Vec<T>> for Pipelines<'a>
 where
     T: DeserializeOwned,
 {
-    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
+    fn query(&self, client: &dyn GitlabClient) -> Result<Vec<T>, GitlabError> {
         self.paged_query(client)
     }
 }

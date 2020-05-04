@@ -7,9 +7,9 @@
 pub use reqwest::Method;
 pub use serde::de::DeserializeOwned;
 
-pub use crate::gitlab::Gitlab;
 pub use crate::gitlab::GitlabError;
 
+pub use crate::query::GitlabClient;
 pub use crate::query::PagedQuery;
 pub use crate::query::Pagination;
 pub use crate::query::Pairs;

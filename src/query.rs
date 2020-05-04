@@ -4,6 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::header::HeaderMap;
 use reqwest::Method;
 use serde::de::DeserializeOwned;
@@ -12,7 +13,7 @@ use thiserror::Error;
 use url::form_urlencoded::Serializer;
 use url::{Url, UrlQuery};
 
-use crate::gitlab::{Gitlab, GitlabError, PaginationError};
+use crate::gitlab::{GitlabError, PaginationError};
 
 pub type Pairs<'a> = Serializer<'a, UrlQuery<'a>>;
 
@@ -54,8 +55,21 @@ impl Pagination {
     }
 }
 
+pub trait GitlabClient {
+    /// Get the URL for the endpoint for the client.
+    ///
+    /// This method adds the hostname for the client's target instance.
+    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, GitlabError>;
+
+    /// Build a REST query from a URL and a given method.
+    fn build_rest(&self, method: Method, url: Url) -> RequestBuilder;
+
+    /// Send a REST query.
+    fn rest(&self, request: RequestBuilder) -> Result<Response, GitlabError>;
+}
+
 pub trait Query<T> {
-    fn query(&self, client: &Gitlab) -> Result<T, GitlabError>;
+    fn query(&self, client: &dyn GitlabClient) -> Result<T, GitlabError>;
 }
 
 pub trait SingleQuery<T>
@@ -70,8 +84,8 @@ where
     fn add_parameters(&self, pairs: Pairs);
     fn form_data(&self) -> Self::FormData;
 
-    fn single_query(&self, client: &Gitlab) -> Result<T, GitlabError> {
-        let mut url = client.rest_endpoint(self.endpoint())?;
+    fn single_query(&self, client: &dyn GitlabClient) -> Result<T, GitlabError> {
+        let mut url = client.rest_endpoint(&self.endpoint())?;
         self.add_parameters(url.query_pairs_mut());
 
         let req = client
@@ -87,8 +101,8 @@ where
         serde_json::from_value::<T>(v).map_err(GitlabError::data_type::<T>)
     }
 
-    fn no_answer_query(&self, client: &Gitlab) -> Result<(), GitlabError> {
-        let mut url = client.rest_endpoint(self.endpoint())?;
+    fn no_answer_query(&self, client: &dyn GitlabClient) -> Result<(), GitlabError> {
+        let mut url = client.rest_endpoint(&self.endpoint())?;
         self.add_parameters(url.query_pairs_mut());
 
         let req = client
@@ -183,9 +197,9 @@ where
         false
     }
 
-    fn paged_query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
+    fn paged_query(&self, client: &dyn GitlabClient) -> Result<Vec<T>, GitlabError> {
         let url = {
-            let mut url = client.rest_endpoint(self.endpoint())?;
+            let mut url = client.rest_endpoint(&self.endpoint())?;
             self.add_parameters(url.query_pairs_mut());
             url
         };

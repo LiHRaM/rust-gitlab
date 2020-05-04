@@ -49,7 +49,7 @@ impl<'a, T> Query<T> for Job<'a>
 where
     T: DeserializeOwned,
 {
-    fn query(&self, client: &Gitlab) -> Result<T, GitlabError> {
+    fn query(&self, client: &dyn GitlabClient) -> Result<T, GitlabError> {
         self.single_query(client)
     }
 }

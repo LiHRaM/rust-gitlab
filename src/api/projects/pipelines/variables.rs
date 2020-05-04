@@ -51,7 +51,7 @@ impl<'a, T> Query<Vec<T>> for PipelineVariables<'a>
 where
     T: DeserializeOwned,
 {
-    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
+    fn query(&self, client: &dyn GitlabClient) -> Result<Vec<T>, GitlabError> {
         self.single_query(client)
     }
 }

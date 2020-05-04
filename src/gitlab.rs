@@ -24,7 +24,7 @@ use crate::api::projects::pipelines;
 use crate::api::projects::Projects;
 use crate::api::users::{CurrentUser, User, Users};
 use crate::auth::{Auth, AuthError};
-use crate::query::{LinkHeaderParseError, Query};
+use crate::query::{GitlabClient, LinkHeaderParseError, Query};
 use crate::types::*;
 
 macro_rules! query_param_slice {
@@ -341,25 +341,6 @@ impl Gitlab {
         T: Into<String>,
     {
         GitlabBuilder::new(host, token)
-    }
-
-    /// Create a URL to a REST API endpoint.
-    pub fn rest_endpoint<U>(&self, url: U) -> GitlabResult<Url>
-    where
-        U: AsRef<str>,
-    {
-        debug!(target: "gitlab", "REST api call {}", url.as_ref());
-        Ok(self.rest_url.join(url.as_ref())?)
-    }
-
-    /// Create a URL to a REST API endpoint.
-    pub fn build_rest(&self, method: Method, url: Url) -> RequestBuilder {
-        self.client.request(method, url)
-    }
-
-    /// Send a GraphQL query.
-    pub fn rest(&self, request: RequestBuilder) -> GitlabResult<HttpResponse> {
-        Ok(self.auth.set_header(request)?.send()?)
     }
 
     /// Send a GraphQL query.
@@ -2283,6 +2264,21 @@ impl Gitlab {
         }
 
         Ok(results)
+    }
+}
+
+impl GitlabClient for Gitlab {
+    fn rest_endpoint(&self, endpoint: &str) -> GitlabResult<Url> {
+        debug!(target: "gitlab", "REST api call {}", endpoint);
+        Ok(self.rest_url.join(endpoint)?)
+    }
+
+    fn build_rest(&self, method: Method, url: Url) -> RequestBuilder {
+        self.client.request(method, url)
+    }
+
+    fn rest(&self, request: RequestBuilder) -> GitlabResult<HttpResponse> {
+        Ok(self.auth.set_header(request)?.send()?)
     }
 }
 
