@@ -118,14 +118,12 @@ impl<'a, T> SingleQuery<T> for CreatePipeline<'a>
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::POST
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipeline", self.project)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipeline", self.project).into()
     }
 
     fn add_parameters(&self, mut pairs: Pairs) {
@@ -142,8 +140,6 @@ where
             ]);
         });
     }
-
-    fn form_data(&self) {}
 }
 
 impl<'a, T> Query<T> for CreatePipeline<'a>

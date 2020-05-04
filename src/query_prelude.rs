@@ -4,6 +4,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+pub use std::borrow::Cow;
+
 pub use reqwest::Method;
 pub use serde::de::DeserializeOwned;
 

@@ -31,18 +31,13 @@ impl<'a, T> SingleQuery<T> for Pipeline<'a>
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipeline/{}", self.project, self.pipeline)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipeline/{}", self.project, self.pipeline).into()
     }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
 }
 
 impl<'a, T> Query<T> for Pipeline<'a>

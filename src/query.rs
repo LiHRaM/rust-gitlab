@@ -4,11 +4,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::borrow::Cow;
+
 use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::header::HeaderMap;
 use reqwest::Method;
 use serde::de::DeserializeOwned;
-use serde::ser::Serialize;
 use thiserror::Error;
 use url::form_urlencoded::Serializer;
 use url::{Url, UrlQuery};
@@ -76,13 +77,15 @@ pub trait SingleQuery<T>
 where
     T: DeserializeOwned,
 {
-    type FormData: Serialize;
-
     fn method(&self) -> Method;
-    fn endpoint(&self) -> String;
+    fn endpoint(&self) -> Cow<'static, str>;
 
-    fn add_parameters(&self, pairs: Pairs);
-    fn form_data(&self) -> Self::FormData;
+    #[allow(unused_variables)]
+    fn add_parameters(&self, pairs: Pairs) {}
+
+    fn form_data(&self) -> Vec<u8> {
+        Vec::new()
+    }
 
     fn single_query(&self, client: &dyn GitlabClient) -> Result<T, GitlabError> {
         let mut url = client.rest_endpoint(&self.endpoint())?;
@@ -184,10 +187,9 @@ impl LinkHeaderParseError {
     }
 }
 
-pub trait PagedQuery<T, F>: SingleQuery<Vec<T>, FormData = F>
+pub trait PagedQuery<T>: SingleQuery<Vec<T>>
 where
     T: DeserializeOwned,
-    F: Serialize,
 {
     fn pagination(&self) -> Pagination {
         Pagination::All

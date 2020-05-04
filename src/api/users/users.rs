@@ -180,13 +180,11 @@ impl<'a, T> SingleQuery<Vec<T>> for Users<'a>
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
+    fn endpoint(&self) -> Cow<'static, str> {
         "users".into()
     }
 
@@ -227,11 +225,9 @@ where
         self.without_projects
             .map(|value| pairs.append_pair("without_projects", bool_as_str(value)));
     }
-
-    fn form_data(&self) {}
 }
 
-impl<'a, T> PagedQuery<T, ()> for Users<'a>
+impl<'a, T> PagedQuery<T> for Users<'a>
 where
     T: DeserializeOwned,
 {

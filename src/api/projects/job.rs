@@ -31,18 +31,13 @@ impl<'a, T> SingleQuery<T> for Job<'a>
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/jobs/{}", self.project, self.job)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/jobs/{}", self.project, self.job).into()
     }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
 }
 
 impl<'a, T> Query<T> for Job<'a>

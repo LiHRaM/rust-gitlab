@@ -104,14 +104,12 @@ impl<'a, T> SingleQuery<Vec<T>> for Jobs<'a>
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/jobs", self.project)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/jobs", self.project).into()
     }
 
     fn add_parameters(&self, mut pairs: Pairs) {
@@ -119,11 +117,9 @@ where
             pairs.append_pair("scope[]", value.as_str());
         });
     }
-
-    fn form_data(&self) {}
 }
 
-impl<'a, T> PagedQuery<T, ()> for Jobs<'a>
+impl<'a, T> PagedQuery<T> for Jobs<'a>
 where
     T: DeserializeOwned,
 {

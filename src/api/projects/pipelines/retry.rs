@@ -32,21 +32,17 @@ impl<'a, T> SingleQuery<T> for RetryPipeline<'a>
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::POST
     }
 
-    fn endpoint(&self) -> String {
+    fn endpoint(&self) -> Cow<'static, str> {
         format!(
             "projects/{}/pipelines/{}/retry",
             self.project, self.pipeline,
         )
+        .into()
     }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
 }
 
 impl<'a, T> Query<T> for RetryPipeline<'a>

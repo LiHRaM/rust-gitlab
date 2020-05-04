@@ -30,18 +30,13 @@ impl<'a, T> SingleQuery<T> for DeletePipeline<'a>
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::DELETE
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipelines/{}", self.project, self.pipeline)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipelines/{}", self.project, self.pipeline).into()
     }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
 }
 
 impl<'a, T> Query<T> for DeletePipeline<'a>

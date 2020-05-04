@@ -200,13 +200,11 @@ impl<T> SingleQuery<Vec<T>> for Projects
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
+    fn endpoint(&self) -> Cow<'static, str> {
         "projects".into()
     }
 
@@ -275,11 +273,9 @@ where
         self.sort
             .map(|value| pairs.append_pair("sort", value.as_str()));
     }
-
-    fn form_data(&self) {}
 }
 
-impl<T> PagedQuery<T, ()> for Projects
+impl<T> PagedQuery<T> for Projects
 where
     T: DeserializeOwned,
 {

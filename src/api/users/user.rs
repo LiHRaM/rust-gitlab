@@ -26,18 +26,13 @@ impl<T> SingleQuery<T> for User
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
-        format!("users/{}", self.user)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("users/{}", self.user).into()
     }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
 }
 
 impl<T> Query<T> for User

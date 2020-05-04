@@ -198,14 +198,12 @@ impl<'a, T> SingleQuery<Vec<T>> for Pipelines<'a>
 where
     T: DeserializeOwned,
 {
-    type FormData = ();
-
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipelines", self.project)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipelines", self.project).into()
     }
 
     fn add_parameters(&self, mut pairs: Pairs) {
@@ -246,11 +244,9 @@ where
         self.sort
             .map(|value| pairs.append_pair("sort", value.as_str()));
     }
-
-    fn form_data(&self) {}
 }
 
-impl<'a, T> PagedQuery<T, ()> for Pipelines<'a>
+impl<'a, T> PagedQuery<T> for Pipelines<'a>
 where
     T: DeserializeOwned,
 {
