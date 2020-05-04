@@ -6,15 +6,8 @@
 
 #![allow(clippy::module_inception)]
 
-mod current_user;
-mod user;
-mod users;
+mod projects;
 
-pub use self::user::User;
-
-pub use self::current_user::CurrentUser;
-
-pub use self::users::ExternalProvider;
-pub use self::users::UserOrderBy;
-pub use self::users::Users;
-pub use self::users::UsersBuilder;
+pub use self::projects::ProjectOrderBy;
+pub use self::projects::Projects;
+pub use self::projects::ProjectsBuilder;

@@ -4,13 +4,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use reqwest::header::HeaderMap;
 use reqwest::Method;
 use serde::de::DeserializeOwned;
 use serde::ser::Serialize;
+use thiserror::Error;
 use url::form_urlencoded::Serializer;
-use url::UrlQuery;
+use url::{Url, UrlQuery};
 
-use crate::gitlab::{Gitlab, GitlabError};
+use crate::gitlab::{Gitlab, GitlabError, PaginationError};
 
 pub type Pairs<'a> = Serializer<'a, UrlQuery<'a>>;
 
@@ -102,6 +104,75 @@ where
     }
 }
 
+struct LinkHeader<'a> {
+    url: &'a str,
+    params: Vec<(&'a str, &'a str)>,
+}
+
+impl<'a> LinkHeader<'a> {
+    fn parse(s: &'a str) -> Result<Self, LinkHeaderParseError> {
+        let mut parts = s.split(';');
+
+        let url = if let Some(part) = parts.next() {
+            let part = part.trim();
+            if part.starts_with('<') && part.ends_with('>') {
+                &part[1..part.len() - 1]
+            } else {
+                return Err(LinkHeaderParseError::NoBrackets);
+            }
+        } else {
+            return Err(LinkHeaderParseError::MissingUrl);
+        };
+
+        let params = parts
+            .map(|part| {
+                let part = part.trim();
+                let mut halves = part.splitn(2, '=');
+                let key = halves.next().expect("a split always has at least one part");
+                let value = if let Some(value) = halves.next() {
+                    if value.starts_with('"') && value.ends_with('"') {
+                        &value[1..value.len() - 1]
+                    } else {
+                        value
+                    }
+                } else {
+                    return Err(LinkHeaderParseError::MissingParamValue);
+                };
+
+                Ok((key, value))
+            })
+            .collect::<Result<Vec<_>, LinkHeaderParseError>>()?;
+
+        Ok(Self {
+            url,
+            params,
+        })
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum LinkHeaderParseError {
+    #[error("invalid header")]
+    InvalidHeader {
+        #[from]
+        source: reqwest::header::ToStrError,
+    },
+    #[error("missing url")]
+    MissingUrl,
+    #[error("missing brackets around url")]
+    NoBrackets,
+    #[error("missing parameter value")]
+    MissingParamValue,
+}
+
+impl LinkHeaderParseError {
+    fn invalid_header(source: reqwest::header::ToStrError) -> Self {
+        Self::InvalidHeader {
+            source,
+        }
+    }
+}
+
 pub trait PagedQuery<T, F>: SingleQuery<Vec<T>, FormData = F>
 where
     T: DeserializeOwned,
@@ -109,6 +180,10 @@ where
 {
     fn pagination(&self) -> Pagination {
         Pagination::All
+    }
+
+    fn use_keyset_pagination(&self) -> bool {
+        false
     }
 
     fn paged_query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
@@ -124,17 +199,36 @@ where
         let per_page_str = format!("{}", per_page);
 
         let mut results = Vec::new();
+        let mut next_url = None;
+        let use_keyset_pagination = self.use_keyset_pagination();
 
         loop {
-            let page_str = format!("{}", page_num);
-            let mut page_url = url.clone();
-            page_url
-                .query_pairs_mut()
-                .extend_pairs(&[("page", &page_str), ("per_page", &per_page_str)]);
+            let page_url = if let Some(url) = next_url.take() {
+                url
+            } else {
+                let page_str = format!("{}", page_num);
+                let mut page_url = url.clone();
+                page_url
+                    .query_pairs_mut()
+                    .extend_pairs(&[("page", &page_str), ("per_page", &per_page_str)]);
+
+                if use_keyset_pagination {
+                    page_url
+                        .query_pairs_mut()
+                        .append_pair("pagination", "keyset");
+                }
+
+                page_url
+            };
 
             let req = client.build_rest(Method::GET, page_url);
             let rsp = client.rest(req)?;
             let status = rsp.status();
+
+            if use_keyset_pagination {
+                next_url = next_page_from_headers(rsp.headers())?;
+            }
+
             let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
             if !status.is_success() {
                 return Err(GitlabError::from_gitlab(v));
@@ -144,16 +238,51 @@ where
                 serde_json::from_value::<Vec<T>>(v).map_err(GitlabError::data_type::<Vec<T>>)?;
             let page_len = page.len();
             results.extend(page);
-            // Gitlab used to have issues returning paginated results; these have been fixed since,
-            // but if it is needed, the bug manifests as Gitlab returning *all* results instead of
-            // just the requested results. This can cause an infinite loop here if the number of
-            // total results is exactly equal to `per_page`.
-            if pagination.is_last_page(page_len, &results) {
-                break;
+
+            if use_keyset_pagination {
+                if next_url.is_none() {
+                    break;
+                }
+            } else {
+                // Gitlab used to have issues returning paginated results; these have been fixed
+                // since, but if it is needed, the bug manifests as Gitlab returning *all* results
+                // instead of just the requested results. This can cause an infinite loop here if
+                // the number of total results is exactly equal to `per_page`.
+                if pagination.is_last_page(page_len, &results) {
+                    break;
+                }
+                page_num += 1;
             }
-            page_num += 1;
         }
 
         Ok(results)
     }
+}
+
+fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, PaginationError> {
+    headers
+        .get_all(reqwest::header::LINK)
+        .iter()
+        .map(|link| {
+            let value = link
+                .to_str()
+                .map_err(LinkHeaderParseError::invalid_header)?;
+            Ok(LinkHeader::parse(value)?)
+        })
+        .collect::<Result<Vec<_>, PaginationError>>()?
+        .into_iter()
+        .filter_map(|header| {
+            let is_next_link = header
+                .params
+                .into_iter()
+                .any(|(key, value)| key == "rel" && value == "next");
+
+            if is_next_link {
+                Some(header.url.parse().map_err(PaginationError::from))
+            } else {
+                None
+            }
+        })
+        .next()
+        .transpose()
 }

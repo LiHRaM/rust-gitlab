@@ -4,6 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 
@@ -11,7 +12,6 @@ use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
 use crate::query_prelude::*;
-use crate::types::UserResult;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserOrderBy {
@@ -47,23 +47,23 @@ impl fmt::Display for UserOrderBy {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ExternalProvider {
+pub struct ExternalProvider<'a> {
     pub id: u64,
-    pub name: String,
+    pub name: Cow<'a, str>,
 }
 
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
-pub struct Users {
+pub struct Users<'a> {
     /// Search for users using a query string.
     ///
     /// The search query will be escaped automatically.
-    #[builder(default)]
-    search: Option<String>,
+    #[builder(setter(into), default)]
+    search: Option<Cow<'a, str>>,
 
     /// Get a user with a given username.
-    #[builder(default)]
-    username: Option<String>,
+    #[builder(setter(into), default)]
+    username: Option<Cow<'a, str>>,
     /// Return only active users.
     #[builder(default)]
     active: Option<()>,
@@ -76,7 +76,7 @@ pub struct Users {
 
     /// Search for a user with a given external provider identity.
     #[builder(default)]
-    external_provider: Option<ExternalProvider>,
+    external_provider: Option<ExternalProvider<'a>>,
     /// Whether to return external users or not.
     #[builder(default)]
     external: Option<bool>,
@@ -90,7 +90,7 @@ pub struct Users {
 
     /// Search for users with a given custom attribute set.
     #[builder(setter(name = "_custom_attributes"), default, private)]
-    custom_attributes: BTreeMap<String, String>,
+    custom_attributes: BTreeMap<Cow<'a, str>, Cow<'a, str>>,
     /// Search for users with custom attributes.
     #[builder(default)]
     with_custom_attributes: Option<bool>,
@@ -98,7 +98,7 @@ pub struct Users {
     /// Order results by a given key.
     #[builder(default)]
     order_by: Option<UserOrderBy>,
-    /// The sort order for return results..
+    /// The sort order for return results.
     #[builder(default)]
     sort: Option<SortOrder>,
     /// Return users with a two-factor enabled or not.
@@ -109,13 +109,13 @@ pub struct Users {
     without_projects: Option<bool>,
 }
 
-impl Users {
-    pub fn builder() -> UsersBuilder {
+impl<'a> Users<'a> {
+    pub fn builder() -> UsersBuilder<'a> {
         UsersBuilder::default()
     }
 }
 
-impl UsersBuilder {
+impl<'a> UsersBuilder<'a> {
     /// Clear custom attribute search parameters.
     pub fn clear_custom_attributes(&mut self) -> &mut Self {
         self.custom_attributes = None;
@@ -125,8 +125,8 @@ impl UsersBuilder {
     /// Add a custom attribute search parameter.
     pub fn custom_attribute<K, V>(&mut self, key: K, value: V) -> &mut Self
     where
-        K: Into<String>,
-        V: Into<String>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.custom_attributes
             .get_or_insert_with(Default::default)
@@ -138,8 +138,8 @@ impl UsersBuilder {
     pub fn custom_attributes<I, K, V>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = (K, V)>,
-        K: Into<String>,
-        V: Into<String>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.custom_attributes
             .get_or_insert_with(Default::default)
@@ -156,9 +156,9 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl<U> SingleQuery<Vec<U>> for Users
+impl<'a, T> SingleQuery<Vec<T>> for Users<'a>
 where
-    U: UserResult,
+    T: DeserializeOwned,
 {
     type FormData = ();
 
@@ -211,20 +211,20 @@ where
     fn form_data(&self) {}
 }
 
-impl<U> PagedQuery<U, ()> for Users
+impl<'a, T> PagedQuery<T, ()> for Users<'a>
 where
-    U: UserResult,
+    T: DeserializeOwned,
 {
     fn pagination(&self) -> Pagination {
         self.pagination
     }
 }
 
-impl<U> Query<Vec<U>> for Users
+impl<'a, T> Query<Vec<T>> for Users<'a>
 where
-    U: UserResult,
+    T: DeserializeOwned,
 {
-    fn query(&self, client: &Gitlab) -> Result<Vec<U>, GitlabError> {
+    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
         self.paged_query(client)
     }
 }

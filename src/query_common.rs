@@ -6,6 +6,8 @@
 
 use std::fmt;
 
+use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SortOrder {
     Ascending,
@@ -51,5 +53,36 @@ impl EnableState {
 impl fmt::Display for EnableState {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum NameOrId {
+    Name(String),
+    Id(u64),
+}
+
+const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b'#')
+    .add(b'<')
+    .add(b'>')
+    .add(b'`')
+    .add(b'?')
+    .add(b'{')
+    .add(b'}')
+    .add(b'%')
+    .add(b'/');
+
+impl fmt::Display for NameOrId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            NameOrId::Name(name) => {
+                let encoded = utf8_percent_encode(name, PATH_SEGMENT_ENCODE_SET);
+                write!(f, "{}", encoded)
+            },
+            NameOrId::Id(id) => write!(f, "{}", id),
+        }
     }
 }

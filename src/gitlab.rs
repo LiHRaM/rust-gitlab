@@ -21,9 +21,10 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
-use crate::api::users::CurrentUser;
+use crate::api::projects::Projects;
+use crate::api::users::{CurrentUser, User, Users};
 use crate::auth::{Auth, AuthError};
-use crate::query::Query;
+use crate::query::{LinkHeaderParseError, Query};
 use crate::types::*;
 
 macro_rules! query_param_slice {
@@ -44,6 +45,27 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b'}')
     .add(b'%')
     .add(b'/');
+
+#[derive(Debug, Error)]
+// TODO #[non_exhaustive]
+pub enum PaginationError {
+    #[error("failed to parse a Link HTTP header: {}", source)]
+    LinkHeader {
+        #[from]
+        source: LinkHeaderParseError,
+    },
+    #[error("failed to parse a Link HTTP header URL: {}", source)]
+    InvalidUrl {
+        #[from]
+        source: url::ParseError,
+    },
+    /// This is here to force `_` matching right now.
+    ///
+    /// **DO NOT USE**
+    #[doc(hidden)]
+    #[error("unreachable...")]
+    _NonExhaustive,
+}
 
 #[derive(Debug, Error)]
 // TODO #[non_exhaustive]
@@ -85,6 +107,11 @@ pub enum GitlabError {
         #[source]
         source: serde_json::Error,
         typename: &'static str,
+    },
+    #[error("failed to handle for pagination: {}", source)]
+    Pagination {
+        #[from]
+        source: PaginationError,
     },
     /// This is here to force `_` matching right now.
     ///
@@ -383,7 +410,11 @@ impl Gitlab {
     }
 
     /// Find a user by id.
-    pub fn user<T, I, K, V>(&self, user: UserId, params: I) -> GitlabResult<T>
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::users::User.query()` instead"
+    )]
+    pub fn user<T, I, K, V>(&self, user: UserId, _: I) -> GitlabResult<T>
     where
         T: UserResult,
         I: IntoIterator,
@@ -391,17 +422,27 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("users/{}", user), params)
+        User {
+            id: user.value(),
+        }
+        .query(self)
     }
 
     /// Find a user by username.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::users::Users.query()` instead"
+    )]
     pub fn user_by_name<T, N>(&self, name: N) -> GitlabResult<T>
     where
         T: UserResult,
         N: AsRef<str>,
     {
-        let mut users = self.get_paged_with_param("users", &[("username", name.as_ref())])?;
-        users
+        Users::builder()
+            .username(name.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?
             .pop()
             .ok_or_else(|| GitlabError::no_such_user(name.as_ref()))
     }
@@ -505,6 +546,10 @@ impl Gitlab {
     }
 
     /// Get all accessible projects.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::Projects.query()` instead"
+    )]
     pub fn projects<I, K, V>(&self, params: I) -> GitlabResult<Vec<Project>>
     where
         I: IntoIterator,
@@ -516,8 +561,12 @@ impl Gitlab {
     }
 
     /// Get all owned projects.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::Projects.query()` instead"
+    )]
     pub fn owned_projects(&self) -> GitlabResult<Vec<Project>> {
-        self.get_paged_with_param("projects", &[("owned", "true")])
+        Projects::builder().owned(true).build().unwrap().query(self)
     }
 
     /// Find a project by id.

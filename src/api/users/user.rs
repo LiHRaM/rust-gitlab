@@ -6,10 +6,12 @@
 
 use crate::query_prelude::*;
 
-#[derive(Debug)]
-pub struct CurrentUser;
+#[derive(Debug, Clone, Copy)]
+pub struct User {
+    pub id: u64,
+}
 
-impl<T> SingleQuery<T> for CurrentUser
+impl<T> SingleQuery<T> for User
 where
     T: DeserializeOwned,
 {
@@ -20,14 +22,14 @@ where
     }
 
     fn endpoint(&self) -> String {
-        "user".into()
+        format!("users/{}", self.id)
     }
 
     fn add_parameters(&self, _: Pairs) {}
     fn form_data(&self) {}
 }
 
-impl<T> Query<T> for CurrentUser
+impl<T> Query<T> for User
 where
     T: DeserializeOwned,
 {
