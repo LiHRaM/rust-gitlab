@@ -239,18 +239,19 @@ where
             let page_len = page.len();
             results.extend(page);
 
+            // Gitlab used to have issues returning paginated results; these have been fixed since,
+            // but if it is needed, the bug manifests as Gitlab returning *all* results instead of
+            // just the requested results. This can cause an infinite loop here if the number of
+            // total results is exactly equal to `per_page`.
+            if pagination.is_last_page(page_len, &results) {
+                break;
+            }
+
             if use_keyset_pagination {
                 if next_url.is_none() {
                     break;
                 }
             } else {
-                // Gitlab used to have issues returning paginated results; these have been fixed
-                // since, but if it is needed, the bug manifests as Gitlab returning *all* results
-                // instead of just the requested results. This can cause an infinite loop here if
-                // the number of total results is exactly equal to `per_page`.
-                if pagination.is_last_page(page_len, &results) {
-                    break;
-                }
                 page_num += 1;
             }
         }
