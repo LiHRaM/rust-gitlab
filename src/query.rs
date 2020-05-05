@@ -40,7 +40,7 @@ impl Pagination {
 
     fn is_last_page<T>(self, last_page_size: usize, results: &[T]) -> bool {
         // If the last page has fewer elements than our limit, we're definitely done.
-        if last_page_size <= self.page_limit() {
+        if last_page_size < self.page_limit() {
             return true;
         }
 
