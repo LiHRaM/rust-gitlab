@@ -38,6 +38,7 @@ pub enum PaginationError {
     _NonExhaustive,
 }
 
+#[derive(Debug)]
 struct LinkHeader<'a> {
     url: &'a str,
     params: Vec<(&'a str, &'a str)>,
@@ -284,4 +285,58 @@ fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, Pagination
         })
         .next()
         .transpose()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::api::paged::{LinkHeader, LinkHeaderParseError};
+
+    #[test]
+    fn test_link_header_no_brackets() {
+        let err = LinkHeader::parse("url; param=value").unwrap_err();
+        if let LinkHeaderParseError::NoBrackets = err {
+            // expected error
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_link_header_no_param_value() {
+        let err = LinkHeader::parse("<url>; param").unwrap_err();
+        if let LinkHeaderParseError::MissingParamValue = err {
+            // expected error
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_link_header_no_params() {
+        let link = LinkHeader::parse("<url>").unwrap();
+        assert_eq!(link.url, "url");
+        assert_eq!(link.params.len(), 0);
+    }
+
+    #[test]
+    fn test_link_header_quoted_params() {
+        let link = LinkHeader::parse("<url>; param=\"value\"; param2=\"value\"").unwrap();
+        assert_eq!(link.url, "url");
+        assert_eq!(link.params.len(), 2);
+        assert_eq!(link.params[0].0, "param");
+        assert_eq!(link.params[0].1, "value");
+        assert_eq!(link.params[1].0, "param2");
+        assert_eq!(link.params[1].1, "value");
+    }
+
+    #[test]
+    fn test_link_header_bare_params() {
+        let link = LinkHeader::parse("<url>; param=value; param2=value").unwrap();
+        assert_eq!(link.url, "url");
+        assert_eq!(link.params.len(), 2);
+        assert_eq!(link.params[0].0, "param");
+        assert_eq!(link.params[0].1, "value");
+        assert_eq!(link.params[1].0, "param2");
+        assert_eq!(link.params[1].1, "value");
+    }
 }
