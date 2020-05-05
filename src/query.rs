@@ -113,15 +113,14 @@ impl<'a> LinkHeader<'a> {
     fn parse(s: &'a str) -> Result<Self, LinkHeaderParseError> {
         let mut parts = s.split(';');
 
-        let url = if let Some(part) = parts.next() {
-            let part = part.trim();
+        let url_part = parts.next().expect("a split always has at least one part");
+        let url = {
+            let part = url_part.trim();
             if part.starts_with('<') && part.ends_with('>') {
                 &part[1..part.len() - 1]
             } else {
                 return Err(LinkHeaderParseError::NoBrackets);
             }
-        } else {
-            return Err(LinkHeaderParseError::MissingUrl);
         };
 
         let params = parts
@@ -157,8 +156,6 @@ pub enum LinkHeaderParseError {
         #[from]
         source: reqwest::header::ToStrError,
     },
-    #[error("missing url")]
-    MissingUrl,
     #[error("missing brackets around url")]
     NoBrackets,
     #[error("missing parameter value")]
