@@ -205,14 +205,16 @@ where
             } else {
                 let page_str = format!("{}", page_num);
                 let mut page_url = url.clone();
-                page_url
-                    .query_pairs_mut()
-                    .extend_pairs(&[("page", &page_str), ("per_page", &per_page_str)]);
 
-                if use_keyset_pagination {
-                    page_url
-                        .query_pairs_mut()
-                        .append_pair("pagination", "keyset");
+                {
+                    let mut pairs = page_url.query_pairs_mut();
+                    pairs.append_pair("per_page", &per_page_str);
+
+                    if use_keyset_pagination {
+                        pairs.append_pair("pagination", "keyset");
+                    } else {
+                        pairs.append_pair("page", &page_str);
+                    }
                 }
 
                 page_url
