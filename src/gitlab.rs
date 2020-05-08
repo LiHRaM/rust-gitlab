@@ -7,7 +7,6 @@
 use std::any;
 use std::borrow::Borrow;
 use std::fmt::{self, Debug, Display};
-use std::iter;
 
 use graphql_client::{GraphQLQuery, QueryBody, Response};
 use itertools::Itertools;
@@ -21,6 +20,7 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
+use crate::api::projects::pipelines;
 use crate::api::projects::Projects;
 use crate::api::users::{CurrentUser, User, Users};
 use crate::auth::{Auth, AuthError};
@@ -1530,6 +1530,10 @@ impl Gitlab {
     }
 
     /// Get all pipelines for a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipelines::Pipelines.query()` instead"
+    )]
     pub fn pipelines<I, K, V>(
         &self,
         project: ProjectId,
@@ -1545,11 +1549,24 @@ impl Gitlab {
     }
 
     /// Get a single pipeline.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipeline::Pipeline.query()` instead"
+    )]
     pub fn pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
-        self.get(format!("projects/{}/pipelines/{}", project, id))
+        pipelines::Pipeline::builder()
+            .project(project.value())
+            .pipeline(id.value())
+            .build()
+            .unwrap()
+            .query(self)
     }
 
     /// Get variables of a pipeline.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipelines::PipelineVariables.query()` instead"
+    )]
     pub fn pipeline_variables(
         &self,
         project: ProjectId,
@@ -1559,35 +1576,61 @@ impl Gitlab {
     }
 
     /// Create a new pipeline.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipelines::CreatePipeline.query()` instead"
+    )]
     pub fn create_pipeline(
         &self,
         project: ProjectId,
         ref_: ObjectId,
         variables: &[PipelineVariable],
     ) -> GitlabResult<Pipeline> {
-        let params = iter::once(("ref", ref_.value().clone()))
-            .chain(PipelineVariablesParamIter::from(variables.iter()))
-            .collect::<Vec<_>>();
-
-        self.post_with_param(format!("projects/{}/pipeline", project), params)
+        pipelines::CreatePipeline::builder()
+            .project(project.value())
+            .ref_(ref_.value().as_str())
+            .variables(variables.iter().map(|variable| {
+                pipelines::PipelineVariable::builder()
+                    .key(variable.key.as_str())
+                    .value(variable.value.as_str())
+                    .variable_type(match variable.variable_type {
+                        PipelineVariableType::EnvVar => pipelines::PipelineVariableType::EnvVar,
+                        PipelineVariableType::File => pipelines::PipelineVariableType::File,
+                    })
+                    .build()
+                    .unwrap()
+            }))
+            .build()
+            .unwrap()
+            .query(self)
     }
 
     /// Retry jobs in a pipeline.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipelines::RetryPipeline.query()` instead"
+    )]
     pub fn retry_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
-        self.post(format!("projects/{}/pipelines/{}/retry", project, id))
+        pipelines::RetryPipeline::builder()
+            .project(project.value())
+            .pipeline(id.value())
+            .build()
+            .unwrap()
+            .query(self)
     }
 
     /// Cancel a pipeline.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipelines::CancelPipeline.query()` instead"
+    )]
     pub fn cancel_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
-        self.post(format!("projects/{}/pipelines/{}/cancel", project, id))
-    }
-
-    /// Delete a pipeline.
-    ///
-    /// NOTE Not implemented.
-    #[allow(unused)]
-    fn delete_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
-        unimplemented!();
+        pipelines::CancelPipeline::builder()
+            .project(project.value())
+            .pipeline(id.value())
+            .build()
+            .unwrap()
+            .query(self)
     }
 
     /// Get a list of jobs for a pipeline.
@@ -2143,16 +2186,6 @@ impl Gitlab {
         self.send(req)
     }
 
-    /// Create a `POST` request to an API endpoint.
-    fn post<T, U>(&self, url: U) -> GitlabResult<T>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-    {
-        let param: &[(&str, &str)] = &[];
-        self.post_with_param(url, param)
-    }
-
     /// Create a `POST` request to an API endpoint with query parameters.
     fn post_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
     where
@@ -2298,84 +2331,4 @@ impl GitlabBuilder {
             self.cert_validation.clone(),
         )
     }
-}
-
-#[derive(Debug, Clone)]
-struct PipelineVariablesParamIter<T> {
-    next_value: Option<String>,
-    next_type: Option<PipelineVariableType>,
-    iter: T,
-}
-
-impl<'a, T> From<T> for PipelineVariablesParamIter<T>
-where
-    T: Iterator<Item = &'a PipelineVariable>,
-{
-    fn from(from: T) -> Self {
-        Self {
-            next_value: None,
-            next_type: None,
-            iter: from,
-        }
-    }
-}
-
-impl<'a, T> Iterator for PipelineVariablesParamIter<T>
-where
-    T: Iterator<Item = &'a PipelineVariable>,
-{
-    type Item = (&'static str, String);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(value) = self.next_value.take() {
-            return Some(("variables[][value]", value));
-        }
-
-        if let Some(var_type) = self.next_type.take() {
-            return Some(("variables[][variable_type]", var_type.as_str().into()));
-        }
-
-        if let Some(pipe_var) = self.iter.next() {
-            self.next_value = Some(pipe_var.value.clone());
-            self.next_type = Some(pipe_var.variable_type);
-            return Some(("variables[][key]", pipe_var.key.clone()));
-        }
-
-        None
-    }
-}
-
-#[test]
-fn test_pipeline_variables_iter() {
-    let vars = vec![
-        PipelineVariable {
-            key: "var1".into(),
-            value: "value1".into(),
-            variable_type: PipelineVariableType::EnvVar,
-        },
-        PipelineVariable {
-            key: "var2".into(),
-            value: "value2".into(),
-            variable_type: PipelineVariableType::EnvVar,
-        },
-        PipelineVariable {
-            key: "file".into(),
-            value: "content".into(),
-            variable_type: PipelineVariableType::File,
-        },
-    ];
-    let expected = vec![
-        ("variables[][key]", "var1".into()),
-        ("variables[][value]", "value1".into()),
-        ("variables[][variable_type]", "env_var".into()),
-        ("variables[][key]", "var2".into()),
-        ("variables[][value]", "value2".into()),
-        ("variables[][variable_type]", "env_var".into()),
-        ("variables[][key]", "file".into()),
-        ("variables[][value]", "content".into()),
-        ("variables[][variable_type]", "file".into()),
-    ];
-
-    let iter = PipelineVariablesParamIter::from(vars.iter());
-    itertools::assert_equal(iter, expected);
 }

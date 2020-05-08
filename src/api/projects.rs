@@ -10,6 +10,7 @@
 //!
 //! These endpoints are used for querying and modifying projects and their resources.
 
+pub mod pipelines;
 mod projects;
 
 pub use self::projects::ProjectOrderBy;
