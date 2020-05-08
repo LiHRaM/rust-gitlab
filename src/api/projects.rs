@@ -10,8 +10,13 @@
 //!
 //! These endpoints are used for querying and modifying projects and their resources.
 
+mod jobs;
 pub mod pipelines;
 mod projects;
+
+pub use self::jobs::JobScope;
+pub use self::jobs::Jobs;
+pub use self::jobs::JobsBuilder;
 
 pub use self::projects::ProjectOrderBy;
 pub use self::projects::Projects;
