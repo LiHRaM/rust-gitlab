@@ -6,31 +6,18 @@
 
 use std::borrow::Cow;
 
-use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::Method;
 use serde::de::DeserializeOwned;
 use url::form_urlencoded::Serializer;
-use url::{Url, UrlQuery};
+use url::UrlQuery;
 
+use crate::api::Client;
 use crate::gitlab::GitlabError;
 
 pub type Pairs<'a> = Serializer<'a, UrlQuery<'a>>;
 
-pub trait GitlabClient {
-    /// Get the URL for the endpoint for the client.
-    ///
-    /// This method adds the hostname for the client's target instance.
-    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, GitlabError>;
-
-    /// Build a REST query from a URL and a given method.
-    fn build_rest(&self, method: Method, url: Url) -> RequestBuilder;
-
-    /// Send a REST query.
-    fn rest(&self, request: RequestBuilder) -> Result<Response, GitlabError>;
-}
-
 pub trait Query<T> {
-    fn query(&self, client: &dyn GitlabClient) -> Result<T, GitlabError>;
+    fn query(&self, client: &dyn Client) -> Result<T, GitlabError>;
 }
 
 pub trait SingleQuery<T>
@@ -47,7 +34,7 @@ where
         Vec::new()
     }
 
-    fn single_query(&self, client: &dyn GitlabClient) -> Result<T, GitlabError> {
+    fn single_query(&self, client: &dyn Client) -> Result<T, GitlabError> {
         let mut url = client.rest_endpoint(&self.endpoint())?;
         self.add_parameters(url.query_pairs_mut());
 

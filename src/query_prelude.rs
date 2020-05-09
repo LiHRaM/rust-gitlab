@@ -9,11 +9,11 @@ pub use std::borrow::Cow;
 pub use reqwest::Method;
 pub use serde::de::DeserializeOwned;
 
+pub use crate::api::Client;
 pub use crate::api::Pageable;
 
 pub use crate::gitlab::GitlabError;
 
-pub use crate::query::GitlabClient;
 pub use crate::query::Pairs;
 pub use crate::query::Query;
 pub use crate::query::SingleQuery;

@@ -4,8 +4,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::api::Client;
 use crate::gitlab::GitlabError;
-use crate::query::{GitlabClient, Query, SingleQuery};
+use crate::query::{Query, SingleQuery};
 
 /// A query modifier that ignores the data returned from an endpoint.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -24,7 +25,7 @@ impl<E> Query<()> for Ignore<E>
 where
     E: SingleQuery<()>,
 {
-    fn query(&self, client: &dyn GitlabClient) -> Result<(), GitlabError> {
+    fn query(&self, client: &dyn Client) -> Result<(), GitlabError> {
         let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
         self.endpoint.add_parameters(url.query_pairs_mut());
 

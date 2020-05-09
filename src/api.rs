@@ -15,11 +15,14 @@
 //! API implications of adding new members for additional query parameters in future GitLab
 //! releases.
 
+mod client;
 mod ignore;
 mod paged;
 
 pub mod projects;
 pub mod users;
+
+pub use self::client::Client;
 
 pub use self::ignore::ignore;
 pub use self::ignore::Ignore;

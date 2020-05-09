@@ -25,7 +25,7 @@ use crate::api::projects::pipelines;
 use crate::api::projects::Projects;
 use crate::api::users::{CurrentUser, User, Users};
 use crate::auth::{Auth, AuthError};
-use crate::query::{GitlabClient, Query};
+use crate::query::Query;
 use crate::types::*;
 
 macro_rules! query_param_slice {
@@ -2272,7 +2272,7 @@ impl Gitlab {
     }
 }
 
-impl GitlabClient for Gitlab {
+impl api::Client for Gitlab {
     fn rest_endpoint(&self, endpoint: &str) -> GitlabResult<Url> {
         debug!(target: "gitlab", "REST api call {}", endpoint);
         Ok(self.rest_url.join(endpoint)?)

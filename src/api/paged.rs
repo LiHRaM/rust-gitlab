@@ -10,8 +10,9 @@ use serde::de::DeserializeOwned;
 use thiserror::Error;
 use url::Url;
 
+use crate::api::Client;
 use crate::gitlab::{GitlabError, PaginationError};
-use crate::query::{GitlabClient, Query, SingleQuery};
+use crate::query::{Query, SingleQuery};
 
 struct LinkHeader<'a> {
     url: &'a str,
@@ -157,7 +158,7 @@ where
     E: Pageable,
     T: DeserializeOwned,
 {
-    fn query(&self, client: &dyn GitlabClient) -> Result<Vec<T>, GitlabError> {
+    fn query(&self, client: &dyn Client) -> Result<Vec<T>, GitlabError> {
         let url = {
             let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
             self.endpoint.add_parameters(url.query_pairs_mut());
