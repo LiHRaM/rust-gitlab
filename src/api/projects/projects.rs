@@ -152,12 +152,6 @@ impl Projects {
 }
 
 impl ProjectsBuilder {
-    /// Clear custom attribute search parameters.
-    pub fn clear_custom_attributes(&mut self) -> &mut Self {
-        self.custom_attributes = None;
-        self
-    }
-
     /// Add a custom attribute search parameter.
     pub fn custom_attribute<K, V>(&mut self, key: K, value: V) -> &mut Self
     where
