@@ -64,6 +64,10 @@ impl fmt::Display for ProjectOrderBy {
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct Projects {
+    /// Pagination to use for the results.
+    #[builder(default)]
+    pagination: Pagination,
+
     /// Search for projects using a query string.
     ///
     /// The search query will be escaped automatically.
@@ -96,9 +100,6 @@ pub struct Projects {
     /// Include project statistics in the results.
     #[builder(default)]
     statistics: Option<bool>,
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
 
     /// Filter projects by whether issues are enabled.
     #[builder(default)]
