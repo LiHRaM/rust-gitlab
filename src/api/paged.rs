@@ -305,7 +305,7 @@ mod tests {
     use crate::api::endpoint_prelude::*;
     use crate::api::paged::LinkHeader;
     use crate::api::{self, ApiError, LinkHeaderParseError, Pagination, Query};
-    use crate::test::client::{ExpectedUrl, SingleTestClient};
+    use crate::test::client::{ExpectedUrl, PagedTestClient, SingleTestClient};
 
     #[test]
     fn test_link_header_no_brackets() {
@@ -516,6 +516,140 @@ mod tests {
             assert_eq!(msg, "<unknown error>");
         } else {
             panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_pagination_limit() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: false,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(25))
+            .query(&client)
+            .unwrap();
+        assert_eq!(res.len(), 25);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[test]
+    fn test_pagination_all() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy::default();
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::All).query(&client).unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[test]
+    fn test_keyset_pagination_limit() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(25))
+            .query(&client)
+            .unwrap();
+        assert_eq!(res.len(), 25);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[test]
+    fn test_keyset_pagination_all() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::All).query(&client).unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[test]
+    fn test_keyset_pagination_missing_header() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("pagination", "keyset"), ("per_page", "100")])
+            .build()
+            .unwrap();
+        let data: Vec<_> = (0..=255)
+            .map(|value| {
+                DummyResult {
+                    value,
+                }
+            })
+            .collect();
+        let client = SingleTestClient::new_raw(endpoint, serde_json::to_vec(&data).unwrap());
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(300))
+            .query(&client)
+            .unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
         }
     }
 }
