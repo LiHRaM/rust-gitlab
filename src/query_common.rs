@@ -4,6 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::borrow::Cow;
 use std::fmt;
 
 use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
@@ -57,8 +58,8 @@ impl fmt::Display for EnableState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum NameOrId {
-    Name(String),
+pub enum NameOrId<'a> {
+    Name(Cow<'a, str>),
     Id(u64),
 }
 
@@ -75,7 +76,7 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b'%')
     .add(b'/');
 
-impl fmt::Display for NameOrId {
+impl<'a> fmt::Display for NameOrId<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             NameOrId::Name(name) => {
@@ -84,5 +85,23 @@ impl fmt::Display for NameOrId {
             },
             NameOrId::Id(id) => write!(f, "{}", id),
         }
+    }
+}
+
+impl<'a> From<u64> for NameOrId<'a> {
+    fn from(id: u64) -> Self {
+        NameOrId::Id(id)
+    }
+}
+
+impl<'a> From<&'a str> for NameOrId<'a> {
+    fn from(name: &'a str) -> Self {
+        NameOrId::Name(name.into())
+    }
+}
+
+impl<'a> From<String> for NameOrId<'a> {
+    fn from(name: String) -> Self {
+        NameOrId::Name(name.into())
     }
 }

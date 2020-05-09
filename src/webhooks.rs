@@ -526,7 +526,7 @@ pub struct PositionHookAttrs {
 pub struct NoteHookAttrs {
     /// The ID of the note.
     pub id: NoteId,
-    /// THe content of the note.
+    /// The content of the note.
     pub note: String,
     /// The type of entity the note is attached to.
     pub noteable_type: NoteType,

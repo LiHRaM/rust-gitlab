@@ -13,13 +13,20 @@ use derive_builder::Builder;
 use crate::query_prelude::*;
 use crate::types::{AccessLevel, VisibilityLevel};
 
+/// Keys project results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectOrderBy {
+    /// Order by the project ID.
     Id,
+    /// Order by the name of the project.
     Name,
+    /// Order by the full path of the project.
     Path,
+    /// Order by the creation date of the project.
     CreatedAt,
+    /// Order by the last updated date of the project.
     UpdatedAt,
+    /// Order by the last activity date of the project.
     LastActivityAt,
 }
 
@@ -34,6 +41,7 @@ impl ProjectOrderBy {
         self == ProjectOrderBy::Id
     }
 
+    /// The ordering as a query parameter.
     fn as_str(self) -> &'static str {
         match self {
             ProjectOrderBy::Id => "id",
@@ -52,45 +60,63 @@ impl fmt::Display for ProjectOrderBy {
     }
 }
 
+/// Query for projects on an instance.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct Projects {
+    /// Pagination to use for the results.
+    #[builder(default)]
+    pagination: Pagination,
+
     /// Search for projects using a query string.
     ///
     /// The search query will be escaped automatically.
     #[builder(default)]
     search: Option<String>,
 
+    /// Filter projects by its archived state.
     #[builder(default)]
     archived: Option<bool>,
+    /// Filter projects by its visibility.
     #[builder(default)]
     visibility: Option<VisibilityLevel>,
+    /// Search  ancestor namespaces when matching filters.
+    ///
+    /// Defaults to `false`.
     #[builder(default)]
     search_namespaces: Option<bool>,
+    /// Return only simple fields for search results.
     #[builder(default)]
     simple: Option<bool>,
+    /// Filter projects by those owned by the API caller.
     #[builder(default)]
     owned: Option<bool>,
+    /// Filter projects by those the API caller is a member of.
     #[builder(default)]
     membership: Option<bool>,
+    /// Filter projects by those the API caller has starred.
     #[builder(default)]
     starred: Option<bool>,
+    /// Include project statistics in the results.
     #[builder(default)]
     statistics: Option<bool>,
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
 
+    /// Filter projects by whether issues are enabled.
     #[builder(default)]
     with_issues_enabled: Option<bool>,
+    /// Filter projects by whether merge requests are enabled.
     #[builder(default)]
     with_merge_requests_enabled: Option<bool>,
+    /// Filter projects by programming language.
     #[builder(default)]
     with_programming_language: Option<String>,
+    /// Filter projects by those with a failing wiki checksum.
     #[builder(default)]
     wiki_checksum_failed: Option<bool>,
+    /// Filter projects by those with a failing repository checksum.
     #[builder(default)]
     repository_checksum_failed: Option<bool>,
+    /// Filter projects by those where the API caller has a minimum access level.
     #[builder(default)]
     min_access_level: Option<AccessLevel>,
 
@@ -101,12 +127,16 @@ pub struct Projects {
     #[builder(default)]
     with_custom_attributes: Option<bool>,
 
+    /// Filter projects by those with at least this ID.
     #[builder(default)]
     id_after: Option<u64>,
+    /// Filter projects by those with at most this ID.
     #[builder(default)]
     id_before: Option<u64>,
+    /// Filter projects by those with activity after this date.
     #[builder(default)]
     last_activity_after: Option<DateTime<Utc>>,
+    /// Filter projects by those without activity before this date.
     #[builder(default)]
     last_activity_before: Option<DateTime<Utc>>,
 
@@ -119,6 +149,7 @@ pub struct Projects {
 }
 
 impl Projects {
+    /// Create a builder for the endpoint.
     pub fn builder() -> ProjectsBuilder {
         ProjectsBuilder::default()
     }
@@ -276,7 +307,7 @@ mod tests {
     use crate::api::projects::Projects;
 
     #[test]
-    fn defaults_work() {
+    fn defaults_are_sufficient() {
         Projects::builder().build().unwrap();
     }
 }

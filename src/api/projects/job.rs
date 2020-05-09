@@ -6,20 +6,28 @@
 
 use derive_builder::Builder;
 
+use crate::query_common::NameOrId;
 use crate::query_prelude::*;
 
-/// Query information about the API calling user.
-#[derive(Debug, Clone, Copy, Builder)]
-pub struct CurrentUser {}
+/// Query for a job within a project.
+#[derive(Debug, Builder)]
+#[builder(setter(strip_option))]
+pub struct Job<'a> {
+    /// The project to query for the job.
+    #[builder(setter(into))]
+    project: NameOrId<'a>,
+    /// The ID of the job.
+    job: u64,
+}
 
-impl CurrentUser {
+impl<'a> Job<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> CurrentUserBuilder {
-        CurrentUserBuilder::default()
+    pub fn builder() -> JobBuilder<'a> {
+        JobBuilder::default()
     }
 }
 
-impl<T> SingleQuery<T> for CurrentUser
+impl<'a, T> SingleQuery<T> for Job<'a>
 where
     T: DeserializeOwned,
 {
@@ -30,14 +38,14 @@ where
     }
 
     fn endpoint(&self) -> String {
-        "user".into()
+        format!("projects/{}/jobs/{}", self.project, self.job)
     }
 
     fn add_parameters(&self, _: Pairs) {}
     fn form_data(&self) {}
 }
 
-impl<T> Query<T> for CurrentUser
+impl<'a, T> Query<T> for Job<'a>
 where
     T: DeserializeOwned,
 {
@@ -48,10 +56,16 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::api::users::CurrentUser;
+    use crate::api::projects::pipelines::Pipelines;
 
     #[test]
-    fn defaults_are_sufficient() {
-        CurrentUser::builder().build().unwrap();
+    fn project_is_needed() {
+        let err = Pipelines::builder().build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
+    }
+
+    #[test]
+    fn project_is_sufficient() {
+        Pipelines::builder().project(1).build().unwrap();
     }
 }

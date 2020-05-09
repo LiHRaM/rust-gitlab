@@ -4,11 +4,22 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use derive_builder::Builder;
+
 use crate::query_prelude::*;
 
-#[derive(Debug, Clone, Copy)]
+/// Query a user by ID.
+#[derive(Debug, Clone, Copy, Builder)]
 pub struct User {
-    pub id: u64,
+    /// The ID of the user.
+    user: u64,
+}
+
+impl User {
+    /// Create a builder for the endpoint.
+    pub fn builder() -> UserBuilder {
+        UserBuilder::default()
+    }
 }
 
 impl<T> SingleQuery<T> for User
@@ -22,7 +33,7 @@ where
     }
 
     fn endpoint(&self) -> String {
-        format!("users/{}", self.id)
+        format!("users/{}", self.user)
     }
 
     fn add_parameters(&self, _: Pairs) {}
@@ -35,5 +46,21 @@ where
 {
     fn query(&self, client: &Gitlab) -> Result<T, GitlabError> {
         self.single_query(client)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::api::users::User;
+
+    #[test]
+    fn user_is_needed() {
+        let err = User::builder().build().unwrap_err();
+        assert_eq!(err, "`user` must be initialized");
+    }
+
+    #[test]
+    fn user_is_sufficient() {
+        User::builder().user(1).build().unwrap();
     }
 }
