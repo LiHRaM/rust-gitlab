@@ -10,8 +10,8 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
+use crate::api::common::{AccessLevel, SortOrder, VisibilityLevel};
 use crate::api::endpoint_prelude::*;
-use crate::types::{AccessLevel, VisibilityLevel};
 
 /// Keys project results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -234,7 +234,7 @@ impl Endpoint for Projects {
             .map(|value| pairs.append_pair("repository_checksum_failed", bool_as_str(value)));
 
         self.min_access_level
-            .map(|value| pairs.append_pair("min_access_level", &format!("{}", u64::from(value))));
+            .map(|value| pairs.append_pair("min_access_level", &format!("{}", value.as_u64())));
 
         self.id_after
             .map(|value| pairs.append_pair("id_after", &format!("{}", value)));

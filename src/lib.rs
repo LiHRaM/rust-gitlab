@@ -23,8 +23,6 @@ pub mod webhooks;
 pub mod api;
 #[cfg(feature = "client_api")]
 mod auth;
-#[cfg(feature = "client_api")]
-pub mod query_common;
 
 #[cfg(feature = "client_api")]
 pub use crate::auth::AuthError;

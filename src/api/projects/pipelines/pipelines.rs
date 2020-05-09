@@ -10,8 +10,8 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
+use crate::api::common::{NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
-use crate::query_common::NameOrId;
 
 /// Scopes for pipelines.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
