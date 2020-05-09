@@ -8,6 +8,8 @@
 //!
 //! These endpoints are used for querying CI pipelines.
 
+pub mod jobs;
+
 mod cancel;
 mod create;
 mod delete;

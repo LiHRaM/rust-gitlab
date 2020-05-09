@@ -5,63 +5,22 @@
 // except according to those terms.
 
 use std::collections::HashSet;
-use std::fmt;
 
 use derive_builder::Builder;
 
+use crate::api::projects::JobScope;
 use crate::query_common::NameOrId;
 use crate::query_prelude::*;
 
-/// Scopes for jobs.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum JobScope {
-    /// Created, but blocked on dependencies or triggers.
-    Created,
-    /// Ready to run, but have not been claimed by a runner.
-    Pending,
-    /// Currently running.
-    Running,
-    /// Failed jobs.
-    Failed,
-    /// Successful jobs.
-    Success,
-    /// Canceled jobs.
-    Canceled,
-    /// Skipped jobs.
-    Skipped,
-    /// Awaiting manual triggering.
-    Manual,
-}
-
-impl JobScope {
-    /// The scope as a query parameter.
-    pub(crate) fn as_str(self) -> &'static str {
-        match self {
-            JobScope::Created => "created",
-            JobScope::Pending => "pending",
-            JobScope::Running => "running",
-            JobScope::Failed => "failed",
-            JobScope::Success => "success",
-            JobScope::Canceled => "canceled",
-            JobScope::Skipped => "skipped",
-            JobScope::Manual => "manual",
-        }
-    }
-}
-
-impl fmt::Display for JobScope {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
-/// Query for jobs within a project.
+/// Query for jobs within a pipeline.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct Jobs<'a> {
-    /// The project to query for jobs.
+    /// The project to query for the pipeline.
     #[builder(setter(into))]
     project: NameOrId<'a>,
+    /// The ID of the pipeline.
+    pipeline: u64,
 
     /// Pagination to use for the results.
     #[builder(default)]
@@ -111,7 +70,7 @@ where
     }
 
     fn endpoint(&self) -> String {
-        format!("projects/{}/jobs", self.project)
+        format!("projects/{}/pipelines/{}/jobs", self.project, self.pipeline)
     }
 
     fn add_parameters(&self, mut pairs: Pairs) {
@@ -143,16 +102,28 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::Jobs;
+    use crate::api::projects::pipelines::jobs::Jobs;
 
     #[test]
-    fn project_is_needed() {
+    fn project_and_pipeline_are_needed() {
         let err = Jobs::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
-    fn project_is_sufficient() {
-        Jobs::builder().project(1).build().unwrap();
+    fn project_is_needed() {
+        let err = Jobs::builder().pipeline(1).build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
+    }
+
+    #[test]
+    fn pipeline_is_needed() {
+        let err = Jobs::builder().project(1).build().unwrap_err();
+        assert_eq!(err, "`pipeline` must be initialized");
+    }
+
+    #[test]
+    fn project_and_pipeline_are_sufficient() {
+        Jobs::builder().project(1).pipeline(1).build().unwrap();
     }
 }

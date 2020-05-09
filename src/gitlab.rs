@@ -1634,6 +1634,10 @@ impl Gitlab {
     }
 
     /// Get a list of jobs for a pipeline.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipelines::jobs::Jobs.query()` instead"
+    )]
     pub fn pipeline_jobs<I, K, V>(
         &self,
         project: ProjectId,
