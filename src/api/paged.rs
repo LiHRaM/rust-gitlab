@@ -7,101 +7,35 @@
 use reqwest::header::HeaderMap;
 use reqwest::Method;
 use serde::de::DeserializeOwned;
-use serde::ser::Serialize;
 use thiserror::Error;
-use url::form_urlencoded::Serializer;
-use url::{Url, UrlQuery};
+use url::Url;
 
-use crate::gitlab::{Gitlab, GitlabError, PaginationError};
+use crate::api::{ApiError, Client, Endpoint, Query};
 
-pub type Pairs<'a> = Serializer<'a, UrlQuery<'a>>;
-
-const MAX_PAGE_SIZE: usize = 100;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Pagination {
-    All,
-    Limit(usize),
-}
-
-impl Default for Pagination {
-    fn default() -> Self {
-        Pagination::All
-    }
-}
-
-impl Pagination {
-    fn page_limit(self) -> usize {
-        match self {
-            Pagination::All => MAX_PAGE_SIZE,
-            Pagination::Limit(size) => size.min(MAX_PAGE_SIZE),
-        }
-    }
-
-    fn is_last_page<T>(self, last_page_size: usize, results: &[T]) -> bool {
-        // If the last page has fewer elements than our limit, we're definitely done.
-        if last_page_size <= self.page_limit() {
-            return true;
-        }
-
-        // Otherwise, check if we have results which fill our limit.
-        if let Pagination::Limit(limit) = self {
-            return limit <= results.len();
-        }
-
-        // We're not done yet.
-        false
-    }
-}
-
-pub trait Query<T> {
-    fn query(&self, client: &Gitlab) -> Result<T, GitlabError>;
-}
-
-pub trait SingleQuery<T>
-where
-    T: DeserializeOwned,
-{
-    type FormData: Serialize;
-
-    fn method(&self) -> Method;
-    fn endpoint(&self) -> String;
-
-    fn add_parameters(&self, pairs: Pairs);
-    fn form_data(&self) -> Self::FormData;
-
-    fn single_query(&self, client: &Gitlab) -> Result<T, GitlabError> {
-        let mut url = client.rest_endpoint(self.endpoint())?;
-        self.add_parameters(url.query_pairs_mut());
-
-        let req = client
-            .build_rest(self.method(), url)
-            .form(&self.form_data());
-        let rsp = client.rest(req)?;
-        let status = rsp.status();
-        let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-        if !status.is_success() {
-            return Err(GitlabError::from_gitlab(v));
-        }
-
-        serde_json::from_value::<T>(v).map_err(GitlabError::data_type::<T>)
-    }
-
-    fn no_answer_query(&self, client: &Gitlab) -> Result<(), GitlabError> {
-        let mut url = client.rest_endpoint(self.endpoint())?;
-        self.add_parameters(url.query_pairs_mut());
-
-        let req = client
-            .build_rest(self.method(), url)
-            .form(&self.form_data());
-        let rsp = client.rest(req)?;
-        if !rsp.status().is_success() {
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-            return Err(GitlabError::from_gitlab(v));
-        }
-
-        Ok(())
-    }
+/// Errors which may occur with pagination.
+#[derive(Debug, Error)]
+// TODO #[non_exhaustive]
+pub enum PaginationError {
+    /// A `Link` HTTP header can fail to parse.
+    #[error("failed to parse a Link HTTP header: {}", source)]
+    LinkHeader {
+        /// The source of the error.
+        #[from]
+        source: LinkHeaderParseError,
+    },
+    /// An invalid URL can be returned.
+    #[error("failed to parse a Link HTTP header URL: {}", source)]
+    InvalidUrl {
+        /// The source of the error.
+        #[from]
+        source: url::ParseError,
+    },
+    /// This is here to force `_` matching right now.
+    ///
+    /// **DO NOT USE**
+    #[doc(hidden)]
+    #[error("unreachable...")]
+    _NonExhaustive,
 }
 
 struct LinkHeader<'a> {
@@ -113,15 +47,14 @@ impl<'a> LinkHeader<'a> {
     fn parse(s: &'a str) -> Result<Self, LinkHeaderParseError> {
         let mut parts = s.split(';');
 
-        let url = if let Some(part) = parts.next() {
-            let part = part.trim();
+        let url_part = parts.next().expect("a split always has at least one part");
+        let url = {
+            let part = url_part.trim();
             if part.starts_with('<') && part.ends_with('>') {
                 &part[1..part.len() - 1]
             } else {
                 return Err(LinkHeaderParseError::NoBrackets);
             }
-        } else {
-            return Err(LinkHeaderParseError::MissingUrl);
         };
 
         let params = parts
@@ -150,17 +83,20 @@ impl<'a> LinkHeader<'a> {
     }
 }
 
+/// An error which can occur when parsing a link header.
 #[derive(Debug, Error)]
 pub enum LinkHeaderParseError {
+    /// An invalid HTTP header was found.
     #[error("invalid header")]
     InvalidHeader {
+        /// The source of the error.
         #[from]
         source: reqwest::header::ToStrError,
     },
-    #[error("missing url")]
-    MissingUrl,
+    /// The `url` for a `Link` header was missing `<>` brackets.
     #[error("missing brackets around url")]
     NoBrackets,
+    /// A parameter for a `Link` header was missing a value.
     #[error("missing parameter value")]
     MissingParamValue,
 }
@@ -173,34 +109,94 @@ impl LinkHeaderParseError {
     }
 }
 
-pub trait PagedQuery<T, F>: SingleQuery<Vec<T>, FormData = F>
-where
-    T: DeserializeOwned,
-    F: Serialize,
-{
-    fn pagination(&self) -> Pagination {
+/// Pagination options for GitLab.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Pagination {
+    /// Return all results.
+    ///
+    /// Note that some endpoints may have a server-side limit to the number of results (e.g.,
+    /// `/projects` is limited to 10000 results).
+    All,
+    /// Limit to a number of results.
+    Limit(usize),
+}
+
+impl Default for Pagination {
+    fn default() -> Self {
         Pagination::All
     }
+}
 
+const MAX_PAGE_SIZE: usize = 100;
+
+impl Pagination {
+    fn page_limit(self) -> usize {
+        match self {
+            Pagination::All => MAX_PAGE_SIZE,
+            Pagination::Limit(size) => size.min(MAX_PAGE_SIZE),
+        }
+    }
+
+    fn is_last_page<T>(self, last_page_size: usize, results: &[T]) -> bool {
+        // If the last page has fewer elements than our limit, we're definitely done.
+        if last_page_size < self.page_limit() {
+            return true;
+        }
+
+        // Otherwise, check if we have results which fill our limit.
+        if let Pagination::Limit(limit) = self {
+            return limit <= results.len();
+        }
+
+        // We're not done yet.
+        false
+    }
+}
+
+/// A query modifier that paginates an endpoint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Paged<E> {
+    endpoint: E,
+    pagination: Pagination,
+}
+
+/// Collect data from a paged endpoint.
+pub fn paged<E>(endpoint: E, pagination: Pagination) -> Paged<E> {
+    Paged {
+        endpoint,
+        pagination,
+    }
+}
+
+/// A trait to indicate that an endpoint is pageable.
+pub trait Pageable {
+    /// Whether the endpoint uses keyset pagination or not.
     fn use_keyset_pagination(&self) -> bool {
         false
     }
+}
 
-    fn paged_query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
+impl<E, T, C> Query<Vec<T>, C> for Paged<E>
+where
+    E: Endpoint,
+    E: Pageable,
+    T: DeserializeOwned,
+    C: Client,
+{
+    fn query(&self, client: &C) -> Result<Vec<T>, ApiError<C::Error>> {
         let url = {
-            let mut url = client.rest_endpoint(self.endpoint())?;
-            self.add_parameters(url.query_pairs_mut());
+            let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
+            self.endpoint.add_parameters(url.query_pairs_mut());
             url
         };
 
-        let pagination = self.pagination();
         let mut page_num = 1;
-        let per_page = pagination.page_limit();
+        let per_page = self.pagination.page_limit();
         let per_page_str = format!("{}", per_page);
 
         let mut results = Vec::new();
         let mut next_url = None;
-        let use_keyset_pagination = self.use_keyset_pagination();
+        let use_keyset_pagination = self.endpoint.use_keyset_pagination();
 
         loop {
             let page_url = if let Some(url) = next_url.take() {
@@ -208,14 +204,16 @@ where
             } else {
                 let page_str = format!("{}", page_num);
                 let mut page_url = url.clone();
-                page_url
-                    .query_pairs_mut()
-                    .extend_pairs(&[("page", &page_str), ("per_page", &per_page_str)]);
 
-                if use_keyset_pagination {
-                    page_url
-                        .query_pairs_mut()
-                        .append_pair("pagination", "keyset");
+                {
+                    let mut pairs = page_url.query_pairs_mut();
+                    pairs.append_pair("per_page", &per_page_str);
+
+                    if use_keyset_pagination {
+                        pairs.append_pair("pagination", "keyset");
+                    } else {
+                        pairs.append_pair("page", &page_str);
+                    }
                 }
 
                 page_url
@@ -229,13 +227,13 @@ where
                 next_url = next_page_from_headers(rsp.headers())?;
             }
 
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
+            let v = serde_json::from_reader(rsp)?;
             if !status.is_success() {
-                return Err(GitlabError::from_gitlab(v));
+                return Err(ApiError::from_gitlab(v));
             }
 
             let page =
-                serde_json::from_value::<Vec<T>>(v).map_err(GitlabError::data_type::<Vec<T>>)?;
+                serde_json::from_value::<Vec<T>>(v).map_err(ApiError::data_type::<Vec<T>>)?;
             let page_len = page.len();
             results.extend(page);
 
@@ -243,7 +241,7 @@ where
             // but if it is needed, the bug manifests as Gitlab returning *all* results instead of
             // just the requested results. This can cause an infinite loop here if the number of
             // total results is exactly equal to `per_page`.
-            if pagination.is_last_page(page_len, &results) {
+            if self.pagination.is_last_page(page_len, &results) {
                 break;
             }
 

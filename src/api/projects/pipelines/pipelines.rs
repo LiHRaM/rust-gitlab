@@ -10,8 +10,8 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Scopes for pipelines.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -138,10 +138,6 @@ pub struct Pipelines<'a> {
     #[builder(setter(into))]
     project: NameOrId<'a>,
 
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
-
     /// Filter pipelines by its scope.
     #[builder(default)]
     scope: Option<PipelineScope>,
@@ -194,18 +190,13 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl<'a, T> SingleQuery<Vec<T>> for Pipelines<'a>
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl<'a> Endpoint for Pipelines<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipelines", self.project)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipelines", self.project).into()
     }
 
     fn add_parameters(&self, mut pairs: Pairs) {
@@ -246,27 +237,9 @@ where
         self.sort
             .map(|value| pairs.append_pair("sort", value.as_str()));
     }
-
-    fn form_data(&self) {}
 }
 
-impl<'a, T> PagedQuery<T, ()> for Pipelines<'a>
-where
-    T: DeserializeOwned,
-{
-    fn pagination(&self) -> Pagination {
-        self.pagination
-    }
-}
-
-impl<'a, T> Query<Vec<T>> for Pipelines<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
-        self.paged_query(client)
-    }
-}
+impl<'a> Pageable for Pipelines<'a> {}
 
 #[cfg(test)]
 mod tests {

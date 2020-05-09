@@ -6,8 +6,8 @@
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Delete a pipeline.
 #[derive(Debug, Builder)]
@@ -26,30 +26,13 @@ impl<'a> DeletePipeline<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<T> for DeletePipeline<'a>
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl<'a> Endpoint for DeletePipeline<'a> {
     fn method(&self) -> Method {
         Method::DELETE
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipelines/{}", self.project, self.pipeline)
-    }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
-}
-
-impl<'a, T> Query<T> for DeletePipeline<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<T, GitlabError> {
-        self.single_query(client)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipelines/{}", self.project, self.pipeline).into()
     }
 }
 

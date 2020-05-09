@@ -6,7 +6,7 @@
 
 use derive_builder::Builder;
 
-use crate::query_prelude::*;
+use crate::api::endpoint_prelude::*;
 
 /// Query information about the API calling user.
 #[derive(Debug, Clone, Copy, Builder)]
@@ -19,30 +19,13 @@ impl CurrentUser {
     }
 }
 
-impl<T> SingleQuery<T> for CurrentUser
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl Endpoint for CurrentUser {
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
+    fn endpoint(&self) -> Cow<'static, str> {
         "user".into()
-    }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
-}
-
-impl<T> Query<T> for CurrentUser
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<T, GitlabError> {
-        self.single_query(client)
     }
 }
 

@@ -4,17 +4,19 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Endpoint prelude
+//!
+//! This module re-exports all of the types needed for endpoints to implement the
+//! [`Endpoint`](../trait.Endpoint.html) trait.
+
+pub use std::borrow::Cow;
+
 pub use reqwest::Method;
-pub use serde::de::DeserializeOwned;
 
-pub use crate::gitlab::Gitlab;
-pub use crate::gitlab::GitlabError;
-
-pub use crate::query::PagedQuery;
-pub use crate::query::Pagination;
-pub use crate::query::Pairs;
-pub use crate::query::Query;
-pub use crate::query::SingleQuery;
+pub use crate::api::Client;
+pub use crate::api::Endpoint;
+pub use crate::api::Pageable;
+pub use crate::api::Pairs;
 
 pub use crate::query_common::EnableState;
 pub use crate::query_common::SortOrder;

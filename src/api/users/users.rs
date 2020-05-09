@@ -11,7 +11,7 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::query_prelude::*;
+use crate::api::endpoint_prelude::*;
 
 /// Keys user results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -89,9 +89,6 @@ pub struct Users<'a> {
     /// Return only blocked users.
     #[builder(default)]
     blocked: Option<()>,
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
 
     /// Search for a user with a given external provider identity.
     #[builder(default)]
@@ -176,17 +173,12 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl<'a, T> SingleQuery<Vec<T>> for Users<'a>
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl<'a> Endpoint for Users<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
+    fn endpoint(&self) -> Cow<'static, str> {
         "users".into()
     }
 
@@ -227,27 +219,9 @@ where
         self.without_projects
             .map(|value| pairs.append_pair("without_projects", bool_as_str(value)));
     }
-
-    fn form_data(&self) {}
 }
 
-impl<'a, T> PagedQuery<T, ()> for Users<'a>
-where
-    T: DeserializeOwned,
-{
-    fn pagination(&self) -> Pagination {
-        self.pagination
-    }
-}
-
-impl<'a, T> Query<Vec<T>> for Users<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
-        self.paged_query(client)
-    }
-}
+impl<'a> Pageable for Users<'a> {}
 
 #[cfg(test)]
 mod tests {

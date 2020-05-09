@@ -10,7 +10,7 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::query_prelude::*;
+use crate::api::endpoint_prelude::*;
 use crate::types::{AccessLevel, VisibilityLevel};
 
 /// Keys project results may be ordered by.
@@ -64,10 +64,6 @@ impl fmt::Display for ProjectOrderBy {
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct Projects {
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
-
     /// Search for projects using a query string.
     ///
     /// The search query will be escaped automatically.
@@ -196,17 +192,12 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl<T> SingleQuery<Vec<T>> for Projects
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl Endpoint for Projects {
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
+    fn endpoint(&self) -> Cow<'static, str> {
         "projects".into()
     }
 
@@ -275,30 +266,12 @@ where
         self.sort
             .map(|value| pairs.append_pair("sort", value.as_str()));
     }
-
-    fn form_data(&self) {}
 }
 
-impl<T> PagedQuery<T, ()> for Projects
-where
-    T: DeserializeOwned,
-{
-    fn pagination(&self) -> Pagination {
-        self.pagination
-    }
-
+impl Pageable for Projects {
     fn use_keyset_pagination(&self) -> bool {
         self.order_by
             .map_or(false, |order_by| order_by.use_keyset_pagination())
-    }
-}
-
-impl<T> Query<Vec<T>> for Projects
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
-        self.paged_query(client)
     }
 }
 

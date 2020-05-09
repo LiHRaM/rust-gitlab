@@ -9,8 +9,8 @@ use std::fmt;
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// The type of a pipeline variable.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -114,18 +114,13 @@ impl<'a> CreatePipelineBuilder<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<T> for CreatePipeline<'a>
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl<'a> Endpoint for CreatePipeline<'a> {
     fn method(&self) -> Method {
         Method::POST
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipeline", self.project)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipeline", self.project).into()
     }
 
     fn add_parameters(&self, mut pairs: Pairs) {
@@ -141,17 +136,6 @@ where
                 ),
             ]);
         });
-    }
-
-    fn form_data(&self) {}
-}
-
-impl<'a, T> Query<T> for CreatePipeline<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<T, GitlabError> {
-        self.single_query(client)
     }
 }
 

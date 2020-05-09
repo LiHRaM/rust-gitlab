@@ -6,8 +6,8 @@
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Query for the variables of a pipeline.
 #[derive(Debug, Builder)]
@@ -26,33 +26,17 @@ impl<'a> PipelineVariables<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<Vec<T>> for PipelineVariables<'a>
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl<'a> Endpoint for PipelineVariables<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
+    fn endpoint(&self) -> Cow<'static, str> {
         format!(
             "projects/{}/pipelines/{}/variables",
             self.project, self.pipeline,
         )
-    }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
-}
-
-impl<'a, T> Query<Vec<T>> for PipelineVariables<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
-        self.single_query(client)
+        .into()
     }
 }
 

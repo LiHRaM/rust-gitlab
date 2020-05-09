@@ -8,9 +8,9 @@ use std::collections::HashSet;
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::api::projects::JobScope;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Query for jobs within a pipeline.
 #[derive(Debug, Builder)]
@@ -21,10 +21,6 @@ pub struct Jobs<'a> {
     project: NameOrId<'a>,
     /// The ID of the pipeline.
     pipeline: u64,
-
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
 
     /// The scopes to filter jobs by.
     #[builder(setter(name = "_scopes"), default, private)]
@@ -59,18 +55,13 @@ impl<'a> JobsBuilder<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<Vec<T>> for Jobs<'a>
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl<'a> Endpoint for Jobs<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipelines/{}/jobs", self.project, self.pipeline)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipelines/{}/jobs", self.project, self.pipeline).into()
     }
 
     fn add_parameters(&self, mut pairs: Pairs) {
@@ -78,27 +69,9 @@ where
             pairs.append_pair("scope[]", value.as_str());
         });
     }
-
-    fn form_data(&self) {}
 }
 
-impl<'a, T> PagedQuery<T, ()> for Jobs<'a>
-where
-    T: DeserializeOwned,
-{
-    fn pagination(&self) -> Pagination {
-        self.pagination
-    }
-}
-
-impl<'a, T> Query<Vec<T>> for Jobs<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<Vec<T>, GitlabError> {
-        self.paged_query(client)
-    }
-}
+impl<'a> Pageable for Jobs<'a> {}
 
 #[cfg(test)]
 mod tests {

@@ -6,8 +6,8 @@
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Query a single pipeline on a project.
 #[derive(Debug, Builder)]
@@ -27,30 +27,13 @@ impl<'a> Pipeline<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<T> for Pipeline<'a>
-where
-    T: DeserializeOwned,
-{
-    type FormData = ();
-
+impl<'a> Endpoint for Pipeline<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
 
-    fn endpoint(&self) -> String {
-        format!("projects/{}/pipeline/{}", self.project, self.pipeline)
-    }
-
-    fn add_parameters(&self, _: Pairs) {}
-    fn form_data(&self) {}
-}
-
-impl<'a, T> Query<T> for Pipeline<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &Gitlab) -> Result<T, GitlabError> {
-        self.single_query(client)
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/pipeline/{}", self.project, self.pipeline).into()
     }
 }
 

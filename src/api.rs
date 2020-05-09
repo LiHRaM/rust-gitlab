@@ -15,5 +15,33 @@
 //! API implications of adding new members for additional query parameters in future GitLab
 //! releases.
 
+mod client;
+mod endpoint;
+mod error;
+mod ignore;
+mod paged;
+mod query;
+
+pub mod endpoint_prelude;
+
 pub mod projects;
 pub mod users;
+
+pub use self::client::Client;
+
+pub use self::endpoint::Endpoint;
+pub use self::endpoint::Pairs;
+
+pub use self::error::ApiError;
+
+pub use self::ignore::ignore;
+pub use self::ignore::Ignore;
+
+pub use self::paged::paged;
+pub use self::paged::LinkHeaderParseError;
+pub use self::paged::Pageable;
+pub use self::paged::Paged;
+pub use self::paged::Pagination;
+pub use self::paged::PaginationError;
+
+pub use self::query::Query;
