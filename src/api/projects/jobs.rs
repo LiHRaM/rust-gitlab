@@ -109,7 +109,25 @@ impl<'a> Pageable for Jobs<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::Jobs;
+    use crate::api::projects::{JobScope, Jobs};
+
+    #[test]
+    fn job_scope_as_str() {
+        let items = &[
+            (JobScope::Created, "created"),
+            (JobScope::Pending, "pending"),
+            (JobScope::Running, "running"),
+            (JobScope::Failed, "failed"),
+            (JobScope::Success, "success"),
+            (JobScope::Canceled, "canceled"),
+            (JobScope::Skipped, "skipped"),
+            (JobScope::Manual, "manual"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn project_is_needed() {

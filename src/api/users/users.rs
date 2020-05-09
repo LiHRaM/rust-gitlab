@@ -213,7 +213,57 @@ impl<'a> Pageable for Users<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::users::Users;
+    use crate::api::users::{ExternalProvider, UserOrderBy, Users};
+
+    #[test]
+    fn order_by_default() {
+        assert_eq!(UserOrderBy::default(), UserOrderBy::Id);
+    }
+
+    #[test]
+    fn order_by_as_str() {
+        let items = &[
+            (UserOrderBy::Id, "id"),
+            (UserOrderBy::Name, "name"),
+            (UserOrderBy::Username, "username"),
+            (UserOrderBy::CreatedAt, "created_at"),
+            (UserOrderBy::UpdatedAt, "updated_at"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn external_provider_id_and_name_are_necessary() {
+        let err = ExternalProvider::builder().build().unwrap_err();
+        assert_eq!(err, "`id` must be initialized");
+    }
+
+    #[test]
+    fn external_provider_id_is_necessary() {
+        let err = ExternalProvider::builder()
+            .name("name")
+            .build()
+            .unwrap_err();
+        assert_eq!(err, "`id` must be initialized");
+    }
+
+    #[test]
+    fn external_provider_name_is_necessary() {
+        let err = ExternalProvider::builder().id(1).build().unwrap_err();
+        assert_eq!(err, "`name` must be initialized");
+    }
+
+    #[test]
+    fn external_provider_id_and_name_are_sufficient() {
+        ExternalProvider::builder()
+            .id(1)
+            .name("name")
+            .build()
+            .unwrap();
+    }
 
     #[test]
     fn defaults_are_sufficient() {

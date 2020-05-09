@@ -216,7 +216,62 @@ impl<'a> Pageable for Pipelines<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::pipelines::Pipelines;
+    use crate::api::projects::pipelines::{
+        PipelineOrderBy, PipelineScope, PipelineStatus, Pipelines,
+    };
+
+    #[test]
+    fn pipeline_scope_as_str() {
+        let items = &[
+            (PipelineScope::Running, "running"),
+            (PipelineScope::Pending, "pending"),
+            (PipelineScope::Finished, "finished"),
+            (PipelineScope::Branches, "branches"),
+            (PipelineScope::Tags, "tags"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn pipeline_status_as_str() {
+        let items = &[
+            (PipelineStatus::Running, "running"),
+            (PipelineStatus::Pending, "pending"),
+            (PipelineStatus::Success, "success"),
+            (PipelineStatus::Failed, "failed"),
+            (PipelineStatus::Canceled, "canceled"),
+            (PipelineStatus::Skipped, "skipped"),
+            (PipelineStatus::Created, "created"),
+            (PipelineStatus::Manual, "manual"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn order_by_default() {
+        assert_eq!(PipelineOrderBy::default(), PipelineOrderBy::Id);
+    }
+
+    #[test]
+    fn order_by_as_str() {
+        let items = &[
+            (PipelineOrderBy::Id, "id"),
+            (PipelineOrderBy::Status, "status"),
+            (PipelineOrderBy::Ref, "ref"),
+            (PipelineOrderBy::UpdatedAt, "updated_at"),
+            (PipelineOrderBy::UserId, "user_id"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn project_is_needed() {

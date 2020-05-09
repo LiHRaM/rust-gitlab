@@ -256,7 +256,28 @@ impl<'a> Pageable for Projects<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::Projects;
+    use crate::api::projects::{ProjectOrderBy, Projects};
+
+    #[test]
+    fn order_by_default() {
+        assert_eq!(ProjectOrderBy::default(), ProjectOrderBy::CreatedAt);
+    }
+
+    #[test]
+    fn order_by_as_str() {
+        let items = &[
+            (ProjectOrderBy::Id, "id"),
+            (ProjectOrderBy::Name, "name"),
+            (ProjectOrderBy::Path, "path"),
+            (ProjectOrderBy::CreatedAt, "created_at"),
+            (ProjectOrderBy::UpdatedAt, "updated_at"),
+            (ProjectOrderBy::LastActivityAt, "last_activity_at"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn defaults_are_sufficient() {

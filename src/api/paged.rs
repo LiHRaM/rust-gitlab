@@ -289,7 +289,8 @@ fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, Pagination
 
 #[cfg(test)]
 mod tests {
-    use crate::api::paged::{LinkHeader, LinkHeaderParseError};
+    use crate::api::paged::LinkHeader;
+    use crate::api::{LinkHeaderParseError, Pagination};
 
     #[test]
     fn test_link_header_no_brackets() {
@@ -338,5 +339,10 @@ mod tests {
         assert_eq!(link.params[0].1, "value");
         assert_eq!(link.params[1].0, "param2");
         assert_eq!(link.params[1].1, "value");
+    }
+
+    #[test]
+    fn pagination_default() {
+        assert_eq!(Pagination::default(), Pagination::All);
     }
 }

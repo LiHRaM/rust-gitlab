@@ -190,3 +190,117 @@ pub fn bool_str(b: bool) -> &'static str {
         "false"
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::api::common::{
+        self, AccessLevel, EnableState, NameOrId, SortOrder, VisibilityLevel,
+    };
+
+    #[test]
+    fn access_level_as_str() {
+        let items = &[
+            (AccessLevel::Anonymous, "anonymous", 0),
+            (AccessLevel::Guest, "guest", 10),
+            (AccessLevel::Reporter, "reporter", 20),
+            (AccessLevel::Developer, "developer", 30),
+            (AccessLevel::Maintainer, "maintainer", 40),
+            (AccessLevel::Owner, "owner", 50),
+            (AccessLevel::Admin, "admin", 60),
+        ];
+
+        for (i, s, u) in items {
+            assert_eq!(i.as_str(), *s);
+            assert_eq!(i.as_u64(), *u);
+        }
+    }
+
+    #[test]
+    fn access_level_ordering() {
+        let items = &[
+            AccessLevel::Anonymous,
+            AccessLevel::Guest,
+            AccessLevel::Reporter,
+            AccessLevel::Developer,
+            AccessLevel::Maintainer,
+            AccessLevel::Owner,
+            AccessLevel::Admin,
+        ];
+
+        let mut last = None;
+        for item in items {
+            if let Some(prev) = last {
+                assert!(prev < item);
+            }
+            last = Some(item);
+        }
+    }
+
+    #[test]
+    fn sort_order_default() {
+        assert_eq!(SortOrder::default(), SortOrder::Descending);
+    }
+
+    #[test]
+    fn sort_order_as_str() {
+        let items = &[
+            (SortOrder::Ascending, "asc"),
+            (SortOrder::Descending, "desc"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn enable_state_as_str() {
+        let items = &[
+            (EnableState::Enabled, "enabled"),
+            (EnableState::Disabled, "disabled"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn name_or_id_as_str() {
+        let items: &[(NameOrId, _)] = &[
+            ("user".into(), "user"),
+            ("special/name".into(), "special%2Fname"),
+            (
+                "special/name?string".to_string().into(),
+                "special%2Fname%3Fstring",
+            ),
+            (1.into(), "1"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.to_string(), *s);
+        }
+    }
+
+    #[test]
+    fn visibility_level_as_str() {
+        let items = &[
+            (VisibilityLevel::Public, "public"),
+            (VisibilityLevel::Internal, "internal"),
+            (VisibilityLevel::Private, "private"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn bool_str() {
+        let items = &[(true, "true"), (false, "false")];
+
+        for (i, s) in items {
+            assert_eq!(common::bool_str(*i), *s);
+        }
+    }
+}
