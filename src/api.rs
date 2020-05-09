@@ -15,10 +15,14 @@
 //! API implications of adding new members for additional query parameters in future GitLab
 //! releases.
 
+mod ignore;
 mod paged;
 
 pub mod projects;
 pub mod users;
+
+pub use self::ignore::ignore;
+pub use self::ignore::Ignore;
 
 pub use self::paged::paged;
 pub use self::paged::LinkHeaderParseError;

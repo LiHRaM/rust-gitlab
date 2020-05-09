@@ -63,20 +63,4 @@ where
 
         serde_json::from_value::<T>(v).map_err(GitlabError::data_type::<T>)
     }
-
-    fn no_answer_query(&self, client: &dyn GitlabClient) -> Result<(), GitlabError> {
-        let mut url = client.rest_endpoint(&self.endpoint())?;
-        self.add_parameters(url.query_pairs_mut());
-
-        let req = client
-            .build_rest(self.method(), url)
-            .form(&self.form_data());
-        let rsp = client.rest(req)?;
-        if !rsp.status().is_success() {
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-            return Err(GitlabError::from_gitlab(v));
-        }
-
-        Ok(())
-    }
 }
