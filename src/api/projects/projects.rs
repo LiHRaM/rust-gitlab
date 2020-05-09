@@ -63,12 +63,12 @@ impl fmt::Display for ProjectOrderBy {
 /// Query for projects on an instance.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
-pub struct Projects {
+pub struct Projects<'a> {
     /// Search for projects using a query string.
     ///
     /// The search query will be escaped automatically.
     #[builder(default)]
-    search: Option<String>,
+    search: Option<Cow<'a, str>>,
 
     /// Filter projects by its archived state.
     #[builder(default)]
@@ -105,7 +105,7 @@ pub struct Projects {
     with_merge_requests_enabled: Option<bool>,
     /// Filter projects by programming language.
     #[builder(default)]
-    with_programming_language: Option<String>,
+    with_programming_language: Option<Cow<'a, str>>,
     /// Filter projects by those with a failing wiki checksum.
     #[builder(default)]
     wiki_checksum_failed: Option<bool>,
@@ -118,7 +118,7 @@ pub struct Projects {
 
     /// Search for users with a given custom attribute set.
     #[builder(setter(name = "_custom_attributes"), default, private)]
-    custom_attributes: BTreeMap<String, String>,
+    custom_attributes: BTreeMap<Cow<'a, str>, Cow<'a, str>>,
     /// Search for users with custom attributes.
     #[builder(default)]
     with_custom_attributes: Option<bool>,
@@ -144,19 +144,19 @@ pub struct Projects {
     sort: Option<SortOrder>,
 }
 
-impl Projects {
+impl<'a> Projects<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> ProjectsBuilder {
+    pub fn builder() -> ProjectsBuilder<'a> {
         ProjectsBuilder::default()
     }
 }
 
-impl ProjectsBuilder {
+impl<'a> ProjectsBuilder<'a> {
     /// Add a custom attribute search parameter.
     pub fn custom_attribute<K, V>(&mut self, key: K, value: V) -> &mut Self
     where
-        K: Into<String>,
-        V: Into<String>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.custom_attributes
             .get_or_insert_with(Default::default)
@@ -168,8 +168,8 @@ impl ProjectsBuilder {
     pub fn custom_attributes<I, K, V>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = (K, V)>,
-        K: Into<String>,
-        V: Into<String>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.custom_attributes
             .get_or_insert_with(Default::default)
@@ -186,7 +186,7 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl Endpoint for Projects {
+impl<'a> Endpoint for Projects<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
@@ -262,7 +262,7 @@ impl Endpoint for Projects {
     }
 }
 
-impl Pageable for Projects {
+impl<'a> Pageable for Projects<'a> {
     fn use_keyset_pagination(&self) -> bool {
         self.order_by
             .map_or(false, |order_by| order_by.use_keyset_pagination())
