@@ -5,7 +5,9 @@
 // except according to those terms.
 
 use std::borrow::Cow;
+use std::cmp;
 use std::collections::{BTreeMap, HashMap};
+use std::ops::Range;
 
 use bytes::Bytes;
 use derive_builder::Builder;
@@ -193,6 +195,168 @@ impl Client for SingleTestClient {
             .get(&(request.method().clone(), request.uri().path().into()))
             .expect("no matching request found")
             .response()
+            .map(Into::into))
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum Page {
+    ByNumber { number: usize, size: usize },
+    ByKeyset { start: usize, size: usize },
+}
+
+impl Page {
+    fn range(self) -> Range<usize> {
+        match self {
+            Page::ByNumber {
+                number,
+                size,
+            } => {
+                assert_ne!(number, 0);
+                let start = size * (number - 1);
+                start..start + size
+            },
+            Page::ByKeyset {
+                start,
+                size,
+            } => start..start + size,
+        }
+    }
+}
+
+pub struct PagedTestClient<T> {
+    expected: ExpectedUrl,
+    data: Vec<T>,
+}
+
+const KEYSET_QUERY_PARAM: &str = "__test_keyset";
+const DEFAULT_PAGE_SIZE: usize = 20;
+
+impl<T> PagedTestClient<T> {
+    pub fn new_raw<I>(expected: ExpectedUrl, data: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+    {
+        Self {
+            expected,
+            data: data.into_iter().collect(),
+        }
+    }
+}
+
+impl<T> Client for PagedTestClient<T>
+where
+    T: Serialize,
+{
+    type Error = TestClientError;
+
+    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, ApiError<Self::Error>> {
+        Ok(Url::parse(&format!("{}/{}", CLIENT_STUB, endpoint))?)
+    }
+
+    fn rest(
+        &self,
+        request: RequestBuilder,
+        body: Vec<u8>,
+    ) -> Result<Response<Bytes>, ApiError<Self::Error>> {
+        let url = Url::parse(&format!("{}", request.uri_ref().unwrap())).unwrap();
+
+        self.expected
+            .check(request.method_ref().unwrap().clone(), &url);
+        assert_eq!(
+            &body,
+            &self.expected.body,
+            "\nbody is not the same:\nactual  : {}\nexpected: {}\n",
+            String::from_utf8_lossy(&body),
+            String::from_utf8_lossy(&self.expected.body),
+        );
+        let headers = request.headers_ref().unwrap();
+        let content_type = headers
+            .get_all(header::CONTENT_TYPE)
+            .iter()
+            .map(|value| value.to_str().unwrap());
+        if let Some(expected_content_type) = self.expected.content_type.as_ref() {
+            itertools::assert_equal(content_type, [expected_content_type].iter().cloned());
+        } else {
+            assert_eq!(content_type.count(), 0);
+        }
+
+        let mut pagination = false;
+        let mut keyset: Option<usize> = None;
+
+        let mut page: Option<usize> = None;
+        let mut per_page = DEFAULT_PAGE_SIZE;
+
+        for (ref key, ref value) in url.query_pairs() {
+            match key.as_ref() {
+                "pagination" => {
+                    assert_eq!(value, "keyset");
+                    pagination = true;
+                },
+                KEYSET_QUERY_PARAM => {
+                    keyset = Some(value.parse().unwrap());
+                },
+                "page" => {
+                    page = Some(value.parse().unwrap());
+                },
+                "per_page" => {
+                    per_page = value.parse().unwrap();
+                },
+                _ => (),
+            }
+        }
+
+        let page = if pagination {
+            Page::ByKeyset {
+                start: keyset.unwrap_or(0),
+                size: per_page,
+            }
+        } else {
+            Page::ByNumber {
+                number: page.unwrap_or(1),
+                size: per_page,
+            }
+        };
+        let range = {
+            // Limit the range to the amount of data actually available.
+            let mut range = page.range();
+            range.end = cmp::min(range.end, self.data.len());
+            range
+        };
+
+        let request = request.body(body).unwrap();
+        assert_eq!(*request.method(), Method::GET);
+
+        let response = Response::builder().status(self.expected.status);
+        let response = if pagination {
+            if range.end + 1 < self.data.len() {
+                // Generate the URL for the next page.
+                let next_url = {
+                    let mut next_url = url.clone();
+                    next_url
+                        .query_pairs_mut()
+                        .clear()
+                        .extend_pairs(
+                            url.query_pairs()
+                                .filter(|(key, _)| key != KEYSET_QUERY_PARAM),
+                        )
+                        .append_pair(KEYSET_QUERY_PARAM, &format!("{}", range.end));
+                    next_url
+                };
+                let next_header = format!("<{}>; rel=\"next\"", next_url);
+                response.header(http::header::LINK, next_header)
+            } else {
+                response
+            }
+        } else {
+            response
+        };
+
+        let data_page = &self.data[range];
+
+        Ok(response
+            .body(serde_json::to_vec(data_page).unwrap())
+            .unwrap()
             .map(Into::into))
     }
 }
