@@ -4,6 +4,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#![warn(missing_docs)]
+
 //! API endpoint structures
 //!
 //! The types in this module are meant to aid in constructing the appropriate calls using type-safe
