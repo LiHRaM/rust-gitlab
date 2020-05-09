@@ -5,7 +5,6 @@
 // except according to those terms.
 
 use std::collections::BTreeMap;
-use std::fmt;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
@@ -51,12 +50,6 @@ impl ProjectOrderBy {
             ProjectOrderBy::UpdatedAt => "updated_at",
             ProjectOrderBy::LastActivityAt => "last_activity_at",
         }
-    }
-}
-
-impl fmt::Display for ProjectOrderBy {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 

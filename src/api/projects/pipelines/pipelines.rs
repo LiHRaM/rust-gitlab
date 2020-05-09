@@ -5,7 +5,6 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::fmt;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
@@ -38,12 +37,6 @@ impl PipelineScope {
             PipelineScope::Branches => "branches",
             PipelineScope::Tags => "tags",
         }
-    }
-}
-
-impl fmt::Display for PipelineScope {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 
@@ -84,12 +77,6 @@ impl PipelineStatus {
     }
 }
 
-impl fmt::Display for PipelineStatus {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
 /// Keys pipeline results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PipelineOrderBy {
@@ -121,12 +108,6 @@ impl PipelineOrderBy {
             PipelineOrderBy::UpdatedAt => "updated_at",
             PipelineOrderBy::UserId => "user_id",
         }
-    }
-}
-
-impl fmt::Display for PipelineOrderBy {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 

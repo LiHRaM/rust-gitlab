@@ -5,7 +5,6 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::fmt;
 
 use derive_builder::Builder;
 
@@ -39,12 +38,6 @@ impl PipelineVariableType {
             PipelineVariableType::EnvVar => "env_var",
             PipelineVariableType::File => "file",
         }
-    }
-}
-
-impl fmt::Display for PipelineVariableType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 

@@ -6,7 +6,6 @@
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::fmt;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
@@ -45,12 +44,6 @@ impl UserOrderBy {
             UserOrderBy::CreatedAt => "created_at",
             UserOrderBy::UpdatedAt => "updated_at",
         }
-    }
-}
-
-impl fmt::Display for UserOrderBy {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 

@@ -5,7 +5,6 @@
 // except according to those terms.
 
 use std::collections::HashSet;
-use std::fmt;
 
 use derive_builder::Builder;
 
@@ -46,12 +45,6 @@ impl JobScope {
             JobScope::Skipped => "skipped",
             JobScope::Manual => "manual",
         }
-    }
-}
-
-impl fmt::Display for JobScope {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 
