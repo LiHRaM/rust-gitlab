@@ -6,6 +6,10 @@
 
 #![allow(clippy::module_inception)]
 
+//! Project-related API endpoints
+//!
+//! These endpoints are used for querying and modifying projects and their resources.
+
 mod projects;
 
 pub use self::projects::ProjectOrderBy;

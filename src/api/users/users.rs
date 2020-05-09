@@ -13,12 +13,18 @@ use derive_builder::Builder;
 
 use crate::query_prelude::*;
 
+/// Keys user results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserOrderBy {
+    /// Order by the user ID.
     Id,
+    /// Order by the user display name.
     Name,
+    /// Order by the username.
     Username,
+    /// Order by the creation date of the user.
     CreatedAt,
+    /// Order by the last updated date of the project.
     UpdatedAt,
 }
 
@@ -29,6 +35,7 @@ impl Default for UserOrderBy {
 }
 
 impl UserOrderBy {
+    /// The ordering as a query parameter.
     fn as_str(self) -> &'static str {
         match self {
             UserOrderBy::Id => "id",
@@ -46,12 +53,16 @@ impl fmt::Display for UserOrderBy {
     }
 }
 
+/// Representation of a user provided by an external service.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExternalProvider<'a> {
+    /// The ID of the user on the service.
     pub id: u64,
+    /// The name of the service.
     pub name: Cow<'a, str>,
 }
 
+/// Query for users on an instance.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct Users<'a> {
@@ -110,6 +121,7 @@ pub struct Users<'a> {
 }
 
 impl<'a> Users<'a> {
+    /// Create a builder for the endpoint.
     pub fn builder() -> UsersBuilder<'a> {
         UsersBuilder::default()
     }

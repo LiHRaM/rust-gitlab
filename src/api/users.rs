@@ -6,6 +6,10 @@
 
 #![allow(clippy::module_inception)]
 
+//! User-related API endpoints
+//!
+//! These endpoints are used for querying and modifying users and their resources.
+
 mod current_user;
 mod user;
 mod users;

@@ -6,8 +6,10 @@
 
 use crate::query_prelude::*;
 
+/// Query a user by ID.
 #[derive(Debug, Clone, Copy)]
 pub struct User {
+    /// The ID of the user.
     pub id: u64,
 }
 

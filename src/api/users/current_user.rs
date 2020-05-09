@@ -4,8 +4,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use derive_builder::Builder;
+
 use crate::query_prelude::*;
 
+/// Query information about the API calling user.
 #[derive(Debug)]
 pub struct CurrentUser;
 
