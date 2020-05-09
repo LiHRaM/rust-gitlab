@@ -11,7 +11,7 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::query_prelude::*;
+use crate::api::endpoint_prelude::*;
 
 /// Keys user results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -173,10 +173,7 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl<'a, T> SingleQuery<Vec<T>> for Users<'a>
-where
-    T: DeserializeOwned,
-{
+impl<'a> Endpoint for Users<'a> {
     fn method(&self) -> Method {
         Method::GET
     }

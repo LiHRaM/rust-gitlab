@@ -9,8 +9,8 @@ use std::fmt;
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Scopes for jobs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -96,10 +96,7 @@ impl<'a> JobsBuilder<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<Vec<T>> for Jobs<'a>
-where
-    T: DeserializeOwned,
-{
+impl<'a> Endpoint for Jobs<'a> {
     fn method(&self) -> Method {
         Method::GET
     }

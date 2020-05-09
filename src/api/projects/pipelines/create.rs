@@ -9,8 +9,8 @@ use std::fmt;
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// The type of a pipeline variable.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -114,10 +114,7 @@ impl<'a> CreatePipelineBuilder<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<T> for CreatePipeline<'a>
-where
-    T: DeserializeOwned,
-{
+impl<'a> Endpoint for CreatePipeline<'a> {
     fn method(&self) -> Method {
         Method::POST
     }
@@ -139,15 +136,6 @@ where
                 ),
             ]);
         });
-    }
-}
-
-impl<'a, T> Query<T> for CreatePipeline<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &dyn Client) -> Result<T, GitlabError> {
-        self.single_query(client)
     }
 }
 

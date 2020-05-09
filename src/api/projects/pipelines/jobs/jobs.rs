@@ -8,9 +8,9 @@ use std::collections::HashSet;
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::api::projects::JobScope;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Query for jobs within a pipeline.
 #[derive(Debug, Builder)]
@@ -55,10 +55,7 @@ impl<'a> JobsBuilder<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<Vec<T>> for Jobs<'a>
-where
-    T: DeserializeOwned,
-{
+impl<'a> Endpoint for Jobs<'a> {
     fn method(&self) -> Method {
         Method::GET
     }

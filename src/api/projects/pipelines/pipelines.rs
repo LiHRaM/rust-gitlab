@@ -10,8 +10,8 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Scopes for pipelines.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -190,10 +190,7 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl<'a, T> SingleQuery<Vec<T>> for Pipelines<'a>
-where
-    T: DeserializeOwned,
-{
+impl<'a> Endpoint for Pipelines<'a> {
     fn method(&self) -> Method {
         Method::GET
     }

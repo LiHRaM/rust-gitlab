@@ -10,7 +10,7 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::query_prelude::*;
+use crate::api::endpoint_prelude::*;
 use crate::types::{AccessLevel, VisibilityLevel};
 
 /// Keys project results may be ordered by.
@@ -192,10 +192,7 @@ fn bool_as_str(b: bool) -> &'static str {
     }
 }
 
-impl<T> SingleQuery<Vec<T>> for Projects
-where
-    T: DeserializeOwned,
-{
+impl Endpoint for Projects {
     fn method(&self) -> Method {
         Method::GET
     }

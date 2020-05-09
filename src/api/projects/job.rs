@@ -6,8 +6,8 @@
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Query for a job within a project.
 #[derive(Debug, Builder)]
@@ -27,25 +27,13 @@ impl<'a> Job<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<T> for Job<'a>
-where
-    T: DeserializeOwned,
-{
+impl<'a> Endpoint for Job<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("projects/{}/jobs/{}", self.project, self.job).into()
-    }
-}
-
-impl<'a, T> Query<T> for Job<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &dyn Client) -> Result<T, GitlabError> {
-        self.single_query(client)
     }
 }
 

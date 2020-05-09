@@ -6,8 +6,8 @@
 
 use derive_builder::Builder;
 
+use crate::api::endpoint_prelude::*;
 use crate::query_common::NameOrId;
-use crate::query_prelude::*;
 
 /// Retry a pipeline.
 ///
@@ -28,10 +28,7 @@ impl<'a> RetryPipeline<'a> {
     }
 }
 
-impl<'a, T> SingleQuery<T> for RetryPipeline<'a>
-where
-    T: DeserializeOwned,
-{
+impl<'a> Endpoint for RetryPipeline<'a> {
     fn method(&self) -> Method {
         Method::POST
     }
@@ -42,15 +39,6 @@ where
             self.project, self.pipeline,
         )
         .into()
-    }
-}
-
-impl<'a, T> Query<T> for RetryPipeline<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &dyn Client) -> Result<T, GitlabError> {
-        self.single_query(client)
     }
 }
 

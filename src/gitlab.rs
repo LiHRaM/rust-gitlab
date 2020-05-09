@@ -20,12 +20,11 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
-use crate::api;
 use crate::api::projects::pipelines;
 use crate::api::projects::Projects;
 use crate::api::users::{CurrentUser, User, Users};
+use crate::api::{self, Query};
 use crate::auth::{Auth, AuthError};
-use crate::query::Query;
 use crate::types::*;
 
 macro_rules! query_param_slice {

@@ -10,9 +10,8 @@ use serde::de::DeserializeOwned;
 use thiserror::Error;
 use url::Url;
 
-use crate::api::Client;
+use crate::api::{Client, Endpoint, Query};
 use crate::gitlab::{GitlabError, PaginationError};
-use crate::query::{Query, SingleQuery};
 
 struct LinkHeader<'a> {
     url: &'a str,
@@ -154,7 +153,7 @@ pub trait Pageable {
 
 impl<E, T> Query<Vec<T>> for Paged<E>
 where
-    E: SingleQuery<Vec<T>>,
+    E: Endpoint,
     E: Pageable,
     T: DeserializeOwned,
 {

@@ -6,7 +6,7 @@
 
 use derive_builder::Builder;
 
-use crate::query_prelude::*;
+use crate::api::endpoint_prelude::*;
 
 /// Query a user by ID.
 #[derive(Debug, Clone, Copy, Builder)]
@@ -22,25 +22,13 @@ impl User {
     }
 }
 
-impl<T> SingleQuery<T> for User
-where
-    T: DeserializeOwned,
-{
+impl Endpoint for User {
     fn method(&self) -> Method {
         Method::GET
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("users/{}", self.user).into()
-    }
-}
-
-impl<T> Query<T> for User
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &dyn Client) -> Result<T, GitlabError> {
-        self.single_query(client)
     }
 }
 

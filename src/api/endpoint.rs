@@ -11,30 +11,35 @@ use serde::de::DeserializeOwned;
 use url::form_urlencoded::Serializer;
 use url::UrlQuery;
 
-use crate::api::Client;
+use crate::api::{Client, Query};
 use crate::gitlab::GitlabError;
 
+/// A type for managing query parameters.
 pub type Pairs<'a> = Serializer<'a, UrlQuery<'a>>;
 
-pub trait Query<T> {
-    fn query(&self, client: &dyn Client) -> Result<T, GitlabError>;
-}
-
-pub trait SingleQuery<T>
-where
-    T: DeserializeOwned,
-{
+/// A trait for providing the necessary information for a single REST API endpoint.
+pub trait Endpoint {
+    /// The HTTP method to use for the endpoint.
     fn method(&self) -> Method;
+    /// The path to the endpoint.
     fn endpoint(&self) -> Cow<'static, str>;
 
+    /// Add query parameters for the endpoint.
     #[allow(unused_variables)]
     fn add_parameters(&self, pairs: Pairs) {}
 
+    /// Form data for the endpoint.
     fn form_data(&self) -> Vec<u8> {
         Vec::new()
     }
+}
 
-    fn single_query(&self, client: &dyn Client) -> Result<T, GitlabError> {
+impl<E, T> Query<T> for E
+where
+    E: Endpoint,
+    T: DeserializeOwned,
+{
+    fn query(&self, client: &dyn Client) -> Result<T, GitlabError> {
         let mut url = client.rest_endpoint(&self.endpoint())?;
         self.add_parameters(url.query_pairs_mut());
 
