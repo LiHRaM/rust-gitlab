@@ -184,15 +184,23 @@ impl<'a> Endpoint for Users<'a> {
         }
         self.external
             .map(|value| pairs.append_pair("external", common::bool_str(value)));
-        self.created_before
-            .map(|value| pairs.append_pair("created_before", &value.to_rfc3339()));
-        self.created_after
-            .map(|value| pairs.append_pair("created_before", &value.to_rfc3339()));
+        self.created_before.map(|value| {
+            pairs.append_pair(
+                "created_before",
+                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+            )
+        });
+        self.created_after.map(|value| {
+            pairs.append_pair(
+                "created_after",
+                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+            )
+        });
 
         pairs.extend_pairs(
             self.custom_attributes
                 .iter()
-                .map(|(key, value)| (format!("custom_attribute[{}]", key), value)),
+                .map(|(key, value)| (format!("custom_attributes[{}]", key), value)),
         );
         self.with_custom_attributes
             .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
