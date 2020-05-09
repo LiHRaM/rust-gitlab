@@ -10,7 +10,7 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::api::common::{AccessLevel, SortOrder, VisibilityLevel};
+use crate::api::common::{self, AccessLevel, SortOrder, VisibilityLevel};
 use crate::api::endpoint_prelude::*;
 
 /// Keys project results may be ordered by.
@@ -178,14 +178,6 @@ impl<'a> ProjectsBuilder<'a> {
     }
 }
 
-fn bool_as_str(b: bool) -> &'static str {
-    if b {
-        "true"
-    } else {
-        "false"
-    }
-}
-
 impl<'a> Endpoint for Projects<'a> {
     fn method(&self) -> Method {
         Method::GET
@@ -200,32 +192,32 @@ impl<'a> Endpoint for Projects<'a> {
             .as_ref()
             .map(|value| pairs.append_pair("search", value));
         self.archived
-            .map(|value| pairs.append_pair("archived", bool_as_str(value)));
+            .map(|value| pairs.append_pair("archived", common::bool_str(value)));
         self.visibility
             .map(|value| pairs.append_pair("visibility", value.as_str()));
         self.search_namespaces
-            .map(|value| pairs.append_pair("search_namespaces", bool_as_str(value)));
+            .map(|value| pairs.append_pair("search_namespaces", common::bool_str(value)));
         self.simple
-            .map(|value| pairs.append_pair("simple", bool_as_str(value)));
+            .map(|value| pairs.append_pair("simple", common::bool_str(value)));
         self.owned
-            .map(|value| pairs.append_pair("owned", bool_as_str(value)));
+            .map(|value| pairs.append_pair("owned", common::bool_str(value)));
         self.membership
-            .map(|value| pairs.append_pair("membership", bool_as_str(value)));
+            .map(|value| pairs.append_pair("membership", common::bool_str(value)));
         self.starred
-            .map(|value| pairs.append_pair("starred", bool_as_str(value)));
+            .map(|value| pairs.append_pair("starred", common::bool_str(value)));
         self.statistics
-            .map(|value| pairs.append_pair("statistics", bool_as_str(value)));
+            .map(|value| pairs.append_pair("statistics", common::bool_str(value)));
         self.with_issues_enabled
-            .map(|value| pairs.append_pair("with_issues_enabled", bool_as_str(value)));
+            .map(|value| pairs.append_pair("with_issues_enabled", common::bool_str(value)));
         self.with_merge_requests_enabled
-            .map(|value| pairs.append_pair("with_merge_requests_enabled", bool_as_str(value)));
+            .map(|value| pairs.append_pair("with_merge_requests_enabled", common::bool_str(value)));
         self.with_programming_language
             .as_ref()
             .map(|value| pairs.append_pair("with_programming_language", value));
         self.wiki_checksum_failed
-            .map(|value| pairs.append_pair("wiki_checksum_failed", bool_as_str(value)));
+            .map(|value| pairs.append_pair("wiki_checksum_failed", common::bool_str(value)));
         self.repository_checksum_failed
-            .map(|value| pairs.append_pair("repository_checksum_failed", bool_as_str(value)));
+            .map(|value| pairs.append_pair("repository_checksum_failed", common::bool_str(value)));
 
         self.min_access_level
             .map(|value| pairs.append_pair("min_access_level", &format!("{}", value.as_u64())));
@@ -253,7 +245,7 @@ impl<'a> Endpoint for Projects<'a> {
                 .map(|(key, value)| (format!("custom_attribute[{}]", key), value)),
         );
         self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", bool_as_str(value)));
+            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
 
         self.order_by
             .map(|value| pairs.append_pair("order_by", value.as_str()));

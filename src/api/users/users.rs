@@ -160,14 +160,6 @@ impl<'a> UsersBuilder<'a> {
     }
 }
 
-fn bool_as_str(b: bool) -> &'static str {
-    if b {
-        "true"
-    } else {
-        "false"
-    }
-}
-
 impl<'a> Endpoint for Users<'a> {
     fn method(&self) -> Method {
         Method::GET
@@ -191,7 +183,7 @@ impl<'a> Endpoint for Users<'a> {
             pairs.append_pair("provider", &value.name);
         }
         self.external
-            .map(|value| pairs.append_pair("external", bool_as_str(value)));
+            .map(|value| pairs.append_pair("external", common::bool_str(value)));
         self.created_before
             .map(|value| pairs.append_pair("created_before", &value.to_rfc3339()));
         self.created_after
@@ -203,7 +195,7 @@ impl<'a> Endpoint for Users<'a> {
                 .map(|(key, value)| (format!("custom_attribute[{}]", key), value)),
         );
         self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", bool_as_str(value)));
+            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
 
         self.order_by
             .map(|value| pairs.append_pair("order_by", value.as_str()));
@@ -212,7 +204,7 @@ impl<'a> Endpoint for Users<'a> {
         self.two_factor
             .map(|value| pairs.append_pair("two_factor", value.as_str()));
         self.without_projects
-            .map(|value| pairs.append_pair("without_projects", bool_as_str(value)));
+            .map(|value| pairs.append_pair("without_projects", common::bool_str(value)));
     }
 }
 

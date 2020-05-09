@@ -10,7 +10,7 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::api::common::{NameOrId, SortOrder};
+use crate::api::common::{self, NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
 
 /// Scopes for pipelines.
@@ -182,14 +182,6 @@ impl<'a> Pipelines<'a> {
     }
 }
 
-fn bool_as_str(b: bool) -> &'static str {
-    if b {
-        "true"
-    } else {
-        "false"
-    }
-}
-
 impl<'a> Endpoint for Pipelines<'a> {
     fn method(&self) -> Method {
         Method::GET
@@ -211,7 +203,7 @@ impl<'a> Endpoint for Pipelines<'a> {
             .as_ref()
             .map(|value| pairs.append_pair("sha", value));
         self.yaml_errors
-            .map(|value| pairs.append_pair("yaml_errors", bool_as_str(value)));
+            .map(|value| pairs.append_pair("yaml_errors", common::bool_str(value)));
         self.name
             .as_ref()
             .map(|value| pairs.append_pair("name", value));

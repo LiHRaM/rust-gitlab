@@ -181,3 +181,12 @@ impl VisibilityLevel {
         }
     }
 }
+
+/// The string representation of booleans for GitLab.
+pub fn bool_str(b: bool) -> &'static str {
+    if b {
+        "true"
+    } else {
+        "false"
+    }
+}
