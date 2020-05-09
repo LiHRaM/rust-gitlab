@@ -15,5 +15,13 @@
 //! API implications of adding new members for additional query parameters in future GitLab
 //! releases.
 
+mod paged;
+
 pub mod projects;
 pub mod users;
+
+pub use self::paged::paged;
+pub use self::paged::LinkHeaderParseError;
+pub use self::paged::Pageable;
+pub use self::paged::Paged;
+pub use self::paged::Pagination;

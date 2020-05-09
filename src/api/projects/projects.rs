@@ -64,10 +64,6 @@ impl fmt::Display for ProjectOrderBy {
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct Projects {
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
-
     /// Search for projects using a query string.
     ///
     /// The search query will be escaped automatically.
@@ -275,26 +271,10 @@ where
     }
 }
 
-impl<T> PagedQuery<T> for Projects
-where
-    T: DeserializeOwned,
-{
-    fn pagination(&self) -> Pagination {
-        self.pagination
-    }
-
+impl Pageable for Projects {
     fn use_keyset_pagination(&self) -> bool {
         self.order_by
             .map_or(false, |order_by| order_by.use_keyset_pagination())
-    }
-}
-
-impl<T> Query<Vec<T>> for Projects
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &dyn GitlabClient) -> Result<Vec<T>, GitlabError> {
-        self.paged_query(client)
     }
 }
 

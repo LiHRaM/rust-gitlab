@@ -138,10 +138,6 @@ pub struct Pipelines<'a> {
     #[builder(setter(into))]
     project: NameOrId<'a>,
 
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
-
     /// Filter pipelines by its scope.
     #[builder(default)]
     scope: Option<PipelineScope>,
@@ -246,23 +242,7 @@ where
     }
 }
 
-impl<'a, T> PagedQuery<T> for Pipelines<'a>
-where
-    T: DeserializeOwned,
-{
-    fn pagination(&self) -> Pagination {
-        self.pagination
-    }
-}
-
-impl<'a, T> Query<Vec<T>> for Pipelines<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &dyn GitlabClient) -> Result<Vec<T>, GitlabError> {
-        self.paged_query(client)
-    }
-}
+impl<'a> Pageable for Pipelines<'a> {}
 
 #[cfg(test)]
 mod tests {

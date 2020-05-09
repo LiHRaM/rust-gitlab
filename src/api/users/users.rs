@@ -89,9 +89,6 @@ pub struct Users<'a> {
     /// Return only blocked users.
     #[builder(default)]
     blocked: Option<()>,
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
 
     /// Search for a user with a given external provider identity.
     #[builder(default)]
@@ -227,23 +224,7 @@ where
     }
 }
 
-impl<'a, T> PagedQuery<T> for Users<'a>
-where
-    T: DeserializeOwned,
-{
-    fn pagination(&self) -> Pagination {
-        self.pagination
-    }
-}
-
-impl<'a, T> Query<Vec<T>> for Users<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &dyn GitlabClient) -> Result<Vec<T>, GitlabError> {
-        self.paged_query(client)
-    }
-}
+impl<'a> Pageable for Users<'a> {}
 
 #[cfg(test)]
 mod tests {

@@ -22,10 +22,6 @@ pub struct Jobs<'a> {
     /// The ID of the pipeline.
     pipeline: u64,
 
-    /// Pagination to use for the results.
-    #[builder(default)]
-    pagination: Pagination,
-
     /// The scopes to filter jobs by.
     #[builder(setter(name = "_scopes"), default, private)]
     scopes: HashSet<JobScope>,
@@ -78,23 +74,7 @@ where
     }
 }
 
-impl<'a, T> PagedQuery<T> for Jobs<'a>
-where
-    T: DeserializeOwned,
-{
-    fn pagination(&self) -> Pagination {
-        self.pagination
-    }
-}
-
-impl<'a, T> Query<Vec<T>> for Jobs<'a>
-where
-    T: DeserializeOwned,
-{
-    fn query(&self, client: &dyn GitlabClient) -> Result<Vec<T>, GitlabError> {
-        self.paged_query(client)
-    }
-}
+impl<'a> Pageable for Jobs<'a> {}
 
 #[cfg(test)]
 mod tests {

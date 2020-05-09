@@ -20,11 +20,12 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
+use crate::api;
 use crate::api::projects::pipelines;
 use crate::api::projects::Projects;
 use crate::api::users::{CurrentUser, User, Users};
 use crate::auth::{Auth, AuthError};
-use crate::query::{GitlabClient, LinkHeaderParseError, Query};
+use crate::query::{GitlabClient, Query};
 use crate::types::*;
 
 macro_rules! query_param_slice {
@@ -52,7 +53,7 @@ pub enum PaginationError {
     #[error("failed to parse a Link HTTP header: {}", source)]
     LinkHeader {
         #[from]
-        source: LinkHeaderParseError,
+        source: api::LinkHeaderParseError,
     },
     #[error("failed to parse a Link HTTP header URL: {}", source)]
     InvalidUrl {
@@ -420,13 +421,13 @@ impl Gitlab {
         T: UserResult,
         N: AsRef<str>,
     {
-        Users::builder()
-            .username(name.as_ref())
-            .build()
-            .unwrap()
-            .query(self)?
-            .pop()
-            .ok_or_else(|| GitlabError::no_such_user(name.as_ref()))
+        api::paged(
+            Users::builder().username(name.as_ref()).build().unwrap(),
+            api::Pagination::All,
+        )
+        .query(self)?
+        .pop()
+        .ok_or_else(|| GitlabError::no_such_user(name.as_ref()))
     }
 
     /// Create a project
@@ -548,7 +549,11 @@ impl Gitlab {
         note = "use `gitlab::api::projects::Projects.query()` instead"
     )]
     pub fn owned_projects(&self) -> GitlabResult<Vec<Project>> {
-        Projects::builder().owned(true).build().unwrap().query(self)
+        api::paged(
+            Projects::builder().owned(true).build().unwrap(),
+            api::Pagination::All,
+        )
+        .query(self)
     }
 
     /// Find a project by id.
