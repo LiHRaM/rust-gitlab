@@ -85,3 +85,248 @@ where
         self.endpoint.use_keyset_pagination()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use http::StatusCode;
+    use serde::Deserialize;
+    use serde_json::json;
+
+    use crate::api::endpoint_prelude::*;
+    use crate::api::{self, ApiError, Query, SudoContext};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
+
+    struct Dummy;
+
+    impl Endpoint for Dummy {
+        fn method(&self) -> Method {
+            Method::GET
+        }
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "dummy".into()
+        }
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct DummyResult {
+        value: u8,
+    }
+
+    #[test]
+    fn test_gitlab_non_json_response() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "not json");
+
+        let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Json {
+            source,
+        } = err
+        {
+            assert_eq!(format!("{}", source), "expected ident at line 1 column 2");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_empty_response() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Json {
+            source,
+        } = err
+        {
+            assert_eq!(
+                format!("{}", source),
+                "EOF while parsing a value at line 1 column 0",
+            );
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_bad_json() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Json {
+            source,
+        } = err
+        {
+            assert_eq!(
+                format!("{}", source),
+                "EOF while parsing a value at line 1 column 0",
+            );
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "message": "dummy error message",
+            }),
+        );
+
+        let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection_legacy() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "error": "dummy error message",
+            }),
+        );
+
+        let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection_unknown() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "bogus": "dummy error message",
+            }),
+        );
+
+        let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "<unknown error>");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_bad_deserialization() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "not_value": 0,
+            }),
+        );
+
+        let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::DataType {
+            source,
+            typename,
+        } = err
+        {
+            assert_eq!(format!("{}", source), "missing field `value`");
+            assert_eq!(typename, "gitlab::api::sudo::tests::DummyResult");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_good_deserialization() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "value": 0,
+            }),
+        );
+
+        let res: DummyResult = api::sudo(Dummy, "user").query(&client).unwrap();
+        assert_eq!(res.value, 0);
+    }
+
+    #[test]
+    fn test_sudo_context() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .add_query_params(&[("sudo", "user")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "value": 0,
+            }),
+        );
+        let sudo_ctx = SudoContext::new("user");
+        let endpoint = sudo_ctx.apply(Dummy);
+
+        let res: DummyResult = endpoint.query(&client).unwrap();
+        assert_eq!(res.value, 0);
+    }
+}
