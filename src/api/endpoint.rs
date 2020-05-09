@@ -11,8 +11,7 @@ use serde::de::DeserializeOwned;
 use url::form_urlencoded::Serializer;
 use url::UrlQuery;
 
-use crate::api::{Client, Query};
-use crate::gitlab::GitlabError;
+use crate::api::{ApiError, Client, Query};
 
 /// A type for managing query parameters.
 pub type Pairs<'a> = Serializer<'a, UrlQuery<'a>>;
@@ -34,12 +33,13 @@ pub trait Endpoint {
     }
 }
 
-impl<E, T> Query<T> for E
+impl<E, T, C> Query<T, C> for E
 where
     E: Endpoint,
     T: DeserializeOwned,
+    C: Client,
 {
-    fn query(&self, client: &dyn Client) -> Result<T, GitlabError> {
+    fn query(&self, client: &C) -> Result<T, ApiError<C::Error>> {
         let mut url = client.rest_endpoint(&self.endpoint())?;
         self.add_parameters(url.query_pairs_mut());
 
@@ -48,11 +48,11 @@ where
             .form(&self.form_data());
         let rsp = client.rest(req)?;
         let status = rsp.status();
-        let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
+        let v = serde_json::from_reader(rsp)?;
         if !status.is_success() {
-            return Err(GitlabError::from_gitlab(v));
+            return Err(ApiError::from_gitlab(v));
         }
 
-        serde_json::from_value::<T>(v).map_err(GitlabError::data_type::<T>)
+        serde_json::from_value::<T>(v).map_err(ApiError::data_type::<T>)
     }
 }

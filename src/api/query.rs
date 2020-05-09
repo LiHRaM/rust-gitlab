@@ -4,11 +4,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::api::Client;
-use crate::gitlab::GitlabError;
+use crate::api::{ApiError, Client};
 
 /// A trait which represents a query which may be made to a GitLab client.
-pub trait Query<T> {
+pub trait Query<T, C>
+where
+    C: Client,
+{
     /// Perform the query against the client.
-    fn query(&self, client: &dyn Client) -> Result<T, GitlabError>;
+    fn query(&self, client: &C) -> Result<T, ApiError<C::Error>>;
 }

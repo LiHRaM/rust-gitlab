@@ -4,8 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::api::{Client, Endpoint, Query};
-use crate::gitlab::GitlabError;
+use crate::api::{ApiError, Client, Endpoint, Query};
 
 /// A query modifier that ignores the data returned from an endpoint.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -20,11 +19,12 @@ pub fn ignore<E>(endpoint: E) -> Ignore<E> {
     }
 }
 
-impl<E> Query<()> for Ignore<E>
+impl<E, C> Query<(), C> for Ignore<E>
 where
     E: Endpoint,
+    C: Client,
 {
-    fn query(&self, client: &dyn Client) -> Result<(), GitlabError> {
+    fn query(&self, client: &C) -> Result<(), ApiError<C::Error>> {
         let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
         self.endpoint.add_parameters(url.query_pairs_mut());
 
@@ -33,8 +33,8 @@ where
             .form(&self.endpoint.form_data());
         let rsp = client.rest(req)?;
         if !rsp.status().is_success() {
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-            return Err(GitlabError::from_gitlab(v));
+            let v = serde_json::from_reader(rsp)?;
+            return Err(ApiError::from_gitlab(v));
         }
 
         Ok(())

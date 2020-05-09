@@ -10,8 +10,33 @@ use serde::de::DeserializeOwned;
 use thiserror::Error;
 use url::Url;
 
-use crate::api::{Client, Endpoint, Query};
-use crate::gitlab::{GitlabError, PaginationError};
+use crate::api::{ApiError, Client, Endpoint, Query};
+
+/// Errors which may occur with pagination.
+#[derive(Debug, Error)]
+// TODO #[non_exhaustive]
+pub enum PaginationError {
+    /// A `Link` HTTP header can fail to parse.
+    #[error("failed to parse a Link HTTP header: {}", source)]
+    LinkHeader {
+        /// The source of the error.
+        #[from]
+        source: LinkHeaderParseError,
+    },
+    /// An invalid URL can be returned.
+    #[error("failed to parse a Link HTTP header URL: {}", source)]
+    InvalidUrl {
+        /// The source of the error.
+        #[from]
+        source: url::ParseError,
+    },
+    /// This is here to force `_` matching right now.
+    ///
+    /// **DO NOT USE**
+    #[doc(hidden)]
+    #[error("unreachable...")]
+    _NonExhaustive,
+}
 
 struct LinkHeader<'a> {
     url: &'a str,
@@ -151,13 +176,14 @@ pub trait Pageable {
     }
 }
 
-impl<E, T> Query<Vec<T>> for Paged<E>
+impl<E, T, C> Query<Vec<T>, C> for Paged<E>
 where
     E: Endpoint,
     E: Pageable,
     T: DeserializeOwned,
+    C: Client,
 {
-    fn query(&self, client: &dyn Client) -> Result<Vec<T>, GitlabError> {
+    fn query(&self, client: &C) -> Result<Vec<T>, ApiError<C::Error>> {
         let url = {
             let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
             self.endpoint.add_parameters(url.query_pairs_mut());
@@ -201,13 +227,13 @@ where
                 next_url = next_page_from_headers(rsp.headers())?;
             }
 
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
+            let v = serde_json::from_reader(rsp)?;
             if !status.is_success() {
-                return Err(GitlabError::from_gitlab(v));
+                return Err(ApiError::from_gitlab(v));
             }
 
             let page =
-                serde_json::from_value::<Vec<T>>(v).map_err(GitlabError::data_type::<Vec<T>>)?;
+                serde_json::from_value::<Vec<T>>(v).map_err(ApiError::data_type::<Vec<T>>)?;
             let page_len = page.len();
             results.extend(page);
 

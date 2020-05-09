@@ -48,27 +48,6 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
 
 #[derive(Debug, Error)]
 // TODO #[non_exhaustive]
-pub enum PaginationError {
-    #[error("failed to parse a Link HTTP header: {}", source)]
-    LinkHeader {
-        #[from]
-        source: api::LinkHeaderParseError,
-    },
-    #[error("failed to parse a Link HTTP header URL: {}", source)]
-    InvalidUrl {
-        #[from]
-        source: url::ParseError,
-    },
-    /// This is here to force `_` matching right now.
-    ///
-    /// **DO NOT USE**
-    #[doc(hidden)]
-    #[error("unreachable...")]
-    _NonExhaustive,
-}
-
-#[derive(Debug, Error)]
-// TODO #[non_exhaustive]
 pub enum GitlabError {
     #[error("failed to parse url: {}", source)]
     UrlParse {
@@ -108,10 +87,10 @@ pub enum GitlabError {
         source: serde_json::Error,
         typename: &'static str,
     },
-    #[error("failed to handle for pagination: {}", source)]
-    Pagination {
+    #[error("api error: {}", source)]
+    Api {
         #[from]
-        source: PaginationError,
+        source: api::ApiError<RestError>,
     },
     /// This is here to force `_` matching right now.
     ///
@@ -371,7 +350,7 @@ impl Gitlab {
         note = "use `gitlab::api::users::CurrentUser.query()` instead"
     )]
     pub fn current_user(&self) -> GitlabResult<UserPublic> {
-        CurrentUser::builder().build().unwrap().query(self)
+        Ok(CurrentUser::builder().build().unwrap().query(self)?)
     }
 
     /// Get all user accounts
@@ -403,11 +382,11 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        User::builder()
+        Ok(User::builder()
             .user(user.value())
             .build()
             .unwrap()
-            .query(self)
+            .query(self)?)
     }
 
     /// Find a user by username.
@@ -548,11 +527,11 @@ impl Gitlab {
         note = "use `gitlab::api::projects::Projects.query()` instead"
     )]
     pub fn owned_projects(&self) -> GitlabResult<Vec<Project>> {
-        api::paged(
+        Ok(api::paged(
             Projects::builder().owned(true).build().unwrap(),
             api::Pagination::All,
         )
-        .query(self)
+        .query(self)?)
     }
 
     /// Find a project by id.
@@ -1539,12 +1518,12 @@ impl Gitlab {
         note = "use `gitlab::api::projects::pipeline::Pipeline.query()` instead"
     )]
     pub fn pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
-        pipelines::Pipeline::builder()
+        Ok(pipelines::Pipeline::builder()
             .project(project.value())
             .pipeline(id.value())
             .build()
             .unwrap()
-            .query(self)
+            .query(self)?)
     }
 
     /// Get variables of a pipeline.
@@ -1571,7 +1550,7 @@ impl Gitlab {
         ref_: ObjectId,
         variables: &[PipelineVariable],
     ) -> GitlabResult<Pipeline> {
-        pipelines::CreatePipeline::builder()
+        Ok(pipelines::CreatePipeline::builder()
             .project(project.value())
             .ref_(ref_.value().as_str())
             .variables(variables.iter().map(|variable| {
@@ -1587,7 +1566,7 @@ impl Gitlab {
             }))
             .build()
             .unwrap()
-            .query(self)
+            .query(self)?)
     }
 
     /// Retry jobs in a pipeline.
@@ -1596,12 +1575,12 @@ impl Gitlab {
         note = "use `gitlab::api::projects::pipelines::RetryPipeline.query()` instead"
     )]
     pub fn retry_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
-        pipelines::RetryPipeline::builder()
+        Ok(pipelines::RetryPipeline::builder()
             .project(project.value())
             .pipeline(id.value())
             .build()
             .unwrap()
-            .query(self)
+            .query(self)?)
     }
 
     /// Cancel a pipeline.
@@ -1610,12 +1589,12 @@ impl Gitlab {
         note = "use `gitlab::api::projects::pipelines::CancelPipeline.query()` instead"
     )]
     pub fn cancel_pipeline(&self, project: ProjectId, id: PipelineId) -> GitlabResult<Pipeline> {
-        pipelines::CancelPipeline::builder()
+        Ok(pipelines::CancelPipeline::builder()
             .project(project.value())
             .pipeline(id.value())
             .build()
             .unwrap()
-            .query(self)
+            .query(self)?)
     }
 
     /// Get a list of jobs for a pipeline.
@@ -2271,8 +2250,31 @@ impl Gitlab {
     }
 }
 
+#[derive(Debug, Error)]
+// TODO #[non_exhaustive]
+pub enum RestError {
+    #[error("error setting auth header: {}", source)]
+    AuthError {
+        #[from]
+        source: AuthError,
+    },
+    #[error("communication with gitlab: {}", source)]
+    Communication {
+        #[from]
+        source: reqwest::Error,
+    },
+    /// This is here to force `_` matching right now.
+    ///
+    /// **DO NOT USE**
+    #[doc(hidden)]
+    #[error("unreachable...")]
+    _NonExhaustive,
+}
+
 impl api::Client for Gitlab {
-    fn rest_endpoint(&self, endpoint: &str) -> GitlabResult<Url> {
+    type Error = RestError;
+
+    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, api::ApiError<Self::Error>> {
         debug!(target: "gitlab", "REST api call {}", endpoint);
         Ok(self.rest_url.join(endpoint)?)
     }
@@ -2281,8 +2283,14 @@ impl api::Client for Gitlab {
         self.client.request(method, url)
     }
 
-    fn rest(&self, request: RequestBuilder) -> GitlabResult<HttpResponse> {
-        Ok(self.auth.set_header(request)?.send()?)
+    fn rest(&self, request: RequestBuilder) -> Result<HttpResponse, api::ApiError<Self::Error>> {
+        self.auth
+            .set_header(request)
+            .map_err(RestError::from)
+            .map_err(api::ApiError::client)?
+            .send()
+            .map_err(RestError::from)
+            .map_err(api::ApiError::client)
     }
 }
 
