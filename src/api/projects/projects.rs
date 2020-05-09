@@ -307,7 +307,7 @@ mod tests {
     use crate::api::projects::Projects;
 
     #[test]
-    fn defaults_work() {
+    fn defaults_are_sufficient() {
         Projects::builder().build().unwrap();
     }
 }

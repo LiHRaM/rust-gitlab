@@ -45,3 +45,13 @@ where
         self.single_query(client)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::api::users::CurrentUser;
+
+    #[test]
+    fn defaults_are_sufficient() {
+        CurrentUser::builder().build().unwrap();
+    }
+}

@@ -254,7 +254,7 @@ mod tests {
     use crate::api::users::Users;
 
     #[test]
-    fn defaults_work() {
+    fn defaults_are_sufficient() {
         Users::builder().build().unwrap();
     }
 }

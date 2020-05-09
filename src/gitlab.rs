@@ -423,7 +423,7 @@ impl Gitlab {
         V: AsRef<str>,
     {
         User::builder()
-            .id(user.value())
+            .user(user.value())
             .build()
             .unwrap()
             .query(self)
