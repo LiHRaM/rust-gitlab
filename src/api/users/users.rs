@@ -54,12 +54,20 @@ impl fmt::Display for UserOrderBy {
 }
 
 /// Representation of a user provided by an external service.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Builder)]
 pub struct ExternalProvider<'a> {
     /// The ID of the user on the service.
     pub id: u64,
     /// The name of the service.
+    #[builder(setter(into))]
     pub name: Cow<'a, str>,
+}
+
+impl<'a> ExternalProvider<'a> {
+    /// Create a builder for the external provider.
+    pub fn builder() -> ExternalProviderBuilder<'a> {
+        ExternalProviderBuilder::default()
+    }
 }
 
 /// Query for users on an instance.

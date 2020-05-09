@@ -9,8 +9,15 @@ use derive_builder::Builder;
 use crate::query_prelude::*;
 
 /// Query information about the API calling user.
-#[derive(Debug)]
-pub struct CurrentUser;
+#[derive(Debug, Clone, Copy, Builder)]
+pub struct CurrentUser {}
+
+impl CurrentUser {
+    /// Create a builder for the endpoint.
+    pub fn builder() -> CurrentUserBuilder {
+        CurrentUserBuilder::default()
+    }
+}
 
 impl<T> SingleQuery<T> for CurrentUser
 where

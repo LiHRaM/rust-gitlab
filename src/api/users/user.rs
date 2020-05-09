@@ -4,13 +4,22 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use derive_builder::Builder;
+
 use crate::query_prelude::*;
 
 /// Query a user by ID.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Builder)]
 pub struct User {
     /// The ID of the user.
-    pub id: u64,
+    id: u64,
+}
+
+impl User {
+    /// Create a builder for the endpoint.
+    pub fn builder() -> UserBuilder {
+        UserBuilder::default()
+    }
 }
 
 impl<T> SingleQuery<T> for User

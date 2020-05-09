@@ -329,7 +329,7 @@ impl Gitlab {
         };
 
         // Ensure the API is working.
-        let _: UserPublic = CurrentUser.query(&api)?;
+        let _: UserPublic = CurrentUser::builder().build().unwrap().query(&api)?;
 
         Ok(api)
     }
@@ -390,7 +390,7 @@ impl Gitlab {
         note = "use `gitlab::api::users::CurrentUser.query()` instead"
     )]
     pub fn current_user(&self) -> GitlabResult<UserPublic> {
-        CurrentUser.query(self)
+        CurrentUser::builder().build().unwrap().query(self)
     }
 
     /// Get all user accounts
@@ -422,10 +422,11 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        User {
-            id: user.value(),
-        }
-        .query(self)
+        User::builder()
+            .id(user.value())
+            .build()
+            .unwrap()
+            .query(self)
     }
 
     /// Find a user by username.
