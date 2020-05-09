@@ -298,8 +298,14 @@ fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, Pagination
 
 #[cfg(test)]
 mod tests {
+    use http::StatusCode;
+    use serde::{Deserialize, Serialize};
+    use serde_json::json;
+
+    use crate::api::endpoint_prelude::*;
     use crate::api::paged::LinkHeader;
-    use crate::api::{LinkHeaderParseError, Pagination};
+    use crate::api::{self, ApiError, LinkHeaderParseError, Pagination, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn test_link_header_no_brackets() {
@@ -353,5 +359,163 @@ mod tests {
     #[test]
     fn pagination_default() {
         assert_eq!(Pagination::default(), Pagination::All);
+    }
+
+    #[derive(Debug, Default)]
+    struct Dummy {
+        with_keyset: bool,
+    }
+
+    impl Endpoint for Dummy {
+        fn method(&self) -> Method {
+            Method::GET
+        }
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "paged_dummy".into()
+        }
+    }
+
+    impl Pageable for Dummy {
+        fn use_keyset_pagination(&self) -> bool {
+            self.with_keyset
+        }
+    }
+
+    #[derive(Debug, Deserialize, Serialize)]
+    struct DummyResult {
+        value: u8,
+    }
+
+    #[test]
+    fn test_gitlab_non_json_response() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "not json");
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Json {
+            source,
+        } = err
+        {
+            assert_eq!(format!("{}", source), "expected ident at line 1 column 2");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_bad_json() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Json {
+            source,
+        } = err
+        {
+            assert_eq!(
+                format!("{}", source),
+                "EOF while parsing a value at line 1 column 0",
+            );
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "message": "dummy error message",
+            }),
+        );
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection_legacy() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "error": "dummy error message",
+            }),
+        );
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection_unknown() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "bogus": "dummy error message",
+            }),
+        );
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "<unknown error>");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
     }
 }
