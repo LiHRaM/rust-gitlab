@@ -5,7 +5,6 @@
 // except according to those terms.
 
 use reqwest::header::HeaderMap;
-use reqwest::Method;
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 use url::Url;
@@ -220,7 +219,7 @@ where
                 page_url
             };
 
-            let req = client.build_rest(Method::GET, page_url);
+            let req = client.build_rest(self.endpoint.method(), page_url);
             let rsp = client.rest(req)?;
             let status = rsp.status();
 
