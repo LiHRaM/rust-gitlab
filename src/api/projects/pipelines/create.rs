@@ -42,7 +42,7 @@ impl PipelineVariableType {
 }
 
 /// A pipeline variable.
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Clone, Builder)]
 pub struct PipelineVariable<'a> {
     /// The name of the pipeline variable.
     #[builder(setter(into))]
