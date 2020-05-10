@@ -426,6 +426,11 @@ impl Gitlab {
     ///                     .unwrap();
     /// gitlab.create_project("My Project", Some("project"), Some(params));
     /// ```
+    #[allow(deprecated)]
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::CreateProject.query()` instead"
+    )]
     pub fn create_project<N: AsRef<str>, P: AsRef<str>>(
         &self,
         name: N,
