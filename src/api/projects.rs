@@ -15,6 +15,7 @@ mod edit;
 mod job;
 mod jobs;
 pub mod pipelines;
+mod project;
 mod projects;
 
 pub use self::create::AutoDevOpsDeployStrategy;
@@ -39,6 +40,9 @@ pub use self::job::JobBuilder;
 pub use self::jobs::JobScope;
 pub use self::jobs::Jobs;
 pub use self::jobs::JobsBuilder;
+
+pub use self::project::Project;
+pub use self::project::ProjectBuilder;
 
 pub use self::projects::ProjectOrderBy;
 pub use self::projects::Projects;

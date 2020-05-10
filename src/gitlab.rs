@@ -582,6 +582,10 @@ impl Gitlab {
     }
 
     /// Find a project by id.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::Project.query()` instead"
+    )]
     pub fn project<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Project>
     where
         I: IntoIterator,
@@ -598,6 +602,10 @@ impl Gitlab {
     }
 
     /// Find a project by name.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::Project.query()` instead"
+    )]
     pub fn project_by_name<N, I, K, V>(&self, name: N, params: I) -> GitlabResult<Project>
     where
         N: AsRef<str>,
