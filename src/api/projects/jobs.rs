@@ -10,6 +10,7 @@
 
 mod job;
 mod jobs;
+mod trace;
 
 pub use self::job::Job;
 pub use self::job::JobBuilder;
@@ -17,3 +18,6 @@ pub use self::job::JobBuilder;
 pub use self::jobs::JobScope;
 pub use self::jobs::Jobs;
 pub use self::jobs::JobsBuilder;
+
+pub use self::trace::JobTrace;
+pub use self::trace::JobTraceBuilder;

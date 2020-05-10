@@ -1676,16 +1676,19 @@ impl Gitlab {
     }
 
     /// Get a log for a specific job of a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipelines::jobs::JobTrace.query()` instead"
+    )]
     pub fn job_log(&self, project: ProjectId, job_id: JobId) -> GitlabResult<Vec<u8>> {
-        let full_url = self.create_url(format!("projects/{}/jobs/{}/trace", project, job_id))?;
-        let req = self.client.get(full_url);
-        let rsp = self.send_impl(req)?;
-        let status = rsp.status();
-        if !status.is_success() {
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-            return Err(GitlabError::from_gitlab(v));
-        }
-        Ok(rsp.bytes()?.to_vec())
+        Ok(api::raw(
+            projects::jobs::JobTrace::builder()
+                .project(project.value())
+                .job(job_id.value())
+                .build()
+                .unwrap(),
+        )
+        .query(self)?)
     }
 
     /// Get merge requests.
