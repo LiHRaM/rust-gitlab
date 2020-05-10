@@ -126,19 +126,19 @@ pub struct Pipelines<'a> {
     #[builder(default)]
     status: Option<PipelineStatus>,
     /// Filter pipelines by the owning ref.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     ref_: Option<Cow<'a, str>>,
     /// Filter pipelines for a given commit SHA.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     sha: Option<Cow<'a, str>>,
     /// Filter pipelines with or without YAML errors.
     #[builder(default)]
     yaml_errors: Option<bool>,
     /// Filter pipelines by the name of the triggering user.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     name: Option<Cow<'a, str>>,
     /// Filter pipelines by the username of the triggering user.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     username: Option<Cow<'a, str>>,
 
     /// Order results by a given key.

@@ -60,7 +60,7 @@ pub struct Projects<'a> {
     /// Search for projects using a query string.
     ///
     /// The search query will be escaped automatically.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     search: Option<Cow<'a, str>>,
 
     /// Filter projects by its archived state.
@@ -97,7 +97,7 @@ pub struct Projects<'a> {
     #[builder(default)]
     with_merge_requests_enabled: Option<bool>,
     /// Filter projects by programming language.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     with_programming_language: Option<Cow<'a, str>>,
     /// Filter projects by those with a failing wiki checksum.
     #[builder(default)]
