@@ -33,7 +33,7 @@ impl<'a> Endpoint for Pipeline<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/pipeline/{}", self.project, self.pipeline).into()
+        format!("projects/{}/pipelines/{}", self.project, self.pipeline).into()
     }
 }
 
