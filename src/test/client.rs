@@ -6,7 +6,7 @@
 
 use std::borrow::Cow;
 use std::cmp;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::ops::Range;
 
 use bytes::Bytes;
@@ -25,7 +25,7 @@ pub struct ExpectedUrl {
     pub method: Method,
     pub endpoint: &'static str,
     #[builder(default)]
-    pub query: BTreeMap<Cow<'static, str>, Cow<'static, str>>,
+    pub query: Vec<(Cow<'static, str>, Cow<'static, str>)>,
     #[builder(setter(strip_option, into), default)]
     pub content_type: Option<String>,
     #[builder(default)]
@@ -40,7 +40,7 @@ pub struct ExpectedUrl {
 impl ExpectedUrlBuilder {
     pub fn add_query_params(&mut self, pairs: &[(&'static str, &'static str)]) -> &mut Self {
         self.query
-            .get_or_insert_with(BTreeMap::new)
+            .get_or_insert_with(Vec::new)
             .extend(pairs.iter().cloned().map(|(k, v)| (k.into(), v.into())));
         self
     }
@@ -73,9 +73,11 @@ impl ExpectedUrl {
                 continue;
             }
 
-            if let Some(expected) = self.query.get(key.as_ref()) {
-                assert_eq!(value, expected);
-            } else {
+            let found = self.query.iter().any(|(expected_key, expected_value)| {
+                key == expected_key && value == expected_value
+            });
+
+            if !found {
                 panic!("unexpected query parameter `{}={}`", key, value);
             }
             count += 1;
