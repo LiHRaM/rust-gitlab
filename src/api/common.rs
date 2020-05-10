@@ -161,7 +161,7 @@ impl<'a> From<String> for NameOrId<'a> {
 }
 
 /// Visibility levels of projects.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VisibilityLevel {
     /// The project is visible to anonymous users.
     Public,
