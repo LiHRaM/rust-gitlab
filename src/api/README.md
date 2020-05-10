@@ -8,6 +8,10 @@ These API endpoints have been implemented.
   * `PUT    /projects/:project` `projects/projects/edit.rs`
   * `GET    /projects/:project/jobs` `projects/jobs/jobs.rs`
   * `GET    /projects/:project/jobs/:id` `projects/jobs/job.rs`
+  * `POST   /projects/:project/jobs/:id/cancel` `projects/jobs/cancel.rs`
+  * `POST   /projects/:project/jobs/:id/erase` `projects/jobs/erase.rs`
+  * `POST   /projects/:project/jobs/:id/retry` `projects/jobs/retry.rs`
+  * `POST   /projects/:project/jobs/:id/play` `projects/jobs/play.rs`
   * `GET    /projects/:project/jobs/:id/trace` `projects/jobs/trace.rs`
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
@@ -49,10 +53,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/jobs/:id/artifacts` https://gitlab.kitware.com/help/api/jobs.md#get-job-artifacts
   * `DELETE /projects/:project/jobs/:id/artifacts` https://gitlab.kitware.com/help/api/jobs.md#delete-artifacts
   * `POST   /projects/:project/jobs/:id/artifacts/keep` https://gitlab.kitware.com/help/api/jobs.md#keep-artifacts
-  * `POST   /projects/:project/jobs/:id/cancel` https://gitlab.kitware.com/help/api/jobs.md#cancel-a-job
-  * `POST   /projects/:project/jobs/:id/erase` https://gitlab.kitware.com/help/api/jobs.md#erase-a-job
-  * `POST   /projects/:project/jobs/:id/retry` https://gitlab.kitware.com/help/api/jobs.md#retry-a-job
-  * `POST   /projects/:project/jobs/:id/play` https://gitlab.kitware.com/help/api/jobs.md#play-a-job
   * `GET    /projects/:project/jobs/artifacts/:ref/download` https://gitlab.kitware.com/help/api/jobs.md#download-the-artifacts-archive
   * `GET    /projects/:project/jobs/artifacts/:ref/raw/*artifact_path` https://gitlab.kitware.com/help/api/jobs.md#download-a-single-artifact-file-from-specific-tag-or-branch
   * `GET    /projects/:project/languages` https://gitlab.kitware.com/help/api/projects.md#languages

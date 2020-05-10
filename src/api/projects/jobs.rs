@@ -8,9 +8,19 @@
 //!
 //! These endpoints are used for querying CI jobs.
 
+mod cancel;
+mod erase;
 mod job;
 mod jobs;
+mod play;
+mod retry;
 mod trace;
+
+pub use self::cancel::CancelJob;
+pub use self::cancel::CancelJobBuilder;
+
+pub use self::erase::EraseJob;
+pub use self::erase::EraseJobBuilder;
 
 pub use self::job::Job;
 pub use self::job::JobBuilder;
@@ -18,6 +28,12 @@ pub use self::job::JobBuilder;
 pub use self::jobs::JobScope;
 pub use self::jobs::Jobs;
 pub use self::jobs::JobsBuilder;
+
+pub use self::play::PlayJob;
+pub use self::play::PlayJobBuilder;
+
+pub use self::retry::RetryJob;
+pub use self::retry::RetryJobBuilder;
 
 pub use self::trace::JobTrace;
 pub use self::trace::JobTraceBuilder;
