@@ -621,6 +621,10 @@ impl Gitlab {
     }
 
     /// Get all accessible environments.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::environments::Environments.query()` instead"
+    )]
     pub fn environments<I, K, V>(
         &self,
         project: ProjectId,
@@ -635,6 +639,10 @@ impl Gitlab {
         self.get_paged_with_param(format!("projects/{}/environments", project), params)
     }
 
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::environments::Environment.query()` instead"
+    )]
     pub fn environment<I, K, V>(
         &self,
         project: ProjectId,

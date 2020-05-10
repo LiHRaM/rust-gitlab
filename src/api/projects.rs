@@ -12,6 +12,7 @@
 
 mod create;
 mod edit;
+pub mod environments;
 pub mod jobs;
 pub mod pipelines;
 mod project;

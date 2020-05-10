@@ -6,6 +6,8 @@ These API endpoints have been implemented.
   * `POST   /projects` `projects/projects/create.rs`
   * `GET    /projects/:project` `projects/projects/project.rs`
   * `PUT    /projects/:project` `projects/projects/edit.rs`
+  * `GET    /projects/:project/environments` `projects/environments/environments.rs`
+  * `GET    /projects/:project/environments/:id` `projects/environments/environment.rs`
   * `GET    /projects/:project/jobs` `projects/jobs/jobs.rs`
   * `GET    /projects/:project/jobs/:id` `projects/jobs/job.rs`
   * `POST   /projects/:project/jobs/:id/cancel` `projects/jobs/cancel.rs`
@@ -40,6 +42,10 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project` https://gitlab.kitware.com/help/api/projects.md#remove-project
   * `POST   /projects/:project/archive` https://gitlab.kitware.com/help/api/projects.md#archive-a-project
   * `POST   /projects/:project/unarchive` https://gitlab.kitware.com/help/api/projects.md#unarchive-a-project
+  * `POST   /projects/:project/environments` https://gitlab.kitware.com/help/api/environments.md#create-a-new-environment
+  * `PUT    /projects/:project/environments/:id` https://gitlab.kitware.com/help/api/environments.md#edit-an-existing-environment
+  * `DELETE /projects/:project/environments/:id` https://gitlab.kitware.com/help/api/environments.md#delete-an-environment
+  * `POST   /projects/:project/environments/:id/stop` https://gitlab.kitware.com/help/api/environments.md#stop-an-environment
   * `POST   /projects/:project/fork` https://gitlab.kitware.com/help/api/projects.md#fork-project
   * `DELETE /projects/:project/fork` https://gitlab.kitware.com/help/api/projects.md#delete-an-existing-forked-from-relationship
   * `POST   /projects/:project/fork/:from` https://gitlab.kitware.com/help/api/projects.md#create-a-forked-fromto-relation-between-existing-projects
@@ -137,7 +143,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/deploy_keys.md
   * https://gitlab.kitware.com/help/api/deployments.md
   * https://gitlab.kitware.com/help/api/discussions.md
-  * https://gitlab.kitware.com/help/api/environments.md
   * https://gitlab.kitware.com/help/api/error_tracking.md
   * https://gitlab.kitware.com/help/api/events.md
   * https://gitlab.kitware.com/help/api/issues.md
