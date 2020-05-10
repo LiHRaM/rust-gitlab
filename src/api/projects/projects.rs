@@ -235,7 +235,7 @@ impl<'a> Endpoint for Projects<'a> {
         pairs.extend_pairs(
             self.custom_attributes
                 .iter()
-                .map(|(key, value)| (format!("custom_attribute[{}]", key), value)),
+                .map(|(key, value)| (format!("custom_attributes[{}]", key), value)),
         );
         self.with_custom_attributes
             .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
