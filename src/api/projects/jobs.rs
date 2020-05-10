@@ -71,9 +71,7 @@ impl<'a> Jobs<'a> {
 impl<'a> JobsBuilder<'a> {
     /// Filter jobs by a scope.
     pub fn scope(&mut self, scope: JobScope) -> &mut Self {
-        self.scopes
-            .get_or_insert_with(Default::default)
-            .insert(scope);
+        self.scopes.get_or_insert_with(HashSet::new).insert(scope);
         self
     }
 
@@ -82,9 +80,7 @@ impl<'a> JobsBuilder<'a> {
     where
         I: Iterator<Item = JobScope>,
     {
-        self.scopes
-            .get_or_insert_with(Default::default)
-            .extend(scopes);
+        self.scopes.get_or_insert_with(HashSet::new).extend(scopes);
         self
     }
 }
