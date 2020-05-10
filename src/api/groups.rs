@@ -13,6 +13,7 @@
 mod create;
 mod group;
 mod groups;
+pub mod members;
 
 pub use create::BranchProtection;
 pub use create::CreateGroup;

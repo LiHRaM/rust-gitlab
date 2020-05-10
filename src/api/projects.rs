@@ -15,6 +15,7 @@ mod edit;
 pub mod environments;
 pub mod hooks;
 pub mod jobs;
+pub mod members;
 pub mod pipelines;
 mod project;
 mod projects;

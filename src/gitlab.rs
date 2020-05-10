@@ -22,7 +22,7 @@ use thiserror::Error;
 
 use crate::api::projects::{self, pipelines};
 use crate::api::users::{CurrentUser, User, Users};
-use crate::api::{self, groups, Query};
+use crate::api::{self, common, groups, Query};
 use crate::auth::{Auth, AuthError};
 use crate::types::*;
 
@@ -807,6 +807,10 @@ impl Gitlab {
     }
 
     /// Get the team members of a group.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::members::GroupMembers.query()` instead"
+    )]
     pub fn group_members<I, K, V>(&self, group: GroupId, params: I) -> GitlabResult<Vec<Member>>
     where
         I: IntoIterator,
@@ -818,22 +822,30 @@ impl Gitlab {
     }
 
     /// Get a team member of a group.
-    pub fn group_member<I, K, V>(
-        &self,
-        group: GroupId,
-        user: UserId,
-        params: I,
-    ) -> GitlabResult<Member>
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::members::GroupMember.query()` instead"
+    )]
+    pub fn group_member<I, K, V>(&self, group: GroupId, user: UserId, _: I) -> GitlabResult<Member>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("groups/{}/members/{}", group, user), params)
+        Ok(groups::members::GroupMember::builder()
+            .group(group.value())
+            .user(user.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the team members of a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::members::ProjectMembers.query()` instead"
+    )]
     pub fn project_members<I, K, V>(
         &self,
         project: ProjectId,
@@ -849,11 +861,15 @@ impl Gitlab {
     }
 
     /// Get a team member of a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::members::ProjectMember.query()` instead"
+    )]
     pub fn project_member<I, K, V>(
         &self,
         project: ProjectId,
         user: UserId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Member>
     where
         I: IntoIterator,
@@ -861,26 +877,47 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("projects/{}/members/{}", project, user), params)
+        Ok(projects::members::ProjectMember::builder()
+            .project(project.value())
+            .user(user.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Add a user to a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::members::AddProjectMember.query()` instead"
+    )]
     pub fn add_user_to_project(
         &self,
         project: ProjectId,
         user: UserId,
         access: AccessLevel,
     ) -> GitlabResult<Member> {
-        let user_str = format!("{}", user);
-        let access_str = format!("{}", access);
-
-        self.post_with_param(
-            format!("projects/{}/members", project),
-            &[("user_id", &user_str), ("access_level", &access_str)],
-        )
+        Ok(projects::members::AddProjectMember::builder()
+            .project(project.value())
+            .user(user.value())
+            .access_level(match access {
+                AccessLevel::Anonymous => common::AccessLevel::Anonymous,
+                AccessLevel::Guest => common::AccessLevel::Guest,
+                AccessLevel::Reporter => common::AccessLevel::Reporter,
+                AccessLevel::Developer => common::AccessLevel::Developer,
+                AccessLevel::Maintainer => common::AccessLevel::Maintainer,
+                AccessLevel::Owner => common::AccessLevel::Owner,
+                AccessLevel::Admin => common::AccessLevel::Admin,
+            })
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Add a user to a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::members::AddProjectMember.query()` instead"
+    )]
     pub fn add_user_to_project_by_name<P>(
         &self,
         project: P,
@@ -890,13 +927,21 @@ impl Gitlab {
     where
         P: AsRef<str>,
     {
-        let user_str = format!("{}", user);
-        let access_str = format!("{}", access);
-
-        self.post_with_param(
-            format!("projects/{}/members", Self::url_name(project.as_ref())),
-            &[("user_id", &user_str), ("access_level", &access_str)],
-        )
+        Ok(projects::members::AddProjectMember::builder()
+            .project(project.as_ref())
+            .user(user.value())
+            .access_level(match access {
+                AccessLevel::Anonymous => common::AccessLevel::Anonymous,
+                AccessLevel::Guest => common::AccessLevel::Guest,
+                AccessLevel::Reporter => common::AccessLevel::Reporter,
+                AccessLevel::Developer => common::AccessLevel::Developer,
+                AccessLevel::Maintainer => common::AccessLevel::Maintainer,
+                AccessLevel::Owner => common::AccessLevel::Owner,
+                AccessLevel::Admin => common::AccessLevel::Admin,
+            })
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Create a branch for a project

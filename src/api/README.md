@@ -11,6 +11,8 @@ These API endpoints have been implemented.
   * `GET    /groups` `groups/groups.rs`
   * `POST   /groups` `groups/create.rs`
   * `GET    /groups/:group` `groups/group.rs`
+  * `GET    /groups/:group/members` `groups/members/members.rs`
+  * `GET    /groups/:group/members/:id` `groups/members/member.rs`
   * `GET    /projects` `projects/projects.rs`
   * `POST   /projects` `projects/projects/create.rs`
   * `GET    /projects/:project` `projects/projects/project.rs`
@@ -27,6 +29,9 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/jobs/:id/retry` `projects/jobs/retry.rs`
   * `POST   /projects/:project/jobs/:id/play` `projects/jobs/play.rs`
   * `GET    /projects/:project/jobs/:id/trace` `projects/jobs/trace.rs`
+  * `GET    /projects/:project/members` `projects/members/members.rs`
+  * `POST   /projects/:project/members` `projects/members/add.rs`
+  * `GET    /projects/:project/members/:id` `projects/members/member.rs`
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
   * `GET    /projects/:project/pipelines/:pipeline` `projects/pipelines/pipeline.rs`
@@ -64,6 +69,11 @@ instead of having to search the page for missing endpoints.
   * `GET    /groups/:group/hooks/:id` https://gitlab.kitware.com/help/api/groups.md#get-group-hook
   * `PUT    /groups/:group/hooks/:id` https://gitlab.kitware.com/help/api/groups.md#edit-group-hook
   * `DELETE /groups/:group/hooks/:id` https://gitlab.kitware.com/help/api/groups.md#delete-group-hook
+  * `POST   /groups/:group/members` https://gitlab.kitware.com/help/api/members.md#add-a-member-to-a-group-or-project
+  * `GET    /groups/:group/members/all` https://gitlab.kitware.com/help/api/members.md#list-all-members-of-a-group-or-project-including-inherited-members
+  * `GET    /groups/:group/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
+  * `PUT    /groups/:group/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
+  * `DELETE /groups/:group/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
   * `GET    /groups/:group/subgroups` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-subgroups
   * `POST   /groups/:group/restore` https://gitlab.kitware.com/help/api/groups.md#restore-group-marked-for-deletion-premium
   * `GET    /groups/:group/projects` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-projects
@@ -89,6 +99,10 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/jobs/artifacts/:ref/download` https://gitlab.kitware.com/help/api/jobs.md#download-the-artifacts-archive
   * `GET    /projects/:project/jobs/artifacts/:ref/raw/*artifact_path` https://gitlab.kitware.com/help/api/jobs.md#download-a-single-artifact-file-from-specific-tag-or-branch
   * `GET    /projects/:project/languages` https://gitlab.kitware.com/help/api/projects.md#languages
+  * `GET    /projects/:project/members/all` https://gitlab.kitware.com/help/api/members.md#list-all-members-of-a-group-or-project-including-inherited-members
+  * `GET    /projects/:project/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
+  * `PUT    /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
+  * `DELETE /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
   * `POST   /projects/:project/mirror/pull` https://gitlab.kitware.com/help/api/projects.md#start-the-pull-mirroring-process-for-a-project-starter
   * `POST   /projects/:project/pipeline` https://gitlab.kitware.com/help/api/pipelines.md#create-a-new-pipeline
   * `GET    /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#get-project-push-rules
@@ -177,7 +191,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/issue_links.md
   * https://gitlab.kitware.com/help/api/labels.md
   * https://gitlab.kitware.com/help/api/managed_licenses.md
-  * https://gitlab.kitware.com/help/api/members.md
   * https://gitlab.kitware.com/help/api/merge_request_approvals.md
   * https://gitlab.kitware.com/help/api/merge_requests.md
   * https://gitlab.kitware.com/help/api/notes.md
