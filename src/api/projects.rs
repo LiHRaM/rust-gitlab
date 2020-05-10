@@ -16,6 +16,7 @@ pub mod jobs;
 pub mod pipelines;
 mod project;
 mod projects;
+pub mod repository;
 
 pub use self::create::AutoDevOpsDeployStrategy;
 pub use self::create::BuildGitStrategy;

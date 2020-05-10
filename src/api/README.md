@@ -21,6 +21,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/pipelines/:pipeline/jobs` `projects/pipelines/jobs.rs`
   * `POST   /projects/:project/pipelines/:pipeline/retry` `projects/pipelines/retry.rs`
   * `GET    /projects/:project/pipelines/:pipeline/variables` `projects/pipelines/variables.rs`
+  * `POST   /projects/:project/repository/files/*file_path` `projects/repository/files/create.rs`
   * `GET    /user` `users/current_user.rs`
   * `GET    /users` `users/users.rs`
   * `GET    /users/:user` `users/user.rs`
@@ -62,6 +63,12 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#add-project-push-rule
   * `PUT    /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#edit-project-push-rule
   * `DELETE /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#delete-project-push-rule
+  * `GET    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
+  * `HEAD   /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
+  * `GET    /projects/:project/repository/files/*file_path/blame` https://gitlab.kitware.com/help/api/repository_files.md#get-file-blame-from-repository
+  * `GET    /projects/:project/repository/files/*file_path/raw` https://gitlab.kitware.com/help/api/repository_files.md#get-raw-file-from-repository
+  * `PUT    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#update-existing-file-in-repository
+  * `DELETE /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#delete-existing-file-in-repository
   * `POST   /projects/:project/restore` https://gitlab.kitware.com/help/api/projects.md#restore-project-marked-for-deletion-premium
   * `POST   /projects/:project/share` https://gitlab.kitware.com/help/api/projects.md#share-project-with-group
   * `DELETE /projects/:project/share/:group` https://gitlab.kitware.com/help/api/projects.md#delete-a-shared-project-link-within-a-group
@@ -162,7 +169,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/releases/links.md
   * https://gitlab.kitware.com/help/api/remote_mirrors.md
   * https://gitlab.kitware.com/help/api/repositories.md
-  * https://gitlab.kitware.com/help/api/repository_files.md
   * https://gitlab.kitware.com/help/api/repository_submodules.md
   * https://gitlab.kitware.com/help/api/resource_label_events.md
   * https://gitlab.kitware.com/help/api/runners.md

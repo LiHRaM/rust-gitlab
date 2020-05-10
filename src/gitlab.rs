@@ -451,6 +451,10 @@ impl Gitlab {
     }
 
     /// Create a new file in repository
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::files::CreateFile.query()` instead"
+    )]
     pub fn create_file<F, B, C, M>(
         &self,
         project: ProjectId,
@@ -465,19 +469,15 @@ impl Gitlab {
         C: AsRef<str>,
         M: AsRef<str>,
     {
-        let url = format!(
-            "projects/{}/repository/files/{}",
-            project,
-            file_path.as_ref()
-        );
-        self.post_with_param(
-            url,
-            &[
-                ("branch", branch.as_ref()),
-                ("content", content.as_ref()),
-                ("commit_message", commit_message.as_ref()),
-            ],
-        )
+        Ok(projects::repository::files::CreateFile::builder()
+            .project(project.value())
+            .file_path(file_path.as_ref())
+            .branch(branch.as_ref())
+            .content(content.as_ref().as_bytes())
+            .commit_message(commit_message.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set project description
