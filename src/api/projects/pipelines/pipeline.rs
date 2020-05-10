@@ -11,7 +11,6 @@ use crate::api::endpoint_prelude::*;
 
 /// Query a single pipeline on a project.
 #[derive(Debug, Builder)]
-#[builder(setter(strip_option))]
 pub struct Pipeline<'a> {
     /// The project to query for pipeline.
     #[builder(setter(into))]

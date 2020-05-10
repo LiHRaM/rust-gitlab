@@ -14,7 +14,6 @@ use crate::api::projects::JobScope;
 
 /// Query for jobs within a pipeline.
 #[derive(Debug, Builder)]
-#[builder(setter(strip_option))]
 pub struct Jobs<'a> {
     /// The project to query for the pipeline.
     #[builder(setter(into))]
