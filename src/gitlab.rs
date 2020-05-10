@@ -731,6 +731,10 @@ impl Gitlab {
     }
 
     /// Get a project's hooks.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::hooks::Hooks.query()` instead"
+    )]
     pub fn hooks<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<ProjectHook>>
     where
         I: IntoIterator,
@@ -742,54 +746,30 @@ impl Gitlab {
     }
 
     /// Get a project hook.
-    pub fn hook<I, K, V>(
-        &self,
-        project: ProjectId,
-        hook: HookId,
-        params: I,
-    ) -> GitlabResult<ProjectHook>
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::hooks::Hook.query()` instead"
+    )]
+    pub fn hook<I, K, V>(&self, project: ProjectId, hook: HookId, _: I) -> GitlabResult<ProjectHook>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("projects/{}/hooks/{}", project, hook), params)
-    }
-
-    /// Convert a boolean parameter into an HTTP request value.
-    fn bool_param_value(value: bool) -> &'static str {
-        if value {
-            "true"
-        } else {
-            "false"
-        }
-    }
-
-    /// HTTP parameters required to register to a project.
-    fn event_flags(events: WebhookEvents) -> Vec<(&'static str, &'static str)> {
-        vec![
-            ("job_events", Self::bool_param_value(events.job())),
-            ("issues_events", Self::bool_param_value(events.issues())),
-            (
-                "confidential_issues_events",
-                Self::bool_param_value(events.confidential_issues()),
-            ),
-            (
-                "merge_requests_events",
-                Self::bool_param_value(events.merge_requests()),
-            ),
-            ("note_events", Self::bool_param_value(events.note())),
-            ("pipeline_events", Self::bool_param_value(events.pipeline())),
-            ("push_events", Self::bool_param_value(events.push())),
-            (
-                "wiki_page_events",
-                Self::bool_param_value(events.wiki_page()),
-            ),
-        ]
+        Ok(projects::hooks::Hook::builder()
+            .project(project.value())
+            .hook(hook.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Add a project hook.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::hooks::CreateHook.query()` instead"
+    )]
     pub fn add_hook<U, T>(
         &self,
         project: ProjectId,
@@ -802,18 +782,28 @@ impl Gitlab {
         U: AsRef<str>,
         T: AsRef<str>,
     {
-        let mut flags = Self::event_flags(events);
-        flags.push(("url", url.as_ref()));
-        let s: String;
-        if let Some(ssl) = enable_ssl_verification {
-            s = ssl.to_string();
-            flags.push(("enable_ssl_verification", s.as_str()));
+        let mut builder = projects::hooks::CreateHook::builder();
+
+        builder
+            .project(project.value())
+            .url(url.as_ref())
+            .job_events(events.job())
+            .issues_events(events.issues())
+            .confidential_issues_events(events.confidential_issues())
+            .merge_requests_events(events.merge_requests())
+            .note_events(events.note())
+            .pipeline_events(events.pipeline())
+            .push_events(events.push())
+            .wiki_page_events(events.wiki_page());
+
+        if let Some(enable_ssl_verification) = enable_ssl_verification {
+            builder.enable_ssl_verification(enable_ssl_verification);
         }
-        if let Some(tk) = token.as_ref() {
-            flags.push(("token", tk.as_ref()));
+        if let Some(token) = token.as_ref() {
+            builder.token(token.as_ref());
         }
 
-        self.post_with_param(format!("projects/{}/hooks", project), &flags)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get the team members of a group.

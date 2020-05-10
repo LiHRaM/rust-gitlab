@@ -11,6 +11,9 @@ These API endpoints have been implemented.
   * `PUT    /projects/:project` `projects/projects/edit.rs`
   * `GET    /projects/:project/environments` `projects/environments/environments.rs`
   * `GET    /projects/:project/environments/:id` `projects/environments/environment.rs`
+  * `GET    /projects/:project/hooks` `projects/hooks/hooks.rs`
+  * `POST   /projects/:project/hooks` `projects/hooks/create.rs`
+  * `GET    /projects/:project/hooks/:id` `projects/hooks/hook.rs`
   * `GET    /projects/:project/jobs` `projects/jobs/jobs.rs`
   * `GET    /projects/:project/jobs/:id` `projects/jobs/job.rs`
   * `POST   /projects/:project/jobs/:id/cancel` `projects/jobs/cancel.rs`
@@ -70,9 +73,6 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/fork` https://gitlab.kitware.com/help/api/projects.md#delete-an-existing-forked-from-relationship
   * `POST   /projects/:project/fork/:from` https://gitlab.kitware.com/help/api/projects.md#create-a-forked-fromto-relation-between-existing-projects
   * `GET    /projects/:project/forks` https://gitlab.kitware.com/help/api/projects.md#list-forks-of-a-project
-  * `GET    /projects/:project/hooks` https://gitlab.kitware.com/help/api/projects.md#list-project-hooks
-  * `POST   /projects/:project/hooks` https://gitlab.kitware.com/help/api/projects.md#add-project-hook
-  * `GET    /projects/:project/hooks/:id` https://gitlab.kitware.com/help/api/projects.md#get-project-hook
   * `PUT    /projects/:project/hooks/:id` https://gitlab.kitware.com/help/api/projects.md#edit-project-hook
   * `DELETE /projects/:project/hooks/:id` https://gitlab.kitware.com/help/api/projects.md#delete-project-hook
   * `POST   /projects/:project/housekeeping` https://gitlab.kitware.com/help/api/projects.md#start-the-housekeeping-task-for-a-project
