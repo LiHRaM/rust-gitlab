@@ -6,14 +6,14 @@ These API endpoints have been implemented.
   * `POST   /projects` `projects/projects/create.rs`
   * `GET    /projects/:project` `projects/projects/project.rs`
   * `PUT    /projects/:project` `projects/projects/edit.rs`
-  * `GET    /projects/:project/jobs` `projects/jobs.rs`
-  * `GET    /projects/:project/job/:id` `projects/job.rs`
+  * `GET    /projects/:project/jobs` `projects/jobs/jobs.rs`
+  * `GET    /projects/:project/jobs/:id` `projects/jobs/job.rs`
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
   * `GET    /projects/:project/pipelines/:pipeline` `projects/pipelines/pipeline.rs`
   * `DELETE /projects/:project/pipelines/:pipeline` `projects/pipelines/delete.rs`
   * `POST   /projects/:project/pipelines/:pipeline/cancel` `projects/pipelines/cancel.rs`
-  * `GET    /projects/:project/pipelines/:pipeline/jobs` `projects/pipelines/jobs/jobs.rs`
+  * `GET    /projects/:project/pipelines/:pipeline/jobs` `projects/pipelines/jobs.rs`
   * `POST   /projects/:project/pipelines/:pipeline/retry` `projects/pipelines/retry.rs`
   * `GET    /projects/:project/pipelines/:pipeline/variables` `projects/pipelines/variables.rs`
   * `GET    /user` `users/current_user.rs`

@@ -8,11 +8,10 @@
 //!
 //! These endpoints are used for querying CI pipelines.
 
-pub mod jobs;
-
 mod cancel;
 mod create;
 mod delete;
+mod jobs;
 mod pipeline;
 mod pipelines;
 mod retry;
@@ -28,6 +27,9 @@ pub use self::create::PipelineVariableType;
 
 pub use self::delete::DeletePipeline;
 pub use self::delete::DeletePipelineBuilder;
+
+pub use self::jobs::PipelineJobs;
+pub use self::jobs::PipelineJobsBuilder;
 
 pub use self::pipeline::Pipeline;
 pub use self::pipeline::PipelineBuilder;
