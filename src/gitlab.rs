@@ -20,8 +20,7 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
-use crate::api::projects::pipelines;
-use crate::api::projects::Projects;
+use crate::api::projects::{self, pipelines};
 use crate::api::users::{CurrentUser, User, Users};
 use crate::api::{self, Query};
 use crate::auth::{Auth, AuthError};
@@ -482,33 +481,76 @@ impl Gitlab {
     }
 
     /// Set project description
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::EditProject.query()` instead"
+    )]
     pub fn set_project_description<T: AsRef<str>>(
         &self,
         project: ProjectId,
         description: T,
     ) -> GitlabResult<Project> {
-        let url = format!("projects/{}", project);
-        self.put_with_param(url, &[("description", description.as_ref())])
+        Ok(projects::EditProject::builder()
+            .project(project.value())
+            .description(description.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set project default branch
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::EditProject.query()` instead"
+    )]
     pub fn set_project_default_branch<T: AsRef<str>>(
         &self,
         project: ProjectId,
         branch: T,
     ) -> GitlabResult<Project> {
-        let url = format!("projects/{}", project);
-        self.put_with_param(url, &[("default_branch", branch.as_ref())])
+        Ok(projects::EditProject::builder()
+            .project(project.value())
+            .default_branch(branch.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set project features access level
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::EditProject.query()` instead"
+    )]
     pub fn set_project_feature_access_level(
         &self,
         project: ProjectId,
         feature: ProjectFeatures,
     ) -> GitlabResult<Project> {
-        let url = format!("projects/{}", project);
-        self.put_with_param(url, &[(feature.name(), feature.access_level())])
+        let mut builder = projects::EditProject::builder();
+        builder.project(project.value());
+
+        let convert = |level| {
+            match level {
+                FeatureVisibilityLevel::Disabled => projects::FeatureAccessLevel::Disabled,
+                FeatureVisibilityLevel::Private => projects::FeatureAccessLevel::Private,
+                FeatureVisibilityLevel::Enabled | FeatureVisibilityLevel::Public => {
+                    projects::FeatureAccessLevel::Enabled
+                },
+            }
+        };
+
+        match feature {
+            ProjectFeatures::Issues(level) => builder.issues_access_level(convert(level)),
+            ProjectFeatures::Repository(level) => builder.repository_access_level(convert(level)),
+            ProjectFeatures::MergeRequests(level) => {
+                builder.merge_requests_access_level(convert(level))
+            },
+            ProjectFeatures::Builds(level) => builder.builds_access_level(convert(level)),
+            ProjectFeatures::Wiki(level) => builder.wiki_access_level(convert(level)),
+            ProjectFeatures::Snippets(level) => builder.snippets_access_level(convert(level)),
+        };
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get all accessible projects.
@@ -533,7 +575,7 @@ impl Gitlab {
     )]
     pub fn owned_projects(&self) -> GitlabResult<Vec<Project>> {
         Ok(api::paged(
-            Projects::builder().owned(true).build().unwrap(),
+            projects::Projects::builder().owned(true).build().unwrap(),
             api::Pagination::All,
         )
         .query(self)?)

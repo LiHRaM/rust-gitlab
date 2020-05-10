@@ -4,6 +4,7 @@ These API endpoints have been implemented.
 
   * `GET    /projects` `projects/projects.rs`
   * `POST   /projects` `projects/projects/create.rs`
+  * `PUT    /projects/:project` `projects/projects/edit.rs`
   * `GET    /projects/:project/jobs` `projects/jobs.rs`
   * `GET    /projects/:project/job/:id` `projects/job.rs`
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
@@ -30,7 +31,6 @@ implemented above. This is split out into a separate list for convenience
 instead of having to search the page for missing endpoints.
 
   * `GET    /projects/:project` https://gitlab.kitware.com/help/api/projects.md#get-single-project
-  * `PUT    /projects/:project` https://gitlab.kitware.com/help/api/projects.md#edit-project
   * `DELETE /projects/:project` https://gitlab.kitware.com/help/api/projects.md#remove-project
   * `POST   /projects/:project/archive` https://gitlab.kitware.com/help/api/projects.md#archive-a-project
   * `POST   /projects/:project/unarchive` https://gitlab.kitware.com/help/api/projects.md#unarchive-a-project

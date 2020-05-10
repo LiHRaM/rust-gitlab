@@ -25,7 +25,7 @@ pub enum FeatureAccessLevel {
 
 impl FeatureAccessLevel {
     /// The variable type query parameter.
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             FeatureAccessLevel::Disabled => "disabled",
             FeatureAccessLevel::Private => "private",
@@ -51,7 +51,7 @@ pub enum FeatureAccessLevelPublic {
 
 impl FeatureAccessLevelPublic {
     /// The variable type query parameter.
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             FeatureAccessLevelPublic::Disabled => "disabled",
             FeatureAccessLevelPublic::Private => "private",
@@ -80,7 +80,7 @@ pub enum ContainerExpirationCadence {
 
 impl ContainerExpirationCadence {
     /// The variable type query parameter.
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             ContainerExpirationCadence::OneDay => "1d",
             ContainerExpirationCadence::OneWeek => "7d",
@@ -112,7 +112,7 @@ pub enum ContainerExpirationKeepN {
 
 impl ContainerExpirationKeepN {
     /// The variable type query parameter.
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             ContainerExpirationKeepN::One => "1",
             ContainerExpirationKeepN::Five => "5",
@@ -141,7 +141,7 @@ pub enum ContainerExpirationOlderThan {
 
 impl ContainerExpirationOlderThan {
     /// The variable type query parameter.
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             ContainerExpirationOlderThan::OneWeek => "7d",
             ContainerExpirationOlderThan::TwoWeeks => "14d",
@@ -181,7 +181,7 @@ impl<'a> ContainerExpirationPolicy<'a> {
         ContainerExpirationPolicyBuilder::default()
     }
 
-    fn add_query(&self, pairs: &mut Pairs) {
+    pub(crate) fn add_query(&self, pairs: &mut Pairs) {
         self.cadence.map(|value| {
             pairs.append_pair(
                 "container_expiration_policy_attributes[cadence]",
@@ -225,7 +225,7 @@ pub enum AutoDevOpsDeployStrategy {
 
 impl AutoDevOpsDeployStrategy {
     /// The variable type query parameter.
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             AutoDevOpsDeployStrategy::Continuous => "continuous",
             AutoDevOpsDeployStrategy::Manual => "manual",
@@ -247,7 +247,7 @@ pub enum MergeMethod {
 
 impl MergeMethod {
     /// The variable type query parameter.
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             MergeMethod::Merge => "merge",
             MergeMethod::RebaseMerge => "rebase_merge",
@@ -275,7 +275,7 @@ impl Default for BuildGitStrategy {
 
 impl BuildGitStrategy {
     /// The variable type query parameter.
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             BuildGitStrategy::Clone => "clone",
             BuildGitStrategy::Fetch => "fetch",

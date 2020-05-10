@@ -11,6 +11,7 @@
 //! These endpoints are used for querying and modifying projects and their resources.
 
 mod create;
+mod edit;
 mod job;
 mod jobs;
 pub mod pipelines;
@@ -28,6 +29,9 @@ pub use self::create::CreateProjectBuilder;
 pub use self::create::FeatureAccessLevel;
 pub use self::create::FeatureAccessLevelPublic;
 pub use self::create::MergeMethod;
+
+pub use self::edit::EditProject;
+pub use self::edit::EditProjectBuilder;
 
 pub use self::job::Job;
 pub use self::job::JobBuilder;
