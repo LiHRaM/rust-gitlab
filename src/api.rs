@@ -21,6 +21,7 @@ mod error;
 mod ignore;
 mod paged;
 mod query;
+mod raw;
 mod sudo;
 
 pub mod endpoint_prelude;
@@ -47,6 +48,9 @@ pub use self::paged::Pagination;
 pub use self::paged::PaginationError;
 
 pub use self::query::Query;
+
+pub use self::raw::raw;
+pub use self::raw::Raw;
 
 pub use self::sudo::sudo;
 pub use self::sudo::Sudo;
