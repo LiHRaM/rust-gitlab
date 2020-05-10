@@ -1,3 +1,9 @@
+# Endpoint status
+
+This document categorizes the APIs as they pertain to this crate.
+
+Last synced: 12.10.2
+
 # Implemented
 
 These API endpoints have been implemented.
