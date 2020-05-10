@@ -22,7 +22,7 @@ use thiserror::Error;
 
 use crate::api::projects::{self, pipelines};
 use crate::api::users::{CurrentUser, User, Users};
-use crate::api::{self, Query};
+use crate::api::{self, groups, Query};
 use crate::auth::{Auth, AuthError};
 use crate::types::*;
 
@@ -680,6 +680,10 @@ impl Gitlab {
     ///                     .unwrap();
     /// gitlab.create_group("A group", "A path", Some(params));
     /// ```
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::CreateGroup.query()` instead"
+    )]
     pub fn create_group<N: AsRef<str>, P: AsRef<str>>(
         &self,
         name: N,
@@ -696,6 +700,10 @@ impl Gitlab {
     }
 
     /// Get all accessible groups.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::Groups.query()` instead"
+    )]
     pub fn groups<I, K, V>(&self, params: I) -> GitlabResult<Vec<Group>>
     where
         I: IntoIterator,
@@ -707,12 +715,19 @@ impl Gitlab {
     }
 
     /// Find a group by its name.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::Group.query()` instead"
+    )]
     pub fn group_by_name<N>(&self, name: N) -> GitlabResult<Group>
     where
         N: AsRef<str>,
     {
-        let param: &[(&str, &str)] = &[];
-        self.get_with_param(format!("groups/{}", Self::url_name(name.as_ref())), param)
+        Ok(groups::Group::builder()
+            .group(name.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get a project's hooks.

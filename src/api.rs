@@ -27,6 +27,7 @@ mod sudo;
 pub mod endpoint_prelude;
 
 pub mod common;
+pub mod groups;
 pub mod projects;
 pub mod users;
 
