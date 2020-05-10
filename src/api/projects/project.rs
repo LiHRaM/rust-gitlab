@@ -9,7 +9,7 @@ use derive_builder::Builder;
 use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
 
-/// Query for projects on an instance.
+/// Query for a specific project on an instance.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct Project<'a> {
