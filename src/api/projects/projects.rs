@@ -109,10 +109,10 @@ pub struct Projects<'a> {
     #[builder(default)]
     min_access_level: Option<AccessLevel>,
 
-    /// Search for users with a given custom attribute set.
+    /// Search for projects with a given custom attribute set.
     #[builder(setter(name = "_custom_attributes"), default, private)]
     custom_attributes: BTreeMap<Cow<'a, str>, Cow<'a, str>>,
-    /// Search for users with custom attributes.
+    /// Search for projects with custom attributes.
     #[builder(default)]
     with_custom_attributes: Option<bool>,
 
