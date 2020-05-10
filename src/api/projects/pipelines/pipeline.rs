@@ -42,7 +42,7 @@ mod tests {
 
     #[test]
     fn project_and_pipeline_are_needed() {
-        let err = Pipeline::builder().pipeline(1).build().unwrap_err();
+        let err = Pipeline::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
