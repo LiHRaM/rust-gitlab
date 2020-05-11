@@ -40,6 +40,11 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/pipelines/:pipeline/jobs` `projects/pipelines/jobs.rs`
   * `POST   /projects/:project/pipelines/:pipeline/retry` `projects/pipelines/retry.rs`
   * `GET    /projects/:project/pipelines/:pipeline/variables` `projects/pipelines/variables.rs`
+  * `POST   /projects/:project/protected_branches` `projects/protected_branches/protect.rs`
+  * `DELETE /projects/:project/protected_branches/:branch` `projects/protected_branches/unprotect.rs`
+  * `GET    /projects/:project/repository/branches` `projects/repository/branches/branches.rs`
+  * `POST   /projects/:project/repository/branches` `projects/repository/branches/create.rs`
+  * `GET    /projects/:project/repository/branches/:branch` `projects/repository/branches/branch.rs`
   * `POST   /projects/:project/repository/files/*file_path` `projects/repository/files/create.rs`
   * `GET    /user` `users/current_user.rs`
   * `GET    /users` `users/users.rs`
@@ -103,17 +108,22 @@ instead of having to search the page for missing endpoints.
   * `PUT    /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
   * `DELETE /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
   * `POST   /projects/:project/mirror/pull` https://gitlab.kitware.com/help/api/projects.md#start-the-pull-mirroring-process-for-a-project-starter
+  * `GET    /projects/:project/protected_branches` https://gitlab.kitware.com/help/api/protected_branches.md#list-protected-branches
+  * `GET    /projects/:project/protected_branches/:branch` https://gitlab.kitware.com/help/api/protected_branches.md#get-a-single-protected-branch-or-wildcard-protected-branch
+  * `PATCH  /projects/:project/protected_branches/:branch` https://gitlab.kitware.com/help/api/protected_branches.md#require-code-owner-approvals-for-a-single-branch
   * `POST   /projects/:project/pipeline` https://gitlab.kitware.com/help/api/pipelines.md#create-a-new-pipeline
   * `GET    /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#get-project-push-rules
   * `POST   /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#add-project-push-rule
   * `PUT    /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#edit-project-push-rule
   * `DELETE /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#delete-project-push-rule
+  * `DELETE /projects/:project/repository/branches/:branch` https://gitlab.kitware.com/help/api/branches.md#delete-repository-branch
   * `GET    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
   * `HEAD   /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
   * `GET    /projects/:project/repository/files/*file_path/blame` https://gitlab.kitware.com/help/api/repository_files.md#get-file-blame-from-repository
   * `GET    /projects/:project/repository/files/*file_path/raw` https://gitlab.kitware.com/help/api/repository_files.md#get-raw-file-from-repository
   * `PUT    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#update-existing-file-in-repository
   * `DELETE /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#delete-existing-file-in-repository
+  * `DELETE /projects/:project/repository/merged_branches` https://gitlab.kitware.com/help/api/branches.md#delete-merged-branches
   * `POST   /projects/:project/restore` https://gitlab.kitware.com/help/api/projects.md#restore-project-marked-for-deletion-premium
   * `POST   /projects/:project/share` https://gitlab.kitware.com/help/api/projects.md#share-project-with-group
   * `DELETE /projects/:project/share/:group` https://gitlab.kitware.com/help/api/projects.md#delete-a-shared-project-link-within-a-group
@@ -175,7 +185,6 @@ These pages document other endpoints not mentioned above:
 
   * https://gitlab.kitware.com/help/api/access_requests.md
   * https://gitlab.kitware.com/help/api/award_emoji.md
-  * https://gitlab.kitware.com/help/api/branches.md
   * https://gitlab.kitware.com/help/api/commits.md
   * https://gitlab.kitware.com/help/api/container_registry.md
   * https://gitlab.kitware.com/help/api/custom_attributes.md
@@ -207,7 +216,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/project_snippets.md
   * https://gitlab.kitware.com/help/api/project_templates.md
   * https://gitlab.kitware.com/help/api/protected_environments.md
-  * https://gitlab.kitware.com/help/api/protected_branches.md
   * https://gitlab.kitware.com/help/api/protected_tags.md
   * https://gitlab.kitware.com/help/api/releases/index.md
   * https://gitlab.kitware.com/help/api/releases/links.md

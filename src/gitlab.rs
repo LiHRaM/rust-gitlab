@@ -945,20 +945,30 @@ impl Gitlab {
     }
 
     /// Create a branch for a project
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::branches::CreateBranch.query()` instead"
+    )]
     pub fn create_branch<V: AsRef<str>>(
         &self,
         project: ProjectId,
         name: V,
         reference: V,
     ) -> GitlabResult<RepoBranch> {
-        let url = format!("projects/{}/repository/branches", project);
-        self.post_with_param(
-            url,
-            &[("branch", name.as_ref()), ("ref", reference.as_ref())],
-        )
+        Ok(projects::repository::branches::CreateBranch::builder()
+            .project(project.value())
+            .branch(name.as_ref())
+            .ref_(reference.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get branches for a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::branches::Branches.query()` instead"
+    )]
     pub fn branches<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<RepoBranch>>
     where
         I: IntoIterator,
@@ -970,11 +980,15 @@ impl Gitlab {
     }
 
     /// Get a branch.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::branches::Branch.query()` instead"
+    )]
     pub fn branch<B, I, K, V>(
         &self,
         project: ProjectId,
         branch: B,
-        params: I,
+        _: I,
     ) -> GitlabResult<RepoBranch>
     where
         B: AsRef<str>,
@@ -983,14 +997,12 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(
-            format!(
-                "projects/{}/repository/branches/{}",
-                project,
-                Self::url_name(branch.as_ref()),
-            ),
-            params,
-        )
+        Ok(projects::repository::branches::Branch::builder()
+            .project(project.value())
+            .branch(branch.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Protect a branch
@@ -1001,6 +1013,10 @@ impl Gitlab {
     /// * push_access_level: Access level allowed to push (defaults: maintainers)
     /// * merge_access_level: Access level allowed to merge (defaults:  maintainers)
     /// * unprotect_access_level: Access level allowed to unproctect (defaults: maintainers)
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::protected_branches::ProtectBranch.query()` instead"
+    )]
     pub fn protect_branch<B: AsRef<str>>(
         &self,
         project: ProjectId,
@@ -1009,26 +1025,36 @@ impl Gitlab {
         merge_access_level: Option<AccessLevel>,
         unprotect_access_level: Option<AccessLevel>,
     ) -> GitlabResult<ProtectedRepoBranch> {
-        let url = format!("projects/{}/protected_branches", project);
-        self.post_with_param(
-            url,
-            &[
-                ("name", branch.as_ref()),
-                (
-                    "push_access_level",
-                    &u64::from(push_access_level.unwrap_or(AccessLevel::Maintainer)).to_string(),
-                ),
-                (
-                    "merge_access_level",
-                    &u64::from(merge_access_level.unwrap_or(AccessLevel::Maintainer)).to_string(),
-                ),
-                (
-                    "unprotect_access_level",
-                    &u64::from(unprotect_access_level.unwrap_or(AccessLevel::Maintainer))
-                        .to_string(),
-                ),
-            ],
-        )
+        let mut builder = projects::protected_branches::ProtectBranch::builder();
+
+        let convert = |level| {
+            match level {
+                AccessLevel::Anonymous | AccessLevel::Guest | AccessLevel::Reporter => {
+                    projects::protected_branches::ProtectedAccessLevel::NoAccess
+                },
+                AccessLevel::Developer => {
+                    projects::protected_branches::ProtectedAccessLevel::Developer
+                },
+                AccessLevel::Maintainer | AccessLevel::Owner => {
+                    projects::protected_branches::ProtectedAccessLevel::Maintainer
+                },
+                AccessLevel::Admin => projects::protected_branches::ProtectedAccessLevel::Admin,
+            }
+        };
+
+        builder.project(project.value()).name(branch.as_ref());
+
+        if let Some(push) = push_access_level {
+            builder.push_access_level(convert(push));
+        }
+        if let Some(merge) = merge_access_level {
+            builder.merge_access_level(convert(merge));
+        }
+        if let Some(unprotect) = unprotect_access_level {
+            builder.unprotect_access_level(convert(unprotect));
+        }
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Unprotect a branch
@@ -1036,17 +1062,21 @@ impl Gitlab {
     /// # Arguments
     /// * project: The project id
     /// * branch: The name of the branch or wildcard
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::protected_branches::UnprotectBranch.query()` instead"
+    )]
     pub fn unprotect_branch<B: AsRef<str>>(
         &self,
         project: ProjectId,
         branch: B,
     ) -> GitlabResult<()> {
-        let url = format!(
-            "projects/{}/protected_branches/{}",
-            project,
-            branch.as_ref(),
-        );
-        self.delete(url)
+        Ok(projects::protected_branches::UnprotectBranch::builder()
+            .project(project.value())
+            .name(branch.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get a commit.
@@ -2217,20 +2247,6 @@ impl Gitlab {
     }
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
-    fn send_no_answer<T>(&self, req: RequestBuilder) -> GitlabResult<T>
-    where
-        T: DeserializeOwned + Default,
-    {
-        let rsp = self.send_impl(req)?;
-        if !rsp.status().is_success() {
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-            return Err(GitlabError::from_gitlab(v));
-        }
-
-        Ok(T::default())
-    }
-
-    /// Refactored code which talks to Gitlab and transforms error messages properly.
     fn send<T>(&self, req: RequestBuilder) -> GitlabResult<T>
     where
         T: DeserializeOwned,
@@ -2279,27 +2295,6 @@ impl Gitlab {
     {
         let full_url = self.create_url(url)?;
         self.send(self.client.post(full_url).form(&param))
-    }
-
-    /// Create a `DELETE` request to an API endpoint.
-    fn delete<T, U>(&self, url: U) -> GitlabResult<T>
-    where
-        T: DeserializeOwned + Default,
-        U: AsRef<str>,
-    {
-        let param: &[(&str, &str)] = &[];
-        self.delete_with_param(url, param)
-    }
-
-    /// Create a `DELETE` request to an API endpoint with query parameters.
-    fn delete_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
-    where
-        T: DeserializeOwned + Default,
-        U: AsRef<str>,
-        P: Serialize,
-    {
-        let full_url = self.create_url(url)?;
-        self.send_no_answer(self.client.delete(full_url).form(&param))
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.

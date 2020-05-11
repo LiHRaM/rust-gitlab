@@ -8,4 +8,5 @@
 //!
 //! These endpoints are used for querying a project's repository.
 
+pub mod branches;
 pub mod files;

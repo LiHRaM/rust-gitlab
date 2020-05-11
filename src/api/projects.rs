@@ -19,6 +19,7 @@ pub mod members;
 pub mod pipelines;
 mod project;
 mod projects;
+pub mod protected_branches;
 pub mod repository;
 
 pub use self::create::AutoDevOpsDeployStrategy;
