@@ -5,12 +5,11 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::fmt;
 
 use derive_builder::Builder;
 
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
-use crate::query_common::NameOrId;
 
 /// The type of a pipeline variable.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -42,14 +41,8 @@ impl PipelineVariableType {
     }
 }
 
-impl fmt::Display for PipelineVariableType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
 /// A pipeline variable.
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Clone, Builder)]
 pub struct PipelineVariable<'a> {
     /// The name of the pipeline variable.
     #[builder(setter(into))]
@@ -141,7 +134,57 @@ impl<'a> Endpoint for CreatePipeline<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::pipelines::CreatePipeline;
+    use crate::api::projects::pipelines::{CreatePipeline, PipelineVariable, PipelineVariableType};
+
+    #[test]
+    fn pipeline_variable_type_default() {
+        assert_eq!(
+            PipelineVariableType::default(),
+            PipelineVariableType::EnvVar,
+        );
+    }
+
+    #[test]
+    fn pipeline_variable_type_as_str() {
+        let items = &[
+            (PipelineVariableType::EnvVar, "env_var"),
+            (PipelineVariableType::File, "file"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn pipeline_variable_key_and_value_are_necessary() {
+        let err = PipelineVariable::builder().build().unwrap_err();
+        assert_eq!(err, "`key` must be initialized");
+    }
+
+    #[test]
+    fn pipeline_variable_key_is_necessary() {
+        let err = PipelineVariable::builder()
+            .value("value")
+            .build()
+            .unwrap_err();
+        assert_eq!(err, "`key` must be initialized");
+    }
+
+    #[test]
+    fn pipeline_variable_value_is_necessary() {
+        let err = PipelineVariable::builder().key("key").build().unwrap_err();
+        assert_eq!(err, "`value` must be initialized");
+    }
+
+    #[test]
+    fn pipeline_variable_key_and_value_are_sufficient() {
+        PipelineVariable::builder()
+            .key("key")
+            .value("value")
+            .build()
+            .unwrap();
+    }
 
     #[test]
     fn project_and_ref_are_needed() {

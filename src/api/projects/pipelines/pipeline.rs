@@ -6,8 +6,8 @@
 
 use derive_builder::Builder;
 
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
-use crate::query_common::NameOrId;
 
 /// Query a single pipeline on a project.
 #[derive(Debug, Builder)]
@@ -33,7 +33,7 @@ impl<'a> Endpoint for Pipeline<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/pipeline/{}", self.project, self.pipeline).into()
+        format!("projects/{}/pipelines/{}", self.project, self.pipeline).into()
     }
 }
 

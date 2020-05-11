@@ -7,6 +7,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/job/:id` `projects/job.rs`
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
+  * `GET    /projects/:project/pipelines/:pipeline` `projects/pipelines/pipeline.rs`
   * `DELETE /projects/:project/pipelines/:pipeline` `projects/pipelines/delete.rs`
   * `POST   /projects/:project/pipelines/:pipeline/cancel` `projects/pipelines/cancel.rs`
   * `GET    /projects/:project/pipelines/:pipeline/jobs` `projects/pipelines/jobs/jobs.rs`

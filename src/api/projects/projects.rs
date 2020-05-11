@@ -5,13 +5,12 @@
 // except according to those terms.
 
 use std::collections::BTreeMap;
-use std::fmt;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
+use crate::api::common::{self, AccessLevel, SortOrder, VisibilityLevel};
 use crate::api::endpoint_prelude::*;
-use crate::types::{AccessLevel, VisibilityLevel};
 
 /// Keys project results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -54,21 +53,15 @@ impl ProjectOrderBy {
     }
 }
 
-impl fmt::Display for ProjectOrderBy {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
 /// Query for projects on an instance.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
-pub struct Projects {
+pub struct Projects<'a> {
     /// Search for projects using a query string.
     ///
     /// The search query will be escaped automatically.
-    #[builder(default)]
-    search: Option<String>,
+    #[builder(setter(into), default)]
+    search: Option<Cow<'a, str>>,
 
     /// Filter projects by its archived state.
     #[builder(default)]
@@ -104,8 +97,8 @@ pub struct Projects {
     #[builder(default)]
     with_merge_requests_enabled: Option<bool>,
     /// Filter projects by programming language.
-    #[builder(default)]
-    with_programming_language: Option<String>,
+    #[builder(setter(into), default)]
+    with_programming_language: Option<Cow<'a, str>>,
     /// Filter projects by those with a failing wiki checksum.
     #[builder(default)]
     wiki_checksum_failed: Option<bool>,
@@ -116,10 +109,10 @@ pub struct Projects {
     #[builder(default)]
     min_access_level: Option<AccessLevel>,
 
-    /// Search for users with a given custom attribute set.
+    /// Search for projects with a given custom attribute set.
     #[builder(setter(name = "_custom_attributes"), default, private)]
-    custom_attributes: BTreeMap<String, String>,
-    /// Search for users with custom attributes.
+    custom_attributes: BTreeMap<Cow<'a, str>, Cow<'a, str>>,
+    /// Search for projects with custom attributes.
     #[builder(default)]
     with_custom_attributes: Option<bool>,
 
@@ -144,25 +137,19 @@ pub struct Projects {
     sort: Option<SortOrder>,
 }
 
-impl Projects {
+impl<'a> Projects<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> ProjectsBuilder {
+    pub fn builder() -> ProjectsBuilder<'a> {
         ProjectsBuilder::default()
     }
 }
 
-impl ProjectsBuilder {
-    /// Clear custom attribute search parameters.
-    pub fn clear_custom_attributes(&mut self) -> &mut Self {
-        self.custom_attributes = None;
-        self
-    }
-
+impl<'a> ProjectsBuilder<'a> {
     /// Add a custom attribute search parameter.
     pub fn custom_attribute<K, V>(&mut self, key: K, value: V) -> &mut Self
     where
-        K: Into<String>,
-        V: Into<String>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.custom_attributes
             .get_or_insert_with(Default::default)
@@ -174,8 +161,8 @@ impl ProjectsBuilder {
     pub fn custom_attributes<I, K, V>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = (K, V)>,
-        K: Into<String>,
-        V: Into<String>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.custom_attributes
             .get_or_insert_with(Default::default)
@@ -184,15 +171,7 @@ impl ProjectsBuilder {
     }
 }
 
-fn bool_as_str(b: bool) -> &'static str {
-    if b {
-        "true"
-    } else {
-        "false"
-    }
-}
-
-impl Endpoint for Projects {
+impl<'a> Endpoint for Projects<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
@@ -206,35 +185,35 @@ impl Endpoint for Projects {
             .as_ref()
             .map(|value| pairs.append_pair("search", value));
         self.archived
-            .map(|value| pairs.append_pair("archived", bool_as_str(value)));
+            .map(|value| pairs.append_pair("archived", common::bool_str(value)));
         self.visibility
             .map(|value| pairs.append_pair("visibility", value.as_str()));
         self.search_namespaces
-            .map(|value| pairs.append_pair("search_namespaces", bool_as_str(value)));
+            .map(|value| pairs.append_pair("search_namespaces", common::bool_str(value)));
         self.simple
-            .map(|value| pairs.append_pair("simple", bool_as_str(value)));
+            .map(|value| pairs.append_pair("simple", common::bool_str(value)));
         self.owned
-            .map(|value| pairs.append_pair("owned", bool_as_str(value)));
+            .map(|value| pairs.append_pair("owned", common::bool_str(value)));
         self.membership
-            .map(|value| pairs.append_pair("membership", bool_as_str(value)));
+            .map(|value| pairs.append_pair("membership", common::bool_str(value)));
         self.starred
-            .map(|value| pairs.append_pair("starred", bool_as_str(value)));
+            .map(|value| pairs.append_pair("starred", common::bool_str(value)));
         self.statistics
-            .map(|value| pairs.append_pair("statistics", bool_as_str(value)));
+            .map(|value| pairs.append_pair("statistics", common::bool_str(value)));
         self.with_issues_enabled
-            .map(|value| pairs.append_pair("with_issues_enabled", bool_as_str(value)));
+            .map(|value| pairs.append_pair("with_issues_enabled", common::bool_str(value)));
         self.with_merge_requests_enabled
-            .map(|value| pairs.append_pair("with_merge_requests_enabled", bool_as_str(value)));
+            .map(|value| pairs.append_pair("with_merge_requests_enabled", common::bool_str(value)));
         self.with_programming_language
             .as_ref()
             .map(|value| pairs.append_pair("with_programming_language", value));
         self.wiki_checksum_failed
-            .map(|value| pairs.append_pair("wiki_checksum_failed", bool_as_str(value)));
+            .map(|value| pairs.append_pair("wiki_checksum_failed", common::bool_str(value)));
         self.repository_checksum_failed
-            .map(|value| pairs.append_pair("repository_checksum_failed", bool_as_str(value)));
+            .map(|value| pairs.append_pair("repository_checksum_failed", common::bool_str(value)));
 
         self.min_access_level
-            .map(|value| pairs.append_pair("min_access_level", &format!("{}", u64::from(value))));
+            .map(|value| pairs.append_pair("min_access_level", &format!("{}", value.as_u64())));
 
         self.id_after
             .map(|value| pairs.append_pair("id_after", &format!("{}", value)));
@@ -256,10 +235,10 @@ impl Endpoint for Projects {
         pairs.extend_pairs(
             self.custom_attributes
                 .iter()
-                .map(|(key, value)| (format!("custom_attribute[{}]", key), value)),
+                .map(|(key, value)| (format!("custom_attributes[{}]", key), value)),
         );
         self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", bool_as_str(value)));
+            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
 
         self.order_by
             .map(|value| pairs.append_pair("order_by", value.as_str()));
@@ -268,7 +247,7 @@ impl Endpoint for Projects {
     }
 }
 
-impl Pageable for Projects {
+impl<'a> Pageable for Projects<'a> {
     fn use_keyset_pagination(&self) -> bool {
         self.order_by
             .map_or(false, |order_by| order_by.use_keyset_pagination())
@@ -277,7 +256,28 @@ impl Pageable for Projects {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::Projects;
+    use crate::api::projects::{ProjectOrderBy, Projects};
+
+    #[test]
+    fn order_by_default() {
+        assert_eq!(ProjectOrderBy::default(), ProjectOrderBy::CreatedAt);
+    }
+
+    #[test]
+    fn order_by_as_str() {
+        let items = &[
+            (ProjectOrderBy::Id, "id"),
+            (ProjectOrderBy::Name, "name"),
+            (ProjectOrderBy::Path, "path"),
+            (ProjectOrderBy::CreatedAt, "created_at"),
+            (ProjectOrderBy::UpdatedAt, "updated_at"),
+            (ProjectOrderBy::LastActivityAt, "last_activity_at"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn defaults_are_sufficient() {

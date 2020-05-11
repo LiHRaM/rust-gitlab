@@ -6,8 +6,8 @@
 
 use derive_builder::Builder;
 
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
-use crate::query_common::NameOrId;
 
 /// Query for the variables of a pipeline.
 #[derive(Debug, Builder)]

@@ -8,9 +8,9 @@ use std::collections::HashSet;
 
 use derive_builder::Builder;
 
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
 use crate::api::projects::JobScope;
-use crate::query_common::NameOrId;
 
 /// Query for jobs within a pipeline.
 #[derive(Debug, Builder)]

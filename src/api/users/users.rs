@@ -6,11 +6,11 @@
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::fmt;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
+use crate::api::common::{self, EnableState, SortOrder};
 use crate::api::endpoint_prelude::*;
 
 /// Keys user results may be ordered by.
@@ -44,12 +44,6 @@ impl UserOrderBy {
             UserOrderBy::CreatedAt => "created_at",
             UserOrderBy::UpdatedAt => "updated_at",
         }
-    }
-}
-
-impl fmt::Display for UserOrderBy {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 
@@ -133,12 +127,6 @@ impl<'a> Users<'a> {
 }
 
 impl<'a> UsersBuilder<'a> {
-    /// Clear custom attribute search parameters.
-    pub fn clear_custom_attributes(&mut self) -> &mut Self {
-        self.custom_attributes = None;
-        self
-    }
-
     /// Add a custom attribute search parameter.
     pub fn custom_attribute<K, V>(&mut self, key: K, value: V) -> &mut Self
     where
@@ -165,14 +153,6 @@ impl<'a> UsersBuilder<'a> {
     }
 }
 
-fn bool_as_str(b: bool) -> &'static str {
-    if b {
-        "true"
-    } else {
-        "false"
-    }
-}
-
 impl<'a> Endpoint for Users<'a> {
     fn method(&self) -> Method {
         Method::GET
@@ -196,19 +176,27 @@ impl<'a> Endpoint for Users<'a> {
             pairs.append_pair("provider", &value.name);
         }
         self.external
-            .map(|value| pairs.append_pair("external", bool_as_str(value)));
-        self.created_before
-            .map(|value| pairs.append_pair("created_before", &value.to_rfc3339()));
-        self.created_after
-            .map(|value| pairs.append_pair("created_before", &value.to_rfc3339()));
+            .map(|value| pairs.append_pair("external", common::bool_str(value)));
+        self.created_before.map(|value| {
+            pairs.append_pair(
+                "created_before",
+                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+            )
+        });
+        self.created_after.map(|value| {
+            pairs.append_pair(
+                "created_after",
+                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+            )
+        });
 
         pairs.extend_pairs(
             self.custom_attributes
                 .iter()
-                .map(|(key, value)| (format!("custom_attribute[{}]", key), value)),
+                .map(|(key, value)| (format!("custom_attributes[{}]", key), value)),
         );
         self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", bool_as_str(value)));
+            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
 
         self.order_by
             .map(|value| pairs.append_pair("order_by", value.as_str()));
@@ -217,7 +205,7 @@ impl<'a> Endpoint for Users<'a> {
         self.two_factor
             .map(|value| pairs.append_pair("two_factor", value.as_str()));
         self.without_projects
-            .map(|value| pairs.append_pair("without_projects", bool_as_str(value)));
+            .map(|value| pairs.append_pair("without_projects", common::bool_str(value)));
     }
 }
 
@@ -225,7 +213,57 @@ impl<'a> Pageable for Users<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::users::Users;
+    use crate::api::users::{ExternalProvider, UserOrderBy, Users};
+
+    #[test]
+    fn order_by_default() {
+        assert_eq!(UserOrderBy::default(), UserOrderBy::Id);
+    }
+
+    #[test]
+    fn order_by_as_str() {
+        let items = &[
+            (UserOrderBy::Id, "id"),
+            (UserOrderBy::Name, "name"),
+            (UserOrderBy::Username, "username"),
+            (UserOrderBy::CreatedAt, "created_at"),
+            (UserOrderBy::UpdatedAt, "updated_at"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn external_provider_id_and_name_are_necessary() {
+        let err = ExternalProvider::builder().build().unwrap_err();
+        assert_eq!(err, "`id` must be initialized");
+    }
+
+    #[test]
+    fn external_provider_id_is_necessary() {
+        let err = ExternalProvider::builder()
+            .name("name")
+            .build()
+            .unwrap_err();
+        assert_eq!(err, "`id` must be initialized");
+    }
+
+    #[test]
+    fn external_provider_name_is_necessary() {
+        let err = ExternalProvider::builder().id(1).build().unwrap_err();
+        assert_eq!(err, "`name` must be initialized");
+    }
+
+    #[test]
+    fn external_provider_id_and_name_are_sufficient() {
+        ExternalProvider::builder()
+            .id(1)
+            .name("name")
+            .build()
+            .unwrap();
+    }
 
     #[test]
     fn defaults_are_sufficient() {

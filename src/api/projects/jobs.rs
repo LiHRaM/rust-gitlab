@@ -5,12 +5,11 @@
 // except according to those terms.
 
 use std::collections::HashSet;
-use std::fmt;
 
 use derive_builder::Builder;
 
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
-use crate::query_common::NameOrId;
 
 /// Scopes for jobs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -46,12 +45,6 @@ impl JobScope {
             JobScope::Skipped => "skipped",
             JobScope::Manual => "manual",
         }
-    }
-}
-
-impl fmt::Display for JobScope {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 
@@ -116,7 +109,25 @@ impl<'a> Pageable for Jobs<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::Jobs;
+    use crate::api::projects::{JobScope, Jobs};
+
+    #[test]
+    fn job_scope_as_str() {
+        let items = &[
+            (JobScope::Created, "created"),
+            (JobScope::Pending, "pending"),
+            (JobScope::Running, "running"),
+            (JobScope::Failed, "failed"),
+            (JobScope::Success, "success"),
+            (JobScope::Canceled, "canceled"),
+            (JobScope::Skipped, "skipped"),
+            (JobScope::Manual, "manual"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn project_is_needed() {

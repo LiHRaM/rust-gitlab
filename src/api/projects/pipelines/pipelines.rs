@@ -5,13 +5,12 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::fmt;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
+use crate::api::common::{self, NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
-use crate::query_common::NameOrId;
 
 /// Scopes for pipelines.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,12 +37,6 @@ impl PipelineScope {
             PipelineScope::Branches => "branches",
             PipelineScope::Tags => "tags",
         }
-    }
-}
-
-impl fmt::Display for PipelineScope {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
     }
 }
 
@@ -84,12 +77,6 @@ impl PipelineStatus {
     }
 }
 
-impl fmt::Display for PipelineStatus {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
 /// Keys pipeline results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PipelineOrderBy {
@@ -124,12 +111,6 @@ impl PipelineOrderBy {
     }
 }
 
-impl fmt::Display for PipelineOrderBy {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
 /// Query for pipelines within a project.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
@@ -145,19 +126,19 @@ pub struct Pipelines<'a> {
     #[builder(default)]
     status: Option<PipelineStatus>,
     /// Filter pipelines by the owning ref.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     ref_: Option<Cow<'a, str>>,
     /// Filter pipelines for a given commit SHA.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     sha: Option<Cow<'a, str>>,
     /// Filter pipelines with or without YAML errors.
     #[builder(default)]
     yaml_errors: Option<bool>,
     /// Filter pipelines by the name of the triggering user.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     name: Option<Cow<'a, str>>,
     /// Filter pipelines by the username of the triggering user.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     username: Option<Cow<'a, str>>,
 
     /// Order results by a given key.
@@ -182,14 +163,6 @@ impl<'a> Pipelines<'a> {
     }
 }
 
-fn bool_as_str(b: bool) -> &'static str {
-    if b {
-        "true"
-    } else {
-        "false"
-    }
-}
-
 impl<'a> Endpoint for Pipelines<'a> {
     fn method(&self) -> Method {
         Method::GET
@@ -211,7 +184,7 @@ impl<'a> Endpoint for Pipelines<'a> {
             .as_ref()
             .map(|value| pairs.append_pair("sha", value));
         self.yaml_errors
-            .map(|value| pairs.append_pair("yaml_errors", bool_as_str(value)));
+            .map(|value| pairs.append_pair("yaml_errors", common::bool_str(value)));
         self.name
             .as_ref()
             .map(|value| pairs.append_pair("name", value));
@@ -243,7 +216,62 @@ impl<'a> Pageable for Pipelines<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::pipelines::Pipelines;
+    use crate::api::projects::pipelines::{
+        PipelineOrderBy, PipelineScope, PipelineStatus, Pipelines,
+    };
+
+    #[test]
+    fn pipeline_scope_as_str() {
+        let items = &[
+            (PipelineScope::Running, "running"),
+            (PipelineScope::Pending, "pending"),
+            (PipelineScope::Finished, "finished"),
+            (PipelineScope::Branches, "branches"),
+            (PipelineScope::Tags, "tags"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn pipeline_status_as_str() {
+        let items = &[
+            (PipelineStatus::Running, "running"),
+            (PipelineStatus::Pending, "pending"),
+            (PipelineStatus::Success, "success"),
+            (PipelineStatus::Failed, "failed"),
+            (PipelineStatus::Canceled, "canceled"),
+            (PipelineStatus::Skipped, "skipped"),
+            (PipelineStatus::Created, "created"),
+            (PipelineStatus::Manual, "manual"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn order_by_default() {
+        assert_eq!(PipelineOrderBy::default(), PipelineOrderBy::Id);
+    }
+
+    #[test]
+    fn order_by_as_str() {
+        let items = &[
+            (PipelineOrderBy::Id, "id"),
+            (PipelineOrderBy::Status, "status"),
+            (PipelineOrderBy::Ref, "ref"),
+            (PipelineOrderBy::UpdatedAt, "updated_at"),
+            (PipelineOrderBy::UserId, "user_id"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn project_is_needed() {
