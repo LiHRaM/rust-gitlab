@@ -45,7 +45,14 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/repository/branches` `projects/repository/branches/branches.rs`
   * `POST   /projects/:project/repository/branches` `projects/repository/branches/create.rs`
   * `GET    /projects/:project/repository/branches/:branch` `projects/repository/branches/branch.rs`
+  * `GET    /projects/:project/repository/commits/:sha` `projects/repository/commits/commit.rs`
+  * `GET    /projects/:project/repository/commits/:sha/comments` `projects/repository/commits/comments.rs`
+  * `POST   /projects/:project/repository/commits/:sha/comments` `projects/repository/commits/comment.rs`
+  * `GET    /projects/:project/repository/commits/:sha/statuses` `projects/repository/commits/statuses.rs`
   * `POST   /projects/:project/repository/files/*file_path` `projects/repository/files/create.rs`
+  * `GET    /projects/:project/statuses/:sha` `projects/repository/commits/create_status.rs`
+    Arguably, this should be `POST /projects/:project/repository/commits/:sha/statuses`.
+    https://gitlab.com/gitlab-org/gitlab/-/issues/217412
   * `GET    /user` `users/current_user.rs`
   * `GET    /users` `users/users.rs`
   * `GET    /users/:user` `users/user.rs`
@@ -117,6 +124,14 @@ instead of having to search the page for missing endpoints.
   * `PUT    /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#edit-project-push-rule
   * `DELETE /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#delete-project-push-rule
   * `DELETE /projects/:project/repository/branches/:branch` https://gitlab.kitware.com/help/api/branches.md#delete-repository-branch
+  * `GET    /projects/:project/repository/commits` https://gitlab.kitware.com/help/api/commits.md#list-repository-commits
+  * `POST   /projects/:project/repository/commits` https://gitlab.kitware.com/help/api/commits.md#create-a-commit-with-multiple-files-and-actions
+  * `POST   /projects/:project/repository/commits/:sha/cherry_pick` https://gitlab.kitware.com/help/api/commits.md#cherry-pick-a-commit
+  * `GET    /projects/:project/repository/commits/:sha/diffs` https://gitlab.kitware.com/help/api/commits.md#get-the-diff-of-a-commit
+  * `GET    /projects/:project/repository/commits/:sha/merge_requests` https://gitlab.kitware.com/help/api/commits.md#list-merge-requests-associated-with-a-commit
+  * `GET    /projects/:project/repository/commits/:sha/refs` https://gitlab.kitware.com/help/api/commits.md#get-references-a-commit-is-pushed-to
+  * `POST   /projects/:project/repository/commits/:sha/revert` https://gitlab.kitware.com/help/api/commits.md#revert-a-commit
+  * `GET    /projects/:project/repository/commits/:sha/signature` https://gitlab.kitware.com/help/api/commits.md#get-gpg-signature-of-a-commit
   * `GET    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
   * `HEAD   /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
   * `GET    /projects/:project/repository/files/*file_path/blame` https://gitlab.kitware.com/help/api/repository_files.md#get-file-blame-from-repository
@@ -185,7 +200,6 @@ These pages document other endpoints not mentioned above:
 
   * https://gitlab.kitware.com/help/api/access_requests.md
   * https://gitlab.kitware.com/help/api/award_emoji.md
-  * https://gitlab.kitware.com/help/api/commits.md
   * https://gitlab.kitware.com/help/api/container_registry.md
   * https://gitlab.kitware.com/help/api/custom_attributes.md
   * https://gitlab.kitware.com/help/api/dependencies.md

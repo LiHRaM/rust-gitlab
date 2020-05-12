@@ -91,6 +91,8 @@ pub enum GitlabError {
         #[from]
         source: api::ApiError<RestError>,
     },
+    #[error("invalid status state for new commit status: {}", state.as_str())]
+    InvalidStatusState { state: StatusState },
     /// This is here to force `_` matching right now.
     ///
     /// **DO NOT USE**
@@ -1080,26 +1082,33 @@ impl Gitlab {
     }
 
     /// Get a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::Commit.query()` instead"
+    )]
     pub fn commit<C>(&self, project: ProjectId, commit: C) -> GitlabResult<RepoCommitDetail>
     where
         C: AsRef<str>,
     {
-        self.get_with_param(
-            format!(
-                "projects/{}/repository/commits/{}",
-                project,
-                commit.as_ref(),
-            ),
-            &[("stats", "true")],
-        )
+        Ok(projects::repository::commits::Commit::builder()
+            .project(project.value())
+            .commit(commit.as_ref())
+            .stats(true)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get comments on a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommitComments.query()` instead"
+    )]
     pub fn commit_comments<C, I, K, V>(
         &self,
         project: ProjectId,
         commit: C,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<CommitNote>>
     where
         C: AsRef<str>,
@@ -1108,17 +1117,22 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/repository/commits/{}/comments",
-                project,
-                commit.as_ref(),
-            ),
-            params,
+        Ok(api::paged(
+            projects::repository::commits::CommitComments::builder()
+                .project(project.value())
+                .commit(commit.as_ref())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get comments on a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommentOnCommit.query()` instead"
+    )]
     pub fn create_commit_comment<C, B>(
         &self,
         project: ProjectId,
@@ -1129,17 +1143,20 @@ impl Gitlab {
         C: AsRef<str>,
         B: AsRef<str>,
     {
-        self.post_with_param(
-            format!(
-                "projects/{}/repository/commits/{}/comment",
-                project,
-                commit.as_ref(),
-            ),
-            &[("note", body.as_ref())],
-        )
+        Ok(projects::repository::commits::CommentOnCommit::builder()
+            .project(project.value())
+            .commit(commit.as_ref())
+            .note(body.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get comments on a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommentOnCommit.query()` instead"
+    )]
     pub fn create_commit_comment_by_name<P, C, B>(
         &self,
         project: P,
@@ -1151,17 +1168,20 @@ impl Gitlab {
         C: AsRef<str>,
         B: AsRef<str>,
     {
-        self.post_with_param(
-            format!(
-                "projects/{}/repository/commits/{}/comment",
-                Self::url_name(project.as_ref()),
-                commit.as_ref(),
-            ),
-            &[("note", body.as_ref())],
-        )
+        Ok(projects::repository::commits::CommentOnCommit::builder()
+            .project(project.as_ref())
+            .commit(commit.as_ref())
+            .note(body.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get comments on a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommentOnCommit.query()` instead"
+    )]
     pub fn create_commit_line_comment(
         &self,
         project: ProjectId,
@@ -1170,21 +1190,23 @@ impl Gitlab {
         path: &str,
         line: u64,
     ) -> GitlabResult<CommitNote> {
-        let line_str = format!("{}", line);
-        let line_type = LineType::New;
-
-        self.post_with_param(
-            format!("projects/{}/repository/commits/{}/comment", project, commit),
-            &[
-                ("note", body),
-                ("path", path),
-                ("line", &line_str),
-                ("line_type", line_type.as_str()),
-            ],
-        )
+        Ok(projects::repository::commits::CommentOnCommit::builder()
+            .project(project.value())
+            .commit(commit)
+            .note(body)
+            .path(path)
+            .line(line)
+            .line_type(projects::repository::commits::LineType::New)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the latest statuses of a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommitStatuses.query()` instead"
+    )]
     pub fn commit_latest_statuses<C, I, K, V>(
         &self,
         project: ProjectId,
@@ -1209,6 +1231,10 @@ impl Gitlab {
     }
 
     /// Get the latest statuses of a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommitStatuses.query()` instead"
+    )]
     pub fn commit_latest_statuses_by_name<P, C, I, K, V>(
         &self,
         project: P,
@@ -1234,6 +1260,10 @@ impl Gitlab {
     }
 
     /// Get the all statuses of a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommitStatuses.query()` instead"
+    )]
     pub fn commit_all_statuses<C>(
         &self,
         project: ProjectId,
@@ -1242,14 +1272,13 @@ impl Gitlab {
     where
         C: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/repository/commits/{}/statuses",
-                project,
-                commit.as_ref(),
-            ),
-            &[("all", "true")],
-        )
+        Ok(projects::repository::commits::CommitStatuses::builder()
+            .project(project.value())
+            .commit(commit.as_ref())
+            .all(true)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the latest builds of a commit.
@@ -1292,6 +1321,10 @@ impl Gitlab {
     }
 
     /// Create a status message for a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CreateCommitStatus.query()` instead"
+    )]
     pub fn create_commit_status<S>(
         &self,
         project: ProjectId,
@@ -1302,27 +1335,38 @@ impl Gitlab {
     where
         S: AsRef<str>,
     {
-        let path = format!("projects/{}/statuses/{}", project, sha.as_ref());
+        let mut builder = projects::repository::commits::CreateCommitStatus::builder();
+        builder
+            .project(project.value())
+            .commit(sha.as_ref())
+            .state(match state {
+                StatusState::Pending => projects::repository::commits::CommitStatusState::Pending,
+                StatusState::Running => projects::repository::commits::CommitStatusState::Running,
+                StatusState::Success => projects::repository::commits::CommitStatusState::Success,
+                StatusState::Failed => projects::repository::commits::CommitStatusState::Failed,
+                StatusState::Canceled => projects::repository::commits::CommitStatusState::Canceled,
+                StatusState::Created | StatusState::Skipped | StatusState::Manual => {
+                    return Err(GitlabError::InvalidStatusState {
+                        state,
+                    });
+                },
+            });
 
-        let mut params = vec![("state", state.as_str())];
+        info.refname.map(|refname| builder.ref_(refname));
+        info.name.map(|name| builder.name(name));
+        info.target_url
+            .map(|target_url| builder.target_url(target_url));
+        info.description
+            .map(|description| builder.description(description));
 
-        if let Some(v) = info.refname {
-            params.push(("ref", v))
-        }
-        if let Some(v) = info.name {
-            params.push(("name", v))
-        }
-        if let Some(v) = info.target_url {
-            params.push(("target_url", v))
-        }
-        if let Some(v) = info.description {
-            params.push(("description", v))
-        }
-
-        self.post_with_param(path, &params)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Create a status message for a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CreateCommitStatus.query()` instead"
+    )]
     pub fn create_commit_status_by_name<P, S>(
         &self,
         project: P,
@@ -1334,28 +1378,31 @@ impl Gitlab {
         P: AsRef<str>,
         S: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/statuses/{}",
-            Self::url_name(project.as_ref()),
-            sha.as_ref(),
-        );
+        let mut builder = projects::repository::commits::CreateCommitStatus::builder();
+        builder
+            .project(project.as_ref())
+            .commit(sha.as_ref())
+            .state(match state {
+                StatusState::Pending => projects::repository::commits::CommitStatusState::Pending,
+                StatusState::Running => projects::repository::commits::CommitStatusState::Running,
+                StatusState::Success => projects::repository::commits::CommitStatusState::Success,
+                StatusState::Failed => projects::repository::commits::CommitStatusState::Failed,
+                StatusState::Canceled => projects::repository::commits::CommitStatusState::Canceled,
+                StatusState::Created | StatusState::Skipped | StatusState::Manual => {
+                    return Err(GitlabError::InvalidStatusState {
+                        state,
+                    });
+                },
+            });
 
-        let mut params = vec![("state", state.as_str())];
+        info.refname.map(|refname| builder.ref_(refname));
+        info.name.map(|name| builder.name(name));
+        info.target_url
+            .map(|target_url| builder.target_url(target_url));
+        info.description
+            .map(|description| builder.description(description));
 
-        if let Some(v) = info.refname {
-            params.push(("ref", v))
-        }
-        if let Some(v) = info.name {
-            params.push(("name", v))
-        }
-        if let Some(v) = info.target_url {
-            params.push(("target_url", v))
-        }
-        if let Some(v) = info.description {
-            params.push(("description", v))
-        }
-
-        self.post_with_param(path, &params)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get the labels for a project.
