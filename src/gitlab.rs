@@ -1282,6 +1282,7 @@ impl Gitlab {
     }
 
     /// Get the latest builds of a commit.
+    #[deprecated(since = "0.1210.1", note = "deprecated by GitLab")]
     pub fn commit_latest_builds<C, I, K, V>(
         &self,
         project: ProjectId,
@@ -1306,6 +1307,7 @@ impl Gitlab {
     }
 
     /// Get the all builds of a commit.
+    #[deprecated(since = "0.1210.1", note = "deprecated by GitLab")]
     pub fn commit_all_builds<C>(&self, project: ProjectId, commit: C) -> GitlabResult<Vec<Job>>
     where
         C: AsRef<str>,
