@@ -29,6 +29,9 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/jobs/:id/retry` `projects/jobs/retry.rs`
   * `POST   /projects/:project/jobs/:id/play` `projects/jobs/play.rs`
   * `GET    /projects/:project/jobs/:id/trace` `projects/jobs/trace.rs`
+  * `GET    /projects/:project/labels` `projects/labels/label.rs`
+  * `POST   /projects/:project/labels` `projects/labels/create.rs`
+  * `GET    /projects/:project/labels/:label` `projects/labels/labels.rs`
   * `GET    /projects/:project/members` `projects/members/members.rs`
   * `POST   /projects/:project/members` `projects/members/add.rs`
   * `GET    /projects/:project/members/:id` `projects/members/member.rs`
@@ -109,6 +112,11 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/jobs/:id/artifacts` https://gitlab.kitware.com/help/api/jobs.md#delete-artifacts
   * `POST   /projects/:project/jobs/:id/artifacts/keep` https://gitlab.kitware.com/help/api/jobs.md#keep-artifacts
   * `GET    /projects/:project/jobs/:id/artifacts/*artifact_path` https://gitlab.kitware.com/help/api/jobs.md#download-a-single-artifact-file-by-job-id
+  * `PUT    /projects/:project/labels/:label` https://gitlab.kitware.com/help/api/labels.md#edit-an-existing-label
+  * `DELETE /projects/:project/labels/:label` https://gitlab.kitware.com/help/api/labels.md#delete-a-label
+  * `PUT    /projects/:project/labels/:label/promote` https://gitlab.kitware.com/help/api/labels.md#promote-a-project-label-to-a-group-label
+  * `POST   /projects/:project/labels/:label/subscribe` https://gitlab.kitware.com/help/api/labels.md#subscribe-to-a-label
+  * `POST   /projects/:project/labels/:label/unsubscribe` https://gitlab.kitware.com/help/api/labels.md#unsubscribe-from-a-label
   * `GET    /projects/:project/languages` https://gitlab.kitware.com/help/api/projects.md#languages
   * `GET    /projects/:project/members/all` https://gitlab.kitware.com/help/api/members.md#list-all-members-of-a-group-or-project-including-inherited-members
   * `GET    /projects/:project/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
@@ -212,7 +220,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/issues_statistics.md
   * https://gitlab.kitware.com/help/api/boards.md
   * https://gitlab.kitware.com/help/api/issue_links.md
-  * https://gitlab.kitware.com/help/api/labels.md
   * https://gitlab.kitware.com/help/api/managed_licenses.md
   * https://gitlab.kitware.com/help/api/merge_request_approvals.md
   * https://gitlab.kitware.com/help/api/merge_requests.md

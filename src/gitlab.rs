@@ -1408,21 +1408,44 @@ impl Gitlab {
     }
 
     /// Get the labels for a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::labels::Labels.query()` instead"
+    )]
     pub fn labels(&self, project: ProjectId) -> GitlabResult<Vec<Label>> {
-        self.get_paged(format!("projects/{}/labels", project))
+        Ok(projects::labels::Labels::builder()
+            .project(project.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the labels with open/closed/merge requests count
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::labels::Labels.query()` instead"
+    )]
     pub fn labels_with_counts(&self, project: ProjectId) -> GitlabResult<Vec<Label>> {
-        self.get_paged_with_param(
-            format!("projects/{}/labels", project),
-            &[("with_counts", "true")],
-        )
+        Ok(projects::labels::Labels::builder()
+            .project(project.value())
+            .with_counts(true)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get label by ID.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::labels::Label.query()` instead"
+    )]
     pub fn label(&self, project: ProjectId, label: LabelId) -> GitlabResult<Label> {
-        self.get(format!("projects/{}/labels/{}", project, label))
+        Ok(projects::labels::Label::builder()
+            .project(project.value())
+            .label(label.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the issues for a project.
@@ -1496,6 +1519,10 @@ impl Gitlab {
     }
 
     /// Create a new label
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::labels::CreateLabel.query()` instead"
+    )]
     pub fn create_label(&self, project: ProjectId, label: Label) -> GitlabResult<Label> {
         let path = format!("projects/{}/labels", project);
 
