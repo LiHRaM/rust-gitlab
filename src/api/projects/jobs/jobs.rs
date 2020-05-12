@@ -50,7 +50,6 @@ impl JobScope {
 
 /// Query for jobs within a project.
 #[derive(Debug, Builder)]
-#[builder(setter(strip_option))]
 pub struct Jobs<'a> {
     /// The project to query for jobs.
     #[builder(setter(into))]

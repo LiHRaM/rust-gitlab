@@ -11,7 +11,6 @@ use crate::api::endpoint_prelude::*;
 
 /// Query for a job within a project.
 #[derive(Debug, Builder)]
-#[builder(setter(strip_option))]
 pub struct Job<'a> {
     /// The project to query for the job.
     #[builder(setter(into))]
@@ -39,16 +38,28 @@ impl<'a> Endpoint for Job<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::pipelines::Pipelines;
+    use crate::api::projects::jobs::Job;
 
     #[test]
-    fn project_is_needed() {
-        let err = Pipelines::builder().build().unwrap_err();
+    fn project_and_job_are_needed() {
+        let err = Job::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
-    fn project_is_sufficient() {
-        Pipelines::builder().project(1).build().unwrap();
+    fn project_is_needed() {
+        let err = Job::builder().job(1).build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
+    }
+
+    #[test]
+    fn job_is_needed() {
+        let err = Job::builder().project(1).build().unwrap_err();
+        assert_eq!(err, "`job` must be initialized");
+    }
+
+    #[test]
+    fn project_and_job_are_sufficient() {
+        Job::builder().project(1).job(1).build().unwrap();
     }
 }
