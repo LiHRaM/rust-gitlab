@@ -11,8 +11,7 @@ use crate::api::endpoint_prelude::*;
 
 /// Query for a job within a project.
 #[derive(Debug, Builder)]
-#[builder(setter(strip_option))]
-pub struct Job<'a> {
+pub struct JobTrace<'a> {
     /// The project to query for the job.
     #[builder(setter(into))]
     project: NameOrId<'a>,
@@ -20,35 +19,47 @@ pub struct Job<'a> {
     job: u64,
 }
 
-impl<'a> Job<'a> {
+impl<'a> JobTrace<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> JobBuilder<'a> {
-        JobBuilder::default()
+    pub fn builder() -> JobTraceBuilder<'a> {
+        JobTraceBuilder::default()
     }
 }
 
-impl<'a> Endpoint for Job<'a> {
+impl<'a> Endpoint for JobTrace<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/jobs/{}", self.project, self.job).into()
+        format!("projects/{}/jobs/{}/trace", self.project, self.job).into()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::pipelines::Pipelines;
+    use crate::api::projects::jobs::JobTrace;
 
     #[test]
-    fn project_is_needed() {
-        let err = Pipelines::builder().build().unwrap_err();
+    fn project_and_job_are_needed() {
+        let err = JobTrace::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
-    fn project_is_sufficient() {
-        Pipelines::builder().project(1).build().unwrap();
+    fn project_is_needed() {
+        let err = JobTrace::builder().job(1).build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
+    }
+
+    #[test]
+    fn job_is_needed() {
+        let err = JobTrace::builder().project(1).build().unwrap_err();
+        assert_eq!(err, "`job` must be initialized");
+    }
+
+    #[test]
+    fn project_and_job_are_sufficient() {
+        JobTrace::builder().project(1).job(1).build().unwrap();
     }
 }

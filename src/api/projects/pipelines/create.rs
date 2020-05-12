@@ -88,9 +88,7 @@ impl<'a> CreatePipeline<'a> {
 impl<'a> CreatePipelineBuilder<'a> {
     /// Add a variable.
     pub fn variable(&mut self, variable: PipelineVariable<'a>) -> &mut Self {
-        self.variables
-            .get_or_insert_with(Default::default)
-            .push(variable);
+        self.variables.get_or_insert_with(Vec::new).push(variable);
         self
     }
 
@@ -101,7 +99,7 @@ impl<'a> CreatePipelineBuilder<'a> {
         V: Into<PipelineVariable<'a>>,
     {
         self.variables
-            .get_or_insert_with(Default::default)
+            .get_or_insert_with(Vec::new)
             .extend(iter.map(Into::into));
         self
     }

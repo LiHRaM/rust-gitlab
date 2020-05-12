@@ -18,6 +18,7 @@ default = ["client_api"]
 client_api = ["itertools", "percent-encoding", "reqwest", "thiserror", "graphql_client"]
 
 [dependencies]
+base64 = "~0.12"
 derive_builder = "~0.9"
 itertools = { version = "~0.8", optional = true }
 log = "~0.4"

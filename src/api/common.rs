@@ -130,13 +130,15 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b'%')
     .add(b'/');
 
+/// Escape a string for usage as a single URL path component.
+pub fn path_escaped<'a>(input: &'a str) -> impl fmt::Display + 'a {
+    utf8_percent_encode(input, PATH_SEGMENT_ENCODE_SET)
+}
+
 impl<'a> fmt::Display for NameOrId<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            NameOrId::Name(name) => {
-                let encoded = utf8_percent_encode(name, PATH_SEGMENT_ENCODE_SET);
-                write!(f, "{}", encoded)
-            },
+            NameOrId::Name(name) => write!(f, "{}", path_escaped(name)),
             NameOrId::Id(id) => write!(f, "{}", id),
         }
     }
@@ -161,7 +163,7 @@ impl<'a> From<String> for NameOrId<'a> {
 }
 
 /// Visibility levels of projects.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VisibilityLevel {
     /// The project is visible to anonymous users.
     Public,

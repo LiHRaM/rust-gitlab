@@ -152,7 +152,7 @@ impl<'a> ProjectsBuilder<'a> {
         V: Into<Cow<'a, str>>,
     {
         self.custom_attributes
-            .get_or_insert_with(Default::default)
+            .get_or_insert_with(BTreeMap::new)
             .insert(key.into(), value.into());
         self
     }
@@ -165,7 +165,7 @@ impl<'a> ProjectsBuilder<'a> {
         V: Into<Cow<'a, str>>,
     {
         self.custom_attributes
-            .get_or_insert_with(Default::default)
+            .get_or_insert_with(BTreeMap::new)
             .extend(iter.map(|(k, v)| (k.into(), v.into())));
         self
     }

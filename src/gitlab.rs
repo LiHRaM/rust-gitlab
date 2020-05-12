@@ -20,10 +20,9 @@ use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
 
-use crate::api::projects::pipelines;
-use crate::api::projects::Projects;
+use crate::api::projects::{self, pipelines};
 use crate::api::users::{CurrentUser, User, Users};
-use crate::api::{self, Query};
+use crate::api::{self, common, groups, Query};
 use crate::auth::{Auth, AuthError};
 use crate::types::*;
 
@@ -92,6 +91,8 @@ pub enum GitlabError {
         #[from]
         source: api::ApiError<RestError>,
     },
+    #[error("invalid status state for new commit status: {}", state.as_str())]
+    InvalidStatusState { state: StatusState },
     /// This is here to force `_` matching right now.
     ///
     /// **DO NOT USE**
@@ -426,6 +427,11 @@ impl Gitlab {
     ///                     .unwrap();
     /// gitlab.create_project("My Project", Some("project"), Some(params));
     /// ```
+    #[allow(deprecated)]
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::CreateProject.query()` instead"
+    )]
     pub fn create_project<N: AsRef<str>, P: AsRef<str>>(
         &self,
         name: N,
@@ -447,6 +453,10 @@ impl Gitlab {
     }
 
     /// Create a new file in repository
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::files::CreateFile.query()` instead"
+    )]
     pub fn create_file<F, B, C, M>(
         &self,
         project: ProjectId,
@@ -461,49 +471,88 @@ impl Gitlab {
         C: AsRef<str>,
         M: AsRef<str>,
     {
-        let url = format!(
-            "projects/{}/repository/files/{}",
-            project,
-            file_path.as_ref()
-        );
-        self.post_with_param(
-            url,
-            &[
-                ("branch", branch.as_ref()),
-                ("content", content.as_ref()),
-                ("commit_message", commit_message.as_ref()),
-            ],
-        )
+        Ok(projects::repository::files::CreateFile::builder()
+            .project(project.value())
+            .file_path(file_path.as_ref())
+            .branch(branch.as_ref())
+            .content(content.as_ref().as_bytes())
+            .commit_message(commit_message.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set project description
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::EditProject.query()` instead"
+    )]
     pub fn set_project_description<T: AsRef<str>>(
         &self,
         project: ProjectId,
         description: T,
     ) -> GitlabResult<Project> {
-        let url = format!("projects/{}", project);
-        self.put_with_param(url, &[("description", description.as_ref())])
+        Ok(projects::EditProject::builder()
+            .project(project.value())
+            .description(description.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set project default branch
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::EditProject.query()` instead"
+    )]
     pub fn set_project_default_branch<T: AsRef<str>>(
         &self,
         project: ProjectId,
         branch: T,
     ) -> GitlabResult<Project> {
-        let url = format!("projects/{}", project);
-        self.put_with_param(url, &[("default_branch", branch.as_ref())])
+        Ok(projects::EditProject::builder()
+            .project(project.value())
+            .default_branch(branch.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set project features access level
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::EditProject.query()` instead"
+    )]
     pub fn set_project_feature_access_level(
         &self,
         project: ProjectId,
         feature: ProjectFeatures,
     ) -> GitlabResult<Project> {
-        let url = format!("projects/{}", project);
-        self.put_with_param(url, &[(feature.name(), feature.access_level())])
+        let mut builder = projects::EditProject::builder();
+        builder.project(project.value());
+
+        let convert = |level| {
+            match level {
+                FeatureVisibilityLevel::Disabled => projects::FeatureAccessLevel::Disabled,
+                FeatureVisibilityLevel::Private => projects::FeatureAccessLevel::Private,
+                FeatureVisibilityLevel::Enabled | FeatureVisibilityLevel::Public => {
+                    projects::FeatureAccessLevel::Enabled
+                },
+            }
+        };
+
+        match feature {
+            ProjectFeatures::Issues(level) => builder.issues_access_level(convert(level)),
+            ProjectFeatures::Repository(level) => builder.repository_access_level(convert(level)),
+            ProjectFeatures::MergeRequests(level) => {
+                builder.merge_requests_access_level(convert(level))
+            },
+            ProjectFeatures::Builds(level) => builder.builds_access_level(convert(level)),
+            ProjectFeatures::Wiki(level) => builder.wiki_access_level(convert(level)),
+            ProjectFeatures::Snippets(level) => builder.snippets_access_level(convert(level)),
+        };
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get all accessible projects.
@@ -528,13 +577,17 @@ impl Gitlab {
     )]
     pub fn owned_projects(&self) -> GitlabResult<Vec<Project>> {
         Ok(api::paged(
-            Projects::builder().owned(true).build().unwrap(),
+            projects::Projects::builder().owned(true).build().unwrap(),
             api::Pagination::All,
         )
         .query(self)?)
     }
 
     /// Find a project by id.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::Project.query()` instead"
+    )]
     pub fn project<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Project>
     where
         I: IntoIterator,
@@ -551,6 +604,10 @@ impl Gitlab {
     }
 
     /// Find a project by name.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::Project.query()` instead"
+    )]
     pub fn project_by_name<N, I, K, V>(&self, name: N, params: I) -> GitlabResult<Project>
     where
         N: AsRef<str>,
@@ -566,6 +623,10 @@ impl Gitlab {
     }
 
     /// Get all accessible environments.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::environments::Environments.query()` instead"
+    )]
     pub fn environments<I, K, V>(
         &self,
         project: ProjectId,
@@ -580,6 +641,10 @@ impl Gitlab {
         self.get_paged_with_param(format!("projects/{}/environments", project), params)
     }
 
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::environments::Environment.query()` instead"
+    )]
     pub fn environment<I, K, V>(
         &self,
         project: ProjectId,
@@ -617,6 +682,10 @@ impl Gitlab {
     ///                     .unwrap();
     /// gitlab.create_group("A group", "A path", Some(params));
     /// ```
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::CreateGroup.query()` instead"
+    )]
     pub fn create_group<N: AsRef<str>, P: AsRef<str>>(
         &self,
         name: N,
@@ -633,6 +702,10 @@ impl Gitlab {
     }
 
     /// Get all accessible groups.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::Groups.query()` instead"
+    )]
     pub fn groups<I, K, V>(&self, params: I) -> GitlabResult<Vec<Group>>
     where
         I: IntoIterator,
@@ -644,15 +717,26 @@ impl Gitlab {
     }
 
     /// Find a group by its name.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::Group.query()` instead"
+    )]
     pub fn group_by_name<N>(&self, name: N) -> GitlabResult<Group>
     where
         N: AsRef<str>,
     {
-        let param: &[(&str, &str)] = &[];
-        self.get_with_param(format!("groups/{}", Self::url_name(name.as_ref())), param)
+        Ok(groups::Group::builder()
+            .group(name.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get a project's hooks.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::hooks::Hooks.query()` instead"
+    )]
     pub fn hooks<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<ProjectHook>>
     where
         I: IntoIterator,
@@ -664,54 +748,30 @@ impl Gitlab {
     }
 
     /// Get a project hook.
-    pub fn hook<I, K, V>(
-        &self,
-        project: ProjectId,
-        hook: HookId,
-        params: I,
-    ) -> GitlabResult<ProjectHook>
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::hooks::Hook.query()` instead"
+    )]
+    pub fn hook<I, K, V>(&self, project: ProjectId, hook: HookId, _: I) -> GitlabResult<ProjectHook>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("projects/{}/hooks/{}", project, hook), params)
-    }
-
-    /// Convert a boolean parameter into an HTTP request value.
-    fn bool_param_value(value: bool) -> &'static str {
-        if value {
-            "true"
-        } else {
-            "false"
-        }
-    }
-
-    /// HTTP parameters required to register to a project.
-    fn event_flags(events: WebhookEvents) -> Vec<(&'static str, &'static str)> {
-        vec![
-            ("job_events", Self::bool_param_value(events.job())),
-            ("issues_events", Self::bool_param_value(events.issues())),
-            (
-                "confidential_issues_events",
-                Self::bool_param_value(events.confidential_issues()),
-            ),
-            (
-                "merge_requests_events",
-                Self::bool_param_value(events.merge_requests()),
-            ),
-            ("note_events", Self::bool_param_value(events.note())),
-            ("pipeline_events", Self::bool_param_value(events.pipeline())),
-            ("push_events", Self::bool_param_value(events.push())),
-            (
-                "wiki_page_events",
-                Self::bool_param_value(events.wiki_page()),
-            ),
-        ]
+        Ok(projects::hooks::Hook::builder()
+            .project(project.value())
+            .hook(hook.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Add a project hook.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::hooks::CreateHook.query()` instead"
+    )]
     pub fn add_hook<U, T>(
         &self,
         project: ProjectId,
@@ -724,21 +784,35 @@ impl Gitlab {
         U: AsRef<str>,
         T: AsRef<str>,
     {
-        let mut flags = Self::event_flags(events);
-        flags.push(("url", url.as_ref()));
-        let s: String;
-        if let Some(ssl) = enable_ssl_verification {
-            s = ssl.to_string();
-            flags.push(("enable_ssl_verification", s.as_str()));
+        let mut builder = projects::hooks::CreateHook::builder();
+
+        builder
+            .project(project.value())
+            .url(url.as_ref())
+            .job_events(events.job())
+            .issues_events(events.issues())
+            .confidential_issues_events(events.confidential_issues())
+            .merge_requests_events(events.merge_requests())
+            .note_events(events.note())
+            .pipeline_events(events.pipeline())
+            .push_events(events.push())
+            .wiki_page_events(events.wiki_page());
+
+        if let Some(enable_ssl_verification) = enable_ssl_verification {
+            builder.enable_ssl_verification(enable_ssl_verification);
         }
-        if let Some(tk) = token.as_ref() {
-            flags.push(("token", tk.as_ref()));
+        if let Some(token) = token.as_ref() {
+            builder.token(token.as_ref());
         }
 
-        self.post_with_param(format!("projects/{}/hooks", project), &flags)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get the team members of a group.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::members::GroupMembers.query()` instead"
+    )]
     pub fn group_members<I, K, V>(&self, group: GroupId, params: I) -> GitlabResult<Vec<Member>>
     where
         I: IntoIterator,
@@ -750,22 +824,30 @@ impl Gitlab {
     }
 
     /// Get a team member of a group.
-    pub fn group_member<I, K, V>(
-        &self,
-        group: GroupId,
-        user: UserId,
-        params: I,
-    ) -> GitlabResult<Member>
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::groups::members::GroupMember.query()` instead"
+    )]
+    pub fn group_member<I, K, V>(&self, group: GroupId, user: UserId, _: I) -> GitlabResult<Member>
     where
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("groups/{}/members/{}", group, user), params)
+        Ok(groups::members::GroupMember::builder()
+            .group(group.value())
+            .user(user.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the team members of a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::members::ProjectMembers.query()` instead"
+    )]
     pub fn project_members<I, K, V>(
         &self,
         project: ProjectId,
@@ -781,11 +863,15 @@ impl Gitlab {
     }
 
     /// Get a team member of a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::members::ProjectMember.query()` instead"
+    )]
     pub fn project_member<I, K, V>(
         &self,
         project: ProjectId,
         user: UserId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Member>
     where
         I: IntoIterator,
@@ -793,26 +879,47 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("projects/{}/members/{}", project, user), params)
+        Ok(projects::members::ProjectMember::builder()
+            .project(project.value())
+            .user(user.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Add a user to a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::members::AddProjectMember.query()` instead"
+    )]
     pub fn add_user_to_project(
         &self,
         project: ProjectId,
         user: UserId,
         access: AccessLevel,
     ) -> GitlabResult<Member> {
-        let user_str = format!("{}", user);
-        let access_str = format!("{}", access);
-
-        self.post_with_param(
-            format!("projects/{}/members", project),
-            &[("user_id", &user_str), ("access_level", &access_str)],
-        )
+        Ok(projects::members::AddProjectMember::builder()
+            .project(project.value())
+            .user(user.value())
+            .access_level(match access {
+                AccessLevel::Anonymous => common::AccessLevel::Anonymous,
+                AccessLevel::Guest => common::AccessLevel::Guest,
+                AccessLevel::Reporter => common::AccessLevel::Reporter,
+                AccessLevel::Developer => common::AccessLevel::Developer,
+                AccessLevel::Maintainer => common::AccessLevel::Maintainer,
+                AccessLevel::Owner => common::AccessLevel::Owner,
+                AccessLevel::Admin => common::AccessLevel::Admin,
+            })
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Add a user to a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::members::AddProjectMember.query()` instead"
+    )]
     pub fn add_user_to_project_by_name<P>(
         &self,
         project: P,
@@ -822,30 +929,48 @@ impl Gitlab {
     where
         P: AsRef<str>,
     {
-        let user_str = format!("{}", user);
-        let access_str = format!("{}", access);
-
-        self.post_with_param(
-            format!("projects/{}/members", Self::url_name(project.as_ref())),
-            &[("user_id", &user_str), ("access_level", &access_str)],
-        )
+        Ok(projects::members::AddProjectMember::builder()
+            .project(project.as_ref())
+            .user(user.value())
+            .access_level(match access {
+                AccessLevel::Anonymous => common::AccessLevel::Anonymous,
+                AccessLevel::Guest => common::AccessLevel::Guest,
+                AccessLevel::Reporter => common::AccessLevel::Reporter,
+                AccessLevel::Developer => common::AccessLevel::Developer,
+                AccessLevel::Maintainer => common::AccessLevel::Maintainer,
+                AccessLevel::Owner => common::AccessLevel::Owner,
+                AccessLevel::Admin => common::AccessLevel::Admin,
+            })
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Create a branch for a project
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::branches::CreateBranch.query()` instead"
+    )]
     pub fn create_branch<V: AsRef<str>>(
         &self,
         project: ProjectId,
         name: V,
         reference: V,
     ) -> GitlabResult<RepoBranch> {
-        let url = format!("projects/{}/repository/branches", project);
-        self.post_with_param(
-            url,
-            &[("branch", name.as_ref()), ("ref", reference.as_ref())],
-        )
+        Ok(projects::repository::branches::CreateBranch::builder()
+            .project(project.value())
+            .branch(name.as_ref())
+            .ref_(reference.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get branches for a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::branches::Branches.query()` instead"
+    )]
     pub fn branches<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<RepoBranch>>
     where
         I: IntoIterator,
@@ -857,11 +982,15 @@ impl Gitlab {
     }
 
     /// Get a branch.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::branches::Branch.query()` instead"
+    )]
     pub fn branch<B, I, K, V>(
         &self,
         project: ProjectId,
         branch: B,
-        params: I,
+        _: I,
     ) -> GitlabResult<RepoBranch>
     where
         B: AsRef<str>,
@@ -870,14 +999,12 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(
-            format!(
-                "projects/{}/repository/branches/{}",
-                project,
-                Self::url_name(branch.as_ref()),
-            ),
-            params,
-        )
+        Ok(projects::repository::branches::Branch::builder()
+            .project(project.value())
+            .branch(branch.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Protect a branch
@@ -888,6 +1015,10 @@ impl Gitlab {
     /// * push_access_level: Access level allowed to push (defaults: maintainers)
     /// * merge_access_level: Access level allowed to merge (defaults:  maintainers)
     /// * unprotect_access_level: Access level allowed to unproctect (defaults: maintainers)
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::protected_branches::ProtectBranch.query()` instead"
+    )]
     pub fn protect_branch<B: AsRef<str>>(
         &self,
         project: ProjectId,
@@ -896,26 +1027,36 @@ impl Gitlab {
         merge_access_level: Option<AccessLevel>,
         unprotect_access_level: Option<AccessLevel>,
     ) -> GitlabResult<ProtectedRepoBranch> {
-        let url = format!("projects/{}/protected_branches", project);
-        self.post_with_param(
-            url,
-            &[
-                ("name", branch.as_ref()),
-                (
-                    "push_access_level",
-                    &u64::from(push_access_level.unwrap_or(AccessLevel::Maintainer)).to_string(),
-                ),
-                (
-                    "merge_access_level",
-                    &u64::from(merge_access_level.unwrap_or(AccessLevel::Maintainer)).to_string(),
-                ),
-                (
-                    "unprotect_access_level",
-                    &u64::from(unprotect_access_level.unwrap_or(AccessLevel::Maintainer))
-                        .to_string(),
-                ),
-            ],
-        )
+        let mut builder = projects::protected_branches::ProtectBranch::builder();
+
+        let convert = |level| {
+            match level {
+                AccessLevel::Anonymous | AccessLevel::Guest | AccessLevel::Reporter => {
+                    projects::protected_branches::ProtectedAccessLevel::NoAccess
+                },
+                AccessLevel::Developer => {
+                    projects::protected_branches::ProtectedAccessLevel::Developer
+                },
+                AccessLevel::Maintainer | AccessLevel::Owner => {
+                    projects::protected_branches::ProtectedAccessLevel::Maintainer
+                },
+                AccessLevel::Admin => projects::protected_branches::ProtectedAccessLevel::Admin,
+            }
+        };
+
+        builder.project(project.value()).name(branch.as_ref());
+
+        if let Some(push) = push_access_level {
+            builder.push_access_level(convert(push));
+        }
+        if let Some(merge) = merge_access_level {
+            builder.merge_access_level(convert(merge));
+        }
+        if let Some(unprotect) = unprotect_access_level {
+            builder.unprotect_access_level(convert(unprotect));
+        }
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Unprotect a branch
@@ -923,40 +1064,51 @@ impl Gitlab {
     /// # Arguments
     /// * project: The project id
     /// * branch: The name of the branch or wildcard
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::protected_branches::UnprotectBranch.query()` instead"
+    )]
     pub fn unprotect_branch<B: AsRef<str>>(
         &self,
         project: ProjectId,
         branch: B,
     ) -> GitlabResult<()> {
-        let url = format!(
-            "projects/{}/protected_branches/{}",
-            project,
-            branch.as_ref(),
-        );
-        self.delete(url)
+        Ok(projects::protected_branches::UnprotectBranch::builder()
+            .project(project.value())
+            .name(branch.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::Commit.query()` instead"
+    )]
     pub fn commit<C>(&self, project: ProjectId, commit: C) -> GitlabResult<RepoCommitDetail>
     where
         C: AsRef<str>,
     {
-        self.get_with_param(
-            format!(
-                "projects/{}/repository/commits/{}",
-                project,
-                commit.as_ref(),
-            ),
-            &[("stats", "true")],
-        )
+        Ok(projects::repository::commits::Commit::builder()
+            .project(project.value())
+            .commit(commit.as_ref())
+            .stats(true)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get comments on a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommitComments.query()` instead"
+    )]
     pub fn commit_comments<C, I, K, V>(
         &self,
         project: ProjectId,
         commit: C,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<CommitNote>>
     where
         C: AsRef<str>,
@@ -965,17 +1117,22 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/repository/commits/{}/comments",
-                project,
-                commit.as_ref(),
-            ),
-            params,
+        Ok(api::paged(
+            projects::repository::commits::CommitComments::builder()
+                .project(project.value())
+                .commit(commit.as_ref())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get comments on a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommentOnCommit.query()` instead"
+    )]
     pub fn create_commit_comment<C, B>(
         &self,
         project: ProjectId,
@@ -986,17 +1143,20 @@ impl Gitlab {
         C: AsRef<str>,
         B: AsRef<str>,
     {
-        self.post_with_param(
-            format!(
-                "projects/{}/repository/commits/{}/comment",
-                project,
-                commit.as_ref(),
-            ),
-            &[("note", body.as_ref())],
-        )
+        Ok(projects::repository::commits::CommentOnCommit::builder()
+            .project(project.value())
+            .commit(commit.as_ref())
+            .note(body.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get comments on a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommentOnCommit.query()` instead"
+    )]
     pub fn create_commit_comment_by_name<P, C, B>(
         &self,
         project: P,
@@ -1008,17 +1168,20 @@ impl Gitlab {
         C: AsRef<str>,
         B: AsRef<str>,
     {
-        self.post_with_param(
-            format!(
-                "projects/{}/repository/commits/{}/comment",
-                Self::url_name(project.as_ref()),
-                commit.as_ref(),
-            ),
-            &[("note", body.as_ref())],
-        )
+        Ok(projects::repository::commits::CommentOnCommit::builder()
+            .project(project.as_ref())
+            .commit(commit.as_ref())
+            .note(body.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get comments on a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommentOnCommit.query()` instead"
+    )]
     pub fn create_commit_line_comment(
         &self,
         project: ProjectId,
@@ -1027,21 +1190,23 @@ impl Gitlab {
         path: &str,
         line: u64,
     ) -> GitlabResult<CommitNote> {
-        let line_str = format!("{}", line);
-        let line_type = LineType::New;
-
-        self.post_with_param(
-            format!("projects/{}/repository/commits/{}/comment", project, commit),
-            &[
-                ("note", body),
-                ("path", path),
-                ("line", &line_str),
-                ("line_type", line_type.as_str()),
-            ],
-        )
+        Ok(projects::repository::commits::CommentOnCommit::builder()
+            .project(project.value())
+            .commit(commit)
+            .note(body)
+            .path(path)
+            .line(line)
+            .line_type(projects::repository::commits::LineType::New)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the latest statuses of a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommitStatuses.query()` instead"
+    )]
     pub fn commit_latest_statuses<C, I, K, V>(
         &self,
         project: ProjectId,
@@ -1066,6 +1231,10 @@ impl Gitlab {
     }
 
     /// Get the latest statuses of a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommitStatuses.query()` instead"
+    )]
     pub fn commit_latest_statuses_by_name<P, C, I, K, V>(
         &self,
         project: P,
@@ -1091,6 +1260,10 @@ impl Gitlab {
     }
 
     /// Get the all statuses of a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CommitStatuses.query()` instead"
+    )]
     pub fn commit_all_statuses<C>(
         &self,
         project: ProjectId,
@@ -1099,17 +1272,17 @@ impl Gitlab {
     where
         C: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/repository/commits/{}/statuses",
-                project,
-                commit.as_ref(),
-            ),
-            &[("all", "true")],
-        )
+        Ok(projects::repository::commits::CommitStatuses::builder()
+            .project(project.value())
+            .commit(commit.as_ref())
+            .all(true)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the latest builds of a commit.
+    #[deprecated(since = "0.1210.1", note = "deprecated by GitLab")]
     pub fn commit_latest_builds<C, I, K, V>(
         &self,
         project: ProjectId,
@@ -1134,6 +1307,7 @@ impl Gitlab {
     }
 
     /// Get the all builds of a commit.
+    #[deprecated(since = "0.1210.1", note = "deprecated by GitLab")]
     pub fn commit_all_builds<C>(&self, project: ProjectId, commit: C) -> GitlabResult<Vec<Job>>
     where
         C: AsRef<str>,
@@ -1149,6 +1323,10 @@ impl Gitlab {
     }
 
     /// Create a status message for a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CreateCommitStatus.query()` instead"
+    )]
     pub fn create_commit_status<S>(
         &self,
         project: ProjectId,
@@ -1159,27 +1337,38 @@ impl Gitlab {
     where
         S: AsRef<str>,
     {
-        let path = format!("projects/{}/statuses/{}", project, sha.as_ref());
+        let mut builder = projects::repository::commits::CreateCommitStatus::builder();
+        builder
+            .project(project.value())
+            .commit(sha.as_ref())
+            .state(match state {
+                StatusState::Pending => projects::repository::commits::CommitStatusState::Pending,
+                StatusState::Running => projects::repository::commits::CommitStatusState::Running,
+                StatusState::Success => projects::repository::commits::CommitStatusState::Success,
+                StatusState::Failed => projects::repository::commits::CommitStatusState::Failed,
+                StatusState::Canceled => projects::repository::commits::CommitStatusState::Canceled,
+                StatusState::Created | StatusState::Skipped | StatusState::Manual => {
+                    return Err(GitlabError::InvalidStatusState {
+                        state,
+                    });
+                },
+            });
 
-        let mut params = vec![("state", state.as_str())];
+        info.refname.map(|refname| builder.ref_(refname));
+        info.name.map(|name| builder.name(name));
+        info.target_url
+            .map(|target_url| builder.target_url(target_url));
+        info.description
+            .map(|description| builder.description(description));
 
-        if let Some(v) = info.refname {
-            params.push(("ref", v))
-        }
-        if let Some(v) = info.name {
-            params.push(("name", v))
-        }
-        if let Some(v) = info.target_url {
-            params.push(("target_url", v))
-        }
-        if let Some(v) = info.description {
-            params.push(("description", v))
-        }
-
-        self.post_with_param(path, &params)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Create a status message for a commit.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::repository::commits::CreateCommitStatus.query()` instead"
+    )]
     pub fn create_commit_status_by_name<P, S>(
         &self,
         project: P,
@@ -1191,49 +1380,79 @@ impl Gitlab {
         P: AsRef<str>,
         S: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/statuses/{}",
-            Self::url_name(project.as_ref()),
-            sha.as_ref(),
-        );
+        let mut builder = projects::repository::commits::CreateCommitStatus::builder();
+        builder
+            .project(project.as_ref())
+            .commit(sha.as_ref())
+            .state(match state {
+                StatusState::Pending => projects::repository::commits::CommitStatusState::Pending,
+                StatusState::Running => projects::repository::commits::CommitStatusState::Running,
+                StatusState::Success => projects::repository::commits::CommitStatusState::Success,
+                StatusState::Failed => projects::repository::commits::CommitStatusState::Failed,
+                StatusState::Canceled => projects::repository::commits::CommitStatusState::Canceled,
+                StatusState::Created | StatusState::Skipped | StatusState::Manual => {
+                    return Err(GitlabError::InvalidStatusState {
+                        state,
+                    });
+                },
+            });
 
-        let mut params = vec![("state", state.as_str())];
+        info.refname.map(|refname| builder.ref_(refname));
+        info.name.map(|name| builder.name(name));
+        info.target_url
+            .map(|target_url| builder.target_url(target_url));
+        info.description
+            .map(|description| builder.description(description));
 
-        if let Some(v) = info.refname {
-            params.push(("ref", v))
-        }
-        if let Some(v) = info.name {
-            params.push(("name", v))
-        }
-        if let Some(v) = info.target_url {
-            params.push(("target_url", v))
-        }
-        if let Some(v) = info.description {
-            params.push(("description", v))
-        }
-
-        self.post_with_param(path, &params)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get the labels for a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::labels::Labels.query()` instead"
+    )]
     pub fn labels(&self, project: ProjectId) -> GitlabResult<Vec<Label>> {
-        self.get_paged(format!("projects/{}/labels", project))
+        Ok(projects::labels::Labels::builder()
+            .project(project.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the labels with open/closed/merge requests count
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::labels::Labels.query()` instead"
+    )]
     pub fn labels_with_counts(&self, project: ProjectId) -> GitlabResult<Vec<Label>> {
-        self.get_paged_with_param(
-            format!("projects/{}/labels", project),
-            &[("with_counts", "true")],
-        )
+        Ok(projects::labels::Labels::builder()
+            .project(project.value())
+            .with_counts(true)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get label by ID.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::labels::Label.query()` instead"
+    )]
     pub fn label(&self, project: ProjectId, label: LabelId) -> GitlabResult<Label> {
-        self.get(format!("projects/{}/labels/{}", project, label))
+        Ok(projects::labels::Label::builder()
+            .project(project.value())
+            .label(label.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the issues for a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::Issues.query()` instead"
+    )]
     pub fn issues<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<Issue>>
     where
         I: IntoIterator,
@@ -1245,11 +1464,15 @@ impl Gitlab {
     }
 
     /// Get issues.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::Issue.query()` instead"
+    )]
     pub fn issue<I, K, V>(
         &self,
         project: ProjectId,
         issue: IssueInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Issue>
     where
         I: IntoIterator,
@@ -1257,7 +1480,12 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("projects/{}/issues/{}", project, issue), params)
+        Ok(projects::issues::Issue::builder()
+            .project(project.value())
+            .issue(issue.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the notes from a issue.
@@ -1304,6 +1532,10 @@ impl Gitlab {
     }
 
     /// Create a new label
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::labels::CreateLabel.query()` instead"
+    )]
     pub fn create_label(&self, project: ProjectId, label: Label) -> GitlabResult<Label> {
         let path = format!("projects/{}/labels", project);
 
@@ -1353,6 +1585,10 @@ impl Gitlab {
     }
 
     /// Create a new issue
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::CreateIssue.query()` instead"
+    )]
     pub fn create_issue(&self, project: ProjectId, issue: Issue) -> GitlabResult<Issue> {
         let path = format!("projects/{}/issues", project);
 
@@ -1621,16 +1857,19 @@ impl Gitlab {
     }
 
     /// Get a log for a specific job of a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::pipelines::jobs::JobTrace.query()` instead"
+    )]
     pub fn job_log(&self, project: ProjectId, job_id: JobId) -> GitlabResult<Vec<u8>> {
-        let full_url = self.create_url(format!("projects/{}/jobs/{}/trace", project, job_id))?;
-        let req = self.client.get(full_url);
-        let rsp = self.send_impl(req)?;
-        let status = rsp.status();
-        if !status.is_success() {
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-            return Err(GitlabError::from_gitlab(v));
-        }
-        Ok(rsp.bytes()?.to_vec())
+        Ok(api::raw(
+            projects::jobs::JobTrace::builder()
+                .project(project.value())
+                .job(job_id.value())
+                .build()
+                .unwrap(),
+        )
+        .query(self)?)
     }
 
     /// Get merge requests.
@@ -2011,12 +2250,25 @@ impl Gitlab {
     }
 
     /// Closes an issue
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::EditIssue.query()` instead"
+    )]
     pub fn close_issue(&self, project: ProjectId, issue: IssueInternalId) -> GitlabResult<Issue> {
-        let path = format!("projects/{}/issues/{}", project, issue);
-        self.put_with_param(path, &[("state_event", "close")])
+        Ok(projects::issues::EditIssue::builder()
+            .project(project.value())
+            .issue_iid(issue.value())
+            .state_event(projects::issues::IssueStateEvent::Close)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set the labels on an issue.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::EditIssue.query()` instead"
+    )]
     pub fn set_issue_labels<I, L>(
         &self,
         project: ProjectId,
@@ -2027,11 +2279,20 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = format!("projects/{}/issues/{}", project, issue);
-        self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
+        Ok(projects::issues::EditIssue::builder()
+            .project(project.value())
+            .issue_iid(issue.value())
+            .labels(labels.into_iter().map(|label| format!("{}", label)))
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set the labels on an issue.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::EditIssue.query()` instead"
+    )]
     pub fn set_issue_labels_by_name<P, I, L>(
         &self,
         project: P,
@@ -2043,12 +2304,13 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = format!(
-            "projects/{}/issues/{}",
-            Self::url_name(project.as_ref()),
-            issue,
-        );
-        self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
+        Ok(projects::issues::EditIssue::builder()
+            .project(project.as_ref())
+            .issue_iid(issue.value())
+            .labels(labels.into_iter().map(|label| format!("{}", label)))
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set the labels on a merge request.
@@ -2101,20 +2363,6 @@ impl Gitlab {
     }
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
-    fn send_no_answer<T>(&self, req: RequestBuilder) -> GitlabResult<T>
-    where
-        T: DeserializeOwned + Default,
-    {
-        let rsp = self.send_impl(req)?;
-        if !rsp.status().is_success() {
-            let v = serde_json::from_reader(rsp).map_err(GitlabError::json)?;
-            return Err(GitlabError::from_gitlab(v));
-        }
-
-        Ok(T::default())
-    }
-
-    /// Refactored code which talks to Gitlab and transforms error messages properly.
     fn send<T>(&self, req: RequestBuilder) -> GitlabResult<T>
     where
         T: DeserializeOwned,
@@ -2163,27 +2411,6 @@ impl Gitlab {
     {
         let full_url = self.create_url(url)?;
         self.send(self.client.post(full_url).form(&param))
-    }
-
-    /// Create a `DELETE` request to an API endpoint.
-    fn delete<T, U>(&self, url: U) -> GitlabResult<T>
-    where
-        T: DeserializeOwned + Default,
-        U: AsRef<str>,
-    {
-        let param: &[(&str, &str)] = &[];
-        self.delete_with_param(url, param)
-    }
-
-    /// Create a `DELETE` request to an API endpoint with query parameters.
-    fn delete_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
-    where
-        T: DeserializeOwned + Default,
-        U: AsRef<str>,
-        P: Serialize,
-    {
-        let full_url = self.create_url(url)?;
-        self.send_no_answer(self.client.delete(full_url).form(&param))
     }
 
     /// Create a `PUT` request to an API endpoint with query parameters.

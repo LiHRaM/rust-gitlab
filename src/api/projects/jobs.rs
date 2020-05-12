@@ -4,139 +4,36 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::collections::HashSet;
+//! Project job API endpoints.
+//!
+//! These endpoints are used for querying CI jobs.
 
-use derive_builder::Builder;
+mod cancel;
+mod erase;
+mod job;
+mod jobs;
+mod play;
+mod retry;
+mod trace;
 
-use crate::api::common::NameOrId;
-use crate::api::endpoint_prelude::*;
+pub use self::cancel::CancelJob;
+pub use self::cancel::CancelJobBuilder;
 
-/// Scopes for jobs.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum JobScope {
-    /// Created, but blocked on dependencies or triggers.
-    Created,
-    /// Ready to run, but have not been claimed by a runner.
-    Pending,
-    /// Currently running.
-    Running,
-    /// Failed jobs.
-    Failed,
-    /// Successful jobs.
-    Success,
-    /// Canceled jobs.
-    Canceled,
-    /// Skipped jobs.
-    Skipped,
-    /// Awaiting manual triggering.
-    Manual,
-}
+pub use self::erase::EraseJob;
+pub use self::erase::EraseJobBuilder;
 
-impl JobScope {
-    /// The scope as a query parameter.
-    pub(crate) fn as_str(self) -> &'static str {
-        match self {
-            JobScope::Created => "created",
-            JobScope::Pending => "pending",
-            JobScope::Running => "running",
-            JobScope::Failed => "failed",
-            JobScope::Success => "success",
-            JobScope::Canceled => "canceled",
-            JobScope::Skipped => "skipped",
-            JobScope::Manual => "manual",
-        }
-    }
-}
+pub use self::job::Job;
+pub use self::job::JobBuilder;
 
-/// Query for jobs within a project.
-#[derive(Debug, Builder)]
-#[builder(setter(strip_option))]
-pub struct Jobs<'a> {
-    /// The project to query for jobs.
-    #[builder(setter(into))]
-    project: NameOrId<'a>,
+pub use self::jobs::JobScope;
+pub use self::jobs::Jobs;
+pub use self::jobs::JobsBuilder;
 
-    /// The scopes to filter jobs by.
-    #[builder(setter(name = "_scopes"), default, private)]
-    scopes: HashSet<JobScope>,
-}
+pub use self::play::PlayJob;
+pub use self::play::PlayJobBuilder;
 
-impl<'a> Jobs<'a> {
-    /// Create a builder for the endpoint.
-    pub fn builder() -> JobsBuilder<'a> {
-        JobsBuilder::default()
-    }
-}
+pub use self::retry::RetryJob;
+pub use self::retry::RetryJobBuilder;
 
-impl<'a> JobsBuilder<'a> {
-    /// Filter jobs by a scope.
-    pub fn scope(&mut self, scope: JobScope) -> &mut Self {
-        self.scopes
-            .get_or_insert_with(Default::default)
-            .insert(scope);
-        self
-    }
-
-    /// Filter jobs by a set of scopes.
-    pub fn scopes<I>(&mut self, scopes: I) -> &mut Self
-    where
-        I: Iterator<Item = JobScope>,
-    {
-        self.scopes
-            .get_or_insert_with(Default::default)
-            .extend(scopes);
-        self
-    }
-}
-
-impl<'a> Endpoint for Jobs<'a> {
-    fn method(&self) -> Method {
-        Method::GET
-    }
-
-    fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/jobs", self.project).into()
-    }
-
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.scopes.iter().for_each(|value| {
-            pairs.append_pair("scope[]", value.as_str());
-        });
-    }
-}
-
-impl<'a> Pageable for Jobs<'a> {}
-
-#[cfg(test)]
-mod tests {
-    use crate::api::projects::{JobScope, Jobs};
-
-    #[test]
-    fn job_scope_as_str() {
-        let items = &[
-            (JobScope::Created, "created"),
-            (JobScope::Pending, "pending"),
-            (JobScope::Running, "running"),
-            (JobScope::Failed, "failed"),
-            (JobScope::Success, "success"),
-            (JobScope::Canceled, "canceled"),
-            (JobScope::Skipped, "skipped"),
-            (JobScope::Manual, "manual"),
-        ];
-
-        for (i, s) in items {
-            assert_eq!(i.as_str(), *s);
-        }
-    }
-
-    #[test]
-    fn project_is_needed() {
-        let err = Jobs::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
-    }
-
-    #[test]
-    fn project_is_sufficient() {
-        Jobs::builder().project(1).build().unwrap();
-    }
-}
+pub use self::trace::JobTrace;
+pub use self::trace::JobTraceBuilder;

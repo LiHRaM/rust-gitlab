@@ -9,57 +9,57 @@ use derive_builder::Builder;
 use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
 
-/// Query a single pipeline on a project.
+/// Query a single member of a project.
 #[derive(Debug, Builder)]
-pub struct Pipeline<'a> {
-    /// The project to query for pipeline.
+pub struct ProjectMember<'a> {
+    /// The project to query for membership.
     #[builder(setter(into))]
     project: NameOrId<'a>,
-    /// The ID of the pipeline.
-    pipeline: u64,
+    /// The ID of the user.
+    user: u64,
 }
 
-impl<'a> Pipeline<'a> {
+impl<'a> ProjectMember<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> PipelineBuilder<'a> {
-        PipelineBuilder::default()
+    pub fn builder() -> ProjectMemberBuilder<'a> {
+        ProjectMemberBuilder::default()
     }
 }
 
-impl<'a> Endpoint for Pipeline<'a> {
+impl<'a> Endpoint for ProjectMember<'a> {
     fn method(&self) -> Method {
         Method::GET
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/pipelines/{}", self.project, self.pipeline).into()
+        format!("projects/{}/members/{}", self.project, self.user).into()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::pipelines::Pipeline;
+    use crate::api::projects::members::ProjectMember;
 
     #[test]
-    fn project_and_pipeline_are_needed() {
-        let err = Pipeline::builder().build().unwrap_err();
+    fn project_and_user_are_needed() {
+        let err = ProjectMember::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
     fn project_is_needed() {
-        let err = Pipeline::builder().pipeline(1).build().unwrap_err();
+        let err = ProjectMember::builder().user(1).build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
-    fn pipeline_is_needed() {
-        let err = Pipeline::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`pipeline` must be initialized");
+    fn user_is_needed() {
+        let err = ProjectMember::builder().project(1).build().unwrap_err();
+        assert_eq!(err, "`user` must be initialized");
     }
 
     #[test]
-    fn project_and_pipeline_are_sufficient() {
-        Pipeline::builder().project(1).pipeline(1).build().unwrap();
+    fn project_and_user_are_sufficient() {
+        ProjectMember::builder().project(1).user(1).build().unwrap();
     }
 }
