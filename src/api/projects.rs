@@ -14,6 +14,7 @@ mod create;
 mod edit;
 pub mod environments;
 pub mod hooks;
+pub mod issues;
 pub mod jobs;
 pub mod labels;
 pub mod members;

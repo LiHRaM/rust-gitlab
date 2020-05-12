@@ -1449,6 +1449,10 @@ impl Gitlab {
     }
 
     /// Get the issues for a project.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::Issues.query()` instead"
+    )]
     pub fn issues<I, K, V>(&self, project: ProjectId, params: I) -> GitlabResult<Vec<Issue>>
     where
         I: IntoIterator,
@@ -1460,11 +1464,15 @@ impl Gitlab {
     }
 
     /// Get issues.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::Issue.query()` instead"
+    )]
     pub fn issue<I, K, V>(
         &self,
         project: ProjectId,
         issue: IssueInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Issue>
     where
         I: IntoIterator,
@@ -1472,7 +1480,12 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_with_param(format!("projects/{}/issues/{}", project, issue), params)
+        Ok(projects::issues::Issue::builder()
+            .project(project.value())
+            .issue(issue.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the notes from a issue.
@@ -1572,6 +1585,10 @@ impl Gitlab {
     }
 
     /// Create a new issue
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::CreateIssue.query()` instead"
+    )]
     pub fn create_issue(&self, project: ProjectId, issue: Issue) -> GitlabResult<Issue> {
         let path = format!("projects/{}/issues", project);
 
@@ -2233,12 +2250,25 @@ impl Gitlab {
     }
 
     /// Closes an issue
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::EditIssue.query()` instead"
+    )]
     pub fn close_issue(&self, project: ProjectId, issue: IssueInternalId) -> GitlabResult<Issue> {
-        let path = format!("projects/{}/issues/{}", project, issue);
-        self.put_with_param(path, &[("state_event", "close")])
+        Ok(projects::issues::EditIssue::builder()
+            .project(project.value())
+            .issue_iid(issue.value())
+            .state_event(projects::issues::IssueStateEvent::Close)
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set the labels on an issue.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::EditIssue.query()` instead"
+    )]
     pub fn set_issue_labels<I, L>(
         &self,
         project: ProjectId,
@@ -2249,11 +2279,20 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = format!("projects/{}/issues/{}", project, issue);
-        self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
+        Ok(projects::issues::EditIssue::builder()
+            .project(project.value())
+            .issue_iid(issue.value())
+            .labels(labels.into_iter().map(|label| format!("{}", label)))
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set the labels on an issue.
+    #[deprecated(
+        since = "0.1210.1",
+        note = "use `gitlab::api::projects::issues::EditIssue.query()` instead"
+    )]
     pub fn set_issue_labels_by_name<P, I, L>(
         &self,
         project: P,
@@ -2265,12 +2304,13 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = format!(
-            "projects/{}/issues/{}",
-            Self::url_name(project.as_ref()),
-            issue,
-        );
-        self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
+        Ok(projects::issues::EditIssue::builder()
+            .project(project.as_ref())
+            .issue_iid(issue.value())
+            .labels(labels.into_iter().map(|label| format!("{}", label)))
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Set the labels on a merge request.

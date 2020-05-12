@@ -22,6 +22,10 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/hooks` `projects/hooks/hooks.rs`
   * `POST   /projects/:project/hooks` `projects/hooks/create.rs`
   * `GET    /projects/:project/hooks/:id` `projects/hooks/hook.rs`
+  * `GET    /projects/:project/issues` `projects/issues/issues.rs`
+  * `POST   /projects/:project/issues` `projects/issues/create.rs`
+  * `GET    /projects/:project/issues/:issue` `projects/issues/issue.rs`
+  * `PUT    /projects/:project/issues/:issue` `projects/issues/edit.rs`
   * `GET    /projects/:project/jobs` `projects/jobs/jobs.rs`
   * `GET    /projects/:project/jobs/:id` `projects/jobs/job.rs`
   * `POST   /projects/:project/jobs/:id/cancel` `projects/jobs/cancel.rs`
@@ -71,6 +75,7 @@ These endpoints are documented on a page that have other endpoints already
 implemented above. This is split out into a separate list for convenience
 instead of having to search the page for missing endpoints.
 
+  * `GET    /issues` https://gitlab.kitware.com/help/api/issues.md#list-issues
   * `PUT    /groups/:group` https://gitlab.kitware.com/help/api/groups.md#update-group
   * `DELETE /groups/:group` https://gitlab.kitware.com/help/api/groups.md#remove-group
   * `GET    /groups/:group/hooks` https://gitlab.kitware.com/help/api/groups.md#list-group-hooks
@@ -78,6 +83,7 @@ instead of having to search the page for missing endpoints.
   * `GET    /groups/:group/hooks/:id` https://gitlab.kitware.com/help/api/groups.md#get-group-hook
   * `PUT    /groups/:group/hooks/:id` https://gitlab.kitware.com/help/api/groups.md#edit-group-hook
   * `DELETE /groups/:group/hooks/:id` https://gitlab.kitware.com/help/api/groups.md#delete-group-hook
+  * `GET    /groups/:group/issues` https://gitlab.kitware.com/help/api/issues.md#list-group-issues
   * `POST   /groups/:group/ldap_sync` https://gitlab.kitware.com/help/api/groups.md#sync-group-with-ldap-starter
   * `GET    /groups/:group/ldap_group_links` https://gitlab.kitware.com/help/api/groups.md#list-ldap-group-links-starter
   * `POST   /groups/:group/ldap_group_links` https://gitlab.kitware.com/help/api/groups.md#add-ldap-group-link-with-cn-or-filter-starter
@@ -106,6 +112,20 @@ instead of having to search the page for missing endpoints.
   * `PUT    /projects/:project/hooks/:id` https://gitlab.kitware.com/help/api/projects.md#edit-project-hook
   * `DELETE /projects/:project/hooks/:id` https://gitlab.kitware.com/help/api/projects.md#delete-project-hook
   * `POST   /projects/:project/housekeeping` https://gitlab.kitware.com/help/api/projects.md#start-the-housekeeping-task-for-a-project
+  * `DELETE /projects/:project/issues/:issue` https://gitlab.kitware.com/help/api/issues.md#delete-an-issue
+  * `POST   /projects/:project/issues/:issue/add_spent_time` https://gitlab.kitware.com/help/api/issues.md#add-spent-time-for-an-issue
+  * `GET    /projects/:project/issues/:issue/closed_by` https://gitlab.kitware.com/help/api/issues.md#list-merge-requests-that-will-close-issue-on-merge
+  * `POST   /projects/:project/issues/:issue/move` https://gitlab.kitware.com/help/api/issues.md#move-an-issue
+  * `GET    /projects/:project/issues/:issue/participants` https://gitlab.kitware.com/help/api/issues.md#participants-on-issues
+  * `GET    /projects/:project/issues/:issue/related_merge_requests` https://gitlab.kitware.com/help/api/issues.md#list-merge-requests-related-to-issue
+  * `POST   /projects/:project/issues/:issue/reset_spent_time` https://gitlab.kitware.com/help/api/issues.md#reset-spent-time-for-an-issue
+  * `POST   /projects/:project/issues/:issue/reset_time_estimate` https://gitlab.kitware.com/help/api/issues.md#reset-the-time-estimate-for-an-issue
+  * `POST   /projects/:project/issues/:issue/subscribe` https://gitlab.kitware.com/help/api/issues.md#subscribe-to-an-issue
+  * `POST   /projects/:project/issues/:issue/time_estimate` https://gitlab.kitware.com/help/api/issues.md#set-a-time-estimate-for-an-issue
+  * `GET    /projects/:project/issues/:issue/time_stats` https://gitlab.kitware.com/help/api/issues.md#get-time-tracking-stats
+  * `POST   /projects/:project/issues/:issue/todo` https://gitlab.kitware.com/help/api/issues.md#create-a-todo
+  * `POST   /projects/:project/issues/:issue/unsubscribe` https://gitlab.kitware.com/help/api/issues.md#unsubscribe-from-an-issue
+  * `GET    /projects/:project/issues/:issue/user_agent_detail` https://gitlab.kitware.com/help/api/issues.md#get-user-agent-details
   * `GET    /projects/:project/jobs/artifacts/:ref/download` https://gitlab.kitware.com/help/api/jobs.md#download-the-artifacts-archive
   * `GET    /projects/:project/jobs/artifacts/:ref/raw/*artifact_path` https://gitlab.kitware.com/help/api/jobs.md#download-a-single-artifact-file-from-specific-tag-or-branch
   * `GET    /projects/:project/jobs/:id/artifacts` https://gitlab.kitware.com/help/api/jobs.md#get-job-artifacts
@@ -216,7 +236,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/discussions.md
   * https://gitlab.kitware.com/help/api/error_tracking.md
   * https://gitlab.kitware.com/help/api/events.md
-  * https://gitlab.kitware.com/help/api/issues.md
   * https://gitlab.kitware.com/help/api/issues_statistics.md
   * https://gitlab.kitware.com/help/api/boards.md
   * https://gitlab.kitware.com/help/api/issue_links.md

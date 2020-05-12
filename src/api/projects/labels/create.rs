@@ -16,13 +16,21 @@ pub struct CreateLabel<'a> {
     /// The project to create a label within.
     #[builder(setter(into))]
     project: NameOrId<'a>,
+    /// The name of the label.
     #[builder(setter(into))]
     name: Cow<'a, str>,
+    /// The color of the label.
+    ///
+    /// CSS and RGB colors in `#RRGGBB` format are supported.
+    ///
+    /// TODO: Use a specific structure for this.
     #[builder(setter(into))]
     color: Cow<'a, str>,
 
+    /// The description of the label.
     #[builder(setter(into), default)]
     description: Option<Cow<'a, str>>,
+    /// The priority of the label.
     #[builder(default)]
     priority: Option<u64>,
 }
