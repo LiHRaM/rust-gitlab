@@ -6,10 +6,10 @@
 
 use std::borrow::Cow;
 
-use reqwest::{header, Method};
+use http::{self, header, Method, Request};
 use serde::de::DeserializeOwned;
 
-use crate::api::{ApiError, BodyError, Client, Query, QueryParams};
+use crate::api::{query, ApiError, BodyError, Client, Query, QueryParams};
 
 /// A trait for providing the necessary information for a single REST API endpoint.
 pub trait Endpoint {
@@ -41,15 +41,18 @@ where
         let mut url = client.rest_endpoint(&self.endpoint())?;
         self.parameters().add_to_url(&mut url);
 
-        let req = client.build_rest(self.method(), url);
-        let req = if let Some((mime, data)) = self.body()? {
-            req.header(header::CONTENT_TYPE, mime).body(data)
+        let req = Request::builder()
+            .method(self.method())
+            .uri(query::url_to_http_uri(url));
+        let (req, data) = if let Some((mime, data)) = self.body()? {
+            let req = req.header(header::CONTENT_TYPE, mime);
+            (req, data)
         } else {
-            req
+            (req, Vec::new())
         };
-        let rsp = client.rest(req)?;
+        let rsp = client.rest(req, data)?;
         let status = rsp.status();
-        let v = serde_json::from_reader(rsp)?;
+        let v = serde_json::from_slice(rsp.body())?;
         if !status.is_success() {
             return Err(ApiError::from_gitlab(v));
         }

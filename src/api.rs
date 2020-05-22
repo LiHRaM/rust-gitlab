@@ -63,7 +63,7 @@ mod error;
 mod ignore;
 mod paged;
 mod params;
-mod query;
+pub(crate) mod query;
 mod raw;
 mod sudo;
 

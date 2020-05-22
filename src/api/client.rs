@@ -6,8 +6,9 @@
 
 use std::error::Error;
 
-use reqwest::blocking::{RequestBuilder, Response};
-use reqwest::Method;
+use bytes::Bytes;
+use http::request::Builder as RequestBuilder;
+use http::Response;
 use url::Url;
 
 use crate::api::ApiError;
@@ -22,9 +23,10 @@ pub trait Client {
     /// This method adds the hostname for the client's target instance.
     fn rest_endpoint(&self, endpoint: &str) -> Result<Url, ApiError<Self::Error>>;
 
-    /// Build a REST query from a URL and a given method.
-    fn build_rest(&self, method: Method, url: Url) -> RequestBuilder;
-
     /// Send a REST query.
-    fn rest(&self, request: RequestBuilder) -> Result<Response, ApiError<Self::Error>>;
+    fn rest(
+        &self,
+        request: RequestBuilder,
+        body: Vec<u8>,
+    ) -> Result<Response<Bytes>, ApiError<Self::Error>>;
 }

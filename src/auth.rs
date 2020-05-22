@@ -4,9 +4,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use http::{HeaderMap, HeaderValue};
 use log::error;
-use reqwest::blocking::RequestBuilder;
-use reqwest::header::{self, HeaderValue};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -15,7 +14,7 @@ pub enum AuthError {
     #[error("header value error: {}", source)]
     HeaderValue {
         #[from]
-        source: header::InvalidHeaderValue,
+        source: http::header::InvalidHeaderValue,
     },
     /// This is here to force `_` matching right now.
     ///
@@ -39,24 +38,30 @@ pub enum Auth {
 }
 
 impl Auth {
-    /// Sets the appropriate header on the request.
+    /// Adds the appropriate header to a set of headers.
     ///
-    /// Depending on the token type, this will be either the Private-Auth header
+    /// Depending on the token type, this will be either the Private-Token header
     /// or the Authorization header.
+    ///
     /// Returns an error if the token string cannot be parsed as a header value.
-    pub fn set_header(&self, req: RequestBuilder) -> AuthResult<RequestBuilder> {
-        Ok(match self {
+    pub fn set_header<'a>(
+        &self,
+        headers: &'a mut HeaderMap<HeaderValue>,
+    ) -> AuthResult<&'a mut HeaderMap<HeaderValue>> {
+        match self {
             Auth::Token(token) => {
                 let mut token_header_value = HeaderValue::from_str(&token)?;
                 token_header_value.set_sensitive(true);
-                req.header("PRIVATE-TOKEN", token_header_value)
+                headers.insert("PRIVATE-TOKEN", token_header_value);
             },
             Auth::OAuth2(token) => {
                 let value = format!("Bearer {}", token);
                 let mut token_header_value = HeaderValue::from_str(&value)?;
                 token_header_value.set_sensitive(true);
-                req.header("Authorization", token_header_value)
+                headers.insert(http::header::AUTHORIZATION, token_header_value);
             },
-        })
+        }
+
+        Ok(headers)
     }
 }

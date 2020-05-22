@@ -4,12 +4,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use reqwest::header::{self, HeaderMap};
+use http::{header, HeaderMap, Request};
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 use url::Url;
 
-use crate::api::{ApiError, Client, Endpoint, Query};
+use crate::api::{query, ApiError, Client, Endpoint, Query};
 
 /// Errors which may occur with pagination.
 #[derive(Debug, Error)]
@@ -221,20 +221,23 @@ where
                 page_url
             };
 
-            let req = client.build_rest(self.endpoint.method(), page_url);
-            let req = if let Some((mime, data)) = body.as_ref() {
-                req.header(header::CONTENT_TYPE, *mime).body(data.clone())
+            let req = Request::builder()
+                .method(self.endpoint.method())
+                .uri(query::url_to_http_uri(page_url));
+            let (req, data) = if let Some((mime, data)) = body.as_ref() {
+                let req = req.header(header::CONTENT_TYPE, *mime);
+                (req, data.clone())
             } else {
-                req
+                (req, Vec::new())
             };
-            let rsp = client.rest(req)?;
+            let rsp = client.rest(req, data)?;
             let status = rsp.status();
 
             if use_keyset_pagination {
                 next_url = next_page_from_headers(rsp.headers())?;
             }
 
-            let v = serde_json::from_reader(rsp)?;
+            let v = serde_json::from_slice(rsp.body())?;
             if !status.is_success() {
                 return Err(ApiError::from_gitlab(v));
             }
