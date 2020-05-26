@@ -4,7 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use reqwest::header::HeaderMap;
+use reqwest::header::{self, HeaderMap};
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 use url::Url;
@@ -198,6 +198,8 @@ where
         let mut next_url = None;
         let use_keyset_pagination = self.endpoint.use_keyset_pagination();
 
+        let body = self.endpoint.body()?;
+
         loop {
             let page_url = if let Some(url) = next_url.take() {
                 url
@@ -220,6 +222,11 @@ where
             };
 
             let req = client.build_rest(self.endpoint.method(), page_url);
+            let req = if let Some((mime, data)) = body.as_ref() {
+                req.header(header::CONTENT_TYPE, *mime).body(data.clone())
+            } else {
+                req
+            };
             let rsp = client.rest(req)?;
             let status = rsp.status();
 

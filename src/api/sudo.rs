@@ -73,8 +73,8 @@ where
         self.endpoint.add_parameters(pairs);
     }
 
-    fn form_data(&self) -> Vec<u8> {
-        self.endpoint.form_data()
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        self.endpoint.body()
     }
 }
 

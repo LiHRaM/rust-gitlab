@@ -79,6 +79,7 @@ pub use self::endpoint::Endpoint;
 pub use self::endpoint::Pairs;
 
 pub use self::error::ApiError;
+pub use self::error::BodyError;
 
 pub use self::ignore::ignore;
 pub use self::ignore::Ignore;
