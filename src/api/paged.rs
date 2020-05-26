@@ -186,7 +186,7 @@ where
     fn query(&self, client: &C) -> Result<Vec<T>, ApiError<C::Error>> {
         let url = {
             let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
-            self.endpoint.add_parameters(url.query_pairs_mut());
+            self.endpoint.parameters().add_to_url(&mut url);
             url
         };
 

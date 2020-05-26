@@ -77,17 +77,21 @@ impl<'a> Endpoint for Environments<'a> {
         format!("projects/{}/environments", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
         if let Some(name_or_search) = self.name_or_search.as_ref() {
             match name_or_search {
                 NameOrSearch::Name(name) => {
-                    pairs.append_pair("name", name);
+                    params.push("name", name);
                 },
                 NameOrSearch::Search(search) => {
-                    pairs.append_pair("search", search);
+                    params.push("search", search);
                 },
             }
         }
+
+        params
     }
 }
 

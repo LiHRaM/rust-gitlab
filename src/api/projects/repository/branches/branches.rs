@@ -36,10 +36,12 @@ impl<'a> Endpoint for Branches<'a> {
         format!("projects/{}/repository/branches", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.search
-            .as_ref()
-            .map(|value| pairs.append_pair("search", value));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params.push_opt("search", self.search.as_ref());
+
+        params
     }
 }
 

@@ -46,9 +46,12 @@ impl<'a> Endpoint for Commit<'a> {
         .into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.stats
-            .map(|value| pairs.append_pair("stats", common::bool_str(value)));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params.push_opt("stats", self.stats);
+
+        params
     }
 }
 

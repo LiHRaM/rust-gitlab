@@ -6,7 +6,7 @@
 
 use derive_builder::Builder;
 
-use crate::api::common::{self, NameOrId};
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
 
 /// Query for a specific project on an instance.
@@ -44,13 +44,15 @@ impl<'a> Endpoint for Project<'a> {
         format!("projects/{}", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.statistics
-            .map(|value| pairs.append_pair("statistics", common::bool_str(value)));
-        self.license
-            .map(|value| pairs.append_pair("license", common::bool_str(value)));
-        self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params
+            .push_opt("statistics", self.statistics)
+            .push_opt("license", self.license)
+            .push_opt("with_custom_attributes", self.with_custom_attributes);
+
+        params
     }
 }
 

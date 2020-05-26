@@ -77,7 +77,6 @@ pub mod users;
 pub use self::client::Client;
 
 pub use self::endpoint::Endpoint;
-pub use self::endpoint::Pairs;
 
 pub use self::error::ApiError;
 pub use self::error::BodyError;

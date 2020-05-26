@@ -10,8 +10,9 @@ use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 use itertools::Itertools;
 
-use crate::api::common::{self, NameOrId, SortOrder};
+use crate::api::common::{NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Filters for issue states.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -31,6 +32,12 @@ impl IssueState {
     }
 }
 
+impl ParamValue<'static> for IssueState {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 #[derive(Debug, Clone)]
 enum Labels<'a> {
     Any,
@@ -45,6 +52,12 @@ impl<'a> Labels<'a> {
             Labels::None => "None".into(),
             Labels::AllOf(labels) => format!("{}", labels.iter().format(",")).into(),
         }
+    }
+}
+
+impl<'a, 'b: 'a> ParamValue<'static> for &'b Labels<'a> {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str()
     }
 }
 
@@ -69,6 +82,12 @@ impl IssueScope {
     }
 }
 
+impl ParamValue<'static> for IssueScope {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 #[derive(Debug, Clone)]
 enum Assignee<'a> {
     Assigned,
@@ -78,19 +97,19 @@ enum Assignee<'a> {
 }
 
 impl<'a> Assignee<'a> {
-    fn add_query(&self, pairs: &mut Pairs) {
+    fn add_params<'b>(&'b self, params: &mut QueryParams<'b>) {
         match self {
             Assignee::Assigned => {
-                pairs.append_pair("assignee_id", "Any");
+                params.push("assignee_id", "Any");
             },
             Assignee::Unassigned => {
-                pairs.append_pair("assignee_id", "None");
+                params.push("assignee_id", "None");
             },
             Assignee::Id(id) => {
-                pairs.append_pair("assignee_id", &format!("{}", id));
+                params.push("assignee_id", *id);
             },
             Assignee::Usernames(usernames) => {
-                pairs.extend_pairs(usernames.iter().map(|value| ("assignee_username[]", value)));
+                params.extend(usernames.iter().map(|value| ("assignee_username[]", value)));
             },
         }
     }
@@ -113,6 +132,12 @@ impl<'a> ReactionEmoji<'a> {
     }
 }
 
+impl<'a, 'b: 'a> ParamValue<'a> for &'b ReactionEmoji<'a> {
+    fn as_value(self) -> Cow<'a, str> {
+        self.as_str().into()
+    }
+}
+
 /// Filter issues by weight.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IssueWeight {
@@ -131,6 +156,12 @@ impl IssueWeight {
             IssueWeight::None => "None".into(),
             IssueWeight::Weight(weight) => format!("{}", weight).into(),
         }
+    }
+}
+
+impl ParamValue<'static> for IssueWeight {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str()
     }
 }
 
@@ -178,6 +209,12 @@ impl IssueOrderBy {
             IssueOrderBy::Popularity => "popularity",
             IssueOrderBy::WeightFields => "weight_fields",
         }
+    }
+}
+
+impl ParamValue<'static> for IssueOrderBy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -405,75 +442,42 @@ impl<'a> Endpoint for Issues<'a> {
         format!("projects/{}/issues", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.extend_pairs(
-            self.iids
-                .iter()
-                .map(|value| ("iids[]", format!("{}", value))),
-        );
-        self.state
-            .map(|value| pairs.append_pair("state", value.as_str()));
-        self.labels
-            .as_ref()
-            .map(|value| pairs.append_pair("labels", &value.as_str()));
-        self.with_labels_details
-            .map(|value| pairs.append_pair("with_labels_details", common::bool_str(value)));
-        self.milestone
-            .as_ref()
-            .map(|value| pairs.append_pair("milestone", value));
-        self.scope
-            .map(|value| pairs.append_pair("scope", value.as_str()));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params
+            .extend(self.iids.iter().map(|&value| ("iids[]", value)))
+            .push_opt("state", self.state)
+            .push_opt("labels", self.labels.as_ref())
+            .push_opt("with_labels_details", self.with_labels_details)
+            .push_opt("milestone", self.milestone.as_ref())
+            .push_opt("scope", self.scope)
+            .push_opt("my_reaction_emoji", self.my_reaction_emoji.as_ref())
+            .push_opt("weight", self.weight)
+            .push_opt("search", self.search.as_ref())
+            .push_opt("created_after", self.created_after)
+            .push_opt("created_before", self.created_before)
+            .push_opt("updated_after", self.updated_after)
+            .push_opt("updated_before", self.updated_before)
+            .push_opt("confidential", self.confidential)
+            .push_opt("order_by", self.order_by)
+            .push_opt("sort", self.sort);
+
         if let Some(author) = self.author.as_ref() {
             match author {
                 NameOrId::Name(name) => {
-                    pairs.append_pair("author_username", name);
+                    params.push("author_username", name);
                 },
                 NameOrId::Id(id) => {
-                    pairs.append_pair("author_id", &format!("{}", id));
+                    params.push("author_id", *id);
                 },
             }
         }
         if let Some(assignee) = self.assignee.as_ref() {
-            assignee.add_query(&mut pairs);
+            assignee.add_params(&mut params);
         }
-        self.my_reaction_emoji
-            .as_ref()
-            .map(|value| pairs.append_pair("my_reaction_emoji", value.as_str()));
-        self.weight
-            .map(|value| pairs.append_pair("weight", &value.as_str()));
-        self.search
-            .as_ref()
-            .map(|value| pairs.append_pair("search", value));
-        self.created_after.map(|value| {
-            pairs.append_pair(
-                "created_after",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
-        self.created_before.map(|value| {
-            pairs.append_pair(
-                "created_before",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
-        self.updated_after.map(|value| {
-            pairs.append_pair(
-                "updated_after",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
-        self.updated_before.map(|value| {
-            pairs.append_pair(
-                "updated_before",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
-        self.confidential
-            .map(|value| pairs.append_pair("confidential", common::bool_str(value)));
-        self.order_by
-            .map(|value| pairs.append_pair("order_by", value.as_str()));
-        self.sort
-            .map(|value| pairs.append_pair("sort", value.as_str()));
+
+        params
     }
 }
 

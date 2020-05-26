@@ -9,8 +9,9 @@ use std::borrow::Cow;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::api::common::{self, NameOrId, SortOrder};
+use crate::api::common::{NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Scopes for pipelines.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -37,6 +38,12 @@ impl PipelineScope {
             PipelineScope::Branches => "branches",
             PipelineScope::Tags => "tags",
         }
+    }
+}
+
+impl ParamValue<'static> for PipelineScope {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -77,6 +84,12 @@ impl PipelineStatus {
     }
 }
 
+impl ParamValue<'static> for PipelineStatus {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// Keys pipeline results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PipelineOrderBy {
@@ -108,6 +121,12 @@ impl PipelineOrderBy {
             PipelineOrderBy::UpdatedAt => "updated_at",
             PipelineOrderBy::UserId => "user_id",
         }
+    }
+}
+
+impl ParamValue<'static> for PipelineOrderBy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -172,43 +191,23 @@ impl<'a> Endpoint for Pipelines<'a> {
         format!("projects/{}/pipelines", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.scope
-            .map(|value| pairs.append_pair("scope", value.as_str()));
-        self.status
-            .map(|value| pairs.append_pair("status", value.as_str()));
-        self.ref_
-            .as_ref()
-            .map(|value| pairs.append_pair("ref", value));
-        self.sha
-            .as_ref()
-            .map(|value| pairs.append_pair("sha", value));
-        self.yaml_errors
-            .map(|value| pairs.append_pair("yaml_errors", common::bool_str(value)));
-        self.name
-            .as_ref()
-            .map(|value| pairs.append_pair("name", value));
-        self.username
-            .as_ref()
-            .map(|value| pairs.append_pair("username", value));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
 
-        self.updated_after.map(|value| {
-            pairs.append_pair(
-                "updated_after",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
-        self.updated_before.map(|value| {
-            pairs.append_pair(
-                "updated_before",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
+        params
+            .push_opt("scope", self.scope)
+            .push_opt("status", self.status)
+            .push_opt("ref", self.ref_.as_ref())
+            .push_opt("sha", self.sha.as_ref())
+            .push_opt("yaml_errors", self.yaml_errors)
+            .push_opt("name", self.name.as_ref())
+            .push_opt("username", self.username.as_ref())
+            .push_opt("updated_after", self.updated_after)
+            .push_opt("updated_before", self.updated_before)
+            .push_opt("order_by", self.order_by)
+            .push_opt("sort", self.sort);
 
-        self.order_by
-            .map(|value| pairs.append_pair("order_by", value.as_str()));
-        self.sort
-            .map(|value| pairs.append_pair("sort", value.as_str()));
+        params
     }
 }
 

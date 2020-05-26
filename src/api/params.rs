@@ -14,7 +14,7 @@ use std::borrow::Cow;
 use chrono::{DateTime, NaiveDate, Utc};
 use url::Url;
 
-use crate::api::{common, BodyError};
+use crate::api::BodyError;
 
 /// A trait representing a parameter value.
 pub trait ParamValue<'a> {
@@ -24,7 +24,11 @@ pub trait ParamValue<'a> {
 
 impl ParamValue<'static> for bool {
     fn as_value(self) -> Cow<'static, str> {
-        common::bool_str(self).into()
+        if self {
+            "true".into()
+        } else {
+            "false".into()
+        }
     }
 }
 
@@ -186,5 +190,19 @@ impl<'a> QueryParams<'a> {
     pub fn add_to_url(&self, url: &mut Url) {
         let mut pairs = url.query_pairs_mut();
         pairs.extend_pairs(self.params.iter());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::api::ParamValue;
+
+    #[test]
+    fn bool_str() {
+        let items = &[(true, "true"), (false, "false")];
+
+        for (i, s) in items {
+            assert_eq!((*i).as_value(), *s);
+        }
     }
 }

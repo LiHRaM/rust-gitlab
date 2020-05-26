@@ -10,8 +10,9 @@ use std::collections::BTreeMap;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::api::common::{self, EnableState, SortOrder};
+use crate::api::common::{EnableState, SortOrder};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Keys user results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -44,6 +45,12 @@ impl UserOrderBy {
             UserOrderBy::CreatedAt => "created_at",
             UserOrderBy::UpdatedAt => "updated_at",
         }
+    }
+}
+
+impl ParamValue<'static> for UserOrderBy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -162,50 +169,35 @@ impl<'a> Endpoint for Users<'a> {
         "users".into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.search
-            .as_ref()
-            .map(|value| pairs.append_pair("search", value));
-        self.username
-            .as_ref()
-            .map(|value| pairs.append_pair("username", value));
-        self.active.map(|_| pairs.append_pair("active", "true"));
-        self.blocked.map(|_| pairs.append_pair("blocked", "true"));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params
+            .push_opt("search", self.search.as_ref())
+            .push_opt("username", self.username.as_ref())
+            .push_opt("active", self.active.map(|()| true))
+            .push_opt("blocked", self.blocked.map(|()| true))
+            .push_opt("external", self.external)
+            .push_opt("created_before", self.created_before)
+            .push_opt("created_after", self.created_after)
+            .extend(
+                self.custom_attributes
+                    .iter()
+                    .map(|(key, value)| (format!("custom_attributes[{}]", key), value)),
+            )
+            .push_opt("with_custom_attributes", self.with_custom_attributes)
+            .push_opt("order_by", self.order_by)
+            .push_opt("sort", self.sort)
+            .push_opt("two_factor", self.two_factor)
+            .push_opt("without_projects", self.without_projects);
+
         if let Some(value) = self.external_provider.as_ref() {
-            pairs.append_pair("extern_uid", &format!("{}", value.id));
-            pairs.append_pair("provider", &value.name);
+            params
+                .push("extern_uid", value.id)
+                .push("provider", &value.name);
         }
-        self.external
-            .map(|value| pairs.append_pair("external", common::bool_str(value)));
-        self.created_before.map(|value| {
-            pairs.append_pair(
-                "created_before",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
-        self.created_after.map(|value| {
-            pairs.append_pair(
-                "created_after",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
 
-        pairs.extend_pairs(
-            self.custom_attributes
-                .iter()
-                .map(|(key, value)| (format!("custom_attributes[{}]", key), value)),
-        );
-        self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
-
-        self.order_by
-            .map(|value| pairs.append_pair("order_by", value.as_str()));
-        self.sort
-            .map(|value| pairs.append_pair("sort", value.as_str()));
-        self.two_factor
-            .map(|value| pairs.append_pair("two_factor", value.as_str()));
-        self.without_projects
-            .map(|value| pairs.append_pair("without_projects", common::bool_str(value)));
+        params
     }
 }
 

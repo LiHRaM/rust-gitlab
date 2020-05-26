@@ -88,6 +88,12 @@ impl SortOrder {
     }
 }
 
+impl ParamValue<'static> for SortOrder {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// States for features or flags.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EnableState {
@@ -198,20 +204,9 @@ impl ParamValue<'static> for VisibilityLevel {
     }
 }
 
-/// The string representation of booleans for GitLab.
-pub fn bool_str(b: bool) -> &'static str {
-    if b {
-        "true"
-    } else {
-        "false"
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::api::common::{
-        self, AccessLevel, EnableState, NameOrId, SortOrder, VisibilityLevel,
-    };
+    use crate::api::common::{AccessLevel, EnableState, NameOrId, SortOrder, VisibilityLevel};
 
     #[test]
     fn access_level_as_str() {
@@ -308,15 +303,6 @@ mod tests {
 
         for (i, s) in items {
             assert_eq!(i.as_str(), *s);
-        }
-    }
-
-    #[test]
-    fn bool_str() {
-        let items = &[(true, "true"), (false, "false")];
-
-        for (i, s) in items {
-            assert_eq!(common::bool_str(*i), *s);
         }
     }
 }
