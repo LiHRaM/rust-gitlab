@@ -8,6 +8,7 @@ use derive_builder::Builder;
 
 use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Line types within a diff.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -24,6 +25,12 @@ impl LineType {
             LineType::New => "new",
             LineType::Old => "old",
         }
+    }
+}
+
+impl ParamValue<'static> for LineType {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -75,16 +82,16 @@ impl<'a> Endpoint for CommentOnCommit<'a> {
         .into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("note", &self.note);
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
 
-        self.path
-            .as_ref()
-            .map(|value| pairs.append_pair("path", value));
-        self.line
-            .map(|value| pairs.append_pair("line", &format!("{}", value)));
-        self.line_type
-            .map(|value| pairs.append_pair("line_type", value.as_str()));
+        params
+            .push("note", &self.note)
+            .push_opt("path", self.path.as_ref())
+            .push_opt("line", self.line)
+            .push_opt("line_type", self.line_type);
+
+        params.into_body()
     }
 }
 

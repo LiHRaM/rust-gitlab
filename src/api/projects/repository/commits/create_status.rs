@@ -8,6 +8,7 @@ use derive_builder::Builder;
 
 use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// The state a commit status may have.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -33,6 +34,12 @@ impl CommitStatusState {
             CommitStatusState::Failed => "failed",
             CommitStatusState::Canceled => "canceled",
         }
+    }
+}
+
+impl ParamValue<'static> for CommitStatusState {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -94,25 +101,19 @@ impl<'a> Endpoint for CreateCommitStatus<'a> {
         .into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("state", self.state.as_str());
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
 
-        self.name
-            .as_ref()
-            .map(|value| pairs.append_pair("name", value));
-        self.ref_
-            .as_ref()
-            .map(|value| pairs.append_pair("ref", value));
-        self.target_url
-            .as_ref()
-            .map(|value| pairs.append_pair("target_url", value));
-        self.description
-            .as_ref()
-            .map(|value| pairs.append_pair("description", value));
-        self.coverage
-            .map(|value| pairs.append_pair("coverage", &format!("{}", value)));
-        self.pipeline_id
-            .map(|value| pairs.append_pair("pipeline_id", &format!("{}", value)));
+        params
+            .push("state", self.state)
+            .push_opt("name", self.name.as_ref())
+            .push_opt("ref", self.ref_.as_ref())
+            .push_opt("target_url", self.target_url.as_ref())
+            .push_opt("description", self.description.as_ref())
+            .push_opt("coverage", self.coverage)
+            .push_opt("pipeline_id", self.pipeline_id);
+
+        params.into_body()
     }
 }
 

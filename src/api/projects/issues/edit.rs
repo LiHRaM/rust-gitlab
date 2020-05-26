@@ -11,8 +11,9 @@ use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
 use itertools::Itertools;
 
-use crate::api::common::{self, NameOrId};
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// States an issue may be set to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -32,6 +33,12 @@ impl IssueStateEvent {
     }
 }
 
+impl ParamValue<'static> for IssueStateEvent {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 #[derive(Debug, Clone)]
 enum IssueAssignees {
     Unassigned,
@@ -42,6 +49,15 @@ enum IssueAssignees {
 enum IssueLabels<'a> {
     Unlabeled,
     Labeled(HashSet<Cow<'a, str>>),
+}
+
+impl<'a, 'b: 'a> ParamValue<'a> for &'b IssueLabels<'a> {
+    fn as_value(self) -> Cow<'a, str> {
+        match self {
+            IssueLabels::Unlabeled => "".into(),
+            IssueLabels::Labeled(labels) => format!("{}", labels.iter().format(",")).into(),
+        }
+    }
 }
 
 /// Create a new issue on a project.
@@ -197,61 +213,38 @@ impl<'a> Endpoint for EditIssue<'a> {
         format!("projects/{}/issues/{}", self.project, self.issue_iid).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.title
-            .as_ref()
-            .map(|value| pairs.append_pair("title", value));
-        self.description
-            .as_ref()
-            .map(|value| pairs.append_pair("description", value));
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
+
+        params
+            .push_opt("title", self.title.as_ref())
+            .push_opt("description", self.description.as_ref())
+            .push_opt("milestone_id", self.milestone_id)
+            .push_opt("labels", self.labels.as_ref())
+            .push_opt("state_event", self.state_event)
+            .push_opt("updated_at", self.updated_at)
+            .push_opt("due_date", self.due_date)
+            .push_opt("weight", self.weight)
+            .push_opt("discussion_locked", self.discussion_locked)
+            .push_opt("epic_id", self.epic_id);
 
         if let Some(assignees) = self.assignee_ids.as_ref() {
             match assignees {
                 IssueAssignees::Unassigned => {
-                    pairs.append_pair("assignee_ids[]", "0");
+                    params.push("assignee_ids[]", "0");
                 },
                 IssueAssignees::Assignees(ids) => {
-                    pairs.extend_pairs(
-                        ids.iter()
-                            .map(|value| ("assignee_ids[]", format!("{}", value))),
-                    );
+                    params.extend(ids.iter().map(|&value| ("assignee_ids[]", value)));
                 },
             }
         }
-        self.milestone_id
-            .map(|value| pairs.append_pair("milestone_id", &format!("{}", value)));
-        if let Some(labels) = self.labels.as_ref() {
-            match labels {
-                IssueLabels::Unlabeled => {
-                    pairs.append_pair("labels", "");
-                },
-                IssueLabels::Labeled(labels) => {
-                    pairs.append_pair("labels", &format!("{}", labels.iter().format(",")));
-                },
-            }
-        }
-        self.state_event
-            .map(|value| pairs.append_pair("state_event", value.as_str()));
-        self.updated_at.map(|value| {
-            pairs.append_pair(
-                "updated_at",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
-        });
-        self.due_date
-            .map(|value| pairs.append_pair("due_date", &format!("{}", value.format("%Y-%m-%d"))));
-        self.weight
-            .map(|value| pairs.append_pair("weight", &format!("{}", value)));
-        self.discussion_locked
-            .map(|value| pairs.append_pair("discussion_locked", common::bool_str(value)));
-        self.epic_id
-            .map(|value| pairs.append_pair("epic_id", &format!("{}", value)));
 
         #[allow(deprecated)]
         {
-            self.epic_iid
-                .map(|value| pairs.append_pair("epic_iid", &format!("{}", value)));
+            params.push_opt("epic_iid", self.epic_iid);
         }
+
+        params.into_body()
     }
 }
 

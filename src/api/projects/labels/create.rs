@@ -51,15 +51,16 @@ impl<'a> Endpoint for CreateLabel<'a> {
         format!("projects/{}/labels", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("name", &self.name);
-        pairs.append_pair("color", &self.color);
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
 
-        self.description
-            .as_ref()
-            .map(|value| pairs.append_pair("description", value));
-        self.priority
-            .map(|value| pairs.append_pair("priority", &format!("{}", value)));
+        params
+            .push("name", &self.name)
+            .push("color", &self.color)
+            .push_opt("description", self.description.as_ref())
+            .push_opt("priority", self.priority);
+
+        params.into_body()
     }
 }
 

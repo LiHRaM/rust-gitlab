@@ -11,7 +11,7 @@ use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
 use itertools::Itertools;
 
-use crate::api::common::{self, NameOrId};
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
 
 /// Create a new issue on a project.
@@ -140,55 +140,43 @@ impl<'a> Endpoint for CreateIssue<'a> {
         format!("projects/{}/issues", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
+
         if !self.title.is_empty() || self.merge_request_to_resolve_discussions_of.is_none() {
-            pairs.append_pair("title", &self.title);
+            params.push("title", &self.title);
         }
 
-        self.iid
-            .map(|value| pairs.append_pair("iid", &format!("{}", value)));
-        self.description
-            .as_ref()
-            .map(|value| pairs.append_pair("description", value));
-        self.confidential
-            .map(|value| pairs.append_pair("confidential", common::bool_str(value)));
-        pairs.extend_pairs(
-            self.assignee_ids
-                .iter()
-                .map(|value| ("assignee_ids[]", format!("{}", value))),
-        );
-        self.milestone_id
-            .map(|value| pairs.append_pair("milestone_id", &format!("{}", value)));
-        if !self.labels.is_empty() {
-            pairs.append_pair("labels", &format!("{}", self.labels.iter().format(",")));
-        }
-        self.created_at.map(|value| {
-            pairs.append_pair(
-                "created_at",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+        params
+            .push_opt("iid", self.iid)
+            .push_opt("description", self.description.as_ref())
+            .push_opt("confidential", self.confidential)
+            .extend(
+                self.assignee_ids
+                    .iter()
+                    .map(|&value| ("assignee_ids[]", value)),
             )
-        });
-        self.due_date
-            .map(|value| pairs.append_pair("due_date", &format!("{}", value.format("%Y-%m-%d"))));
-        self.merge_request_to_resolve_discussions_of.map(|value| {
-            pairs.append_pair(
+            .push_opt("milestone_id", self.milestone_id)
+            .push_opt("created_at", self.created_at)
+            .push_opt("due_date", self.due_date)
+            .push_opt(
                 "merge_request_to_resolve_discussions_of",
-                &format!("{}", value),
+                self.merge_request_to_resolve_discussions_of,
             )
-        });
-        self.discussion_to_resolve
-            .as_ref()
-            .map(|value| pairs.append_pair("discussion_to_resolve", value));
-        self.weight
-            .map(|value| pairs.append_pair("weight", &format!("{}", value)));
-        self.epic_id
-            .map(|value| pairs.append_pair("epic_id", &format!("{}", value)));
+            .push_opt("discussion_to_resolve", self.discussion_to_resolve.as_ref())
+            .push_opt("weight", self.weight)
+            .push_opt("epic_id", self.epic_id);
+
+        if !self.labels.is_empty() {
+            params.push("labels", format!("{}", self.labels.iter().format(",")));
+        }
 
         #[allow(deprecated)]
         {
-            self.epic_iid
-                .map(|value| pairs.append_pair("epic_iid", &format!("{}", value)));
+            params.push_opt("epic_iid", self.epic_iid);
         }
+
+        params.into_body()
     }
 }
 

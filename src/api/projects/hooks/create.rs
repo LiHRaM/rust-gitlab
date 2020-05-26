@@ -6,7 +6,7 @@
 
 use derive_builder::Builder;
 
-use crate::api::common::{self, NameOrId};
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
 
 /// Create a new webhook for a project.
@@ -78,36 +78,31 @@ impl<'a> Endpoint for CreateHook<'a> {
         format!("projects/{}/hooks", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("url", &self.url);
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
 
-        self.push_events
-            .map(|value| pairs.append_pair("push_events", common::bool_str(value)));
-        self.push_events_branch_filter
-            .as_ref()
-            .map(|value| pairs.append_pair("push_events_branch_filter", value));
-        self.issues_events
-            .map(|value| pairs.append_pair("issues_events", common::bool_str(value)));
-        self.confidential_issues_events
-            .map(|value| pairs.append_pair("confidential_issues_events", common::bool_str(value)));
-        self.merge_requests_events
-            .map(|value| pairs.append_pair("merge_requests_events", common::bool_str(value)));
-        self.tag_push_events
-            .map(|value| pairs.append_pair("tag_push_events", common::bool_str(value)));
-        self.note_events
-            .map(|value| pairs.append_pair("note_events", common::bool_str(value)));
-        self.job_events
-            .map(|value| pairs.append_pair("job_events", common::bool_str(value)));
-        self.pipeline_events
-            .map(|value| pairs.append_pair("pipeline_events", common::bool_str(value)));
-        self.wiki_page_events
-            .map(|value| pairs.append_pair("wiki_page_events", common::bool_str(value)));
+        params
+            .push("url", &self.url)
+            .push_opt("push_events", self.push_events)
+            .push_opt(
+                "push_events_branch_filter",
+                self.push_events_branch_filter.as_ref(),
+            )
+            .push_opt("issues_events", self.issues_events)
+            .push_opt(
+                "confidential_issues_events",
+                self.confidential_issues_events,
+            )
+            .push_opt("merge_requests_events", self.merge_requests_events)
+            .push_opt("tag_push_events", self.tag_push_events)
+            .push_opt("note_events", self.note_events)
+            .push_opt("job_events", self.job_events)
+            .push_opt("pipeline_events", self.pipeline_events)
+            .push_opt("wiki_page_events", self.wiki_page_events)
+            .push_opt("enable_ssl_verification", self.enable_ssl_verification)
+            .push_opt("token", self.token.as_ref());
 
-        self.enable_ssl_verification
-            .map(|value| pairs.append_pair("enable_ssl_verification", common::bool_str(value)));
-        self.token
-            .as_ref()
-            .map(|value| pairs.append_pair("token", value));
+        params.into_body()
     }
 }
 

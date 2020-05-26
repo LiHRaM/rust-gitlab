@@ -14,6 +14,8 @@ use std::fmt;
 
 use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
 
+use crate::api::ParamValue;
+
 /// Access levels for groups and projects.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AccessLevel {
@@ -105,6 +107,12 @@ impl EnableState {
     }
 }
 
+impl ParamValue<'static> for EnableState {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// A strucutre for storing a name or ID where either is allowed.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NameOrId<'a> {
@@ -181,6 +189,12 @@ impl VisibilityLevel {
             VisibilityLevel::Internal => "internal",
             VisibilityLevel::Private => "private",
         }
+    }
+}
+
+impl ParamValue<'static> for VisibilityLevel {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 

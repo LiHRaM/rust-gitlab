@@ -1,5 +1,10 @@
 # v0.1300.0 (unreleased)
 
+## New request body handling
+
+It was observed (#41) that the new API pattern was not handling `POST` and
+`PUT` parameters properly. This has now been fixed.
+
 ## Additional merge status cases
 
 Some additional merge status names for merge requests were missing and have
