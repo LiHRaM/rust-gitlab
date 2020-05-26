@@ -649,7 +649,7 @@ impl<'a> Endpoint for CreateProject<'a> {
             .map(|value| pairs.append_pair("default_branch", value));
         self.description
             .as_ref()
-            .map(|value| pairs.append_pair("default_branch", value));
+            .map(|value| pairs.append_pair("description", value));
 
         self.issues_access_level
             .map(|value| pairs.append_pair("issues_access_level", value.as_str()));
