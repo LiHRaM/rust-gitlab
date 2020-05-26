@@ -18,7 +18,7 @@ use std::str::FromStr;
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
 use log::error;
-use serde::de::{DeserializeOwned, Error, Unexpected};
+use serde::de::{DeserializeOwned, Error};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{self, Value};
 use url::Url;
@@ -1629,19 +1629,24 @@ impl_id!(MergeRequestInternalId);
 pub enum MergeStatus {
     /// The merge request has not been checked yet.
     Unchecked,
+    /// The merge request is currently being checked.
+    Checking,
     /// The merge request may be merged.
     CanBeMerged,
     /// The merge request may not be merged yet.
     CannotBeMerged,
-    /// The merge request has not been checked but previously
-    /// could not be merged.
+    /// The merge request has not been checked but previously could not be merged.
     CannotBeMergedRecheck,
+    /// The merge request could not be merged previously, but is being rechecked.
+    CannotBeMergedRechecking,
 }
 enum_serialize!(MergeStatus -> "merge status",
     Unchecked => "unchecked",
+    Checking => "checking",
     CanBeMerged => "can_be_merged",
     CannotBeMerged => "cannot_be_merged",
     CannotBeMergedRecheck => "cannot_be_merged_recheck",
+    CannotBeMergedRechecking => "cannot_be_merged_rechecking",
 );
 
 /// The states a merge request may be in.

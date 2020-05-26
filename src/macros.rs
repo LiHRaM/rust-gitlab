@@ -62,8 +62,7 @@ macro_rules! enum_serialize {
                     $( $str $( | $opt )* => Ok($name::$value), )*
                     v => {
                         error!(target: "gitlab", concat!("unknown ", $desc, " from gitlab: {}"), v);
-                        Err(D::Error::invalid_value(Unexpected::Other("enumeration value"),
-                                                    &concat!("invalid ", $desc)))
+                        Err(D::Error::unknown_variant(v, &[$( $str, $( $opt, )* )*]))
                     },
                 }
             }
