@@ -190,7 +190,7 @@ impl<'a> ContainerExpirationPolicy<'a> {
         });
         self.enabled.map(|value| {
             pairs.append_pair(
-                "container_expiration_policy_attributes[keep_n]",
+                "container_expiration_policy_attributes[enabled]",
                 common::bool_str(value),
             )
         });
