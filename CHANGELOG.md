@@ -1,3 +1,10 @@
+# v0.1300.0 (unreleased)
+
+## Additional merge status cases
+
+Some additional merge status names for merge requests were missing and have
+been added.
+
 # v0.1210.1
 
 ## New API strategy
