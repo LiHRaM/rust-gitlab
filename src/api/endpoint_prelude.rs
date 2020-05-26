@@ -16,5 +16,6 @@ pub use reqwest::Method;
 pub use crate::api::BodyError;
 pub use crate::api::Client;
 pub use crate::api::Endpoint;
+pub use crate::api::FormParams;
 pub use crate::api::Pageable;
 pub use crate::api::Pairs;

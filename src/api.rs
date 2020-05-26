@@ -62,6 +62,7 @@ mod endpoint;
 mod error;
 mod ignore;
 mod paged;
+mod params;
 mod query;
 mod raw;
 mod sudo;
@@ -90,6 +91,9 @@ pub use self::paged::Pageable;
 pub use self::paged::Paged;
 pub use self::paged::Pagination;
 pub use self::paged::PaginationError;
+
+pub use self::params::FormParams;
+pub use self::params::ParamValue;
 
 pub use self::query::Query;
 
