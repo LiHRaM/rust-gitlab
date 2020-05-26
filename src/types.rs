@@ -18,7 +18,7 @@ use std::str::FromStr;
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
 use log::error;
-use serde::de::{DeserializeOwned, Error, Unexpected};
+use serde::de::{DeserializeOwned, Error};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{self, Value};
 use url::Url;
