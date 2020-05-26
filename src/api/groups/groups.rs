@@ -39,6 +39,12 @@ impl GroupOrderBy {
     }
 }
 
+impl ParamValue<'static> for GroupOrderBy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// Query for groups on an instance.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]

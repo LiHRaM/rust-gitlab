@@ -12,6 +12,7 @@
 use std::borrow::Cow;
 
 use chrono::{DateTime, NaiveDate, Utc};
+use url::Url;
 
 use crate::api::{common, BodyError};
 
@@ -134,5 +135,56 @@ impl<'a> FormParams<'a> {
             "application/x-www-form-urlencoded",
             body.into_bytes(),
         )))
+    }
+}
+
+/// A structure for query parameters.
+#[derive(Debug, Default, Clone)]
+pub struct QueryParams<'a> {
+    params: Vec<(Cow<'a, str>, Cow<'a, str>)>,
+}
+
+impl<'a> QueryParams<'a> {
+    /// Push a single parameter.
+    pub fn push<'b, K, V>(&mut self, key: K, value: V) -> &mut Self
+    where
+        K: Into<Cow<'a, str>>,
+        V: ParamValue<'b>,
+        'b: 'a,
+    {
+        self.params.push((key.into(), value.as_value()));
+        self
+    }
+
+    /// Push a single parameter.
+    pub fn push_opt<'b, K, V>(&mut self, key: K, value: Option<V>) -> &mut Self
+    where
+        K: Into<Cow<'a, str>>,
+        V: ParamValue<'b>,
+        'b: 'a,
+    {
+        if let Some(value) = value {
+            self.params.push((key.into(), value.as_value()));
+        }
+        self
+    }
+
+    /// Push a set of parameters.
+    pub fn extend<'b, I, K, V>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = (K, V)>,
+        K: Into<Cow<'a, str>>,
+        V: ParamValue<'b>,
+        'b: 'a,
+    {
+        self.params
+            .extend(iter.map(|(key, value)| (key.into(), value.as_value())));
+        self
+    }
+
+    /// Add the parameters to a URL.
+    pub fn add_to_url(&self, url: &mut Url) {
+        let mut pairs = url.query_pairs_mut();
+        pairs.extend_pairs(self.params.iter());
     }
 }

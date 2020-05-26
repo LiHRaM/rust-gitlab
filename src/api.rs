@@ -94,6 +94,7 @@ pub use self::paged::PaginationError;
 
 pub use self::params::FormParams;
 pub use self::params::ParamValue;
+pub use self::params::QueryParams;
 
 pub use self::query::Query;
 
