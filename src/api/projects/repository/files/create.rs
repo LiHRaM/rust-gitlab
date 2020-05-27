@@ -182,6 +182,34 @@ mod tests {
     }
 
     #[test]
+    fn encoding_is_binary_safe() {
+        let items = &[(Encoding::Text, false), (Encoding::Base64, true)];
+
+        for (i, s) in items {
+            assert_eq!(i.is_binary_safe(), *s);
+        }
+    }
+
+    #[test]
+    fn encoding_encode_text() {
+        let encoding = Encoding::Text;
+        assert_eq!(encoding.encode(Some("foo"), b"foo"), "foo");
+    }
+
+    #[test]
+    #[should_panic = "attempting to encode non-utf8 content using text!"]
+    fn encoding_encode_text_bad() {
+        let encoding = Encoding::Text;
+        encoding.encode(None, b"\xff");
+    }
+
+    #[test]
+    fn encoding_encode_base64() {
+        let encoding = Encoding::Base64;
+        assert_eq!(encoding.encode(None, b"foo"), "Zm9v");
+    }
+
+    #[test]
     fn encoding_as_str() {
         let items = &[(Encoding::Text, "text"), (Encoding::Base64, "base64")];
 
