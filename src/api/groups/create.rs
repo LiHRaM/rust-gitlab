@@ -129,6 +129,7 @@ pub struct CreateGroup<'a> {
     /// Disable email notifications from the group.
     #[builder(default)]
     emails_disabled: Option<bool>,
+    // TODO: Figure out how to actually use this.
     // avatar   mixed   no  Image file for avatar of the group
     // avatar: ???,
     /// Disable group-wide mentions.

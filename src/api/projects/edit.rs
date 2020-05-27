@@ -117,7 +117,7 @@ pub struct EditProject<'a> {
     /// A list of tags to apply to the repository.
     #[builder(setter(name = "_tag_list"), default, private)]
     tag_list: BTreeSet<Cow<'a, str>>,
-    // TODO: Figure out how to actuall use this.
+    // TODO: Figure out how to actually use this.
     // avatar   mixed   no  Image file for avatar of the project
     // avatar: ???,
     /// The default Git strategy for CI jobs of the project.

@@ -490,7 +490,7 @@ pub struct CreateProject<'a> {
     /// A list of tags to apply to the repository.
     #[builder(setter(name = "_tag_list"), default, private)]
     tag_list: BTreeSet<Cow<'a, str>>,
-    // TODO: Figure out how to actuall use this.
+    // TODO: Figure out how to actually use this.
     // avatar   mixed   no  Image file for avatar of the project
     // avatar: ???,
     /// Whether to show a link to create or view a merge request when pushing a branch from the
