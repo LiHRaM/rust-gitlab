@@ -281,8 +281,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/group_labels.md
   * https://gitlab.kitware.com/help/api/group_level_variables.md
   * https://gitlab.kitware.com/help/api/group_milestones.md
-  * https://gitlab.kitware.com/help/api/issues.md
-  * https://gitlab.kitware.com/help/api/members.md
   * https://gitlab.kitware.com/help/api/admin_sidekiq_queues.md
   * https://gitlab.kitware.com/help/api/appearance.md
   * https://gitlab.kitware.com/help/api/applications.md
