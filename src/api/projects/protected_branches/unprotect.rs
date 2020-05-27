@@ -8,7 +8,7 @@ use std::borrow::Cow;
 
 use derive_builder::Builder;
 
-use crate::api::common::NameOrId;
+use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
 
 /// Create a new file in a project.
@@ -35,7 +35,12 @@ impl<'a> Endpoint for UnprotectBranch<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/protected_branches/{}", self.project, self.name).into()
+        format!(
+            "projects/{}/protected_branches/{}",
+            self.project,
+            common::path_escaped(&self.name),
+        )
+        .into()
     }
 }
 
@@ -59,13 +64,13 @@ mod tests {
     }
 
     #[test]
-    fn branch_is_required() {
+    fn name_is_required() {
         let err = UnprotectBranch::builder().project(1).build().unwrap_err();
         assert_eq!(err, "`name` must be initialized");
     }
 
     #[test]
-    fn project_and_branch_are_sufficient() {
+    fn project_and_name_are_sufficient() {
         UnprotectBranch::builder()
             .project(1)
             .name("master")

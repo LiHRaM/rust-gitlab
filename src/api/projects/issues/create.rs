@@ -5,7 +5,7 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
@@ -44,13 +44,13 @@ pub struct CreateIssue<'a> {
     confidential: Option<bool>,
     /// Assignees for the issue.
     #[builder(setter(name = "_assignee_ids"), default, private)]
-    assignee_ids: HashSet<u64>,
+    assignee_ids: BTreeSet<u64>,
     /// The ID of the milestone for the issue.
     #[builder(default)]
     milestone_id: Option<u64>,
     /// Labels to add to the issue.
     #[builder(setter(name = "_labels"), default, private)]
-    labels: HashSet<Cow<'a, str>>,
+    labels: BTreeSet<Cow<'a, str>>,
     /// The creation date of the issue.
     ///
     /// Requires administrator or owner permissions.
@@ -91,7 +91,7 @@ impl<'a> CreateIssueBuilder<'a> {
     /// Assign the issue to a user.
     pub fn assignee_id(&mut self, assignee: u64) -> &mut Self {
         self.assignee_ids
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .insert(assignee);
         self
     }
@@ -102,7 +102,7 @@ impl<'a> CreateIssueBuilder<'a> {
         I: Iterator<Item = u64>,
     {
         self.assignee_ids
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .extend(iter);
         self
     }
@@ -113,7 +113,7 @@ impl<'a> CreateIssueBuilder<'a> {
         L: Into<Cow<'a, str>>,
     {
         self.labels
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .insert(label.into());
         self
     }
@@ -125,7 +125,7 @@ impl<'a> CreateIssueBuilder<'a> {
         L: Into<Cow<'a, str>>,
     {
         self.labels
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .extend(iter.into_iter().map(Into::into));
         self
     }

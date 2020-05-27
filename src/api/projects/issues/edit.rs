@@ -5,7 +5,7 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
@@ -42,13 +42,13 @@ impl ParamValue<'static> for IssueStateEvent {
 #[derive(Debug, Clone)]
 enum IssueAssignees {
     Unassigned,
-    Assignees(HashSet<u64>),
+    Assignees(BTreeSet<u64>),
 }
 
 #[derive(Debug, Clone)]
 enum IssueLabels<'a> {
     Unlabeled,
-    Labeled(HashSet<Cow<'a, str>>),
+    Labeled(BTreeSet<Cow<'a, str>>),
 }
 
 impl<'a, 'b: 'a> ParamValue<'a> for &'b IssueLabels<'a> {
@@ -68,7 +68,7 @@ pub struct EditIssue<'a> {
     #[builder(setter(into))]
     project: NameOrId<'a>,
     /// The internal IID of the issue.
-    issue_iid: u64,
+    issue: u64,
 
     /// The title of the new issue.
     #[builder(setter(into), default)]
@@ -119,6 +119,13 @@ impl<'a> EditIssue<'a> {
 }
 
 impl<'a> EditIssueBuilder<'a> {
+    /// Set the issue ID.
+    #[deprecated(note = "use `issue` instead")]
+    pub fn issue_iid(&mut self, issue_iid: u64) -> &mut Self {
+        self.issue = Some(issue_iid);
+        self
+    }
+
     /// Unassign the issue.
     pub fn unassign(&mut self) -> &mut Self {
         self.assignee_ids = Some(Some(IssueAssignees::Unassigned));
@@ -132,7 +139,7 @@ impl<'a> EditIssueBuilder<'a> {
                 set.insert(assignee);
                 set
             } else {
-                let mut set = HashSet::new();
+                let mut set = BTreeSet::new();
                 set.insert(assignee);
                 set
             };
@@ -175,7 +182,7 @@ impl<'a> EditIssueBuilder<'a> {
             set.insert(label);
             set
         } else {
-            let mut set = HashSet::new();
+            let mut set = BTreeSet::new();
             set.insert(label);
             set
         };
@@ -210,7 +217,7 @@ impl<'a> Endpoint for EditIssue<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/issues/{}", self.project, self.issue_iid).into()
+        format!("projects/{}/issues/{}", self.project, self.issue).into()
     }
 
     fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
@@ -265,25 +272,31 @@ mod tests {
     }
 
     #[test]
-    fn project_and_iid_are_necessary() {
+    fn project_and_issue_are_necessary() {
         let err = EditIssue::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
     fn project_is_necessary() {
-        let err = EditIssue::builder().issue_iid(1).build().unwrap_err();
+        let err = EditIssue::builder().issue(1).build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
-    fn iid_is_necessary() {
+    fn issue_is_necessary() {
         let err = EditIssue::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`issue_iid` must be initialized");
+        assert_eq!(err, "`issue` must be initialized");
     }
 
     #[test]
-    fn project_and_iid_are_sufficient() {
+    fn project_and_issue_are_sufficient() {
+        EditIssue::builder().project(1).issue(1).build().unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn project_and_issue_iid_are_sufficient() {
         EditIssue::builder()
             .project(1)
             .issue_iid(1)

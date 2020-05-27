@@ -11,6 +11,7 @@ use crate::api::endpoint_prelude::*;
 
 /// Query for a specific branch in a project.
 #[derive(Debug, Builder)]
+#[builder(setter(strip_option))]
 pub struct Branches<'a> {
     /// The project to get a branch from.
     #[builder(setter(into))]

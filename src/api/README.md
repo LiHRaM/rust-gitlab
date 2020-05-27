@@ -48,7 +48,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/pipelines/:pipeline/retry` `projects/pipelines/retry.rs`
   * `GET    /projects/:project/pipelines/:pipeline/variables` `projects/pipelines/variables.rs`
   * `POST   /projects/:project/protected_branches` `projects/protected_branches/protect.rs`
-  * `DELETE /projects/:project/protected_branches/:branch` `projects/protected_branches/unprotect.rs`
+  * `DELETE /projects/:project/protected_branches/*branch` `projects/protected_branches/unprotect.rs`
   * `GET    /projects/:project/repository/branches` `projects/repository/branches/branches.rs`
   * `POST   /projects/:project/repository/branches` `projects/repository/branches/create.rs`
   * `GET    /projects/:project/repository/branches/:branch` `projects/repository/branches/branch.rs`

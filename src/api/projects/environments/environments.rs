@@ -17,14 +17,6 @@ enum NameOrSearch<'a> {
     Search(Cow<'a, str>),
 }
 
-impl<'a> AsRef<str> for NameOrSearch<'a> {
-    fn as_ref(&self) -> &str {
-        match self {
-            NameOrSearch::Name(ref c) | NameOrSearch::Search(ref c) => c.as_ref(),
-        }
-    }
-}
-
 /// Query for environments within a project.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]

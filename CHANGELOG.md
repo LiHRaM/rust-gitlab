@@ -15,6 +15,21 @@ parameters was also implemented.
 Some additional merge status names for merge requests were missing and have
 been added.
 
+## Fixes
+
+  * The `api::projects::environments::Environment` endpoint uses the correct
+    path now.
+  * The `api::projects::members::ProjectMembers` and
+    `api::projects::repository::Branches` endpoints now accepts plain strings
+    for their `query` fields.
+  * The `api::projects::protected_branches::UnprotectBranch` endpoint now
+    properly escapes branch names with URL-special characters.
+
+## Changes
+
+  * The `api::projects::issues::EditIssue` now uses `issue` rather than
+    `issue_iid` for consistency.
+
 # v0.1210.1
 
 ## New API strategy

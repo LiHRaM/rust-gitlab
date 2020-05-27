@@ -4,7 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use derive_builder::Builder;
 
@@ -13,6 +13,7 @@ use crate::api::endpoint_prelude::*;
 
 /// Query a members of a project.
 #[derive(Debug, Builder)]
+#[builder(setter(strip_option))]
 pub struct ProjectMembers<'a> {
     /// The project to query for membership.
     #[builder(setter(into))]
@@ -23,7 +24,7 @@ pub struct ProjectMembers<'a> {
     query: Option<Cow<'a, str>>,
     /// A search string to filter members by.
     #[builder(setter(name = "_user_ids"), default, private)]
-    user_ids: HashSet<u64>,
+    user_ids: BTreeSet<u64>,
 }
 
 impl<'a> ProjectMembers<'a> {
@@ -37,7 +38,7 @@ impl<'a> ProjectMembersBuilder<'a> {
     /// Filter results by the given user ID.
     pub fn user_id(&mut self, user_id: u64) -> &mut Self {
         self.user_ids
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .insert(user_id);
         self
     }
@@ -47,7 +48,7 @@ impl<'a> ProjectMembersBuilder<'a> {
     where
         I: Iterator<Item = u64>,
     {
-        self.user_ids.get_or_insert_with(HashSet::new).extend(iter);
+        self.user_ids.get_or_insert_with(BTreeSet::new).extend(iter);
         self
     }
 }
