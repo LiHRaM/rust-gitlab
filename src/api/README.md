@@ -85,6 +85,8 @@ instead of having to search the page for missing endpoints.
   * `GET    /groups/:group/epics/:epic/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-epic-note
   * `PUT    /groups/:group/epics/:epic/notes/:note` https://gitlab.kitware.com/help/api/notes.md#modify-existing-epic-note
   * `DELETE /groups/:group/epics/:epic/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-an-epic-note
+  * `GET    /groups/:group/epics/:epic/resource_label_events` https://gitlab.kitware.com/help/api/resource_label_events.md#list-group-epic-label-events
+  * `GET    /groups/:group/epics/:epic/resource_label_events/:event` https://gitlab.kitware.com/help/api/resource_label_events.md#get-single-epic-label-event
   * `GET    /groups/:group/hooks` https://gitlab.kitware.com/help/api/groups.md#list-group-hooks
   * `POST   /groups/:group/hooks` https://gitlab.kitware.com/help/api/groups.md#add-group-hook
   * `GET    /groups/:group/hooks/:id` https://gitlab.kitware.com/help/api/groups.md#get-group-hook
@@ -130,6 +132,8 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/issues/:issue/related_merge_requests` https://gitlab.kitware.com/help/api/issues.md#list-merge-requests-related-to-issue
   * `POST   /projects/:project/issues/:issue/reset_spent_time` https://gitlab.kitware.com/help/api/issues.md#reset-spent-time-for-an-issue
   * `POST   /projects/:project/issues/:issue/reset_time_estimate` https://gitlab.kitware.com/help/api/issues.md#reset-the-time-estimate-for-an-issue
+  * `GET    /projects/:project/issues/:issue/resource_label_events` https://gitlab.kitware.com/help/api/resource_label_events.md#list-project-issue-label-events
+  * `GET    /projects/:project/issues/:issue/resource_label_events/:event` https://gitlab.kitware.com/help/api/resource_label_events.md#get-single-issue-label-event
   * `POST   /projects/:project/issues/:issue/subscribe` https://gitlab.kitware.com/help/api/issues.md#subscribe-to-an-issue
   * `POST   /projects/:project/issues/:issue/time_estimate` https://gitlab.kitware.com/help/api/issues.md#set-a-time-estimate-for-an-issue
   * `GET    /projects/:project/issues/:issue/time_stats` https://gitlab.kitware.com/help/api/issues.md#get-time-tracking-stats
@@ -157,6 +161,8 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-merge-request-note
   * `PUT    /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#modify-existing-merge-request-note
   * `DELETE /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-a-merge-request-note
+  * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` https://gitlab.kitware.com/help/api/resource_label_events.md#list-project-merge-request-label-events
+  * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events/:event` https://gitlab.kitware.com/help/api/resource_label_events.md#get-single-merge-request-label-event
   * `GET    /projects/:project/milestones` https://gitlab.kitware.com/help/api/milestones.md#list-project-milestones
   * `POST   /projects/:project/milestones` https://gitlab.kitware.com/help/api/milestones.md#create-new-milestone
   * `GET    /projects/:project/milestones/:milestone` https://gitlab.kitware.com/help/api/milestones.md#list-project-milestones
@@ -289,7 +295,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/remote_mirrors.md
   * https://gitlab.kitware.com/help/api/repositories.md
   * https://gitlab.kitware.com/help/api/repository_submodules.md
-  * https://gitlab.kitware.com/help/api/resource_label_events.md
   * https://gitlab.kitware.com/help/api/runners.md
   * https://gitlab.kitware.com/help/api/search.md
   * https://gitlab.kitware.com/help/api/services.md
