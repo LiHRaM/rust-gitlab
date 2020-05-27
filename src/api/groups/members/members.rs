@@ -13,6 +13,7 @@ use crate::api::endpoint_prelude::*;
 
 /// Query a members of a group.
 #[derive(Debug, Builder)]
+#[builder(setter(strip_option))]
 pub struct GroupMembers<'a> {
     /// The group to query for membership.
     #[builder(setter(into))]

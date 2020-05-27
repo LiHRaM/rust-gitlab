@@ -19,11 +19,17 @@ been added.
 
   * The `api::projects::environments::Environment` endpoint uses the correct
     path now.
-  * The `api::projects::members::ProjectMembers` and
+  * The `api::groups::members::GroupMembers`,
+    `api::projects::members::ProjectMembers`, and
     `api::projects::repository::Branches` endpoints now accepts plain strings
     for their `query` fields.
   * The `api::projects::protected_branches::UnprotectBranch` endpoint now
     properly escapes branch names with URL-special characters.
+  * The `api::projects::repository::CreateFile` endpoint now properly upgrades
+    the encoding when attempting to encode binary contents using
+    `Encoding::Text`.
+  * The `api::projects::CreateProject` and `api::projects::EditProject`
+    endpoints now accepts plain strings in its `import_url` field.
 
 ## Changes
 
