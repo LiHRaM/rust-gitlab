@@ -80,6 +80,12 @@ instead of having to search the page for missing endpoints.
   * `GET    /issues` https://gitlab.kitware.com/help/api/issues.md#list-issues
   * `PUT    /groups/:group` https://gitlab.kitware.com/help/api/groups.md#update-group
   * `DELETE /groups/:group` https://gitlab.kitware.com/help/api/groups.md#remove-group
+  * `GET    /groups/:group/epics/:epic/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-group-epic-discussion-items
+  * `POST   /groups/:group/epics/:epic/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-epic-thread
+  * `GET    /groups/:group/epics/:epic/discussions/:discussion` https://gitlab.kitware.com/help/api/discussions.md#get-single-epic-discussion-item
+  * `POST   /groups/:group/epics/:epic/discussions/:discussion/notes` https://gitlab.kitware.com/help/api/discussions.md#add-note-to-existing-epic-thread
+  * `PUT    /groups/:group/epics/:epic/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#modify-existing-epic-thread-note
+  * `DELETE /groups/:group/epics/:epic/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#delete-an-epic-thread-note
   * `GET    /groups/:group/epics/:epic/notes` https://gitlab.kitware.com/help/api/notes.md#list-all-epic-notes
   * `POST   /groups/:group/epics/:epic/notes` https://gitlab.kitware.com/help/api/notes.md#create-new-epic-note
   * `GET    /groups/:group/epics/:epic/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-epic-note
@@ -108,6 +114,15 @@ instead of having to search the page for missing endpoints.
   * `GET    /groups/:group/subgroups` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-subgroups
   * `DELETE /projects/:project` https://gitlab.kitware.com/help/api/projects.md#remove-project
   * `POST   /projects/:project/archive` https://gitlab.kitware.com/help/api/projects.md#archive-a-project
+  * `GET    /projects/:project/commits/:sha/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-project-commit-discussion-items
+    Arguably, this (and its related endpoints) should be `GET
+    /projects/:project/repository/commits/:sha/discussions`.
+    https://gitlab.com/gitlab-org/gitlab/-/issues/219321
+  * `POST   /projects/:project/commits/:sha/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-commit-thread
+  * `GET    /projects/:project/commits/:sha/discussions/:discussion` https://gitlab.kitware.com/help/api/discussions.md#get-single-commit-discussion-item
+  * `POST   /projects/:project/commits/:sha/discussions/:discussion/notes` https://gitlab.kitware.com/help/api/discussions.md#add-note-to-existing-commit-thread
+  * `PUT    /projects/:project/commits/:sha/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#modify-an-existing-commit-thread-note
+  * `DELETE /projects/:project/commits/:sha/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#delete-a-commit-thread-note
   * `POST   /projects/:project/environments` https://gitlab.kitware.com/help/api/environments.md#create-a-new-environment
   * `PUT    /projects/:project/environments/:id` https://gitlab.kitware.com/help/api/environments.md#edit-an-existing-environment
   * `DELETE /projects/:project/environments/:id` https://gitlab.kitware.com/help/api/environments.md#delete-an-environment
@@ -122,6 +137,12 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/issues/:issue` https://gitlab.kitware.com/help/api/issues.md#delete-an-issue
   * `POST   /projects/:project/issues/:issue/add_spent_time` https://gitlab.kitware.com/help/api/issues.md#add-spent-time-for-an-issue
   * `GET    /projects/:project/issues/:issue/closed_by` https://gitlab.kitware.com/help/api/issues.md#list-merge-requests-that-will-close-issue-on-merge
+  * `GET    /projects/:project/issues/:issue/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-project-issue-discussion-items
+  * `POST   /projects/:project/issues/:issue/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-issue-thread
+  * `GET    /projects/:project/issues/:issue/discussions/:discussion` https://gitlab.kitware.com/help/api/discussions.md#get-single-issue-discussion-item
+  * `POST   /projects/:project/issues/:issue/discussions/:discussion/notes` https://gitlab.kitware.com/help/api/discussions.md#add-note-to-existing-issue-thread
+  * `PUT    /projects/:project/issues/:issue/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#modify-existing-issue-thread-note
+  * `DELETE /projects/:project/issues/:issue/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#delete-an-issue-thread-note
   * `GET    /projects/:project/issues/:issue/notes` https://gitlab.kitware.com/help/api/notes.md#issues
   * `POST   /projects/:project/issues/:issue/notes` https://gitlab.kitware.com/help/api/notes.md#create-new-issue-note
   * `GET    /projects/:project/issues/:issue/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-issue-note
@@ -156,6 +177,12 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
   * `PUT    /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
   * `DELETE /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
+  * `GET    /projects/:project/merge_requests/:merge_request/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-project-merge-request-discussion-items
+  * `POST   /projects/:project/merge_requests/:merge_request/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-merge-request-thread
+  * `GET    /projects/:project/merge_requests/:merge_request/discussions/:discussion` https://gitlab.kitware.com/help/api/discussions.md#get-single-merge-request-discussion-item
+  * `POST   /projects/:project/merge_requests/:merge_request/discussions/:discussion/notes` https://gitlab.kitware.com/help/api/discussions.md#add-note-to-existing-merge-request-thread
+  * `PUT    /projects/:project/merge_requests/:merge_request/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#modify-an-existing-merge-request-thread-note
+  * `DELETE /projects/:project/merge_requests/:merge_request/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#delete-a-merge-request-thread-note
   * `GET    /projects/:project/merge_requests/:merge_request/notes` https://gitlab.kitware.com/help/api/notes.md#list-all-merge-request-notes
   * `POST   /projects/:project/merge_requests/:merge_request/notes` https://gitlab.kitware.com/help/api/notes.md#create-new-merge-request-note
   * `GET    /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-merge-request-note
@@ -201,6 +228,12 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/share` https://gitlab.kitware.com/help/api/projects.md#share-project-with-group
   * `DELETE /projects/:project/share/:group` https://gitlab.kitware.com/help/api/projects.md#delete-a-shared-project-link-within-a-group
   * `GET    /projects/:project/snapshot` https://gitlab.kitware.com/help/api/projects.md#download-snapshot-of-a-git-repository
+  * `GET    /projects/:project/snippets/:snippet/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-project-snippet-discussion-items
+  * `POST   /projects/:project/snippets/:snippet/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-snippet-thread
+  * `GET    /projects/:project/snippets/:snippet/discussions/:discussion` https://gitlab.kitware.com/help/api/discussions.md#get-single-snippet-discussion-item
+  * `POST   /projects/:project/snippets/:snippet/discussions/:discussion/notes` https://gitlab.kitware.com/help/api/discussions.md#add-note-to-existing-snippet-thread
+  * `PUT    /projects/:project/snippets/:snippet/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#modify-existing-snippet-thread-note
+  * `DELETE /projects/:project/snippets/:snippet/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#delete-a-snippet-thread-note
   * `GET    /projects/:project/snippets/:snippet/notes` https://gitlab.kitware.com/help/api/notes.md#snippets
   * `POST   /projects/:project/snippets/:snippet/notes` https://gitlab.kitware.com/help/api/notes.md#get-single-snippet-note
   * `GET    /projects/:project/snippets/:snippet/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-snippet-note
@@ -268,7 +301,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/dependencies.md
   * https://gitlab.kitware.com/help/api/deploy_keys.md
   * https://gitlab.kitware.com/help/api/deployments.md
-  * https://gitlab.kitware.com/help/api/discussions.md
   * https://gitlab.kitware.com/help/api/error_tracking.md
   * https://gitlab.kitware.com/help/api/events.md
   * https://gitlab.kitware.com/help/api/issues_statistics.md
