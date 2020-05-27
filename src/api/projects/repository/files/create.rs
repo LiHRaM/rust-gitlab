@@ -12,6 +12,7 @@ use log::warn;
 
 use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Encodings for uploading file contents through an HTTP request.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -58,6 +59,12 @@ impl Encoding {
             Encoding::Text => "text",
             Encoding::Base64 => "base64",
         }
+    }
+}
+
+impl ParamValue<'static> for Encoding {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -125,8 +132,16 @@ impl<'a> Endpoint for CreateFile<'a> {
         .into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("branch", &self.branch);
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
+
+        params
+            .push("branch", &self.branch)
+            .push("commit_message", &self.commit_message)
+            .push_opt("start_branch", self.start_branch.as_ref())
+            .push_opt("author_email", self.author_email.as_ref())
+            .push_opt("author_name", self.author_name.as_ref());
+
         let content = str::from_utf8(&self.content);
         let needs_encoding = content.is_err();
         let encoding = self.encoding.unwrap_or_default();
@@ -139,14 +154,7 @@ impl<'a> Endpoint for CreateFile<'a> {
         } else {
             encoding
         };
-        pairs.append_pair(
-            "content",
-            encoding.encode(content.ok(), &self.content).as_ref(),
-        );
-        pairs.append_pair("commit_message", self.commit_message.as_ref());
-        self.start_branch
-            .as_ref()
-            .map(|value| pairs.append_pair("start_branch", value));
+        params.push("content", encoding.encode(content.ok(), &self.content));
         self.encoding
             // Use the actual encoding.
             .map(|_| actual_encoding)
@@ -158,13 +166,9 @@ impl<'a> Endpoint for CreateFile<'a> {
                     None
                 }
             })
-            .map(|value| pairs.append_pair("encoding", value.as_str()));
-        self.author_email
-            .as_ref()
-            .map(|value| pairs.append_pair("author_email", value));
-        self.author_name
-            .as_ref()
-            .map(|value| pairs.append_pair("author_name", value));
+            .map(|value| params.push("encoding", value));
+
+        params.into_body()
     }
 }
 

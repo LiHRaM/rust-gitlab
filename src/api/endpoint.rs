@@ -6,15 +6,10 @@
 
 use std::borrow::Cow;
 
-use reqwest::Method;
+use reqwest::{header, Method};
 use serde::de::DeserializeOwned;
-use url::form_urlencoded::Serializer;
-use url::UrlQuery;
 
-use crate::api::{ApiError, Client, Query};
-
-/// A type for managing query parameters.
-pub type Pairs<'a> = Serializer<'a, UrlQuery<'a>>;
+use crate::api::{ApiError, BodyError, Client, Query, QueryParams};
 
 /// A trait for providing the necessary information for a single REST API endpoint.
 pub trait Endpoint {
@@ -23,13 +18,16 @@ pub trait Endpoint {
     /// The path to the endpoint.
     fn endpoint(&self) -> Cow<'static, str>;
 
-    /// Add query parameters for the endpoint.
-    #[allow(unused_variables)]
-    fn add_parameters(&self, pairs: Pairs) {}
+    /// Query parameters for the endpoint.
+    fn parameters(&self) -> QueryParams {
+        QueryParams::default()
+    }
 
-    /// Form data for the endpoint.
-    fn form_data(&self) -> Vec<u8> {
-        Vec::new()
+    /// The body for the endpoint.
+    ///
+    /// Returns the `Content-Encoding` header for the data as well as the data itself.
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        Ok(None)
     }
 }
 
@@ -41,11 +39,14 @@ where
 {
     fn query(&self, client: &C) -> Result<T, ApiError<C::Error>> {
         let mut url = client.rest_endpoint(&self.endpoint())?;
-        self.add_parameters(url.query_pairs_mut());
+        self.parameters().add_to_url(&mut url);
 
-        let req = client
-            .build_rest(self.method(), url)
-            .form(&self.form_data());
+        let req = client.build_rest(self.method(), url);
+        let req = if let Some((mime, data)) = self.body()? {
+            req.header(header::CONTENT_TYPE, mime).body(data)
+        } else {
+            req
+        };
         let rsp = client.rest(req)?;
         let status = rsp.status();
         let v = serde_json::from_reader(rsp)?;

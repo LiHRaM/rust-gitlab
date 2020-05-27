@@ -9,8 +9,9 @@ use std::collections::BTreeMap;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::api::common::{self, AccessLevel, SortOrder, VisibilityLevel};
+use crate::api::common::{AccessLevel, SortOrder, VisibilityLevel};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Keys project results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -50,6 +51,12 @@ impl ProjectOrderBy {
             ProjectOrderBy::UpdatedAt => "updated_at",
             ProjectOrderBy::LastActivityAt => "last_activity_at",
         }
+    }
+}
+
+impl ParamValue<'static> for ProjectOrderBy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -180,70 +187,51 @@ impl<'a> Endpoint for Projects<'a> {
         "projects".into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.search
-            .as_ref()
-            .map(|value| pairs.append_pair("search", value));
-        self.archived
-            .map(|value| pairs.append_pair("archived", common::bool_str(value)));
-        self.visibility
-            .map(|value| pairs.append_pair("visibility", value.as_str()));
-        self.search_namespaces
-            .map(|value| pairs.append_pair("search_namespaces", common::bool_str(value)));
-        self.simple
-            .map(|value| pairs.append_pair("simple", common::bool_str(value)));
-        self.owned
-            .map(|value| pairs.append_pair("owned", common::bool_str(value)));
-        self.membership
-            .map(|value| pairs.append_pair("membership", common::bool_str(value)));
-        self.starred
-            .map(|value| pairs.append_pair("starred", common::bool_str(value)));
-        self.statistics
-            .map(|value| pairs.append_pair("statistics", common::bool_str(value)));
-        self.with_issues_enabled
-            .map(|value| pairs.append_pair("with_issues_enabled", common::bool_str(value)));
-        self.with_merge_requests_enabled
-            .map(|value| pairs.append_pair("with_merge_requests_enabled", common::bool_str(value)));
-        self.with_programming_language
-            .as_ref()
-            .map(|value| pairs.append_pair("with_programming_language", value));
-        self.wiki_checksum_failed
-            .map(|value| pairs.append_pair("wiki_checksum_failed", common::bool_str(value)));
-        self.repository_checksum_failed
-            .map(|value| pairs.append_pair("repository_checksum_failed", common::bool_str(value)));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
 
-        self.min_access_level
-            .map(|value| pairs.append_pair("min_access_level", &format!("{}", value.as_u64())));
-
-        self.id_after
-            .map(|value| pairs.append_pair("id_after", &format!("{}", value)));
-        self.id_before
-            .map(|value| pairs.append_pair("id_before", &format!("{}", value)));
-        self.last_activity_after.map(|value| {
-            pairs.append_pair(
-                "last_activity_after",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+        params
+            .push_opt("search", self.search.as_ref())
+            .push_opt("archived", self.archived)
+            .push_opt("visibility", self.visibility)
+            .push_opt("search_namespaces", self.search_namespaces)
+            .push_opt("simple", self.simple)
+            .push_opt("owned", self.owned)
+            .push_opt("membership", self.membership)
+            .push_opt("starred", self.starred)
+            .push_opt("statistics", self.statistics)
+            .push_opt("with_issues_enabled", self.with_issues_enabled)
+            .push_opt(
+                "with_merge_requests_enabled",
+                self.with_merge_requests_enabled,
             )
-        });
-        self.last_activity_before.map(|value| {
-            pairs.append_pair(
-                "last_activity_before",
-                &value.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+            .push_opt(
+                "with_programming_language",
+                self.with_programming_language.as_ref(),
             )
-        });
+            .push_opt("wiki_checksum_failed", self.wiki_checksum_failed)
+            .push_opt(
+                "repository_checksum_failed",
+                self.repository_checksum_failed,
+            )
+            .push_opt(
+                "min_access_level",
+                self.min_access_level.map(|level| level.as_u64()),
+            )
+            .push_opt("id_after", self.id_after)
+            .push_opt("id_before", self.id_before)
+            .push_opt("last_activity_after", self.last_activity_after)
+            .push_opt("last_activity_before", self.last_activity_before)
+            .extend(
+                self.custom_attributes
+                    .iter()
+                    .map(|(key, value)| (format!("custom_attributes[{}]", key), value)),
+            )
+            .push_opt("with_custom_attributes", self.with_custom_attributes)
+            .push_opt("order_by", self.order_by)
+            .push_opt("sort", self.sort);
 
-        pairs.extend_pairs(
-            self.custom_attributes
-                .iter()
-                .map(|(key, value)| (format!("custom_attributes[{}]", key), value)),
-        );
-        self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
-
-        self.order_by
-            .map(|value| pairs.append_pair("order_by", value.as_str()));
-        self.sort
-            .map(|value| pairs.append_pair("sort", value.as_str()));
+        params
     }
 }
 

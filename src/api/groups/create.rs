@@ -6,8 +6,9 @@
 
 use derive_builder::Builder;
 
-use crate::api::common::{self, VisibilityLevel};
+use crate::api::common::VisibilityLevel;
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Access levels for creating a project within a group.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -30,6 +31,12 @@ impl GroupProjectCreationAccessLevel {
     }
 }
 
+impl ParamValue<'static> for GroupProjectCreationAccessLevel {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// Access levels for creating a subgroup within a group.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SubgroupCreationAccessLevel {
@@ -45,6 +52,12 @@ impl SubgroupCreationAccessLevel {
             SubgroupCreationAccessLevel::Owner => "owner",
             SubgroupCreationAccessLevel::Maintainer => "maintainer",
         }
+    }
+}
+
+impl ParamValue<'static> for SubgroupCreationAccessLevel {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -66,6 +79,12 @@ impl BranchProtection {
             BranchProtection::Partial => "1",
             BranchProtection::Full => "2",
         }
+    }
+}
+
+impl ParamValue<'static> for BranchProtection {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -151,47 +170,40 @@ impl<'a> Endpoint for CreateGroup<'a> {
         "groups".into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("name", &self.name);
-        pairs.append_pair("path", &self.path);
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
 
-        self.description
-            .as_ref()
-            .map(|value| pairs.append_pair("description", value));
-        self.membership_lock
-            .map(|value| pairs.append_pair("membership_lock", common::bool_str(value)));
-        self.visibility
-            .map(|value| pairs.append_pair("visibility", value.as_str()));
-        self.share_with_group_lock
-            .map(|value| pairs.append_pair("share_with_group_lock", common::bool_str(value)));
-        self.require_two_factor_authentication.map(|value| {
-            pairs.append_pair("require_two_factor_authentication", common::bool_str(value))
-        });
-        self.two_factor_grace_period
-            .map(|value| pairs.append_pair("two_factor_grace_period", &format!("{}", value)));
-        self.project_creation_level
-            .map(|value| pairs.append_pair("project_creation_level", value.as_str()));
-        self.auto_devops_enabled
-            .map(|value| pairs.append_pair("auto_devops_enabled", common::bool_str(value)));
-        self.subgroup_creation_level
-            .map(|value| pairs.append_pair("subgroup_creation_level", value.as_str()));
-        self.emails_disabled
-            .map(|value| pairs.append_pair("emails_disabled", common::bool_str(value)));
-        self.mentions_disabled
-            .map(|value| pairs.append_pair("mentions_disabled", common::bool_str(value)));
-        self.lfs_enabled
-            .map(|value| pairs.append_pair("lfs_enabled", common::bool_str(value)));
-        self.request_access_enabled
-            .map(|value| pairs.append_pair("request_access_enabled", common::bool_str(value)));
-        self.parent_id
-            .map(|value| pairs.append_pair("parent_id", &format!("{}", value)));
-        self.default_branch_protection
-            .map(|value| pairs.append_pair("default_branch_protection", value.as_str()));
-        self.shared_runners_minutes_limit
-            .map(|value| pairs.append_pair("shared_runners_minutes_limit", &format!("{}", value)));
-        self.extra_shared_runners_minutes_limit.map(|value| {
-            pairs.append_pair("extra_shared_runners_minutes_limit", &format!("{}", value))
-        });
+        params
+            .push("name", &self.name)
+            .push("path", &self.path)
+            .push_opt("description", self.description.as_ref())
+            .push_opt("membership_lock", self.membership_lock)
+            .push_opt("visibility", self.visibility)
+            .push_opt("share_with_group_lock", self.share_with_group_lock)
+            .push_opt(
+                "require_two_factor_authentication",
+                self.require_two_factor_authentication,
+            )
+            .push_opt("two_factor_grace_period", self.two_factor_grace_period)
+            .push_opt("project_creation_level", self.project_creation_level)
+            .push_opt("auto_devops_enabled", self.auto_devops_enabled)
+            .push_opt("subgroup_creation_level", self.subgroup_creation_level)
+            .push_opt("emails_disabled", self.emails_disabled)
+            .push_opt("mentions_disabled", self.mentions_disabled)
+            .push_opt("lfs_enabled", self.lfs_enabled)
+            .push_opt("request_access_enabled", self.request_access_enabled)
+            .push_opt("parent_id", self.parent_id)
+            .push_opt("default_branch_protection", self.default_branch_protection)
+            .push_opt(
+                "shared_runners_minutes_limit",
+                self.shared_runners_minutes_limit,
+            )
+            .push_opt(
+                "extra_shared_runners_minutes_limit",
+                self.extra_shared_runners_minutes_limit,
+            );
+
+        params.into_body()
     }
 }
 

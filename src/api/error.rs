@@ -11,6 +11,25 @@ use thiserror::Error;
 
 use crate::api::PaginationError;
 
+/// Errors which may occur when creating form data.
+#[derive(Debug, Error)]
+// TODO #[non_exhaustive]
+pub enum BodyError {
+    /// Body data could not be serialized from form parameters.
+    #[error("failed to URL encode form parameters: {}", source)]
+    UrlEncoded {
+        /// The source of the error.
+        #[from]
+        source: serde_urlencoded::ser::Error,
+    },
+    /// This is here to force `_` matching right now.
+    ///
+    /// **DO NOT USE**
+    #[doc(hidden)]
+    #[error("unreachable...")]
+    _NonExhaustive,
+}
+
 /// Errors which may occur when using API endpoints.
 #[derive(Debug, Error)]
 // TODO #[non_exhaustive]
@@ -30,6 +49,13 @@ where
         /// The source of the error.
         #[from]
         source: url::ParseError,
+    },
+    /// Body data could not be created.
+    #[error("failed to create form data: {}", source)]
+    Body {
+        /// The source of the error.
+        #[from]
+        source: BodyError,
     },
     /// JSON deserialization from GitLab failed.
     #[error("could not parse JSON response: {}", source)]

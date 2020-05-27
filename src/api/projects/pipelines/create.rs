@@ -114,19 +114,27 @@ impl<'a> Endpoint for CreatePipeline<'a> {
         format!("projects/{}/pipeline", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("ref", &self.ref_);
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
+
+        params.push("ref", &self.ref_);
 
         self.variables.iter().for_each(|variable| {
-            pairs.extend_pairs(&[
-                ("variables[][key]", variable.key.as_ref()),
-                ("variables[][value]", variable.value.as_ref()),
-                (
-                    "variables[][variable_type]",
-                    variable.variable_type.as_str(),
-                ),
-            ]);
+            params.extend(
+                [
+                    ("variables[][key]", variable.key.as_ref()),
+                    ("variables[][value]", variable.value.as_ref()),
+                    (
+                        "variables[][variable_type]",
+                        variable.variable_type.as_str(),
+                    ),
+                ]
+                .iter()
+                .cloned(),
+            );
         });
+
+        params.into_body()
     }
 }
 

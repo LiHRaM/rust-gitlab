@@ -9,8 +9,9 @@ use std::collections::HashSet;
 
 use derive_builder::Builder;
 
-use crate::api::common::{self, NameOrId};
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Access levels for protected branches.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -42,6 +43,12 @@ impl ProtectedAccessLevel {
     }
 }
 
+impl ParamValue<'static> for ProtectedAccessLevel {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// Granular protected access controls for branches.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ProtectedAccess {
@@ -54,16 +61,16 @@ pub enum ProtectedAccess {
 }
 
 impl ProtectedAccess {
-    fn add_query(self, name: &str, pairs: &mut Pairs) {
+    fn add_query(self, name: &str, params: &mut FormParams) {
         match self {
             ProtectedAccess::User(user) => {
-                pairs.append_pair(&format!("{}[][user_id]", name), &format!("{}", user));
+                params.push(format!("{}[][user_id]", name), user);
             },
             ProtectedAccess::Group(group) => {
-                pairs.append_pair(&format!("{}[][group_id]", name), &format!("{}", group));
+                params.push(format!("{}[][group_id]", name), group);
             },
             ProtectedAccess::Level(level) => {
-                pairs.append_pair(&format!("{}[][access_level]", name), level.as_str());
+                params.push(format!("{}[][access_level]", name), level);
             },
         }
     }
@@ -150,26 +157,30 @@ impl<'a> Endpoint for ProtectBranch<'a> {
         format!("projects/{}/protected_branches", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("name", &self.name);
-        self.push_access_level
-            .map(|value| pairs.append_pair("push_access_level", value.as_str()));
-        self.merge_access_level
-            .map(|value| pairs.append_pair("merge_access_level", value.as_str()));
-        self.unprotect_access_level
-            .map(|value| pairs.append_pair("unprotect_access_level", value.as_str()));
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
+
+        params
+            .push("name", &self.name)
+            .push_opt("push_access_level", self.push_access_level)
+            .push_opt("merge_access_level", self.merge_access_level)
+            .push_opt("unprotect_access_level", self.unprotect_access_level)
+            .push_opt(
+                "code_owner_approval_required",
+                self.code_owner_approval_required,
+            );
+
         self.allowed_to_push
             .iter()
-            .for_each(|value| value.add_query("allowed_to_push", &mut pairs));
+            .for_each(|value| value.add_query("allowed_to_push", &mut params));
         self.allowed_to_merge
             .iter()
-            .for_each(|value| value.add_query("allowed_to_merge", &mut pairs));
+            .for_each(|value| value.add_query("allowed_to_merge", &mut params));
         self.allowed_to_unprotect
             .iter()
-            .for_each(|value| value.add_query("allowed_to_unprotect", &mut pairs));
-        self.code_owner_approval_required.map(|value| {
-            pairs.append_pair("code_owner_approval_required", common::bool_str(value))
-        });
+            .for_each(|value| value.add_query("allowed_to_unprotect", &mut params));
+
+        params.into_body()
     }
 }
 

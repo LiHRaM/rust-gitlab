@@ -59,10 +59,12 @@ impl<'a> Endpoint for PipelineJobs<'a> {
         format!("projects/{}/pipelines/{}/jobs", self.project, self.pipeline).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.scopes.iter().for_each(|value| {
-            pairs.append_pair("scope[]", value.as_str());
-        });
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params.extend(self.scopes.iter().map(|&value| ("scope[]", value)));
+
+        params
     }
 }
 

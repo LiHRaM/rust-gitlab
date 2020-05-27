@@ -39,9 +39,12 @@ impl<'a> Endpoint for CreateBranch<'a> {
         format!("projects/{}/repository/branches", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("branch", &self.branch);
-        pairs.append_pair("ref", &self.ref_);
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
+
+        params.push("branch", &self.branch).push("ref", &self.ref_);
+
+        params.into_body()
     }
 }
 

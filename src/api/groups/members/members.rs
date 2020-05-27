@@ -61,13 +61,14 @@ impl<'a> Endpoint for GroupMembers<'a> {
         format!("groups/{}/members", self.group).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.query
-            .as_ref()
-            .map(|value| pairs.append_pair("query", value));
-        self.user_ids.iter().for_each(|value| {
-            pairs.append_pair("user_ids[]", &format!("{}", value));
-        });
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params
+            .push_opt("query", self.query.as_ref())
+            .extend(self.user_ids.iter().map(|&value| ("user_ids[]", value)));
+
+        params
     }
 }
 

@@ -43,12 +43,15 @@ impl<'a> Endpoint for AddProjectMember<'a> {
         format!("projects/{}/members", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("user_id", &format!("{}", self.user));
-        pairs.append_pair("access_level", self.access_level.as_str());
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
 
-        self.expires_at
-            .map(|value| pairs.append_pair("expires_at", &format!("{}", value.format("%Y-%m-%d"))));
+        params
+            .push("user_id", self.user)
+            .push("access_level", self.access_level.as_str())
+            .push_opt("expires_at", self.expires_at);
+
+        params.into_body()
     }
 }
 

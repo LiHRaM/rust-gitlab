@@ -14,6 +14,8 @@ use std::fmt;
 
 use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
 
+use crate::api::ParamValue;
+
 /// Access levels for groups and projects.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AccessLevel {
@@ -86,6 +88,12 @@ impl SortOrder {
     }
 }
 
+impl ParamValue<'static> for SortOrder {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// States for features or flags.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EnableState {
@@ -102,6 +110,12 @@ impl EnableState {
             EnableState::Enabled => "enabled",
             EnableState::Disabled => "disabled",
         }
+    }
+}
+
+impl ParamValue<'static> for EnableState {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -175,7 +189,7 @@ pub enum VisibilityLevel {
 
 impl VisibilityLevel {
     /// The string representation of the visibility level.
-    pub fn as_str(&self) -> &str {
+    pub fn as_str(self) -> &'static str {
         match self {
             VisibilityLevel::Public => "public",
             VisibilityLevel::Internal => "internal",
@@ -184,20 +198,15 @@ impl VisibilityLevel {
     }
 }
 
-/// The string representation of booleans for GitLab.
-pub fn bool_str(b: bool) -> &'static str {
-    if b {
-        "true"
-    } else {
-        "false"
+impl ParamValue<'static> for VisibilityLevel {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::api::common::{
-        self, AccessLevel, EnableState, NameOrId, SortOrder, VisibilityLevel,
-    };
+    use crate::api::common::{AccessLevel, EnableState, NameOrId, SortOrder, VisibilityLevel};
 
     #[test]
     fn access_level_as_str() {
@@ -294,15 +303,6 @@ mod tests {
 
         for (i, s) in items {
             assert_eq!(i.as_str(), *s);
-        }
-    }
-
-    #[test]
-    fn bool_str() {
-        let items = &[(true, "true"), (false, "false")];
-
-        for (i, s) in items {
-            assert_eq!(common::bool_str(*i), *s);
         }
     }
 }

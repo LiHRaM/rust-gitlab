@@ -55,18 +55,16 @@ impl<'a> Endpoint for CommitStatuses<'a> {
         .into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.ref_
-            .as_ref()
-            .map(|value| pairs.append_pair("ref", value));
-        self.stage
-            .as_ref()
-            .map(|value| pairs.append_pair("stage", value));
-        self.name
-            .as_ref()
-            .map(|value| pairs.append_pair("name", value));
-        self.all
-            .map(|value| pairs.append_pair("all", common::bool_str(value)));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params
+            .push_opt("ref", self.ref_.as_ref())
+            .push_opt("stage", self.stage.as_ref())
+            .push_opt("name", self.name.as_ref())
+            .push_opt("all", self.all);
+
+        params
     }
 }
 

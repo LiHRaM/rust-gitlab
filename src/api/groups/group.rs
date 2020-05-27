@@ -6,7 +6,7 @@
 
 use derive_builder::Builder;
 
-use crate::api::common::{self, NameOrId};
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
 
 /// Query for a specific group on an instance.
@@ -42,15 +42,17 @@ impl<'a> Endpoint for Group<'a> {
         format!("groups/{}", self.group).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params.push_opt("with_custom_attributes", self.with_custom_attributes);
 
         #[allow(deprecated)]
         {
-            self.with_projects
-                .map(|value| pairs.append_pair("with_projects", common::bool_str(value)));
+            params.push_opt("with_projects", self.with_projects);
         }
+
+        params
     }
 }
 

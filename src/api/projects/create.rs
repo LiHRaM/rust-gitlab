@@ -9,8 +9,9 @@ use std::collections::HashSet;
 
 use derive_builder::Builder;
 
-use crate::api::common::{self, EnableState, VisibilityLevel};
+use crate::api::common::{EnableState, VisibilityLevel};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Access levels available for most features.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -31,6 +32,12 @@ impl FeatureAccessLevel {
             FeatureAccessLevel::Private => "private",
             FeatureAccessLevel::Enabled => "enabled",
         }
+    }
+}
+
+impl ParamValue<'static> for FeatureAccessLevel {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -61,6 +68,12 @@ impl FeatureAccessLevelPublic {
     }
 }
 
+impl ParamValue<'static> for FeatureAccessLevelPublic {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// How often the container expiration policy is applied.
 ///
 /// Note that GitLab only supports a few discrete values for this setting.
@@ -88,6 +101,12 @@ impl ContainerExpirationCadence {
             ContainerExpirationCadence::OneMonth => "1month",
             ContainerExpirationCadence::ThreeMonths => "3month",
         }
+    }
+}
+
+impl ParamValue<'static> for ContainerExpirationCadence {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -124,6 +143,12 @@ impl ContainerExpirationKeepN {
     }
 }
 
+impl ParamValue<'static> for ContainerExpirationKeepN {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// How old containers need to be before they are candidates for expiration.
 ///
 /// Note that GitLab only supports a few discrete values for this setting.
@@ -148,6 +173,12 @@ impl ContainerExpirationOlderThan {
             ContainerExpirationOlderThan::OneMonth => "30d",
             ContainerExpirationOlderThan::ThreeMonths => "90d",
         }
+    }
+}
+
+impl ParamValue<'static> for ContainerExpirationOlderThan {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -181,34 +212,28 @@ impl<'a> ContainerExpirationPolicy<'a> {
         ContainerExpirationPolicyBuilder::default()
     }
 
-    pub(crate) fn add_query(&self, pairs: &mut Pairs) {
-        self.cadence.map(|value| {
-            pairs.append_pair(
+    pub(crate) fn add_query<'b>(&'b self, params: &mut FormParams<'b>) {
+        params
+            .push_opt(
                 "container_expiration_policy_attributes[cadence]",
-                value.as_str(),
+                self.cadence,
             )
-        });
-        self.enabled.map(|value| {
-            pairs.append_pair(
+            .push_opt(
+                "container_expiration_policy_attributes[enabled]",
+                self.enabled,
+            )
+            .push_opt(
                 "container_expiration_policy_attributes[keep_n]",
-                common::bool_str(value),
+                self.keep_n,
             )
-        });
-        self.keep_n.map(|value| {
-            pairs.append_pair(
-                "container_expiration_policy_attributes[keep_n]",
-                value.as_str(),
-            )
-        });
-        self.older_than.map(|value| {
-            pairs.append_pair(
+            .push_opt(
                 "container_expiration_policy_attributes[older_than]",
-                value.as_str(),
+                self.older_than,
             )
-        });
-        self.name_regex.as_ref().map(|value| {
-            pairs.append_pair("container_expiration_policy_attributes[name_regex]", value)
-        });
+            .push_opt(
+                "container_expiration_policy_attributes[name_regex]",
+                self.name_regex.as_ref(),
+            );
     }
 }
 
@@ -234,6 +259,12 @@ impl AutoDevOpsDeployStrategy {
     }
 }
 
+impl ParamValue<'static> for AutoDevOpsDeployStrategy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// How merge requests should be merged when using the "Merge" button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeMethod {
@@ -253,6 +284,12 @@ impl MergeMethod {
             MergeMethod::RebaseMerge => "rebase_merge",
             MergeMethod::FastForward => "ff",
         }
+    }
+}
+
+impl ParamValue<'static> for MergeMethod {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -281,6 +318,12 @@ impl BuildGitStrategy {
             BuildGitStrategy::Fetch => "fetch",
             BuildGitStrategy::None => "none",
         }
+    }
+}
+
+impl ParamValue<'static> for BuildGitStrategy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -621,159 +664,126 @@ impl<'a> Endpoint for CreateProject<'a> {
         "projects".into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
+
         match &self.name_and_path {
             ProjectName::Name {
                 name,
             } => {
-                pairs.append_pair("name", &name);
+                params.push("name", name);
             },
             ProjectName::Path {
                 path,
             } => {
-                pairs.append_pair("path", &path);
+                params.push("path", path);
             },
             ProjectName::NameAndPath {
                 name,
                 path,
             } => {
-                pairs.append_pair("name", &name);
-                pairs.append_pair("path", &path);
+                params.push("name", name).push("path", path);
             },
         }
 
-        self.namespace_id
-            .map(|value| pairs.append_pair("namespace_id", &format!("{}", value)));
-        self.default_branch
-            .as_ref()
-            .map(|value| pairs.append_pair("default_branch", value));
-        self.description
-            .as_ref()
-            .map(|value| pairs.append_pair("default_branch", value));
-
-        self.issues_access_level
-            .map(|value| pairs.append_pair("issues_access_level", value.as_str()));
-        self.repository_access_level
-            .map(|value| pairs.append_pair("repository_access_level", value.as_str()));
-        self.merge_requests_access_level
-            .map(|value| pairs.append_pair("merge_requests_access_level", value.as_str()));
-        self.forking_access_level
-            .map(|value| pairs.append_pair("forking_access_level", value.as_str()));
-        self.builds_access_level
-            .map(|value| pairs.append_pair("builds_access_level", value.as_str()));
-        self.wiki_access_level
-            .map(|value| pairs.append_pair("wiki_access_level", value.as_str()));
-        self.snippets_access_level
-            .map(|value| pairs.append_pair("snippets_access_level", value.as_str()));
-        self.pages_access_level
-            .map(|value| pairs.append_pair("pages_access_level", value.as_str()));
-
-        self.emails_disabled
-            .map(|value| pairs.append_pair("emails_disabled", common::bool_str(value)));
-        self.resolve_outdated_diff_discussions.map(|value| {
-            pairs.append_pair("resolve_outdated_diff_discussions", common::bool_str(value))
-        });
-        self.container_registry_enabled
-            .map(|value| pairs.append_pair("container_registry_enabled", common::bool_str(value)));
-        if let Some(policy) = self.container_expiration_policy_attributes.as_ref() {
-            policy.add_query(&mut pairs);
-        }
-        self.shared_runners_enabled
-            .map(|value| pairs.append_pair("shared_runners_enabled", common::bool_str(value)));
-        self.visibility
-            .map(|value| pairs.append_pair("visibility", value.as_str()));
-        self.import_url
-            .as_ref()
-            .map(|value| pairs.append_pair("import_url", value));
-        self.public_builds
-            .map(|value| pairs.append_pair("public_builds", common::bool_str(value)));
-        self.only_allow_merge_if_pipeline_succeeds.map(|value| {
-            pairs.append_pair(
+        params
+            .push_opt("namespace_id", self.namespace_id)
+            .push_opt("default_branch", self.default_branch.as_ref())
+            .push_opt("description", self.description.as_ref())
+            .push_opt("issues_access_level", self.issues_access_level)
+            .push_opt("repository_access_level", self.repository_access_level)
+            .push_opt(
+                "merge_requests_access_level",
+                self.merge_requests_access_level,
+            )
+            .push_opt("forking_access_level", self.forking_access_level)
+            .push_opt("builds_access_level", self.builds_access_level)
+            .push_opt("wiki_access_level", self.wiki_access_level)
+            .push_opt("snippets_access_level", self.snippets_access_level)
+            .push_opt("pages_access_level", self.pages_access_level)
+            .push_opt("emails_disabled", self.emails_disabled)
+            .push_opt(
+                "resolve_outdated_diff_discussions",
+                self.resolve_outdated_diff_discussions,
+            )
+            .push_opt(
+                "container_registry_enabled",
+                self.container_registry_enabled,
+            )
+            .push_opt("shared_runners_enabled", self.shared_runners_enabled)
+            .push_opt("visibility", self.visibility)
+            .push_opt("import_url", self.import_url.as_ref())
+            .push_opt("public_builds", self.public_builds)
+            .push_opt(
                 "only_allow_merge_if_pipeline_succeeds",
-                common::bool_str(value),
+                self.only_allow_merge_if_pipeline_succeeds,
             )
-        });
-        self.only_allow_merge_if_all_discussions_are_resolved
-            .map(|value| {
-                pairs.append_pair(
-                    "only_allow_merge_if_all_discussions_are_resolved",
-                    common::bool_str(value),
-                )
-            });
-        self.merge_method
-            .map(|value| pairs.append_pair("merge_method", value.as_str()));
-        self.autoclose_referenced_issues
-            .map(|value| pairs.append_pair("autoclose_referenced_issues", common::bool_str(value)));
-        self.remove_source_branch_after_merge.map(|value| {
-            pairs.append_pair("remove_source_branch_after_merge", common::bool_str(value))
-        });
-        self.lfs_enabled
-            .map(|value| pairs.append_pair("lfs_enabled", common::bool_str(value)));
-        self.request_access_enabled
-            .map(|value| pairs.append_pair("request_access_enabled", common::bool_str(value)));
-        pairs.extend_pairs(self.tag_list.iter().map(|value| ("tag_list[]", value)));
-        self.printing_merge_request_link_enabled.map(|value| {
-            pairs.append_pair(
+            .push_opt(
+                "only_allow_merge_if_all_discussions_are_resolved",
+                self.only_allow_merge_if_all_discussions_are_resolved,
+            )
+            .push_opt("merge_method", self.merge_method)
+            .push_opt(
+                "autoclose_referenced_issues",
+                self.autoclose_referenced_issues,
+            )
+            .push_opt(
+                "remove_source_branch_after_merge",
+                self.remove_source_branch_after_merge,
+            )
+            .push_opt("lfs_enabled", self.lfs_enabled)
+            .push_opt("request_access_enabled", self.request_access_enabled)
+            .extend(self.tag_list.iter().map(|value| ("tag_list[]", value)))
+            .push_opt(
                 "printing_merge_request_link_enabled",
-                common::bool_str(value),
+                self.printing_merge_request_link_enabled,
             )
-        });
-        self.build_git_strategy
-            .map(|value| pairs.append_pair("build_git_strategy", value.as_str()));
-        self.build_timeout
-            .map(|value| pairs.append_pair("build_timeout", &format!("{}", value)));
-        self.auto_cancel_pending_pipelines
-            .map(|value| pairs.append_pair("auto_cancel_pending_pipelines", value.as_str()));
-        self.build_coverage_regex
-            .as_ref()
-            .map(|value| pairs.append_pair("build_coverage_regex", value));
-        self.ci_config_path
-            .as_ref()
-            .map(|value| pairs.append_pair("ci_config_path", value));
-        self.auto_devops_enabled
-            .map(|value| pairs.append_pair("auto_devops_enabled", common::bool_str(value)));
-        self.auto_devops_deploy_strategy
-            .map(|value| pairs.append_pair("auto_devops_deploy_strategy", value.as_str()));
-        self.repository_storage
-            .as_ref()
-            .map(|value| pairs.append_pair("repository_storage", value));
-        self.approvals_before_merge
-            .map(|value| pairs.append_pair("approvals_before_merge", &format!("{}", value)));
-        self.external_authorization_classification_label
-            .as_ref()
-            .map(|value| pairs.append_pair("external_authorization_classification_label", value));
-        self.mirror
-            .map(|value| pairs.append_pair("mirror", common::bool_str(value)));
-        self.mirror_trigger_builds
-            .map(|value| pairs.append_pair("mirror_trigger_builds", common::bool_str(value)));
-        self.initialize_with_readme
-            .map(|value| pairs.append_pair("initialize_with_readme", common::bool_str(value)));
-        self.template_name
-            .as_ref()
-            .map(|value| pairs.append_pair("template_name", value));
-        self.template_project_id
-            .map(|value| pairs.append_pair("template_project_id", &format!("{}", value)));
-        self.use_custom_template
-            .map(|value| pairs.append_pair("use_custom_template", common::bool_str(value)));
-        self.group_with_project_templates_id.map(|value| {
-            pairs.append_pair("group_with_project_templates_id", &format!("{}", value))
-        });
-        self.packages_enabled
-            .map(|value| pairs.append_pair("packages_enabled", common::bool_str(value)));
+            .push_opt("build_git_strategy", self.build_git_strategy)
+            .push_opt("build_timeout", self.build_timeout)
+            .push_opt(
+                "auto_cancel_pending_pipelines",
+                self.auto_cancel_pending_pipelines,
+            )
+            .push_opt("build_coverage_regex", self.build_coverage_regex.as_ref())
+            .push_opt("ci_config_path", self.ci_config_path.as_ref())
+            .push_opt("auto_devops_enabled", self.auto_devops_enabled)
+            .push_opt(
+                "auto_devops_deploy_strategy",
+                self.auto_devops_deploy_strategy,
+            )
+            .push_opt("repository_storage", self.repository_storage.as_ref())
+            .push_opt("approvals_before_merge", self.approvals_before_merge)
+            .push_opt(
+                "external_authorization_classification_label",
+                self.external_authorization_classification_label.as_ref(),
+            )
+            .push_opt("mirror", self.mirror)
+            .push_opt("mirror_trigger_builds", self.mirror_trigger_builds)
+            .push_opt("initialize_with_readme", self.initialize_with_readme)
+            .push_opt("template_name", self.template_name.as_ref())
+            .push_opt("template_project_id", self.template_project_id)
+            .push_opt("use_custom_template", self.use_custom_template)
+            .push_opt(
+                "group_with_project_templates_id",
+                self.group_with_project_templates_id,
+            )
+            .push_opt("packages_enabled", self.packages_enabled);
+
+        if let Some(policy) = self.container_expiration_policy_attributes.as_ref() {
+            policy.add_query(&mut params);
+        }
 
         #[allow(deprecated)]
         {
-            self.issues_enabled
-                .map(|value| pairs.append_pair("issues_enabled", common::bool_str(value)));
-            self.merge_requests_enabled
-                .map(|value| pairs.append_pair("merge_requests_enabled", common::bool_str(value)));
-            self.jobs_enabled
-                .map(|value| pairs.append_pair("jobs_enabled", common::bool_str(value)));
-            self.wiki_enabled
-                .map(|value| pairs.append_pair("wiki_enabled", common::bool_str(value)));
-            self.snippets_enabled
-                .map(|value| pairs.append_pair("snippets_enabled", common::bool_str(value)));
+            params
+                .push_opt("issues_enabled", self.issues_enabled)
+                .push_opt("merge_requests_enabled", self.merge_requests_enabled)
+                .push_opt("jobs_enabled", self.jobs_enabled)
+                .push_opt("wiki_enabled", self.wiki_enabled)
+                .push_opt("snippets_enabled", self.snippets_enabled);
         }
+
+        params.into_body()
     }
 }
 

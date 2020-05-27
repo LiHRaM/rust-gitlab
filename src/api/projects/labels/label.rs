@@ -6,7 +6,7 @@
 
 use derive_builder::Builder;
 
-use crate::api::common::{self, NameOrId};
+use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
 
 /// Query for a label within a project.
@@ -42,9 +42,12 @@ impl<'a> Endpoint for Label<'a> {
         format!("projects/{}/labels/{}", self.project, self.label).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.include_ancestor_groups
-            .map(|value| pairs.append_pair("include_ancestor_groups", common::bool_str(value)));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params.push_opt("include_ancestor_groups", self.include_ancestor_groups);
+
+        params
     }
 }
 

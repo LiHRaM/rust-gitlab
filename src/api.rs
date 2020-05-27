@@ -62,6 +62,7 @@ mod endpoint;
 mod error;
 mod ignore;
 mod paged;
+mod params;
 mod query;
 mod raw;
 mod sudo;
@@ -76,9 +77,9 @@ pub mod users;
 pub use self::client::Client;
 
 pub use self::endpoint::Endpoint;
-pub use self::endpoint::Pairs;
 
 pub use self::error::ApiError;
+pub use self::error::BodyError;
 
 pub use self::ignore::ignore;
 pub use self::ignore::Ignore;
@@ -89,6 +90,10 @@ pub use self::paged::Pageable;
 pub use self::paged::Paged;
 pub use self::paged::Pagination;
 pub use self::paged::PaginationError;
+
+pub use self::params::FormParams;
+pub use self::params::ParamValue;
+pub use self::params::QueryParams;
 
 pub use self::query::Query;
 

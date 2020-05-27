@@ -10,6 +10,7 @@ use derive_builder::Builder;
 
 use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Scopes for jobs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -45,6 +46,12 @@ impl JobScope {
             JobScope::Skipped => "skipped",
             JobScope::Manual => "manual",
         }
+    }
+}
+
+impl ParamValue<'static> for JobScope {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -93,10 +100,12 @@ impl<'a> Endpoint for Jobs<'a> {
         format!("projects/{}/jobs", self.project).into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.scopes.iter().for_each(|value| {
-            pairs.append_pair("scope[]", value.as_str());
-        });
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params.extend(self.scopes.iter().map(|&value| ("scope[]", value)));
+
+        params
     }
 }
 

@@ -8,8 +8,9 @@ use std::collections::HashSet;
 
 use derive_builder::Builder;
 
-use crate::api::common::{self, AccessLevel, SortOrder};
+use crate::api::common::{AccessLevel, SortOrder};
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 /// Keys group results may be ordered by.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -36,6 +37,12 @@ impl GroupOrderBy {
             GroupOrderBy::Path => "path",
             GroupOrderBy::Id => "id",
         }
+    }
+}
+
+impl ParamValue<'static> for GroupOrderBy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -117,28 +124,28 @@ impl<'a> Endpoint for Groups<'a> {
         "groups".into()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        self.search
-            .as_ref()
-            .map(|value| pairs.append_pair("search", value));
-        self.skip_groups.iter().for_each(|value| {
-            pairs.append_pair("skip_groups[]", &format!("{}", value));
-        });
-        self.all_available
-            .map(|value| pairs.append_pair("all_available", common::bool_str(value)));
-        self.owned
-            .map(|value| pairs.append_pair("owned", common::bool_str(value)));
-        self.min_access_level
-            .map(|value| pairs.append_pair("min_access_level", value.as_str()));
-        self.statistics
-            .map(|value| pairs.append_pair("statistics", common::bool_str(value)));
-        self.with_custom_attributes
-            .map(|value| pairs.append_pair("with_custom_attributes", common::bool_str(value)));
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
 
-        self.order_by
-            .map(|value| pairs.append_pair("order_by", value.as_str()));
-        self.sort
-            .map(|value| pairs.append_pair("sort", value.as_str()));
+        params
+            .push_opt("search", self.search.as_ref())
+            .extend(
+                self.skip_groups
+                    .iter()
+                    .map(|&value| ("skip_groups[]", value)),
+            )
+            .push_opt("all_available", self.all_available)
+            .push_opt("owned", self.owned)
+            .push_opt(
+                "min_access_level",
+                self.min_access_level.map(|level| level.as_str()),
+            )
+            .push_opt("statistics", self.statistics)
+            .push_opt("with_custom_attributes", self.with_custom_attributes)
+            .push_opt("order_by", self.order_by)
+            .push_opt("sort", self.sort);
+
+        params
     }
 }
 

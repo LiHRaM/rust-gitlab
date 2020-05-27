@@ -68,13 +68,14 @@ where
         self.endpoint.endpoint()
     }
 
-    fn add_parameters(&self, mut pairs: Pairs) {
-        pairs.append_pair("sudo", &self.sudo);
-        self.endpoint.add_parameters(pairs);
+    fn parameters(&self) -> QueryParams {
+        let mut params = self.endpoint.parameters();
+        params.push("sudo", &self.sudo);
+        params
     }
 
-    fn form_data(&self) -> Vec<u8> {
-        self.endpoint.form_data()
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        self.endpoint.body()
     }
 }
 
