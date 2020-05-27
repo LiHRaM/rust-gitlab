@@ -19,7 +19,8 @@ been added.
 
   * The `api::projects::environments::Environment` endpoint uses the correct
     path now.
-  * The `api::projects::members::ProjectMembers` and
+  * The `api::groups::members::GroupMembers`,
+    `api::projects::members::ProjectMembers`, and
     `api::projects::repository::Branches` endpoints now accepts plain strings
     for their `query` fields.
   * The `api::projects::protected_branches::UnprotectBranch` endpoint now
