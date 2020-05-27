@@ -22,6 +22,8 @@ been added.
   * The `api::projects::members::ProjectMembers` and
     `api::projects::repository::Branches` endpoints now accepts plain strings
     for their `query` fields.
+  * The `api::projects::protected_branches::UnprotectBranch` endpoint now
+    properly escapes branch names with URL-special characters.
 
 ## Changes
 

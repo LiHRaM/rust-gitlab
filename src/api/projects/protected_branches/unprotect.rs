@@ -8,7 +8,7 @@ use std::borrow::Cow;
 
 use derive_builder::Builder;
 
-use crate::api::common::NameOrId;
+use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
 
 /// Create a new file in a project.
@@ -35,7 +35,12 @@ impl<'a> Endpoint for UnprotectBranch<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/protected_branches/{}", self.project, self.name).into()
+        format!(
+            "projects/{}/protected_branches/{}",
+            self.project,
+            common::path_escaped(&self.name),
+        )
+        .into()
     }
 }
 
