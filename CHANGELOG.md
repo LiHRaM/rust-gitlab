@@ -24,6 +24,9 @@ been added.
     for their `query` fields.
   * The `api::projects::protected_branches::UnprotectBranch` endpoint now
     properly escapes branch names with URL-special characters.
+  * The `api::projects::repository::CreateFile` endpoint now properly upgrades
+    the encoding when attempting to encode binary contents using
+    `Encoding::Text`.
 
 ## Changes
 

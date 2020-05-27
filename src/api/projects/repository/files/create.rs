@@ -154,7 +154,10 @@ impl<'a> Endpoint for CreateFile<'a> {
         } else {
             encoding
         };
-        params.push("content", encoding.encode(content.ok(), &self.content));
+        params.push(
+            "content",
+            actual_encoding.encode(content.ok(), &self.content),
+        );
         self.encoding
             // Use the actual encoding.
             .map(|_| actual_encoding)
