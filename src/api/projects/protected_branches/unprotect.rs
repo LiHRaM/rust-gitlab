@@ -59,13 +59,13 @@ mod tests {
     }
 
     #[test]
-    fn branch_is_required() {
+    fn name_is_required() {
         let err = UnprotectBranch::builder().project(1).build().unwrap_err();
         assert_eq!(err, "`name` must be initialized");
     }
 
     #[test]
-    fn project_and_branch_are_sufficient() {
+    fn project_and_name_are_sufficient() {
         UnprotectBranch::builder()
             .project(1)
             .name("master")
