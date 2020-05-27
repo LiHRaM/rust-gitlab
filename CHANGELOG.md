@@ -20,6 +20,11 @@ been added.
   * The `api::projects::environments::Environment` endpoint uses the correct
     path now.
 
+## Changes
+
+  * The `api::projects::issues::EditIssue` now uses `issue` rather than
+    `issue_iid` for consistency.
+
 # v0.1210.1
 
 ## New API strategy

@@ -2257,7 +2257,7 @@ impl Gitlab {
     pub fn close_issue(&self, project: ProjectId, issue: IssueInternalId) -> GitlabResult<Issue> {
         Ok(projects::issues::EditIssue::builder()
             .project(project.value())
-            .issue_iid(issue.value())
+            .issue(issue.value())
             .state_event(projects::issues::IssueStateEvent::Close)
             .build()
             .unwrap()
@@ -2281,7 +2281,7 @@ impl Gitlab {
     {
         Ok(projects::issues::EditIssue::builder()
             .project(project.value())
-            .issue_iid(issue.value())
+            .issue(issue.value())
             .labels(labels.into_iter().map(|label| format!("{}", label)))
             .build()
             .unwrap()
@@ -2306,7 +2306,7 @@ impl Gitlab {
     {
         Ok(projects::issues::EditIssue::builder()
             .project(project.as_ref())
-            .issue_iid(issue.value())
+            .issue(issue.value())
             .labels(labels.into_iter().map(|label| format!("{}", label)))
             .build()
             .unwrap()
