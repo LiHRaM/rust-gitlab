@@ -4,7 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
@@ -42,7 +42,7 @@ impl ParamValue<'static> for IssueState {
 enum Labels<'a> {
     Any,
     None,
-    AllOf(HashSet<Cow<'a, str>>),
+    AllOf(BTreeSet<Cow<'a, str>>),
 }
 
 impl<'a> Labels<'a> {
@@ -93,7 +93,7 @@ enum Assignee<'a> {
     Assigned,
     Unassigned,
     Id(u64),
-    Usernames(HashSet<Cow<'a, str>>),
+    Usernames(BTreeSet<Cow<'a, str>>),
 }
 
 impl<'a> Assignee<'a> {
@@ -230,7 +230,7 @@ pub struct Issues<'a> {
 
     /// Filter issues with specific internal IDs.
     #[builder(setter(name = "_iids"), default, private)]
-    iids: HashSet<u64>,
+    iids: BTreeSet<u64>,
     /// Filter issues based on state.
     #[builder(default)]
     state: Option<IssueState>,
@@ -298,7 +298,7 @@ impl<'a> Issues<'a> {
 impl<'a> IssuesBuilder<'a> {
     /// Return an issue with an internal ID.
     pub fn iid(&mut self, iid: u64) -> &mut Self {
-        self.iids.get_or_insert_with(HashSet::new).insert(iid);
+        self.iids.get_or_insert_with(BTreeSet::new).insert(iid);
         self
     }
 
@@ -307,7 +307,7 @@ impl<'a> IssuesBuilder<'a> {
     where
         I: Iterator<Item = u64>,
     {
-        self.iids.get_or_insert_with(HashSet::new).extend(iter);
+        self.iids.get_or_insert_with(BTreeSet::new).extend(iter);
         self
     }
 
@@ -333,7 +333,7 @@ impl<'a> IssuesBuilder<'a> {
             set.insert(label);
             set
         } else {
-            let mut set = HashSet::new();
+            let mut set = BTreeSet::new();
             set.insert(label);
             set
         };
@@ -386,7 +386,7 @@ impl<'a> IssuesBuilder<'a> {
             set.insert(assignee);
             set
         } else {
-            let mut set = HashSet::new();
+            let mut set = BTreeSet::new();
             set.insert(assignee);
             set
         };
@@ -485,7 +485,7 @@ impl<'a> Pageable for Issues<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use std::collections::BTreeSet;
 
     use crate::api::projects::issues::{IssueOrderBy, IssueScope, IssueState, IssueWeight, Issues};
 
@@ -506,12 +506,12 @@ mod tests {
     #[test]
     fn issue_labels_as_str() {
         let one_user = {
-            let mut set = HashSet::new();
+            let mut set = BTreeSet::new();
             set.insert("one".into());
             set
         };
         let two_users = {
-            let mut set = HashSet::new();
+            let mut set = BTreeSet::new();
             set.insert("one".into());
             set.insert("two".into());
             set
@@ -521,17 +521,12 @@ mod tests {
             (Labels::Any, "Any"),
             (Labels::None, "None"),
             (Labels::AllOf(one_user), "one"),
+            (Labels::AllOf(two_users), "one,two"),
         ];
 
         for (i, s) in items {
             assert_eq!(i.as_str(), *s);
         }
-
-        let many_labels = Labels::AllOf(two_users);
-        assert!(
-            many_labels.as_str() == "one,two" || many_labels.as_str() == "two,one",
-            "many_labels.as_str() did not join labels properly",
-        );
     }
 
     #[test]

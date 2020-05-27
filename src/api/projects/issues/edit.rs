@@ -5,7 +5,7 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
@@ -42,13 +42,13 @@ impl ParamValue<'static> for IssueStateEvent {
 #[derive(Debug, Clone)]
 enum IssueAssignees {
     Unassigned,
-    Assignees(HashSet<u64>),
+    Assignees(BTreeSet<u64>),
 }
 
 #[derive(Debug, Clone)]
 enum IssueLabels<'a> {
     Unlabeled,
-    Labeled(HashSet<Cow<'a, str>>),
+    Labeled(BTreeSet<Cow<'a, str>>),
 }
 
 impl<'a, 'b: 'a> ParamValue<'a> for &'b IssueLabels<'a> {
@@ -132,7 +132,7 @@ impl<'a> EditIssueBuilder<'a> {
                 set.insert(assignee);
                 set
             } else {
-                let mut set = HashSet::new();
+                let mut set = BTreeSet::new();
                 set.insert(assignee);
                 set
             };
@@ -175,7 +175,7 @@ impl<'a> EditIssueBuilder<'a> {
             set.insert(label);
             set
         } else {
-            let mut set = HashSet::new();
+            let mut set = BTreeSet::new();
             set.insert(label);
             set
         };

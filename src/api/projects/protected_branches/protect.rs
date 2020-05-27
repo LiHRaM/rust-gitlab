@@ -5,7 +5,8 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::collections::HashSet;
+use std::cmp;
+use std::collections::BTreeSet;
 
 use derive_builder::Builder;
 
@@ -14,16 +15,16 @@ use crate::api::endpoint_prelude::*;
 use crate::api::ParamValue;
 
 /// Access levels for protected branches.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ProtectedAccessLevel {
-    /// The action is not allowed at all.
-    NoAccess,
     /// Developers and maintainers may perform the action.
     Developer,
     /// Maintainers may perform the action.
     Maintainer,
     /// Only administrators may perform the action.
     Admin,
+    /// The action is not allowed at all.
+    NoAccess,
 }
 
 impl Default for ProtectedAccessLevel {
@@ -35,10 +36,10 @@ impl Default for ProtectedAccessLevel {
 impl ProtectedAccessLevel {
     fn as_str(self) -> &'static str {
         match self {
-            ProtectedAccessLevel::NoAccess => "0",
             ProtectedAccessLevel::Developer => "30",
             ProtectedAccessLevel::Maintainer => "40",
             ProtectedAccessLevel::Admin => "60",
+            ProtectedAccessLevel::NoAccess => "0",
         }
     }
 }
@@ -50,7 +51,7 @@ impl ParamValue<'static> for ProtectedAccessLevel {
 }
 
 /// Granular protected access controls for branches.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProtectedAccess {
     /// Give a specific user access.
     User(u64),
@@ -72,6 +73,26 @@ impl ProtectedAccess {
             ProtectedAccess::Level(level) => {
                 params.push(format!("{}[][access_level]", name), level);
             },
+        }
+    }
+}
+
+impl PartialOrd for ProtectedAccess {
+    fn partial_cmp(&self, rhs: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(rhs))
+    }
+}
+
+impl Ord for ProtectedAccess {
+    fn cmp(&self, rhs: &Self) -> cmp::Ordering {
+        match (self, rhs) {
+            (Self::User(l), Self::User(r)) => l.cmp(r),
+            (Self::User(_), _) => cmp::Ordering::Less,
+            (Self::Group(l), Self::Group(r)) => l.cmp(r),
+            (Self::Group(_), Self::User(_)) => cmp::Ordering::Greater,
+            (Self::Group(_), _) => cmp::Ordering::Less,
+            (Self::Level(l), Self::Level(r)) => l.cmp(r),
+            (Self::Level(_), _) => cmp::Ordering::Greater,
         }
     }
 }
@@ -103,13 +124,13 @@ pub struct ProtectBranch<'a> {
     unprotect_access_level: Option<ProtectedAccessLevel>,
     /// A discrete set of accesses allowed to push to the branch.
     #[builder(setter(name = "_allowed_to_push"), default, private)]
-    allowed_to_push: HashSet<ProtectedAccess>,
+    allowed_to_push: BTreeSet<ProtectedAccess>,
     /// A discrete set of accesses allowed to merge into the branch.
     #[builder(setter(name = "_allowed_to_merge"), default, private)]
-    allowed_to_merge: HashSet<ProtectedAccess>,
+    allowed_to_merge: BTreeSet<ProtectedAccess>,
     /// A discrete set of accesses allowed to unprotect the branch.
     #[builder(setter(name = "_allowed_to_unprotect"), default, private)]
-    allowed_to_unprotect: HashSet<ProtectedAccess>,
+    allowed_to_unprotect: BTreeSet<ProtectedAccess>,
     /// Whether code owner approval is required to merge.
     #[builder(default)]
     code_owner_approval_required: Option<bool>,
@@ -126,7 +147,7 @@ impl<'a> ProtectBranchBuilder<'a> {
     /// Add access to push to the branch.
     pub fn allowed_to_push(&mut self, access: ProtectedAccess) -> &mut Self {
         self.allowed_to_push
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .insert(access);
         self
     }
@@ -134,7 +155,7 @@ impl<'a> ProtectBranchBuilder<'a> {
     /// Add access to merge into the branch.
     pub fn allowed_to_merge(&mut self, access: ProtectedAccess) -> &mut Self {
         self.allowed_to_merge
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .insert(access);
         self
     }
@@ -142,7 +163,7 @@ impl<'a> ProtectBranchBuilder<'a> {
     /// Add access to unprotect the branch.
     pub fn allowed_to_unprotect(&mut self, access: ProtectedAccess) -> &mut Self {
         self.allowed_to_unprotect
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .insert(access);
         self
     }
@@ -186,7 +207,11 @@ impl<'a> Endpoint for ProtectBranch<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::protected_branches::{ProtectBranch, ProtectedAccessLevel};
+    use std::cmp;
+
+    use crate::api::projects::protected_branches::{
+        ProtectBranch, ProtectedAccess, ProtectedAccessLevel,
+    };
 
     #[test]
     fn protected_access_level_default() {
@@ -197,16 +222,101 @@ mod tests {
     }
 
     #[test]
+    fn protected_access_level_ord() {
+        let items = &[
+            ProtectedAccessLevel::Developer,
+            ProtectedAccessLevel::Maintainer,
+            ProtectedAccessLevel::Admin,
+            ProtectedAccessLevel::NoAccess,
+        ];
+
+        for i in items {
+            assert_eq!(*i, *i);
+            assert_eq!(i.cmp(i), cmp::Ordering::Equal);
+
+            let mut expect = cmp::Ordering::Greater;
+            for j in items {
+                let is_same = i == j;
+                if is_same {
+                    expect = cmp::Ordering::Equal;
+                }
+                assert_eq!(i.cmp(j), expect);
+                if is_same {
+                    expect = cmp::Ordering::Less;
+                }
+            }
+
+            let mut expect = cmp::Ordering::Less;
+            for j in items.iter().rev() {
+                let is_same = i == j;
+                if is_same {
+                    expect = cmp::Ordering::Equal;
+                }
+                assert_eq!(i.cmp(j), expect);
+                if is_same {
+                    expect = cmp::Ordering::Greater;
+                }
+            }
+        }
+    }
+
+    #[test]
     fn protected_access_level_as_str() {
         let items = &[
-            (ProtectedAccessLevel::NoAccess, "0"),
             (ProtectedAccessLevel::Developer, "30"),
             (ProtectedAccessLevel::Maintainer, "40"),
             (ProtectedAccessLevel::Admin, "60"),
+            (ProtectedAccessLevel::NoAccess, "0"),
         ];
 
         for (i, s) in items {
             assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn protected_access_ord() {
+        let items = &[
+            ProtectedAccess::User(1),
+            ProtectedAccess::User(2),
+            ProtectedAccess::Group(1),
+            ProtectedAccess::Group(2),
+            ProtectedAccessLevel::Developer.into(),
+            ProtectedAccessLevel::Maintainer.into(),
+            ProtectedAccessLevel::Admin.into(),
+            ProtectedAccessLevel::NoAccess.into(),
+        ];
+
+        for i in items {
+            assert_eq!(*i, *i);
+            assert_eq!(i.cmp(i), cmp::Ordering::Equal);
+            assert_eq!(i.partial_cmp(i).unwrap(), cmp::Ordering::Equal);
+
+            let mut expect = cmp::Ordering::Greater;
+            for j in items {
+                let is_same = i == j;
+                if is_same {
+                    expect = cmp::Ordering::Equal;
+                }
+                assert_eq!(i.cmp(j), expect);
+                assert_eq!(i.partial_cmp(j).unwrap(), expect);
+                if is_same {
+                    expect = cmp::Ordering::Less;
+                }
+            }
+
+            let mut expect = cmp::Ordering::Less;
+            for j in items.iter().rev() {
+                let is_same = i == j;
+                if is_same {
+                    expect = cmp::Ordering::Equal;
+                }
+                assert_eq!(i.cmp(j), expect);
+                assert_eq!(i.partial_cmp(j).unwrap(), expect);
+                if is_same {
+                    expect = cmp::Ordering::Greater;
+                }
+            }
         }
     }
 
