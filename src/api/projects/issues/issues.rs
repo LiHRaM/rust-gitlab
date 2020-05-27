@@ -569,6 +569,11 @@ mod tests {
     }
 
     #[test]
+    fn issue_order_by_default() {
+        assert_eq!(IssueOrderBy::default(), IssueOrderBy::CreatedAt);
+    }
+
+    #[test]
     fn issue_order_by_as_str() {
         let items = &[
             (IssueOrderBy::CreatedAt, "created_at"),
