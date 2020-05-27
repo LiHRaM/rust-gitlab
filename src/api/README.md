@@ -80,6 +80,11 @@ instead of having to search the page for missing endpoints.
   * `GET    /issues` https://gitlab.kitware.com/help/api/issues.md#list-issues
   * `PUT    /groups/:group` https://gitlab.kitware.com/help/api/groups.md#update-group
   * `DELETE /groups/:group` https://gitlab.kitware.com/help/api/groups.md#remove-group
+  * `GET    /groups/:group/epics/:epic/notes` https://gitlab.kitware.com/help/api/notes.md#list-all-epic-notes
+  * `POST   /groups/:group/epics/:epic/notes` https://gitlab.kitware.com/help/api/notes.md#create-new-epic-note
+  * `GET    /groups/:group/epics/:epic/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-epic-note
+  * `PUT    /groups/:group/epics/:epic/notes/:note` https://gitlab.kitware.com/help/api/notes.md#modify-existing-epic-note
+  * `DELETE /groups/:group/epics/:epic/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-an-epic-note
   * `GET    /groups/:group/hooks` https://gitlab.kitware.com/help/api/groups.md#list-group-hooks
   * `POST   /groups/:group/hooks` https://gitlab.kitware.com/help/api/groups.md#add-group-hook
   * `GET    /groups/:group/hooks/:id` https://gitlab.kitware.com/help/api/groups.md#get-group-hook
@@ -115,6 +120,11 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/issues/:issue` https://gitlab.kitware.com/help/api/issues.md#delete-an-issue
   * `POST   /projects/:project/issues/:issue/add_spent_time` https://gitlab.kitware.com/help/api/issues.md#add-spent-time-for-an-issue
   * `GET    /projects/:project/issues/:issue/closed_by` https://gitlab.kitware.com/help/api/issues.md#list-merge-requests-that-will-close-issue-on-merge
+  * `GET    /projects/:project/issues/:issue/notes` https://gitlab.kitware.com/help/api/notes.md#issues
+  * `POST   /projects/:project/issues/:issue/notes` https://gitlab.kitware.com/help/api/notes.md#create-new-issue-note
+  * `GET    /projects/:project/issues/:issue/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-issue-note
+  * `PUT    /projects/:project/issues/:issue/notes/:note` https://gitlab.kitware.com/help/api/notes.md#modify-existing-issue-note
+  * `DELETE /projects/:project/issues/:issue/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-an-issue-note
   * `POST   /projects/:project/issues/:issue/move` https://gitlab.kitware.com/help/api/issues.md#move-an-issue
   * `GET    /projects/:project/issues/:issue/participants` https://gitlab.kitware.com/help/api/issues.md#participants-on-issues
   * `GET    /projects/:project/issues/:issue/related_merge_requests` https://gitlab.kitware.com/help/api/issues.md#list-merge-requests-related-to-issue
@@ -142,6 +152,11 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
   * `PUT    /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
   * `DELETE /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
+  * `GET    /projects/:project/merge_requests/:merge_request/notes` https://gitlab.kitware.com/help/api/notes.md#list-all-merge-request-notes
+  * `POST   /projects/:project/merge_requests/:merge_request/notes` https://gitlab.kitware.com/help/api/notes.md#create-new-merge-request-note
+  * `GET    /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-merge-request-note
+  * `PUT    /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#modify-existing-merge-request-note
+  * `DELETE /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-a-merge-request-note
   * `POST   /projects/:project/mirror/pull` https://gitlab.kitware.com/help/api/projects.md#start-the-pull-mirroring-process-for-a-project-starter
   * `GET    /projects/:project/protected_branches` https://gitlab.kitware.com/help/api/protected_branches.md#list-protected-branches
   * `GET    /projects/:project/protected_branches/:branch` https://gitlab.kitware.com/help/api/protected_branches.md#get-a-single-protected-branch-or-wildcard-protected-branch
@@ -171,6 +186,11 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/share` https://gitlab.kitware.com/help/api/projects.md#share-project-with-group
   * `DELETE /projects/:project/share/:group` https://gitlab.kitware.com/help/api/projects.md#delete-a-shared-project-link-within-a-group
   * `GET    /projects/:project/snapshot` https://gitlab.kitware.com/help/api/projects.md#download-snapshot-of-a-git-repository
+  * `GET    /projects/:project/snippets/:snippet/notes` https://gitlab.kitware.com/help/api/notes.md#snippets
+  * `POST   /projects/:project/snippets/:snippet/notes` https://gitlab.kitware.com/help/api/notes.md#get-single-snippet-note
+  * `GET    /projects/:project/snippets/:snippet/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-snippet-note
+  * `PUT    /projects/:project/snippets/:snippet/notes/:note` https://gitlab.kitware.com/help/api/notes.md#modify-existing-snippet-note
+  * `DELETE /projects/:project/snippets/:snippet/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-a-snippet-note
   * `POST   /projects/:project/star` https://gitlab.kitware.com/help/api/projects.md#star-a-project
   * `GET    /projects/:project/starrers` https://gitlab.kitware.com/help/api/projects.md#list-starrers-of-a-project
   * `PUT    /projects/:project/transfer` https://gitlab.kitware.com/help/api/projects.md#transfer-a-project-to-a-new-namespace
@@ -242,7 +262,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/managed_licenses.md
   * https://gitlab.kitware.com/help/api/merge_request_approvals.md
   * https://gitlab.kitware.com/help/api/merge_requests.md
-  * https://gitlab.kitware.com/help/api/notes.md
   * https://gitlab.kitware.com/help/api/notification_settings.md
   * https://gitlab.kitware.com/help/api/packages.md
   * https://gitlab.kitware.com/help/api/pages_domains.md
