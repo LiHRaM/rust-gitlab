@@ -82,7 +82,7 @@ pub struct EditProject<'a> {
     #[builder(default)]
     visibility: Option<VisibilityLevel>,
     /// A URL to import the repository from.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     import_url: Option<Cow<'a, str>>,
     /// Whether job results are visible to non-project members or not.
     #[builder(default)]
