@@ -5,7 +5,7 @@
 // except according to those terms.
 
 use std::borrow::Cow;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use derive_builder::Builder;
 
@@ -116,7 +116,7 @@ pub struct EditProject<'a> {
     request_access_enabled: Option<bool>,
     /// A list of tags to apply to the repository.
     #[builder(setter(name = "_tag_list"), default, private)]
-    tag_list: HashSet<Cow<'a, str>>,
+    tag_list: BTreeSet<Cow<'a, str>>,
     // TODO: Figure out how to actuall use this.
     // avatar   mixed   no  Image file for avatar of the project
     // avatar: ???,
@@ -214,7 +214,7 @@ impl<'a> EditProjectBuilder<'a> {
         T: Into<Cow<'a, str>>,
     {
         self.tag_list
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .insert(tag.into());
         self
     }
@@ -226,7 +226,7 @@ impl<'a> EditProjectBuilder<'a> {
         T: Into<Cow<'a, str>>,
     {
         self.tag_list
-            .get_or_insert_with(HashSet::new)
+            .get_or_insert_with(BTreeSet::new)
             .extend(iter.map(Into::into));
         self
     }
