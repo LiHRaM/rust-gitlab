@@ -34,7 +34,11 @@ impl<'a> Endpoint for Environment<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/environment/{}", self.project, self.environment).into()
+        format!(
+            "projects/{}/environments/{}",
+            self.project, self.environment,
+        )
+        .into()
     }
 }
 

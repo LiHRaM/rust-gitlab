@@ -15,6 +15,11 @@ parameters was also implemented.
 Some additional merge status names for merge requests were missing and have
 been added.
 
+## Fixes
+
+  * The `api::projects::environments::Environment` endpoint uses the correct
+    path now.
+
 # v0.1210.1
 
 ## New API strategy
