@@ -240,7 +240,19 @@ impl<'a> Endpoint for EditMergeRequest<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::merge_requests::EditMergeRequest;
+    use crate::api::projects::merge_requests::{EditMergeRequest, MergeRequestStateEvent};
+
+    #[test]
+    fn merge_request_state_event_as_str() {
+        let items = &[
+            (MergeRequestStateEvent::Close, "close"),
+            (MergeRequestStateEvent::Reopen, "reopen"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn project_and_merge_request_are_necessary() {
