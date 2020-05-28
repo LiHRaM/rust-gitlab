@@ -1666,6 +1666,10 @@ impl Gitlab {
     }
 
     /// Create a note on a issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::CreateIssueNote.query()` instead"
+    )]
     pub fn create_issue_note<C>(
         &self,
         project: ProjectId,
@@ -1675,12 +1679,20 @@ impl Gitlab {
     where
         C: AsRef<str>,
     {
-        let path = format!("projects/{}/issues/{}/notes", project, issue);
-
-        self.post_with_param(path, &[("body", content.as_ref())])
+        Ok(projects::issues::notes::CreateIssueNote::builder()
+            .project(project.value())
+            .issue(issue.value())
+            .body(content.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Create a note on a issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::CreateIssueNote.query()` instead"
+    )]
     pub fn create_issue_note_by_name<P, C>(
         &self,
         project: P,
@@ -1691,13 +1703,13 @@ impl Gitlab {
         P: AsRef<str>,
         C: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/issues/{}/notes",
-            Self::url_name(project.as_ref()),
-            issue,
-        );
-
-        self.post_with_param(path, &[("body", content.as_ref())])
+        Ok(projects::issues::notes::CreateIssueNote::builder()
+            .project(project.as_ref())
+            .issue(issue.value())
+            .body(content.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Edit a note on an issue.
@@ -2167,21 +2179,34 @@ impl Gitlab {
         );
         self.post_with_param(path, &[("body", content)])
     }
+
     /// Create a note on a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::CreateMergeRequestNote.query()` instead"
+    )]
     pub fn create_merge_request_note(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         content: &str,
     ) -> GitlabResult<Note> {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes",
-            project, merge_request,
-        );
-        self.post_with_param(path, &[("body", content)])
+        Ok(
+            projects::merge_requests::notes::CreateMergeRequestNote::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .body(content)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Create a note on a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::CreateMergeRequestNote.query()` instead"
+    )]
     pub fn create_merge_request_note_by_name<P>(
         &self,
         project: P,
@@ -2191,12 +2216,15 @@ impl Gitlab {
     where
         P: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes",
-            Self::url_name(project.as_ref()),
-            merge_request,
-        );
-        self.post_with_param(path, &[("body", content)])
+        Ok(
+            projects::merge_requests::notes::CreateMergeRequestNote::builder()
+                .project(project.as_ref())
+                .merge_request(merge_request.value())
+                .body(content)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Edit a note on a merge request.

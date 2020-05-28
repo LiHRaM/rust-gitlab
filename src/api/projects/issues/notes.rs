@@ -4,12 +4,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Project merge request API endpoints.
+//! Project issue note API endpoints.
 //!
-//! These endpoints are used for querying projects merge requests.
+//! These endpoints are used for querying project issue notes.
 
-pub mod notes;
-mod resource_label_events;
+mod create;
 
-pub use self::resource_label_events::MergeRequestResourceLabelEvents;
-pub use self::resource_label_events::MergeRequestResourceLabelEventsBuilder;
+pub use self::create::CreateIssueNote;
+pub use self::create::CreateIssueNoteBuilder;

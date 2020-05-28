@@ -12,6 +12,7 @@ mod create;
 mod edit;
 mod issue;
 mod issues;
+pub mod notes;
 mod resource_label_events;
 
 pub use self::create::CreateIssue;
