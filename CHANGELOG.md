@@ -1,5 +1,11 @@
 # v0.1300.0 (unreleased)
 
+## Deprecations
+
+  * All methods on the `Gitlab` structure now have `Endpoint` structures
+    implemented. In a future release, these methods (and their support types)
+    will be removed.
+
 ## Changes
 
   * The `api::projects::issues::Issues` endpoint's `milestone` field was
