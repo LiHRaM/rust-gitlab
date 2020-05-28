@@ -110,6 +110,14 @@ instead of having to search the page for missing endpoints.
   * `GET    /groups/:group/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
   * `PUT    /groups/:group/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
   * `GET    /groups/:group/merge_requests` https://gitlab.kitware.com/help/api/merge_requests.md#list-group-merge-requests
+  * `GET    /groups/:group/milestones` https://gitlab.kitware.com/help/api/group_milestones.md#list-group-milestones
+  * `POST   /groups/:group/milestones` https://gitlab.kitware.com/help/api/group_milestones.md#create-new-milestone
+  * `GET    /groups/:group/milestones/:milestone` https://gitlab.kitware.com/help/api/group_milestones.md#get-single-milestone
+  * `PUT    /groups/:group/milestones/:milestone` https://gitlab.kitware.com/help/api/group_milestones.md#edit-milestone
+  * `DELETE /groups/:group/milestones/:milestone` https://gitlab.kitware.com/help/api/group_milestones.md#delete-group-milestone
+  * `GET    /groups/:group/milestones/:milestone/burndown_events` https://gitlab.kitware.com/help/api/group_milestones.md#get-all-burndown-chart-events-for-a-single-milestone-starter
+  * `GET    /groups/:group/milestones/:milestone/issues` https://gitlab.kitware.com/help/api/group_milestones.md#get-all-issues-assigned-to-a-single-milestone
+  * `GET    /groups/:group/milestones/:milestone/merge_requests` https://gitlab.kitware.com/help/api/group_milestones.md#get-all-merge-requests-assigned-to-a-single-milestone
   * `GET    /groups/:group/projects` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-projects
   * `POST   /groups/:group/projects/:id` https://gitlab.kitware.com/help/api/groups.md#transfer-project-to-group
   * `POST   /groups/:group/restore` https://gitlab.kitware.com/help/api/groups.md#restore-group-marked-for-deletion-premium
@@ -395,7 +403,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/group_boards.md
   * https://gitlab.kitware.com/help/api/group_labels.md
   * https://gitlab.kitware.com/help/api/group_level_variables.md
-  * https://gitlab.kitware.com/help/api/group_milestones.md
   * https://gitlab.kitware.com/help/api/admin_sidekiq_queues.md
   * https://gitlab.kitware.com/help/api/appearance.md
   * https://gitlab.kitware.com/help/api/applications.md
