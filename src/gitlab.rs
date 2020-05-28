@@ -2541,6 +2541,10 @@ impl Gitlab {
     }
 
     /// Set the labels on a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::EditMergeRequest.query()` instead"
+    )]
     pub fn set_merge_request_labels<I, L>(
         &self,
         project: ProjectId,
@@ -2551,8 +2555,13 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = format!("projects/{}/merge_requests/{}", project, merge_request);
-        self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
+        Ok(projects::merge_requests::EditMergeRequest::builder()
+            .project(project.value())
+            .merge_request(merge_request.value())
+            .labels(labels.into_iter().map(|l| format!("{}", l)))
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Create a URL to an API endpoint.
@@ -2638,17 +2647,6 @@ impl Gitlab {
     {
         let full_url = self.create_url(url)?;
         self.send(self.client.post(full_url).form(&param))
-    }
-
-    /// Create a `PUT` request to an API endpoint with query parameters.
-    fn put_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-        P: Serialize,
-    {
-        let full_url = self.create_url(url)?;
-        self.send(self.client.put(full_url).form(&param))
     }
 
     /// Handle paginated queries with query parameters. Returns all results.

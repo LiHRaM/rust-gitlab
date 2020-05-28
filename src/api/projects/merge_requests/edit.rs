@@ -12,71 +12,76 @@ use itertools::Itertools;
 
 use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
+use crate::api::projects::merge_requests::create::Assignee;
+use crate::api::ParamValue;
 
-#[derive(Debug, Clone)]
-pub(crate) enum Assignee {
-    Unassigned,
-    Id(u64),
-    Ids(BTreeSet<u64>),
+/// States an issue may be set to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeRequestStateEvent {
+    /// Close the issue.
+    Close,
+    /// Reopen a closed issue.
+    Reopen,
 }
 
-impl Assignee {
-    pub(crate) fn add_params<'a>(&'a self, params: &mut FormParams<'a>) {
+impl MergeRequestStateEvent {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
-            Assignee::Unassigned => {
-                params.push("assignee_ids", "0");
-            },
-            Assignee::Id(id) => {
-                params.push("assignee_id", *id);
-            },
-            Assignee::Ids(ids) => {
-                params.extend(ids.iter().map(|&id| ("assignee_ids[]", id)));
-            },
+            MergeRequestStateEvent::Close => "close",
+            MergeRequestStateEvent::Reopen => "reopen",
         }
     }
 }
 
-/// Create a new merge request on project.
+impl ParamValue<'static> for MergeRequestStateEvent {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
+/// Edit a new merge request on project.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
-pub struct CreateMergeRequest<'a> {
+pub struct EditMergeRequest<'a> {
     /// The project to open the merge requset *from*.
     #[builder(setter(into))]
     project: NameOrId<'a>,
-    /// The name of the source branch for the merge request.
-    #[builder(setter(into))]
-    source_branch: Cow<'a, str>,
-    /// The name of the target branch for the merge request.
-    #[builder(setter(into))]
-    target_branch: Cow<'a, str>,
-    /// The title for the merge request.
-    #[builder(setter(into))]
-    title: Cow<'a, str>,
+    /// The merge request to edit.
+    merge_request: u64,
 
+    /// The name of the target branch for the merge request.
+    #[builder(setter(into), default)]
+    target_branch: Option<Cow<'a, str>>,
+    /// The title for the merge request.
+    #[builder(setter(into), default)]
+    title: Option<Cow<'a, str>>,
     /// The assignee of the merge request.
     #[builder(setter(name = "_assignee"), default, private)]
     assignee: Option<Assignee>,
-    /// The description of the merge request.
-    #[builder(setter(into), default)]
-    description: Option<Cow<'a, str>>,
-    /// The ID of the target project for the merge request.
-    #[builder(default)]
-    target_project_id: Option<u64>,
-    /// Labels to add to the merge request.
-    #[builder(setter(name = "_labels"), default, private)]
-    labels: BTreeSet<Cow<'a, str>>,
     /// The ID of the milestone to add the merge request to.
     #[builder(default)]
     milestone_id: Option<u64>,
+    /// Labels to add to the merge request.
+    #[builder(setter(name = "_labels"), default, private)]
+    labels: BTreeSet<Cow<'a, str>>,
+    /// The description of the merge request.
+    #[builder(setter(into), default)]
+    description: Option<Cow<'a, str>>,
+    /// Change the state of the merge request.
+    #[builder(default)]
+    state_event: Option<MergeRequestStateEvent>,
     /// Whether to remove the source branch once merged or not.
     #[builder(default)]
     remove_source_branch: Option<bool>,
-    /// Whether to allow collaboration with maintainers of the target project or not.
-    #[builder(default)]
-    allow_collaboration: Option<bool>,
     /// Whether to squash the branch when merging or not.
     #[builder(default)]
     squash: Option<bool>,
+    /// Whether to lock discussion or not..
+    #[builder(default)]
+    discussion_locked: Option<bool>,
+    /// Whether to allow collaboration with maintainers of the target project or not.
+    #[builder(default)]
+    allow_collaboration: Option<bool>,
 
     /// Whether to allow collaboration with maintainers of the target project or not.
     #[deprecated(note = "use `allow_collaboration` instead")]
@@ -84,14 +89,14 @@ pub struct CreateMergeRequest<'a> {
     allow_maintainer_to_push: Option<bool>,
 }
 
-impl<'a> CreateMergeRequest<'a> {
+impl<'a> EditMergeRequest<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> CreateMergeRequestBuilder<'a> {
-        CreateMergeRequestBuilder::default()
+    pub fn builder() -> EditMergeRequestBuilder<'a> {
+        EditMergeRequestBuilder::default()
     }
 }
 
-impl<'a> CreateMergeRequestBuilder<'a> {
+impl<'a> EditMergeRequestBuilder<'a> {
     /// Filter unassigned merge requests.
     pub fn unassigned(&mut self) -> &mut Self {
         self.assignee = Some(Some(Assignee::Unassigned));
@@ -159,28 +164,32 @@ impl<'a> CreateMergeRequestBuilder<'a> {
     }
 }
 
-impl<'a> Endpoint for CreateMergeRequest<'a> {
+impl<'a> Endpoint for EditMergeRequest<'a> {
     fn method(&self) -> Method {
-        Method::POST
+        Method::PUT
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/merge_requests", self.project).into()
+        format!(
+            "projects/{}/merge_requests/{}",
+            self.project, self.merge_request,
+        )
+        .into()
     }
 
     fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
         let mut params = FormParams::default();
 
         params
-            .push("source_branch", self.source_branch.as_ref())
-            .push("target_branch", self.target_branch.as_ref())
-            .push("title", self.title.as_ref())
-            .push_opt("description", self.description.as_ref())
-            .push_opt("target_project_id", self.target_project_id)
+            .push_opt("target_branch", self.target_branch.as_ref())
+            .push_opt("title", self.title.as_ref())
             .push_opt("milestone_id", self.milestone_id)
+            .push_opt("description", self.description.as_ref())
+            .push_opt("state_event", self.state_event)
             .push_opt("remove_source_branch", self.remove_source_branch)
-            .push_opt("allow_collaboration", self.allow_collaboration)
-            .push_opt("squash", self.squash);
+            .push_opt("squash", self.squash)
+            .push_opt("discussion_locked", self.discussion_locked)
+            .push_opt("allow_collaboration", self.allow_collaboration);
 
         if !self.labels.is_empty() {
             params.push("labels", format!("{}", self.labels.iter().format(",")));
@@ -200,65 +209,34 @@ impl<'a> Endpoint for CreateMergeRequest<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::merge_requests::CreateMergeRequest;
+    use crate::api::projects::merge_requests::EditMergeRequest;
 
     #[test]
-    fn project_source_branch_target_branch_and_title_are_necessary() {
-        let err = CreateMergeRequest::builder().build().unwrap_err();
+    fn project_and_merge_request_are_necessary() {
+        let err = EditMergeRequest::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
     fn project_is_necessary() {
-        let err = CreateMergeRequest::builder()
-            .source_branch("source")
-            .target_branch("target")
-            .title("title")
+        let err = EditMergeRequest::builder()
+            .merge_request(1)
             .build()
             .unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
-    fn source_branch_is_necessary() {
-        let err = CreateMergeRequest::builder()
-            .project(1)
-            .target_branch("target")
-            .title("title")
-            .build()
-            .unwrap_err();
-        assert_eq!(err, "`source_branch` must be initialized");
+    fn merge_request_is_necessary() {
+        let err = EditMergeRequest::builder().project(1).build().unwrap_err();
+        assert_eq!(err, "`merge_request` must be initialized");
     }
 
     #[test]
-    fn target_branch_is_necessary() {
-        let err = CreateMergeRequest::builder()
+    fn project_and_merge_request_are_sufficient() {
+        EditMergeRequest::builder()
             .project(1)
-            .source_branch("source")
-            .title("title")
-            .build()
-            .unwrap_err();
-        assert_eq!(err, "`target_branch` must be initialized");
-    }
-
-    #[test]
-    fn title_is_necessary() {
-        let err = CreateMergeRequest::builder()
-            .project(1)
-            .source_branch("source")
-            .target_branch("target")
-            .build()
-            .unwrap_err();
-        assert_eq!(err, "`title` must be initialized");
-    }
-
-    #[test]
-    fn project_source_branch_target_branch_and_title_are_sufficient() {
-        CreateMergeRequest::builder()
-            .project(1)
-            .source_branch("source")
-            .target_branch("target")
-            .title("title")
+            .merge_request(1)
             .build()
             .unwrap();
     }

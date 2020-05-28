@@ -10,6 +10,7 @@
 
 pub mod awards;
 mod create;
+mod edit;
 mod issues_closed_by;
 mod merge_request;
 mod merge_requests;
@@ -18,6 +19,10 @@ mod resource_label_events;
 
 pub use self::create::CreateMergeRequest;
 pub use self::create::CreateMergeRequestBuilder;
+
+pub use self::edit::EditMergeRequest;
+pub use self::edit::EditMergeRequestBuilder;
+pub use self::edit::MergeRequestStateEvent;
 
 pub use self::issues_closed_by::IssuesClosedBy;
 pub use self::issues_closed_by::IssuesClosedByBuilder;
