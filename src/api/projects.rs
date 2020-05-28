@@ -18,6 +18,7 @@ pub mod issues;
 pub mod jobs;
 pub mod labels;
 pub mod members;
+pub mod milestones;
 pub mod pipelines;
 mod project;
 mod projects;

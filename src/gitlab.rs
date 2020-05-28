@@ -1556,32 +1556,46 @@ impl Gitlab {
     }
 
     /// Create a new milestone
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::{groups,projects}::milestones::Create{Group,Project}Milestone.query()` instead"
+    )]
     pub fn create_milestone(&self, milestone: Milestone) -> GitlabResult<Milestone> {
-        let path = if let Some(project) = milestone.project_id {
-            format!("projects/{}/milestones", project)
+        if let Some(project) = milestone.project_id {
+            let mut builder = projects::milestones::CreateProjectMilestone::builder();
+
+            builder.project(project.value()).title(milestone.title);
+
+            if let Some(d) = milestone.description {
+                builder.description(d);
+            }
+            if let Some(d) = milestone.due_date {
+                builder.due_date(d);
+            }
+            if let Some(s) = milestone.start_date {
+                builder.start_date(s);
+            }
+
+            Ok(builder.build().unwrap().query(self)?)
         } else if let Some(group) = milestone.group_id {
-            format!("groups/{}/milestones", group)
+            let mut builder = groups::milestones::CreateGroupMilestone::builder();
+
+            builder.group(group.value()).title(milestone.title);
+
+            if let Some(d) = milestone.description {
+                builder.description(d);
+            }
+            if let Some(d) = milestone.due_date {
+                builder.due_date(d);
+            }
+            if let Some(s) = milestone.start_date {
+                builder.start_date(s);
+            }
+
+            Ok(builder.build().unwrap().query(self)?)
         } else {
-            return Err(GitlabError::InvalidMilestone);
-        };
-
-        let mut params: Vec<(&str, String)> = Vec::new();
-
-        params.push(("title", milestone.title));
-
-        if let Some(d) = milestone.description {
-            params.push(("description", d));
+            Err(GitlabError::InvalidMilestone)
         }
-
-        if let Some(d) = milestone.due_date {
-            params.push(("due_date", d.to_string()))
-        }
-
-        if let Some(s) = milestone.start_date {
-            params.push(("start_date", s.to_string()))
-        }
-
-        self.post_with_param(path, &params)
     }
 
     /// Create a new issue

@@ -15,6 +15,7 @@ These API endpoints have been implemented.
   * `POST   /groups/:group/members` `groups/members/add.rs`
   * `GET    /groups/:group/members/:id` `groups/members/member.rs`
   * `DELETE /groups/:group/members/:id` `groups/members/remove.rs`
+  * `POST   /groups/:group/milestones` groups/milestones/create.rs
   * `GET    /projects` `projects/projects.rs`
   * `POST   /projects` `projects/projects/create.rs`
   * `GET    /projects/:project` `projects/projects/project.rs`
@@ -41,6 +42,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/members` `projects/members/members.rs`
   * `POST   /projects/:project/members` `projects/members/add.rs`
   * `GET    /projects/:project/members/:id` `projects/members/member.rs`
+  * `POST   /projects/:project/milestones` projects/milestones/create.rs
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
   * `GET    /projects/:project/pipelines/:pipeline` `projects/pipelines/pipeline.rs`
@@ -111,7 +113,6 @@ instead of having to search the page for missing endpoints.
   * `PUT    /groups/:group/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
   * `GET    /groups/:group/merge_requests` https://gitlab.kitware.com/help/api/merge_requests.md#list-group-merge-requests
   * `GET    /groups/:group/milestones` https://gitlab.kitware.com/help/api/group_milestones.md#list-group-milestones
-  * `POST   /groups/:group/milestones` https://gitlab.kitware.com/help/api/group_milestones.md#create-new-milestone
   * `GET    /groups/:group/milestones/:milestone` https://gitlab.kitware.com/help/api/group_milestones.md#get-single-milestone
   * `PUT    /groups/:group/milestones/:milestone` https://gitlab.kitware.com/help/api/group_milestones.md#edit-milestone
   * `DELETE /groups/:group/milestones/:milestone` https://gitlab.kitware.com/help/api/group_milestones.md#delete-group-milestone
@@ -244,7 +245,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` https://gitlab.kitware.com/help/api/resource_label_events.md#list-project-merge-request-label-events
   * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events/:event` https://gitlab.kitware.com/help/api/resource_label_events.md#get-single-merge-request-label-event
   * `GET    /projects/:project/milestones` https://gitlab.kitware.com/help/api/milestones.md#list-project-milestones
-  * `POST   /projects/:project/milestones` https://gitlab.kitware.com/help/api/milestones.md#create-new-milestone
   * `GET    /projects/:project/milestones/:milestone` https://gitlab.kitware.com/help/api/milestones.md#list-project-milestones
   * `PUT    /projects/:project/milestones/:milestone` https://gitlab.kitware.com/help/api/milestones.md#create-new-milestone
   * `DELETE /projects/:project/milestones/:milestone` https://gitlab.kitware.com/help/api/milestones.md#create-new-milestone
