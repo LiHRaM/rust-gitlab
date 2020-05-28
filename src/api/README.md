@@ -31,6 +31,7 @@ These API endpoints have been implemented.
   * `PUT    /projects/:project/issues/:issue` `projects/issues/edit.rs`
   * `GET    /projects/:project/issues/:issue/notes` projects/issues/notes/notes.rs
   * `POST   /projects/:project/issues/:issue/notes` projects/issues/notes/create.rs
+  * `PUT    /projects/:project/issues/:issue/notes/:note` projects/issues/notes/edit.rs
   * `GET    /projects/:project/issues/:issue/resource_label_events` projects/issues/resource_label_events.rs
   * `GET    /projects/:project/jobs` `projects/jobs/jobs.rs`
   * `GET    /projects/:project/jobs/:id` `projects/jobs/job.rs`
@@ -48,6 +49,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` projects/merge_requests/issues_closed_by.rs
   * `GET    /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/notes.rs
   * `POST   /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/create.rs
+  * `PUT    /projects/:project/merge_requests/:merge_request/notes/:note` projects/merge_requests/notes/edit.rs
   * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` projects/merge_requests/resource_label_events.rs
   * `POST   /projects/:project/milestones` projects/milestones/create.rs
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
@@ -166,7 +168,6 @@ instead of having to search the page for missing endpoints.
   * `PUT    /projects/:project/issues/:issue/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#modify-existing-issue-thread-note
   * `DELETE /projects/:project/issues/:issue/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#delete-an-issue-thread-note
   * `GET    /projects/:project/issues/:issue/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-issue-note
-  * `PUT    /projects/:project/issues/:issue/notes/:note` https://gitlab.kitware.com/help/api/notes.md#modify-existing-issue-note
   * `DELETE /projects/:project/issues/:issue/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-an-issue-note
   * `GET    /projects/:project/issues/:issue/notes/:note/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#list-a-comments-award-emoji
   * `POST   /projects/:project/issues/:issue/notes/:note/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#award-a-new-emoji-on-a-comment
@@ -237,7 +238,6 @@ instead of having to search the page for missing endpoints.
   * `PUT    /projects/:project/merge_requests/:merge_request/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#modify-an-existing-merge-request-thread-note
   * `DELETE /projects/:project/merge_requests/:merge_request/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#delete-a-merge-request-thread-note
   * `GET    /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-merge-request-note
-  * `PUT    /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#modify-existing-merge-request-note
   * `DELETE /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-a-merge-request-note
   * `GET    /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#list-a-comments-award-emoji
   * `POST   /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#award-a-new-emoji-on-a-comment
