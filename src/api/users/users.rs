@@ -118,7 +118,7 @@ pub struct Users<'a> {
     #[builder(default)]
     sort: Option<SortOrder>,
     /// Return users with a two-factor enabled or not.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     two_factor: Option<EnableState>,
     /// If set to `true`, filter out users without any projects.
     #[builder(default)]

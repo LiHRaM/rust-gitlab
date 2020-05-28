@@ -6,6 +6,7 @@
     changed to match the actual API exposed by GitLab (with `None` and `Any`
     options).
   * The `api::projects::pipelines::PipelineVariables` endpoint is now pageable.
+  * All `EnableState` fields may now be set using `bool` values.
 
 # v0.1210.2
 

@@ -113,6 +113,16 @@ impl EnableState {
     }
 }
 
+impl From<bool> for EnableState {
+    fn from(b: bool) -> Self {
+        if b {
+            EnableState::Enabled
+        } else {
+            EnableState::Disabled
+        }
+    }
+}
+
 impl ParamValue<'static> for EnableState {
     fn as_value(self) -> Cow<'static, str> {
         self.as_str().into()
@@ -312,6 +322,15 @@ mod tests {
 
         for (i, s) in items {
             assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn enable_state_from_bool() {
+        let items = &[(EnableState::Enabled, true), (EnableState::Disabled, false)];
+
+        for (i, s) in items {
+            assert_eq!(*i, (*s).into());
         }
     }
 
