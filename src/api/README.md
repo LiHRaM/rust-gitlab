@@ -29,6 +29,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/issues` `projects/issues/create.rs`
   * `GET    /projects/:project/issues/:issue` `projects/issues/issue.rs`
   * `PUT    /projects/:project/issues/:issue` `projects/issues/edit.rs`
+  * `GET    /projects/:project/issues/:issue/resource_label_events` projects/issues/resource_label_events.rs
   * `GET    /projects/:project/jobs` `projects/jobs/jobs.rs`
   * `GET    /projects/:project/jobs/:id` `projects/jobs/job.rs`
   * `POST   /projects/:project/jobs/:id/cancel` `projects/jobs/cancel.rs`
@@ -42,6 +43,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/members` `projects/members/members.rs`
   * `POST   /projects/:project/members` `projects/members/add.rs`
   * `GET    /projects/:project/members/:id` `projects/members/member.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` projects/merge_requests/resource_label_events.rs
   * `POST   /projects/:project/milestones` projects/milestones/create.rs
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
@@ -172,7 +174,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/issues/:issue/related_merge_requests` https://gitlab.kitware.com/help/api/issues.md#list-merge-requests-related-to-issue
   * `POST   /projects/:project/issues/:issue/reset_spent_time` https://gitlab.kitware.com/help/api/issues.md#reset-spent-time-for-an-issue
   * `POST   /projects/:project/issues/:issue/reset_time_estimate` https://gitlab.kitware.com/help/api/issues.md#reset-the-time-estimate-for-an-issue
-  * `GET    /projects/:project/issues/:issue/resource_label_events` https://gitlab.kitware.com/help/api/resource_label_events.md#list-project-issue-label-events
   * `GET    /projects/:project/issues/:issue/resource_label_events/:event` https://gitlab.kitware.com/help/api/resource_label_events.md#get-single-issue-label-event
   * `POST   /projects/:project/issues/:issue/subscribe` https://gitlab.kitware.com/help/api/issues.md#subscribe-to-an-issue
   * `POST   /projects/:project/issues/:issue/time_estimate` https://gitlab.kitware.com/help/api/issues.md#set-a-time-estimate-for-an-issue
@@ -242,7 +243,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#award-a-new-emoji-on-a-comment
   * `GET    /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#get-an-award-emoji-for-a-comment
   * `DELETE /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#delete-an-award-emoji-from-a-comment
-  * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` https://gitlab.kitware.com/help/api/resource_label_events.md#list-project-merge-request-label-events
   * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events/:event` https://gitlab.kitware.com/help/api/resource_label_events.md#get-single-merge-request-label-event
   * `GET    /projects/:project/milestones` https://gitlab.kitware.com/help/api/milestones.md#list-project-milestones
   * `GET    /projects/:project/milestones/:milestone` https://gitlab.kitware.com/help/api/milestones.md#list-project-milestones

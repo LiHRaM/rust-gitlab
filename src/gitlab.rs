@@ -1645,15 +1645,24 @@ impl Gitlab {
     }
 
     /// Get the resource label events from an issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::IssueResourceLabelEvents.query()` instead"
+    )]
     pub fn issue_label_events(
         &self,
         project: ProjectId,
         issue: IssueInternalId,
     ) -> GitlabResult<Vec<ResourceLabelEvent>> {
-        self.get_paged(format!(
-            "projects/{}/issues/{}/resource_label_events",
-            project, issue,
-        ))
+        Ok(api::paged(
+            projects::issues::IssueResourceLabelEvents::builder()
+                .project(project.value())
+                .issue(issue.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
+        )
+        .query(self)?)
     }
 
     /// Create a note on a issue.
@@ -2126,15 +2135,24 @@ impl Gitlab {
     }
 
     /// Get the resource label events from a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequestResourceLabelEvents.query()` instead"
+    )]
     pub fn merge_request_label_events(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
     ) -> GitlabResult<Vec<ResourceLabelEvent>> {
-        self.get_paged(format!(
-            "projects/{}/merge_requests/{}/resource_label_events",
-            project, merge_request,
-        ))
+        Ok(api::paged(
+            projects::merge_requests::MergeRequestResourceLabelEvents::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
+        )
+        .query(self)?)
     }
 
     pub fn create_merge_request_discussion(
@@ -2436,15 +2454,6 @@ impl Gitlab {
     {
         let full_url = self.create_url(url)?;
         self.send(self.client.put(full_url).form(&param))
-    }
-
-    /// Handle paginated queries. Returns all results.
-    fn get_paged<T, U>(&self, url: U) -> GitlabResult<Vec<T>>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-    {
-        self.get_paged_with_param(url, query_param_slice![])
     }
 
     /// Handle paginated queries with query parameters. Returns all results.
