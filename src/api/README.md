@@ -53,6 +53,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` projects/merge_requests/awards/awards.rs
   * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` projects/merge_requests/issues_closed_by.rs
   * `GET    /projects/:project/merge_requests/:merge_request/discussions` projects/merge_requests/discussions/discussions.rs
+  * `POST   /projects/:project/merge_requests/:merge_request/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-merge-request-thread
   * `GET    /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/notes.rs
   * `POST   /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/create.rs
   * `PUT    /projects/:project/merge_requests/:merge_request/notes/:note` projects/merge_requests/notes/edit.rs
@@ -234,7 +235,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/merge_requests/:merge_request/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#award-a-new-emoji
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#get-single-award-emoji
   * `DELETE /projects/:project/merge_requests/:merge_request/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#delete-an-award-emoji
-  * `POST   /projects/:project/merge_requests/:merge_request/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-merge-request-thread
   * `GET    /projects/:project/merge_requests/:merge_request/discussions/:discussion` https://gitlab.kitware.com/help/api/discussions.md#get-single-merge-request-discussion-item
   * `POST   /projects/:project/merge_requests/:merge_request/discussions/:discussion/notes` https://gitlab.kitware.com/help/api/discussions.md#add-note-to-existing-merge-request-thread
   * `PUT    /projects/:project/merge_requests/:merge_request/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#modify-an-existing-merge-request-thread-note

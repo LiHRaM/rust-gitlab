@@ -2319,17 +2319,25 @@ impl Gitlab {
         .query(self)?)
     }
 
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::discussions::CreateMergeRequestDiscussion.query()` instead"
+    )]
     pub fn create_merge_request_discussion(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         content: &str,
     ) -> GitlabResult<Discussion> {
-        let path = format!(
-            "projects/{}/merge_requests/{}/discussions",
-            project, merge_request
-        );
-        self.post_with_param(path, &[("body", content)])
+        Ok(
+            projects::merge_requests::discussions::CreateMergeRequestDiscussion::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .body(content)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Create a note on a merge request.
