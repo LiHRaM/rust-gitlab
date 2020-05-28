@@ -46,7 +46,7 @@ impl<'a> Endpoint for CreateProjectMilestone<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/issues", self.project).into()
+        format!("projects/{}/milestones", self.project).into()
     }
 
     fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {

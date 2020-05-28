@@ -19,6 +19,7 @@
   * The `min_access_level` field for `api::groups::Groups` and the
     `access_level` for `api::projects::members::AddProjectMember` are now
     properly passed as integers to the API. (#42)
+  * The path used for the project and group milestone endpoints has been fixed.
 
 # v0.1210.2
 
