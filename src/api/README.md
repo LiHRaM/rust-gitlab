@@ -78,6 +78,7 @@ implemented above. This is split out into a separate list for convenience
 instead of having to search the page for missing endpoints.
 
   * `GET    /issues` https://gitlab.kitware.com/help/api/issues.md#list-issues
+  * `GET    /merge_requests` https://gitlab.kitware.com/help/api/merge_requests.md#list-merge-requests
   * `PUT    /groups/:group` https://gitlab.kitware.com/help/api/groups.md#update-group
   * `DELETE /groups/:group` https://gitlab.kitware.com/help/api/groups.md#remove-group
   * `GET    /groups/:group/epics/:epic/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-group-epic-discussion-items
@@ -108,6 +109,7 @@ instead of having to search the page for missing endpoints.
   * `GET    /groups/:group/members/all` https://gitlab.kitware.com/help/api/members.md#list-all-members-of-a-group-or-project-including-inherited-members
   * `GET    /groups/:group/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
   * `PUT    /groups/:group/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
+  * `GET    /groups/:group/merge_requests` https://gitlab.kitware.com/help/api/merge_requests.md#list-group-merge-requests
   * `GET    /groups/:group/projects` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-projects
   * `POST   /groups/:group/projects/:id` https://gitlab.kitware.com/help/api/groups.md#transfer-project-to-group
   * `POST   /groups/:group/restore` https://gitlab.kitware.com/help/api/groups.md#restore-group-marked-for-deletion-premium
@@ -185,6 +187,33 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
   * `PUT    /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
   * `DELETE /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
+  * `GET    /projects/:project/merge_requests` https://gitlab.kitware.com/help/api/merge_requests.md#list-project-merge-requests
+  * `POST   /projects/:project/merge_requests` https://gitlab.kitware.com/help/api/merge_requests.md#create-mr
+  * `GET    /projects/:project/merge_requests/:merge_request` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr
+  * `PUT    /projects/:project/merge_requests/:merge_request` https://gitlab.kitware.com/help/api/merge_requests.md#update-mr
+  * `DELETE /projects/:project/merge_requests/:merge_request` https://gitlab.kitware.com/help/api/merge_requests.md#delete-a-merge-request
+  * `POST   /projects/:project/merge_requests/:merge_request/add_spent_time` https://gitlab.kitware.com/help/api/merge_requests.md#add-spent-time-for-a-merge-request
+  * `POST   /projects/:project/merge_requests/:merge_request/cancel_merge_when_pipeline_succeeds` https://gitlab.kitware.com/help/api/merge_requests.md#cancel-merge-when-pipeline-succeeds
+  * `GET    /projects/:project/merge_requests/:merge_request/changes` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-changes
+  * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` https://gitlab.kitware.com/help/api/merge_requests.md#list-issues-that-will-close-on-merge
+  * `GET    /projects/:project/merge_requests/:merge_request/commits` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-commits
+  * `POST   /projects/:project/merge_requests/:merge_request/merge` https://gitlab.kitware.com/help/api/merge_requests.md#accept-mr
+  * `GET    /projects/:project/merge_requests/:merge_request/merge_ref` https://gitlab.kitware.com/help/api/merge_requests.md#merge-to-default-merge-ref-path
+  * `GET    /projects/:project/merge_requests/:merge_request/participants` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-participants
+  * `GET    /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#list-mr-pipelines
+  * `POST   /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#create-mr-pipeline
+  * `PUT    /projects/:project/merge_requests/:merge_request/rebase` https://gitlab.kitware.com/help/api/merge_requests.md#rebase-a-merge-request
+    This should be a `POST` action.
+    https://gitlab.com/gitlab-org/gitlab/-/issues/219324
+  * `POST   /projects/:project/merge_requests/:merge_request/reset_spent_time` https://gitlab.kitware.com/help/api/merge_requests.md#reset-spent-time-for-a-merge-request
+  * `POST   /projects/:project/merge_requests/:merge_request/reset_time_estimate` https://gitlab.kitware.com/help/api/merge_requests.md#reset-the-time-estimate-for-a-merge-request
+  * `POST   /projects/:project/merge_requests/:merge_request/subscribe` https://gitlab.kitware.com/help/api/merge_requests.md#subscribe-to-a-merge-request
+  * `POST   /projects/:project/merge_requests/:merge_request/time_estimate` https://gitlab.kitware.com/help/api/merge_requests.md#set-a-time-estimate-for-a-merge-request
+  * `GET    /projects/:project/merge_requests/:merge_request/time_stats` https://gitlab.kitware.com/help/api/merge_requests.md#get-time-tracking-stats
+  * `POST   /projects/:project/merge_requests/:merge_request/todo` https://gitlab.kitware.com/help/api/merge_requests.md#create-a-todo
+  * `POST   /projects/:project/merge_requests/:merge_request/unsubscribe` https://gitlab.kitware.com/help/api/merge_requests.md#unsubscribe-from-a-merge-request
+  * `GET    /projects/:project/merge_requests/:merge_request/versions` https://gitlab.kitware.com/help/api/merge_requests.md#get-mr-diff-versions
+  * `GET    /projects/:project/merge_requests/:merge_request/versions/:version` https://gitlab.kitware.com/help/api/merge_requests.md#get-a-single-mr-diff-version
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#list-an-awardables-award-emoji
   * `POST   /projects/:project/merge_requests/:merge_request/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#award-a-new-emoji
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#get-single-award-emoji
@@ -331,7 +360,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/issue_links.md
   * https://gitlab.kitware.com/help/api/managed_licenses.md
   * https://gitlab.kitware.com/help/api/merge_request_approvals.md
-  * https://gitlab.kitware.com/help/api/merge_requests.md
   * https://gitlab.kitware.com/help/api/notification_settings.md
   * https://gitlab.kitware.com/help/api/packages.md
   * https://gitlab.kitware.com/help/api/pages_domains.md
