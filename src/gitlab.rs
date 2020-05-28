@@ -1746,6 +1746,10 @@ impl Gitlab {
     }
 
     /// Get the merge requests for a project.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequests.query()` instead"
+    )]
     pub fn merge_requests<I, K, V>(
         &self,
         project: ProjectId,
@@ -1761,15 +1765,38 @@ impl Gitlab {
     }
 
     /// Get the merge requests with a given state.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequests.query()` instead"
+    )]
     pub fn merge_requests_with_state(
         &self,
         project: ProjectId,
         state: MergeRequestStateFilter,
     ) -> GitlabResult<Vec<MergeRequest>> {
-        self.get_paged_with_param(
-            format!("projects/{}/merge_requests", project),
-            &[("state", state.as_str())],
+        let convert = |state| {
+            match state {
+                MergeRequestStateFilter::Opened => {
+                    projects::merge_requests::MergeRequestState::Opened
+                },
+                MergeRequestStateFilter::Closed => {
+                    projects::merge_requests::MergeRequestState::Closed
+                },
+                MergeRequestStateFilter::Merged => {
+                    projects::merge_requests::MergeRequestState::Merged
+                },
+            }
+        };
+
+        Ok(api::paged(
+            projects::merge_requests::MergeRequests::builder()
+                .project(project.value())
+                .state(convert(state))
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Create a new merge request
