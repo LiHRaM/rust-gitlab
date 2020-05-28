@@ -72,7 +72,10 @@ impl<'a> Pageable for PipelineJobs<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::pipelines::jobs::PipelineJobs;
+    use crate::api::projects::jobs::JobScope;
+    use crate::api::projects::pipelines::PipelineJobs;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_pipeline_are_needed() {
@@ -99,5 +102,40 @@ mod tests {
             .pipeline(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/pipelines/1/jobs")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = PipelineJobs::builder()
+            .project("simple/project")
+            .pipeline(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_scopes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines/1/jobs")
+            .add_query_params(&[("scope[]", "created"), ("scope[]", "success")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = PipelineJobs::builder()
+            .project(1)
+            .pipeline(1)
+            .scope(JobScope::Created)
+            .scopes([JobScope::Created, JobScope::Success].iter().cloned())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

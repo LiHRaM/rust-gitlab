@@ -45,6 +45,8 @@ impl<'a> Pageable for MergeRequestResourceLabelEvents<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::projects::merge_requests::MergeRequestResourceLabelEvents;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_merge_request_are_needed() {
@@ -79,5 +81,21 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1/resource_label_events")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequestResourceLabelEvents::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

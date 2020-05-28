@@ -213,9 +213,14 @@ impl<'a> Pageable for Pipelines<'a> {}
 
 #[cfg(test)]
 mod tests {
+    use chrono::{TimeZone, Utc};
+
+    use crate::api::common::SortOrder;
     use crate::api::projects::pipelines::{
         PipelineOrderBy, PipelineScope, PipelineStatus, Pipelines,
     };
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn pipeline_scope_as_str() {
@@ -279,5 +284,207 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         Pipelines::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/pipelines")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project("simple/project")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_scope() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("scope", "finished")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .scope(PipelineScope::Finished)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_status() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("status", "failed")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .status(PipelineStatus::Failed)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_ref() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("ref", "master")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .ref_("master")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_sha() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("sha", "0000000000000000000000000000000000000000")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .sha("0000000000000000000000000000000000000000")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_yaml_errors() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("yaml_errors", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .yaml_errors(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_name() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("name", "name")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .name("name")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_username() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("username", "name")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .username("name")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_updated_before() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("updated_before", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .updated_before(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_updated_after() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("updated_after", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .updated_after(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_order_by() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("order_by", "updated_at")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .order_by(PipelineOrderBy::UpdatedAt)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_sort() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/pipelines")
+            .add_query_params(&[("sort", "desc")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipelines::builder()
+            .project(1)
+            .sort(SortOrder::Descending)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

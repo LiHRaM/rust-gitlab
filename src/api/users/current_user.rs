@@ -32,9 +32,20 @@ impl Endpoint for CurrentUser {
 #[cfg(test)]
 mod tests {
     use crate::api::users::CurrentUser;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn defaults_are_sufficient() {
         CurrentUser::builder().build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder().endpoint("user").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CurrentUser::builder().build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

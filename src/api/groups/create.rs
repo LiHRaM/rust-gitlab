@@ -210,9 +210,14 @@ impl<'a> Endpoint for CreateGroup<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
+    use crate::api::common::VisibilityLevel;
     use crate::api::groups::{
         BranchProtection, CreateGroup, GroupProjectCreationAccessLevel, SubgroupCreationAccessLevel,
     };
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_project_creation_access_level_as_str() {
@@ -277,5 +282,412 @@ mod tests {
             .path("path")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&path=path"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&description=description",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_membership_lock() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&path=path", "&membership_lock=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .membership_lock(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_visibility() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&path=path", "&visibility=internal"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .visibility(VisibilityLevel::Internal)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_share_with_group_lock() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&share_with_group_lock=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .share_with_group_lock(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_require_two_factor_authentication() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&require_two_factor_authentication=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .require_two_factor_authentication(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_two_factor_grace_period() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&two_factor_grace_period=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .two_factor_grace_period(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_project_creation_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&project_creation_level=maintainer",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .project_creation_level(GroupProjectCreationAccessLevel::Maintainer)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_auto_devops_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&auto_devops_enabled=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .auto_devops_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_subgroup_creation_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&subgroup_creation_level=owner",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .subgroup_creation_level(SubgroupCreationAccessLevel::Owner)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_emails_disabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&path=path", "&emails_disabled=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .emails_disabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_mentions_disabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&mentions_disabled=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .mentions_disabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_lfs_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&path=path", "&lfs_enabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .lfs_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_request_access_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&request_access_enabled=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .request_access_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_parent_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&path=path", "&parent_id=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .parent_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_default_branch_protection() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&default_branch_protection=2",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .default_branch_protection(BranchProtection::Full)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_shared_runners_minutes_limit() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&shared_runners_minutes_limit=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .shared_runners_minutes_limit(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_extra_shared_runners_minutes_limit() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&extra_shared_runners_minutes_limit=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .extra_shared_runners_minutes_limit(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

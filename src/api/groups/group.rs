@@ -59,6 +59,8 @@ impl<'a> Endpoint for Group<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::groups::Group;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_is_necessary() {
@@ -69,5 +71,51 @@ mod tests {
     #[test]
     fn group_is_sufficient() {
         Group::builder().group(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups/group%2Fsubgroup")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Group::builder().group("group/subgroup").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_custom_attributes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups/group%2Fsubgroup")
+            .add_query_params(&[("with_custom_attributes", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Group::builder()
+            .group("group/subgroup")
+            .with_custom_attributes(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_projects() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups/group%2Fsubgroup")
+            .add_query_params(&[("with_projects", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Group::builder()
+            .group("group/subgroup")
+            .with_projects(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

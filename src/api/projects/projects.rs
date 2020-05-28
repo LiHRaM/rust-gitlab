@@ -244,7 +244,12 @@ impl<'a> Pageable for Projects<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::{TimeZone, Utc};
+
+    use crate::api::common::{AccessLevel, SortOrder, VisibilityLevel};
     use crate::api::projects::{ProjectOrderBy, Projects};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn order_by_default() {
@@ -270,5 +275,360 @@ mod tests {
     #[test]
     fn defaults_are_sufficient() {
         Projects::builder().build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder().endpoint("projects").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("search", "special/query")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().search("special/query").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_archived() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("archived", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().archived(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_visibility() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("visibility", "private")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .visibility(VisibilityLevel::Private)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search_namespaces() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("search_namespaces", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .search_namespaces(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_simple() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("simple", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().simple(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_owned() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("owned", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().owned(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_membership() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("membership", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().membership(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_starred() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("starred", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().starred(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_statistics() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("statistics", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().statistics(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_issues_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("with_issues_enabled", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .with_issues_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_merge_requests_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("with_merge_requests_enabled", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .with_merge_requests_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_programming_language() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("with_programming_language", "rust")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .with_programming_language("rust")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_wiki_checksum_failed() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("wiki_checksum_failed", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .wiki_checksum_failed(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_repository_checksum_failed() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("repository_checksum_failed", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .repository_checksum_failed(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_min_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("min_access_level", "10")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .min_access_level(AccessLevel::Guest)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_custom_attributes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[
+                ("custom_attributes[key]", "value"),
+                ("custom_attributes[key2]", "value"),
+                ("custom_attributes[key3]", "value&value"),
+            ])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .custom_attribute("key", "value")
+            .custom_attributes([("key2", "value"), ("key3", "value&value")].iter().cloned())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_custom_attributes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("with_custom_attributes", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .with_custom_attributes(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_id_before() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("id_before", "100")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().id_before(100).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_id_after() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("id_after", "100")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder().id_after(100).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_last_activity_before() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("last_activity_before", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .last_activity_before(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_last_activity_after() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("last_activity_after", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .last_activity_after(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_order_by() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("order_by", "id")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .order_by(ProjectOrderBy::Id)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_sort() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("sort", "desc")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .sort(SortOrder::Descending)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

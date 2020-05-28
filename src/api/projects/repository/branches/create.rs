@@ -50,7 +50,11 @@ impl<'a> Endpoint for CreateBranch<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::repository::branches::CreateBranch;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_necessary() {
@@ -61,5 +65,28 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         CreateBranch::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/branches")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "branch=master",
+                "&ref=0000000000000000000000000000000000000000",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateBranch::builder()
+            .project("simple/project")
+            .branch("master")
+            .ref_("0000000000000000000000000000000000000000")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

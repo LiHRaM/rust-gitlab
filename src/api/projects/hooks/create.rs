@@ -108,7 +108,11 @@ impl<'a> Endpoint for CreateHook<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::hooks::CreateHook;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_url_are_necessary() {
@@ -138,5 +142,300 @@ mod tests {
             .url("url")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_push_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&push_events=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .push_events(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_push_events_branch_filter() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&push_events_branch_filter=branch%2F*%2Ffilter",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .push_events_branch_filter("branch/*/filter")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_issues_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&issues_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .issues_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_confidential_issues_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&confidential_issues_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .confidential_issues_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_requests_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&merge_requests_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .merge_requests_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_tag_push_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&tag_push_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .tag_push_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_note_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&note_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .note_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_job_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&job_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .job_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_pipeline_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&pipeline_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .pipeline_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_wiki_page_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&wiki_page_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .wiki_page_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_enable_ssl_verification() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&enable_ssl_verification=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .enable_ssl_verification(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_token() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&token=secret",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .token("secret")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

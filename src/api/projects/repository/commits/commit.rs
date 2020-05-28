@@ -58,6 +58,8 @@ impl<'a> Endpoint for Commit<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::repository::commits::Commit;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_commit_are_necessary() {
@@ -84,5 +86,36 @@ mod tests {
             .commit("master")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder().endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Commit::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_stats() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000")
+            .add_query_params(&[("stats", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Commit::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .stats(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -39,6 +39,8 @@ impl<'a> Endpoint for ProjectMember<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::members::ProjectMember;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_user_are_needed() {
@@ -61,5 +63,21 @@ mod tests {
     #[test]
     fn project_and_user_are_sufficient() {
         ProjectMember::builder().project(1).user(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMember::builder()
+            .project("simple/project")
+            .user(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

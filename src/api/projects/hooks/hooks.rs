@@ -39,6 +39,8 @@ impl<'a> Pageable for Hooks<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::projects::hooks::Hooks;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
@@ -49,5 +51,17 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         Hooks::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/hooks")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Hooks::builder().project("simple/project").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -59,6 +59,8 @@ impl<'a> Endpoint for Project<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::Project;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_necessary() {
@@ -69,5 +71,71 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         Project::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Project::builder()
+            .project("simple/project")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_statistics() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject")
+            .add_query_params(&[("statistics", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Project::builder()
+            .project("simple/project")
+            .statistics(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_license() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject")
+            .add_query_params(&[("license", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Project::builder()
+            .project("simple/project")
+            .license(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_custom_attributes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject")
+            .add_query_params(&[("with_custom_attributes", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Project::builder()
+            .project("simple/project")
+            .with_custom_attributes(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -39,6 +39,8 @@ impl<'a> Endpoint for Pipeline<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::pipelines::Pipeline;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_pipeline_are_needed() {
@@ -61,5 +63,21 @@ mod tests {
     #[test]
     fn project_and_pipeline_are_sufficient() {
         Pipeline::builder().project(1).pipeline(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/pipelines/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Pipeline::builder()
+            .project("simple/project")
+            .pipeline(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

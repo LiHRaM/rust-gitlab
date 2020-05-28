@@ -119,7 +119,11 @@ impl<'a> Endpoint for CreateCommitStatus<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::repository::commits::{CommitStatusState, CreateCommitStatus};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn commit_status_state_as_str() {
@@ -180,5 +184,154 @@ mod tests {
             .state(CommitStatusState::Pending)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/statuses/0000000000000000000000000000000000000000")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("state=pending")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateCommitStatus::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .state(CommitStatusState::Pending)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_name() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/statuses/0000000000000000000000000000000000000000")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("state=pending", "&name=jobname"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateCommitStatus::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .state(CommitStatusState::Pending)
+            .name("jobname")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_ref() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/statuses/0000000000000000000000000000000000000000")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("state=pending", "&ref=refname"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateCommitStatus::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .state(CommitStatusState::Pending)
+            .ref_("refname")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_target_url() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/statuses/0000000000000000000000000000000000000000")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "state=pending",
+                "&target_url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateCommitStatus::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .state(CommitStatusState::Pending)
+            .target_url("https://test.invalid/path?some=foo")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/statuses/0000000000000000000000000000000000000000")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("state=pending", "&description=description"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateCommitStatus::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .state(CommitStatusState::Pending)
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_coverage() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/statuses/0000000000000000000000000000000000000000")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("state=pending", "&coverage=90"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateCommitStatus::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .state(CommitStatusState::Pending)
+            .coverage(90.)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_pipeline_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/statuses/0000000000000000000000000000000000000000")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("state=pending", "&pipeline_id=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateCommitStatus::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .state(CommitStatusState::Pending)
+            .pipeline_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

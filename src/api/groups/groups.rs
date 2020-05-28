@@ -153,7 +153,10 @@ impl<'a> Pageable for Groups<'a> {}
 
 #[cfg(test)]
 mod tests {
+    use crate::api::common::{AccessLevel, SortOrder};
     use crate::api::groups::{GroupOrderBy, Groups};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn order_by_default() {
@@ -176,5 +179,147 @@ mod tests {
     #[test]
     fn defaults_are_sufficient() {
         Groups::builder().build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder().endpoint("groups").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder().build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("search", "query")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder().search("query").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_skip_groups() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("skip_groups[]", "1"), ("skip_groups[]", "2")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder()
+            .skip_group(1)
+            .skip_groups([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_all_available() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("all_available", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder().all_available(true).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_owned() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("owned", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder().owned(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_min_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("min_access_level", "30")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder()
+            .min_access_level(AccessLevel::Developer)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_statistics() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("statistics", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder().statistics(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_custom_attributes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("with_custom_attributes", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder()
+            .with_custom_attributes(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_order_by() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("order_by", "path")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder()
+            .order_by(GroupOrderBy::Path)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_sort() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("sort", "asc")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder()
+            .sort(SortOrder::Ascending)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

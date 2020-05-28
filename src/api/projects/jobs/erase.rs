@@ -38,7 +38,11 @@ impl<'a> Endpoint for EraseJob<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::jobs::EraseJob;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_job_are_needed() {
@@ -61,5 +65,22 @@ mod tests {
     #[test]
     fn project_and_job_are_sufficient() {
         EraseJob::builder().project(1).job(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/jobs/1/erase")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EraseJob::builder()
+            .project("simple/project")
+            .job(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

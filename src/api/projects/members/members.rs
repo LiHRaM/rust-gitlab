@@ -78,6 +78,8 @@ impl<'a> Pageable for ProjectMembers<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::projects::members::ProjectMembers;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
@@ -88,5 +90,55 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         ProjectMembers::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMembers::builder()
+            .project("simple/project")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_query() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members")
+            .add_query_params(&[("query", "search")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMembers::builder()
+            .project("simple/project")
+            .query("search")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_user_ids() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members")
+            .add_query_params(&[("user_ids[]", "1"), ("user_ids[]", "2")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMembers::builder()
+            .project("simple/project")
+            .user_id(1)
+            .user_ids([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

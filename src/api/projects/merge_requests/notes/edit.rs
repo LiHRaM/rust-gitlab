@@ -56,7 +56,11 @@ impl<'a> Endpoint for EditMergeRequestNote<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::merge_requests::notes::EditMergeRequestNote;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_merge_request_note_and_body_are_necessary() {
@@ -117,5 +121,26 @@ mod tests {
             .body("body")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/notes/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("body=body")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequestNote::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .note(1)
+            .body("body")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

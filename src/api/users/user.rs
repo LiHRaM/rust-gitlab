@@ -35,6 +35,8 @@ impl Endpoint for User {
 #[cfg(test)]
 mod tests {
     use crate::api::users::User;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn user_is_needed() {
@@ -45,5 +47,14 @@ mod tests {
     #[test]
     fn user_is_sufficient() {
         User::builder().user(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder().endpoint("users/1").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = User::builder().user(1).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -204,7 +204,12 @@ impl<'a> Pageable for Users<'a> {}
 
 #[cfg(test)]
 mod tests {
+    use chrono::{TimeZone, Utc};
+
+    use crate::api::common::{EnableState, SortOrder};
     use crate::api::users::{ExternalProvider, UserOrderBy, Users};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn order_by_default() {
@@ -259,5 +264,225 @@ mod tests {
     #[test]
     fn defaults_are_sufficient() {
         Users::builder().build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder().endpoint("users").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("search", "special/query")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().search("special/query").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_username() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("username", "user")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().username("user").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_active() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("active", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().active(()).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_blocked() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("blocked", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().blocked(()).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_external_provider() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("extern_uid", "1"), ("provider", "provider")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder()
+            .external_provider(ExternalProvider {
+                id: 1,
+                name: "provider".into(),
+            })
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_external() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("external", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().external(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_created_before() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("created_before", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder()
+            .created_before(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_created_after() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("created_after", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder()
+            .created_after(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_custom_attributes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[
+                ("custom_attributes[key]", "value"),
+                ("custom_attributes[key2]", "value"),
+                ("custom_attributes[key3]", "value&value"),
+            ])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder()
+            .custom_attribute("key", "value")
+            .custom_attributes([("key2", "value"), ("key3", "value&value")].iter().cloned())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_custom_attributes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("with_custom_attributes", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder()
+            .with_custom_attributes(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_order_by() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("order_by", "id")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().order_by(UserOrderBy::Id).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_sort() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("sort", "desc")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder()
+            .sort(SortOrder::Descending)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_two_factor() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("two_factor", "disabled")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder()
+            .two_factor(EnableState::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_without_projects() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("without_projects", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().without_projects(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

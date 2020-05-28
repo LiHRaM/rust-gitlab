@@ -114,6 +114,8 @@ impl<'a> Pageable for Jobs<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::projects::jobs::{JobScope, Jobs};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn job_scope_as_str() {
@@ -142,5 +144,35 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         Jobs::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/jobs")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Jobs::builder().project("simple/project").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_scopes() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/1/jobs")
+            .add_query_params(&[("scope[]", "created"), ("scope[]", "success")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Jobs::builder()
+            .project(1)
+            .scope(JobScope::Created)
+            .scopes([JobScope::Created, JobScope::Success].iter().cloned())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -49,6 +49,8 @@ impl<'a> Endpoint for Branches<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::repository::branches::Branches;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_necessary() {
@@ -59,5 +61,37 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         Branches::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/branches")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Branches::builder()
+            .project("simple/project")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/branches")
+            .add_query_params(&[("search", "query")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Branches::builder()
+            .project("simple/project")
+            .search("query")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

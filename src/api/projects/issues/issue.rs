@@ -39,6 +39,8 @@ impl<'a> Endpoint for Issue<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::issues::Issue;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_issue_are_needed() {
@@ -61,5 +63,21 @@ mod tests {
     #[test]
     fn project_and_issue_are_sufficient() {
         Issue::builder().project(1).issue(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issue::builder()
+            .project("simple/project")
+            .issue(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

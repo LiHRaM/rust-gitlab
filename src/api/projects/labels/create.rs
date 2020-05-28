@@ -66,7 +66,11 @@ impl<'a> Endpoint for CreateLabel<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::labels::CreateLabel;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_name_and_color_are_necessary() {
@@ -112,5 +116,71 @@ mod tests {
             .color("#f100fe")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/labels")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=label", "&color=%23ffffff"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateLabel::builder()
+            .project("simple/project")
+            .name("label")
+            .color("#ffffff")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/labels")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=label",
+                "&color=%23ffffff",
+                "&description=description",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateLabel::builder()
+            .project("simple/project")
+            .name("label")
+            .color("#ffffff")
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_priority() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/labels")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=label", "&color=%23ffffff", "&priority=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateLabel::builder()
+            .project("simple/project")
+            .name("label")
+            .color("#ffffff")
+            .priority(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

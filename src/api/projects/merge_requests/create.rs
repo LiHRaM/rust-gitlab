@@ -200,7 +200,11 @@ impl<'a> Endpoint for CreateMergeRequest<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::merge_requests::CreateMergeRequest;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_source_branch_target_branch_and_title_are_necessary() {
@@ -261,5 +265,331 @@ mod tests {
             .title("title")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_unassigned() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&assignee_ids=0",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .unassigned()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignee() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&assignee_id=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .assignee(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignees() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&assignee_ids%5B%5D=1",
+                "&assignee_ids%5B%5D=2",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .assignee(1)
+            .assignees([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&description=description",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_target_project_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&target_project_id=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .target_project_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&labels=label%2Clabel1%2Clabel2",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .label("label")
+            .labels(["label1", "label2"].iter().cloned())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_milestone_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&milestone_id=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .milestone_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_remove_source_branch() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&remove_source_branch=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .remove_source_branch(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_allow_collaboration() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&allow_collaboration=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .allow_collaboration(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_squash() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&squash=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .squash(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_allow_maintainer_to_push() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&allow_maintainer_to_push=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .allow_maintainer_to_push(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }
