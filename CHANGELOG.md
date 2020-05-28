@@ -13,6 +13,8 @@
     options).
   * The `api::projects::pipelines::PipelineVariables` endpoint is now pageable.
   * All `EnableState` fields may now be set using `bool` values.
+  * The `api::projects::merge_requests::EditMergeRequest` endpoint now supports
+    unlabeling a merge request.
 
 ## Fixes
 
