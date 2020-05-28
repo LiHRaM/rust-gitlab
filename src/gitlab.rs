@@ -1912,44 +1912,34 @@ impl Gitlab {
         note = "use `gitlab::api::projects::issues::CreateIssue.query()` instead"
     )]
     pub fn create_issue(&self, project: ProjectId, issue: Issue) -> GitlabResult<Issue> {
-        let path = format!("projects/{}/issues", project);
+        let mut builder = projects::issues::CreateIssue::builder();
 
-        let mut params: Vec<(&str, String)> = Vec::new();
+        builder
+            .project(project.value())
+            .title(issue.title)
+            .confidential(issue.confidential)
+            .created_at(issue.created_at);
 
         if issue.iid.value() != 0 {
-            params.push(("iid", issue.iid.value().to_string()));
+            builder.iid(issue.iid.value());
         }
-
-        params.push(("title", issue.title));
-
-        if let Some(d) = issue.description {
-            params.push(("description", d));
+        if let Some(description) = issue.description {
+            builder.description(description);
         }
-
-        params.push(("confidential", issue.confidential.to_string()));
-
-        if let Some(v) = issue.assignees {
-            params.extend(
-                v.into_iter()
-                    .map(|x| ("assignee_ids[]", x.id.value().to_string())),
-            );
+        if let Some(assignees) = issue.assignees {
+            builder.assignee_ids(assignees.into_iter().map(|u| u.id.value()));
         }
-
-        if let Some(m) = issue.milestone {
-            params.push(("milestone_id", m.id.value().to_string()))
+        if let Some(milestone) = issue.milestone {
+            builder.milestone_id(milestone.id.value());
         }
-
         if !issue.labels.is_empty() {
-            params.push(("labels", issue.labels.join(",")));
+            builder.labels(issue.labels);
+        }
+        if let Some(due_date) = issue.due_date {
+            builder.due_date(due_date);
         }
 
-        params.push(("created_at", issue.created_at.to_string()));
-
-        if let Some(d) = issue.due_date {
-            params.push(("due_date", d.to_string()))
-        }
-
-        self.post_with_param(path, &params)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get the resource label events from an issue.
@@ -2949,17 +2939,6 @@ impl Gitlab {
         let full_url = self.create_url_with_param(url, params.into_iter())?;
         let req = self.client.get(full_url);
         self.send(req)
-    }
-
-    /// Create a `POST` request to an API endpoint with query parameters.
-    fn post_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-        P: Serialize,
-    {
-        let full_url = self.create_url(url)?;
-        self.send(self.client.post(full_url).form(&param))
     }
 
     /// Handle paginated queries with query parameters. Returns all results.
