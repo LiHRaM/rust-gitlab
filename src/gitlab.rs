@@ -2048,11 +2048,15 @@ impl Gitlab {
     }
 
     /// Get the discussions from a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequestDiscussions.query()` instead"
+    )]
     pub fn merge_request_discussions<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<Discussion>>
     where
         I: IntoIterator,
@@ -2060,13 +2064,15 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/discussions",
-                project, merge_request,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::discussions::MergeRequestDiscussions::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the notes from a merge request.

@@ -10,6 +10,7 @@
 
 pub mod awards;
 mod create;
+pub mod discussions;
 mod edit;
 mod issues_closed_by;
 mod merge_request;
