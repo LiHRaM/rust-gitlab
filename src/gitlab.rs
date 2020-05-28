@@ -26,12 +26,6 @@ use crate::api::{self, common, groups, Query};
 use crate::auth::{Auth, AuthError};
 use crate::types::*;
 
-macro_rules! query_param_slice {
-    ( $( $x:expr ),* ) => (
-        &[$($x),*] as QueryParamSlice
-    )
-}
-
 const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b' ')
     .add(b'"')
@@ -1897,7 +1891,15 @@ impl Gitlab {
         project: ProjectId,
         id: PipelineId,
     ) -> GitlabResult<Vec<PipelineVariable>> {
-        self.get(format!("projects/{}/pipelines/{}/variables", project, id))
+        Ok(api::paged(
+            projects::pipelines::PipelineVariables::builder()
+                .project(project.value())
+                .pipeline(id.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
+        )
+        .query(self)?)
     }
 
     /// Create a new pipeline.
@@ -2612,15 +2614,6 @@ impl Gitlab {
 
         debug!(target: "gitlab", "received data: {:?}", v);
         serde_json::from_value::<T>(v).map_err(GitlabError::data_type::<T>)
-    }
-
-    /// Create a `GET` request to an API endpoint.
-    fn get<T, U>(&self, url: U) -> GitlabResult<T>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-    {
-        self.get_with_param(url, query_param_slice![])
     }
 
     /// Create a `GET` request to an API endpoint with query parameters.

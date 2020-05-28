@@ -40,6 +40,8 @@ impl<'a> Endpoint for PipelineVariables<'a> {
     }
 }
 
+impl<'a> Pageable for PipelineVariables<'a> {}
+
 #[cfg(test)]
 mod tests {
     use crate::api::projects::pipelines::PipelineVariables;
