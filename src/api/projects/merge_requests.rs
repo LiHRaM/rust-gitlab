@@ -8,6 +8,7 @@
 //!
 //! These endpoints are used for querying projects merge requests.
 
+pub mod awards;
 mod issues_closed_by;
 pub mod notes;
 mod resource_label_events;

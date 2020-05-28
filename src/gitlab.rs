@@ -2096,11 +2096,15 @@ impl Gitlab {
     }
 
     /// Get the awards for a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::awards::MergeRequestAwards.query()` instead"
+    )]
     pub fn merge_request_awards<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<AwardEmoji>>
     where
         I: IntoIterator,
@@ -2108,21 +2112,27 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/award_emoji",
-                project, merge_request,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::awards::MergeRequestAwards::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the awards for a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::awards::MergeRequestAwards.query()` instead"
+    )]
     pub fn merge_request_awards_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<AwardEmoji>>
     where
         P: AsRef<str>,
@@ -2131,14 +2141,15 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/award_emoji",
-                Self::url_name(project.as_ref()),
-                merge_request,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::awards::MergeRequestAwards::builder()
+                .project(project.as_ref())
+                .merge_request(merge_request.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the awards for a merge request note.
