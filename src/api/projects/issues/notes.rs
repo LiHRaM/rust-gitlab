@@ -20,4 +20,4 @@ pub use self::edit::EditIssueNoteBuilder;
 
 pub use self::notes::IssueNotes;
 pub use self::notes::IssueNotesBuilder;
-pub use self::notes::NoteOrderBy;
+pub use crate::api::helpers::NoteOrderBy;

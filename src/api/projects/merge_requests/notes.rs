@@ -21,4 +21,4 @@ pub use self::edit::EditMergeRequestNoteBuilder;
 
 pub use self::notes::MergeRequestNotes;
 pub use self::notes::MergeRequestNotesBuilder;
-pub use crate::api::projects::issues::notes::NoteOrderBy;
+pub use crate::api::helpers::NoteOrderBy;

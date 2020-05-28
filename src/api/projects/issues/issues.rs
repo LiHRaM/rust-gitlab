@@ -8,10 +8,10 @@ use std::collections::BTreeSet;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
-use itertools::Itertools;
 
 use crate::api::common::{NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
+use crate::api::helpers::{Labels, Milestone, ReactionEmoji};
 use crate::api::ParamValue;
 
 /// Filters for issue states.
@@ -34,52 +34,6 @@ impl IssueState {
 
 impl ParamValue<'static> for IssueState {
     fn as_value(self) -> Cow<'static, str> {
-        self.as_str().into()
-    }
-}
-
-#[derive(Debug, Clone)]
-enum Labels<'a> {
-    Any,
-    None,
-    AllOf(BTreeSet<Cow<'a, str>>),
-}
-
-impl<'a> Labels<'a> {
-    fn as_str(&self) -> Cow<'static, str> {
-        match self {
-            Labels::Any => "Any".into(),
-            Labels::None => "None".into(),
-            Labels::AllOf(labels) => format!("{}", labels.iter().format(",")).into(),
-        }
-    }
-}
-
-impl<'a, 'b: 'a> ParamValue<'static> for &'b Labels<'a> {
-    fn as_value(self) -> Cow<'static, str> {
-        self.as_str()
-    }
-}
-
-#[derive(Debug, Clone)]
-enum Milestone<'a> {
-    None,
-    Any,
-    Named(Cow<'a, str>),
-}
-
-impl<'a> Milestone<'a> {
-    fn as_str(&self) -> &str {
-        match self {
-            Milestone::None => "None",
-            Milestone::Any => "Any",
-            Milestone::Named(name) => name.as_ref(),
-        }
-    }
-}
-
-impl<'a, 'b: 'a> ParamValue<'a> for &'b Milestone<'a> {
-    fn as_value(self) -> Cow<'a, str> {
         self.as_str().into()
     }
 }
@@ -135,29 +89,6 @@ impl<'a> Assignee<'a> {
                 params.extend(usernames.iter().map(|value| ("assignee_username[]", value)));
             },
         }
-    }
-}
-
-#[derive(Debug, Clone)]
-enum ReactionEmoji<'a> {
-    None,
-    Any,
-    Emoji(Cow<'a, str>),
-}
-
-impl<'a> ReactionEmoji<'a> {
-    fn as_str(&self) -> &str {
-        match self {
-            ReactionEmoji::None => "None",
-            ReactionEmoji::Any => "Any",
-            ReactionEmoji::Emoji(name) => name.as_ref(),
-        }
-    }
-}
-
-impl<'a, 'b: 'a> ParamValue<'a> for &'b ReactionEmoji<'a> {
-    fn as_value(self) -> Cow<'a, str> {
-        self.as_str().into()
     }
 }
 
@@ -529,11 +460,7 @@ impl<'a> Pageable for Issues<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
     use crate::api::projects::issues::{IssueOrderBy, IssueScope, IssueState, IssueWeight, Issues};
-
-    use super::{Labels, Milestone, ReactionEmoji};
 
     #[test]
     fn issue_state_as_str() {
@@ -548,63 +475,11 @@ mod tests {
     }
 
     #[test]
-    fn issue_labels_as_str() {
-        let one_user = {
-            let mut set = BTreeSet::new();
-            set.insert("one".into());
-            set
-        };
-        let two_users = {
-            let mut set = BTreeSet::new();
-            set.insert("one".into());
-            set.insert("two".into());
-            set
-        };
-
-        let items = &[
-            (Labels::Any, "Any"),
-            (Labels::None, "None"),
-            (Labels::AllOf(one_user), "one"),
-            (Labels::AllOf(two_users), "one,two"),
-        ];
-
-        for (i, s) in items {
-            assert_eq!(i.as_str(), *s);
-        }
-    }
-
-    #[test]
-    fn issue_milestone_as_str() {
-        let items = &[
-            (Milestone::Any, "Any"),
-            (Milestone::None, "None"),
-            (Milestone::Named("milestone".into()), "milestone"),
-        ];
-
-        for (i, s) in items {
-            assert_eq!(i.as_str(), *s);
-        }
-    }
-
-    #[test]
     fn issue_scope_as_str() {
         let items = &[
             (IssueScope::CreatedByMe, "created_by_me"),
             (IssueScope::AssignedToMe, "assigned_to_me"),
             (IssueScope::All, "all"),
-        ];
-
-        for (i, s) in items {
-            assert_eq!(i.as_str(), *s);
-        }
-    }
-
-    #[test]
-    fn reaction_emoji_as_str() {
-        let items = &[
-            (ReactionEmoji::None, "None"),
-            (ReactionEmoji::Any, "Any"),
-            (ReactionEmoji::Emoji("emoji".into()), "emoji"),
         ];
 
         for (i, s) in items {

@@ -8,37 +8,7 @@ use derive_builder::Builder;
 
 use crate::api::common::{NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
-use crate::api::ParamValue;
-
-/// Keys note results may be ordered by.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum NoteOrderBy {
-    /// Sort by creation date.
-    CreatedAt,
-    /// Sort by last updated date.
-    UpdatedAt,
-}
-
-impl Default for NoteOrderBy {
-    fn default() -> Self {
-        NoteOrderBy::CreatedAt
-    }
-}
-
-impl NoteOrderBy {
-    fn as_str(self) -> &'static str {
-        match self {
-            NoteOrderBy::CreatedAt => "created_at",
-            NoteOrderBy::UpdatedAt => "updated_at",
-        }
-    }
-}
-
-impl ParamValue<'static> for NoteOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
-        self.as_str().into()
-    }
-}
+use crate::api::helpers::NoteOrderBy;
 
 /// Query for notes on an issue within a project.
 #[derive(Debug, Builder)]
@@ -89,24 +59,7 @@ impl<'a> Pageable for IssueNotes<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::issues::notes::{IssueNotes, NoteOrderBy};
-
-    #[test]
-    fn note_order_by_default() {
-        assert_eq!(NoteOrderBy::default(), NoteOrderBy::CreatedAt);
-    }
-
-    #[test]
-    fn note_order_by_as_str() {
-        let items = &[
-            (NoteOrderBy::CreatedAt, "created_at"),
-            (NoteOrderBy::UpdatedAt, "updated_at"),
-        ];
-
-        for (i, s) in items {
-            assert_eq!(i.as_str(), *s);
-        }
-    }
+    use crate::api::projects::issues::notes::IssueNotes;
 
     #[test]
     fn project_and_issue_are_necessary() {

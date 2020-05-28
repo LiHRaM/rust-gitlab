@@ -8,7 +8,7 @@ use derive_builder::Builder;
 
 use crate::api::common::{NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
-use crate::api::projects::issues::notes::NoteOrderBy;
+use crate::api::helpers::NoteOrderBy;
 
 /// Query for notes on an merge request within a project.
 #[derive(Debug, Builder)]
