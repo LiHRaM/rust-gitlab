@@ -15,9 +15,11 @@ use crate::api::endpoint_prelude::*;
 #[builder(setter(strip_option))]
 pub struct LineRange<'a> {
     /// The line code for the start of the range.
+    // FIXME: Add a type for this.
     #[builder(setter(into))]
     start_line_code: Cow<'a, str>,
     /// The line code for the end of the range.
+    // FIXME: Add a type for this.
     #[builder(setter(into))]
     end_line_code: Cow<'a, str>,
 }
