@@ -1,3 +1,11 @@
+# v0.1300.0 (unreleased)
+
+## Changes
+
+  * The `api::projects::issues::Issues` endpoint's `milestone` field was
+    changed to match the actual API exposed by GitLab (with `None` and `Any`
+    options).
+
 # v0.1210.2
 
 ## New request body handling

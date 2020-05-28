@@ -61,6 +61,29 @@ impl<'a, 'b: 'a> ParamValue<'static> for &'b Labels<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
+enum Milestone<'a> {
+    None,
+    Any,
+    Named(Cow<'a, str>),
+}
+
+impl<'a> Milestone<'a> {
+    fn as_str(&self) -> &str {
+        match self {
+            Milestone::None => "None",
+            Milestone::Any => "Any",
+            Milestone::Named(name) => name.as_ref(),
+        }
+    }
+}
+
+impl<'a, 'b: 'a> ParamValue<'a> for &'b Milestone<'a> {
+    fn as_value(self) -> Cow<'a, str> {
+        self.as_str().into()
+    }
+}
+
 /// Filter issues by a scope.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IssueScope {
@@ -240,9 +263,9 @@ pub struct Issues<'a> {
     /// Include label details in the result.
     #[builder(default)]
     with_labels_details: Option<bool>,
-    /// Filter issues with a milestone title.
-    #[builder(setter(into), default)]
-    milestone: Option<Cow<'a, str>>,
+    /// Filter issues with a milestone.
+    #[builder(setter(name = "_milestone"), default, private)]
+    milestone: Option<Milestone<'a>>,
     /// Filter issues within a scope.
     #[builder(default)]
     scope: Option<IssueScope>,
@@ -355,6 +378,27 @@ impl<'a> IssuesBuilder<'a> {
             iter.collect()
         };
         self.labels = Some(Some(Labels::AllOf(labels)));
+        self
+    }
+
+    /// Filter issues without a milestone.
+    pub fn without_milestone(&mut self) -> &mut Self {
+        self.milestone = Some(Some(Milestone::None));
+        self
+    }
+
+    /// Filter issues with any milestone.
+    pub fn any_milestone(&mut self) -> &mut Self {
+        self.milestone = Some(Some(Milestone::Any));
+        self
+    }
+
+    /// Filter issues with a given milestone.
+    pub fn milestone<M>(&mut self, milestone: M) -> &mut Self
+    where
+        M: Into<Cow<'a, str>>,
+    {
+        self.milestone = Some(Some(Milestone::Named(milestone.into())));
         self
     }
 
@@ -489,7 +533,7 @@ mod tests {
 
     use crate::api::projects::issues::{IssueOrderBy, IssueScope, IssueState, IssueWeight, Issues};
 
-    use super::{Labels, ReactionEmoji};
+    use super::{Labels, Milestone, ReactionEmoji};
 
     #[test]
     fn issue_state_as_str() {
@@ -522,6 +566,19 @@ mod tests {
             (Labels::None, "None"),
             (Labels::AllOf(one_user), "one"),
             (Labels::AllOf(two_users), "one,two"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn issue_milestone_as_str() {
+        let items = &[
+            (Milestone::Any, "Any"),
+            (Milestone::None, "None"),
+            (Milestone::Named("milestone".into()), "milestone"),
         ];
 
         for (i, s) in items {
