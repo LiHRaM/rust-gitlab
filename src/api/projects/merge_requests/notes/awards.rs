@@ -8,7 +8,11 @@
 //!
 //! These endpoints are used for querying project merge request note awards.
 
+mod awards;
 mod create;
+
+pub use self::awards::MergeRequestNoteAwards;
+pub use self::awards::MergeRequestNoteAwardsBuilder;
 
 pub use self::create::CreateMergeRequestNoteAward;
 pub use self::create::CreateMergeRequestNoteAwardBuilder;

@@ -2142,12 +2142,16 @@ impl Gitlab {
     }
 
     /// Get the awards for a merge request note.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::awards::MergeRequestNoteAwards.query()` instead"
+    )]
     pub fn merge_request_note_awards<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         note: NoteId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<AwardEmoji>>
     where
         I: IntoIterator,
@@ -2155,22 +2159,29 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-                project, merge_request, note,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::notes::awards::MergeRequestNoteAwards::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the awards for a merge request note.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::awards::MergeRequestNoteAwards.query()` instead"
+    )]
     pub fn merge_request_note_awards_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
         note: NoteId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<AwardEmoji>>
     where
         P: AsRef<str>,
@@ -2179,15 +2190,16 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-                Self::url_name(project.as_ref()),
-                merge_request,
-                note,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::notes::awards::MergeRequestNoteAwards::builder()
+                .project(project.as_ref())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the resource label events from a merge request.

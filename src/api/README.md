@@ -50,6 +50,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/notes.rs
   * `POST   /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/create.rs
   * `PUT    /projects/:project/merge_requests/:merge_request/notes/:note` projects/merge_requests/notes/edit.rs
+  * `GET    /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` projects/merge_requests/notes/awards/awards.rs
   * `POST   /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` projects/merge_requests/notes/awards/create.rs
   * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` projects/merge_requests/resource_label_events.rs
   * `POST   /projects/:project/milestones` projects/milestones/create.rs
@@ -240,7 +241,6 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/merge_requests/:merge_request/discussions/:discussion/notes/:note` https://gitlab.kitware.com/help/api/discussions.md#delete-a-merge-request-thread-note
   * `GET    /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#get-single-merge-request-note
   * `DELETE /projects/:project/merge_requests/:merge_request/notes/:note` https://gitlab.kitware.com/help/api/notes.md#delete-a-merge-request-note
-  * `GET    /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#list-a-comments-award-emoji
   * `GET    /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#get-an-award-emoji-for-a-comment
   * `DELETE /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#delete-an-award-emoji-from-a-comment
   * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events/:event` https://gitlab.kitware.com/help/api/resource_label_events.md#get-single-merge-request-label-event
