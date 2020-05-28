@@ -47,6 +47,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/members` `projects/members/add.rs`
   * `GET    /projects/:project/members/:id` `projects/members/member.rs`
   * `GET    /projects/:project/merge_requests` projects/merge_requests/merge_requests.rs
+  * `GET    /projects/:project/merge_requests/:merge_request` projects/merge_requests/merge_request.rs
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` projects/merge_requests/awards/awards.rs
   * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` projects/merge_requests/issues_closed_by.rs
   * `GET    /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/notes.rs
@@ -206,7 +207,6 @@ instead of having to search the page for missing endpoints.
   * `PUT    /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
   * `DELETE /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
   * `POST   /projects/:project/merge_requests` https://gitlab.kitware.com/help/api/merge_requests.md#create-mr
-  * `GET    /projects/:project/merge_requests/:merge_request` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr
   * `PUT    /projects/:project/merge_requests/:merge_request` https://gitlab.kitware.com/help/api/merge_requests.md#update-mr
   * `DELETE /projects/:project/merge_requests/:merge_request` https://gitlab.kitware.com/help/api/merge_requests.md#delete-a-merge-request
   * `POST   /projects/:project/merge_requests/:merge_request/add_spent_time` https://gitlab.kitware.com/help/api/merge_requests.md#add-spent-time-for-a-merge-request

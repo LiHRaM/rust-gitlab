@@ -1951,7 +1951,11 @@ impl Gitlab {
         .query(self)?)
     }
 
-    /// Get merge requests.
+    /// Get a single merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequest.query()` instead"
+    )]
     pub fn merge_request<I, K, V>(
         &self,
         project: ProjectId,

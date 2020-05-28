@@ -10,12 +10,16 @@
 
 pub mod awards;
 mod issues_closed_by;
+mod merge_request;
 mod merge_requests;
 pub mod notes;
 mod resource_label_events;
 
 pub use self::issues_closed_by::IssuesClosedBy;
 pub use self::issues_closed_by::IssuesClosedByBuilder;
+
+pub use self::merge_request::MergeRequest;
+pub use self::merge_request::MergeRequestBuilder;
 
 pub use self::merge_requests::MergeRequestOrderBy;
 pub use self::merge_requests::MergeRequestScope;
