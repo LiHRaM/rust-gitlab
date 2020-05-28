@@ -588,7 +588,7 @@ mod tests {
     fn merge_request_order_by_default() {
         assert_eq!(
             MergeRequestOrderBy::default(),
-            MergeRequestOrderBy::CreatedAt
+            MergeRequestOrderBy::CreatedAt,
         );
     }
 

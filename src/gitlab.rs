@@ -10,7 +10,7 @@ use std::fmt::{self, Debug, Display};
 
 use graphql_client::{GraphQLQuery, QueryBody, Response};
 use itertools::Itertools;
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use reqwest::blocking::{Client, RequestBuilder, Response as HttpResponse};
 use reqwest::{Method, Url};
@@ -421,7 +421,7 @@ impl Gitlab {
     ///                     .unwrap();
     /// gitlab.create_project("My Project", Some("project"), Some(params));
     /// ```
-    #[allow(deprecated)]
+    #[allow(clippy::cognitive_complexity)]
     #[deprecated(
         since = "0.1210.1",
         note = "use `gitlab::api::projects::CreateProject.query()` instead"
@@ -432,18 +432,214 @@ impl Gitlab {
         path: Option<P>,
         params: Option<CreateProjectParams>,
     ) -> GitlabResult<Project> {
-        let url = "projects";
+        let mut builder = projects::CreateProject::builder();
 
-        let mut merged_params = params.unwrap_or_default();
+        builder.name(name.as_ref());
 
-        let path = match path.as_ref() {
-            None => name.as_ref(),
-            Some(s) => s.as_ref(),
+        let convert = |level| {
+            match level {
+                FeatureVisibilityLevel::Disabled => projects::FeatureAccessLevel::Disabled,
+                FeatureVisibilityLevel::Private => projects::FeatureAccessLevel::Private,
+                FeatureVisibilityLevel::Enabled | FeatureVisibilityLevel::Public => {
+                    projects::FeatureAccessLevel::Enabled
+                },
+            }
         };
-        merged_params.name = Some(name.as_ref().to_string());
-        merged_params.path = Some(path.to_string());
+        let convert_pub = |level| {
+            match level {
+                FeatureVisibilityLevel::Disabled => projects::FeatureAccessLevelPublic::Disabled,
+                FeatureVisibilityLevel::Private => projects::FeatureAccessLevelPublic::Private,
+                FeatureVisibilityLevel::Enabled => projects::FeatureAccessLevelPublic::Enabled,
+                FeatureVisibilityLevel::Public => projects::FeatureAccessLevelPublic::Public,
+            }
+        };
+        let convert_vis = |level| {
+            match level {
+                VisibilityLevel::Public => api::common::VisibilityLevel::Public,
+                VisibilityLevel::Internal => api::common::VisibilityLevel::Internal,
+                VisibilityLevel::Private => api::common::VisibilityLevel::Private,
+            }
+        };
+        let convert_mm = |method| {
+            match method {
+                MergeMethod::Merge => api::projects::MergeMethod::Merge,
+                MergeMethod::RebaseMerge => api::projects::MergeMethod::RebaseMerge,
+                MergeMethod::FastForward => api::projects::MergeMethod::FastForward,
+            }
+        };
+        let convert_git = |strategy| {
+            match strategy {
+                BuildGitStrategy::Fetch => api::projects::BuildGitStrategy::Fetch,
+                BuildGitStrategy::Clone => api::projects::BuildGitStrategy::Clone,
+            }
+        };
+        let convert_auto_deploy = |strategy| {
+            match strategy {
+                "continuous" => Some(api::projects::AutoDevOpsDeployStrategy::Continuous),
+                "manual" => Some(api::projects::AutoDevOpsDeployStrategy::Manual),
+                "timed_incremental" => {
+                    Some(api::projects::AutoDevOpsDeployStrategy::TimedIncremental)
+                },
+                unknown => {
+                    warn!(
+                        target: "gitlab",
+                        "unknown auto_devops_deploy_strategy '{}'; ignoring",
+                        unknown,
+                    );
+                    None
+                },
+            }
+        };
 
-        self.post_with_param(url, &merged_params)
+        let path_save;
+        if let Some(path) = path {
+            path_save = path;
+            builder.path(path_save.as_ref());
+        }
+        if let Some(params) = params {
+            if let Some(namespace_id) = params.namespace_id {
+                builder.namespace_id(namespace_id);
+            }
+            if let Some(default_branch) = params.default_branch {
+                builder.default_branch(default_branch);
+            }
+            if let Some(description) = params.description {
+                builder.description(description);
+            }
+            if let Some(issues_access_level) = params.issues_access_level {
+                builder.issues_access_level(convert(issues_access_level));
+            }
+            if let Some(repository_access_level) = params.repository_access_level {
+                builder.repository_access_level(convert(repository_access_level));
+            }
+            if let Some(merge_requests_access_level) = params.merge_requests_access_level {
+                builder.merge_requests_access_level(convert(merge_requests_access_level));
+            }
+            if let Some(builds_access_level) = params.builds_access_level {
+                builder.builds_access_level(convert(builds_access_level));
+            }
+            if let Some(wiki_access_level) = params.wiki_access_level {
+                builder.wiki_access_level(convert(wiki_access_level));
+            }
+            if let Some(snippets_access_level) = params.snippets_access_level {
+                builder.snippets_access_level(convert(snippets_access_level));
+            }
+            if let Some(pages_access_level) = params.pages_access_level {
+                builder.pages_access_level(convert_pub(pages_access_level));
+            }
+            if let Some(resolve_outdated_diff_discussions) =
+                params.resolve_outdated_diff_discussions
+            {
+                builder.resolve_outdated_diff_discussions(resolve_outdated_diff_discussions);
+            }
+            if let Some(container_registry_enabled) = params.container_registry_enabled {
+                builder.container_registry_enabled(container_registry_enabled);
+            }
+            if let Some(shared_runners_enabled) = params.shared_runners_enabled {
+                builder.shared_runners_enabled(shared_runners_enabled);
+            }
+            if let Some(visibility) = params.visibility {
+                builder.visibility(convert_vis(visibility));
+            }
+            if let Some(import_url) = params.import_url {
+                builder.import_url(import_url);
+            }
+            if let Some(public_builds) = params.public_builds {
+                builder.public_builds(public_builds);
+            }
+            if let Some(only_allow_merge_if_pipeline_succeeds) =
+                params.only_allow_merge_if_pipeline_succeeds
+            {
+                builder
+                    .only_allow_merge_if_pipeline_succeeds(only_allow_merge_if_pipeline_succeeds);
+            }
+            if let Some(only_allow_merge_if_all_discussions_are_resolved) =
+                params.only_allow_merge_if_all_discussions_are_resolved
+            {
+                builder.only_allow_merge_if_all_discussions_are_resolved(
+                    only_allow_merge_if_all_discussions_are_resolved,
+                );
+            }
+            if let Some(merge_method) = params.merge_method {
+                builder.merge_method(convert_mm(merge_method));
+            }
+            if let Some(autoclose_referenced_issues) = params.autoclose_referenced_issues {
+                builder.autoclose_referenced_issues(autoclose_referenced_issues);
+            }
+            if let Some(lfs_enabled) = params.lfs_enabled {
+                builder.lfs_enabled(lfs_enabled);
+            }
+            if let Some(request_access_enabled) = params.request_access_enabled {
+                builder.request_access_enabled(request_access_enabled);
+            }
+            if let Some(tag_list) = params.tag_list {
+                builder.tags(tag_list.into_iter());
+            }
+            if let Some(printing_merge_request_link_enabled) =
+                params.printing_merge_request_link_enabled
+            {
+                builder.printing_merge_request_link_enabled(printing_merge_request_link_enabled);
+            }
+            if let Some(build_git_strategy) = params.build_git_strategy {
+                builder.build_git_strategy(convert_git(build_git_strategy));
+            }
+            if let Some(build_timeout) = params.build_timeout {
+                builder.build_timeout(build_timeout);
+            }
+            if let Some(auto_cancel_pending_pipelines) = params.auto_cancel_pending_pipelines {
+                builder.auto_cancel_pending_pipelines(auto_cancel_pending_pipelines);
+            }
+            if let Some(build_coverage_regex) = params.build_coverage_regex {
+                builder.build_coverage_regex(build_coverage_regex);
+            }
+            if let Some(ci_config_path) = params.ci_config_path {
+                builder.ci_config_path(ci_config_path);
+            }
+            if let Some(auto_devops_enabled) = params.auto_devops_enabled {
+                builder.auto_devops_enabled(auto_devops_enabled);
+            }
+            if let Some(auto_devops_deploy_strategy) = params.auto_devops_deploy_strategy {
+                if let Some(strategy) = convert_auto_deploy(&auto_devops_deploy_strategy) {
+                    builder.auto_devops_deploy_strategy(strategy);
+                }
+            }
+            if let Some(repository_storage) = params.repository_storage {
+                builder.repository_storage(repository_storage);
+            }
+            if let Some(approvals_before_merge) = params.approvals_before_merge {
+                builder.approvals_before_merge(approvals_before_merge);
+            }
+            if let Some(external_authorization_classification_label) =
+                params.external_authorization_classification_label
+            {
+                builder.external_authorization_classification_label(
+                    external_authorization_classification_label,
+                );
+            }
+            if let Some(mirror) = params.mirror {
+                builder.mirror(mirror);
+            }
+            if let Some(mirror_trigger_builds) = params.mirror_trigger_builds {
+                builder.mirror_trigger_builds(mirror_trigger_builds);
+            }
+            if let Some(template_name) = params.template_name {
+                builder.template_name(template_name);
+            }
+            if let Some(template_project_id) = params.template_project_id {
+                builder.template_project_id(template_project_id);
+            }
+            if let Some(use_custom_template) = params.use_custom_template {
+                builder.use_custom_template(use_custom_template);
+            }
+            if let Some(group_with_project_templates_id) = params.group_with_project_templates_id {
+                builder.group_with_project_templates_id(group_with_project_templates_id);
+            }
+            if let Some(packages_enabled) = params.packages_enabled {
+                builder.packages_enabled(packages_enabled);
+            }
+        }
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Create a new file in repository
