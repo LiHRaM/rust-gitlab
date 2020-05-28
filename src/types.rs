@@ -2870,54 +2870,40 @@ pub struct CreateGroupParams {
     #[builder(setter(skip))]
     pub(crate) path: Option<String>,
     /// The group description
-    description: Option<String>,
+    pub(crate) description: Option<String>,
     /// The group visibility level, can be `private`, `internal` or `public`
-    visibility: Option<VisibilityLevel>,
+    pub(crate) visibility: Option<VisibilityLevel>,
     /// Prevent sharing a project with another group within this group
-    share_with_group_lock: Option<bool>,
+    pub(crate) share_with_group_lock: Option<bool>,
     /// Require all users in this group to setup two-factor authentication
-    require_two_factor_authentication: Option<bool>,
+    pub(crate) require_two_factor_authentication: Option<bool>,
     /// Time before two-factor authentication is enforced
-    two_factor_grace_period: Option<u64>,
+    pub(crate) two_factor_grace_period: Option<u64>,
     /// Determine if developers can create projects in the group
-    #[builder(setter(name = "_project_creation_level"))]
-    project_creation_level: Option<String>,
+    pub(crate) project_creation_level: Option<AccessLevel>,
     /// Default to Auto Devops pipeline for all projects within this group
-    auto_devops_enabled: Option<bool>,
+    pub(crate) auto_devops_enabled: Option<bool>,
     /// Role allowed to create subgroups
-    #[builder(setter(name = "_subgroup_creation_level"))]
-    subgroup_creation_level: Option<String>,
+    pub(crate) subgroup_creation_level: Option<AccessLevel>,
     /// Disable email notification
-    emails_disabled: Option<bool>,
+    pub(crate) emails_disabled: Option<bool>,
     /// Disable the capability of a group from getting mentioned
-    mentions_disabled: Option<bool>,
+    pub(crate) mentions_disabled: Option<bool>,
     /// Enable/disable Large File Storage (LFS) for the projects in this group
-    lfs_enabled: Option<bool>,
+    pub(crate) lfs_enabled: Option<bool>,
     /// Allow users to request membership
-    request_access_enabled: Option<bool>,
+    pub(crate) request_access_enabled: Option<bool>,
     /// The parent group ID for creating a nesting group
-    parent_id: Option<GroupId>,
+    pub(crate) parent_id: Option<GroupId>,
     /// [Gitlab Starter and higher] pipeline minutes quota for this group
-    shared_runners_minutes_limit: Option<u64>,
+    pub(crate) shared_runners_minutes_limit: Option<u64>,
     /// [Gitlab Starter and higher] extra pipeline minutes quota for this group
-    extra_shared_runners_minutes_limit: Option<u64>,
+    pub(crate) extra_shared_runners_minutes_limit: Option<u64>,
 }
 
 impl CreateGroupParams {
     pub fn builder() -> CreateGroupParamsBuilder {
         CreateGroupParamsBuilder::default()
-    }
-}
-
-impl CreateGroupParamsBuilder {
-    pub fn project_creation_level(&mut self, level: AccessLevel) -> &mut Self {
-        self.project_creation_level = Some(Some(level.as_str().to_string()));
-        self
-    }
-
-    pub fn subgroup_creation_level(&mut self, level: AccessLevel) -> &mut Self {
-        self.subgroup_creation_level = Some(Some(level.as_str().to_string()));
-        self
     }
 }
 

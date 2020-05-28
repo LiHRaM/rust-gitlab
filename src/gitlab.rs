@@ -882,13 +882,124 @@ impl Gitlab {
         path: P,
         params: Option<CreateGroupParams>,
     ) -> GitlabResult<Group> {
-        let url = "groups";
+        let mut builder = groups::CreateGroup::builder();
 
-        let mut merged_params = params.unwrap_or_default();
-        merged_params.name = Some(name.as_ref().to_string());
-        merged_params.path = Some(path.as_ref().to_string());
+        builder.name(name.as_ref()).path(path.as_ref());
 
-        self.post_with_param(url, &merged_params)
+        if let Some(params) = params {
+            let convert_vis = |level| {
+                match level {
+                    VisibilityLevel::Public => api::common::VisibilityLevel::Public,
+                    VisibilityLevel::Internal => api::common::VisibilityLevel::Internal,
+                    VisibilityLevel::Private => api::common::VisibilityLevel::Private,
+                }
+            };
+            let convert_project_level = |level| {
+                match level {
+                    AccessLevel::Admin | AccessLevel::Owner => {
+                        warn!(
+                            target: "gitlab",
+                            "project creation may not be limited to {:?}; setting to NoOne",
+                            level,
+                        );
+                        Some(api::groups::GroupProjectCreationAccessLevel::NoOne)
+                    },
+                    AccessLevel::Maintainer => {
+                        Some(api::groups::GroupProjectCreationAccessLevel::Maintainer)
+                    },
+                    AccessLevel::Developer => {
+                        Some(api::groups::GroupProjectCreationAccessLevel::Developer)
+                    },
+                    AccessLevel::Reporter | AccessLevel::Guest | AccessLevel::Anonymous => {
+                        warn!(
+                            target: "gitlab",
+                            "project creation may not be limited to {:?}; ignoring",
+                            level,
+                        );
+                        None
+                    },
+                }
+            };
+            let convert_subgroup_level = |level| {
+                match level {
+                    AccessLevel::Admin => {
+                        warn!(
+                            target: "gitlab",
+                            "subgroup creation may not be limited to administrators; downgrading to Owner",
+                        );
+                        Some(api::groups::SubgroupCreationAccessLevel::Owner)
+                    },
+                    AccessLevel::Owner => Some(api::groups::SubgroupCreationAccessLevel::Owner),
+                    AccessLevel::Maintainer => {
+                        Some(api::groups::SubgroupCreationAccessLevel::Maintainer)
+                    },
+                    AccessLevel::Developer
+                    | AccessLevel::Reporter
+                    | AccessLevel::Guest
+                    | AccessLevel::Anonymous => {
+                        warn!(
+                            target: "gitlab",
+                            "subgroup creation may not be limited to {:?}; ignoring",
+                            level,
+                        );
+                        None
+                    },
+                }
+            };
+
+            if let Some(description) = params.description {
+                builder.description(description);
+            }
+            if let Some(visibility) = params.visibility {
+                builder.visibility(convert_vis(visibility));
+            }
+            if let Some(share_with_group_lock) = params.share_with_group_lock {
+                builder.share_with_group_lock(share_with_group_lock);
+            }
+            if let Some(require_two_factor_authentication) =
+                params.require_two_factor_authentication
+            {
+                builder.require_two_factor_authentication(require_two_factor_authentication);
+            }
+            if let Some(project_creation_level) = params.project_creation_level {
+                if let Some(level) = convert_project_level(project_creation_level) {
+                    builder.project_creation_level(level);
+                }
+            }
+            if let Some(auto_devops_enabled) = params.auto_devops_enabled {
+                builder.auto_devops_enabled(auto_devops_enabled);
+            }
+            if let Some(subgroup_creation_level) = params.subgroup_creation_level {
+                if let Some(level) = convert_subgroup_level(subgroup_creation_level) {
+                    builder.subgroup_creation_level(level);
+                }
+            }
+            if let Some(emails_disabled) = params.emails_disabled {
+                builder.emails_disabled(emails_disabled);
+            }
+            if let Some(mentions_disabled) = params.mentions_disabled {
+                builder.mentions_disabled(mentions_disabled);
+            }
+            if let Some(lfs_enabled) = params.lfs_enabled {
+                builder.lfs_enabled(lfs_enabled);
+            }
+            if let Some(request_access_enabled) = params.request_access_enabled {
+                builder.request_access_enabled(request_access_enabled);
+            }
+            if let Some(parent_id) = params.parent_id {
+                builder.parent_id(parent_id.value());
+            }
+            if let Some(shared_runners_minutes_limit) = params.shared_runners_minutes_limit {
+                builder.shared_runners_minutes_limit(shared_runners_minutes_limit);
+            }
+            if let Some(extra_shared_runners_minutes_limit) =
+                params.extra_shared_runners_minutes_limit
+            {
+                builder.extra_shared_runners_minutes_limit(extra_shared_runners_minutes_limit);
+            }
+        }
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get all accessible groups.
