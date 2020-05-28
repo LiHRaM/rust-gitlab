@@ -1846,22 +1846,21 @@ impl Gitlab {
         note = "use `gitlab::api::projects::labels::CreateLabel.query()` instead"
     )]
     pub fn create_label(&self, project: ProjectId, label: Label) -> GitlabResult<Label> {
-        let path = format!("projects/{}/labels", project);
+        let mut builder = projects::labels::CreateLabel::builder();
 
-        let mut params: Vec<(&str, String)> = Vec::new();
+        builder
+            .project(project.value())
+            .name(label.name)
+            .color(label.color.value());
 
-        params.push(("name", label.name));
-        params.push(("color", label.color.value()));
-
-        if let Some(d) = label.description {
-            params.push(("description", d));
+        if let Some(description) = label.description {
+            builder.description(description);
+        }
+        if let Some(priority) = label.priority {
+            builder.priority(priority);
         }
 
-        if let Some(p) = label.priority {
-            params.push(("priority", p.to_string()));
-        }
-
-        self.post_with_param(path, &params)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Create a new milestone
