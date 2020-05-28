@@ -372,4 +372,13 @@ mod tests {
             assert_eq!(i.as_str(), *s);
         }
     }
+
+    #[test]
+    fn yes_no_from_bool() {
+        let items = &[(YesNo::Yes, true), (YesNo::No, false)];
+
+        for (i, s) in items {
+            assert_eq!(*i, (*s).into());
+        }
+    }
 }
