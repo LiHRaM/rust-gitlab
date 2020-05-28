@@ -12,9 +12,9 @@ These API endpoints have been implemented.
   * `POST   /groups` `groups/create.rs`
   * `GET    /groups/:group` `groups/group.rs`
   * `GET    /groups/:group/members` `groups/members/members.rs`
-  * `POST   /groups/:group/members` `group/members/add.rs`
-  * `DELETE /groups/:group/members/:id` `group/members/remove.rs`
+  * `POST   /groups/:group/members` `groups/members/add.rs`
   * `GET    /groups/:group/members/:id` `groups/members/member.rs`
+  * `DELETE /groups/:group/members/:id` `groups/members/remove.rs`
   * `GET    /projects` `projects/projects.rs`
   * `POST   /projects` `projects/projects/create.rs`
   * `GET    /projects/:project` `projects/projects/project.rs`
