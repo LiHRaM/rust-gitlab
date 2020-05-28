@@ -113,6 +113,16 @@ impl EnableState {
     }
 }
 
+impl From<bool> for EnableState {
+    fn from(b: bool) -> Self {
+        if b {
+            EnableState::Enabled
+        } else {
+            EnableState::Disabled
+        }
+    }
+}
+
 impl ParamValue<'static> for EnableState {
     fn as_value(self) -> Cow<'static, str> {
         self.as_str().into()
@@ -204,9 +214,48 @@ impl ParamValue<'static> for VisibilityLevel {
     }
 }
 
+/// A `yes` or `no`.
+///
+/// Some endpoints use this terminology.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum YesNo {
+    /// A `yes` response.
+    Yes,
+    /// A `no` response.
+    No,
+}
+
+impl YesNo {
+    /// The string representation of the option.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            YesNo::Yes => "yes",
+            YesNo::No => "no",
+        }
+    }
+}
+
+impl From<bool> for YesNo {
+    fn from(b: bool) -> Self {
+        if b {
+            YesNo::Yes
+        } else {
+            YesNo::No
+        }
+    }
+}
+
+impl ParamValue<'static> for YesNo {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::api::common::{AccessLevel, EnableState, NameOrId, SortOrder, VisibilityLevel};
+    use crate::api::common::{
+        AccessLevel, EnableState, NameOrId, SortOrder, VisibilityLevel, YesNo,
+    };
 
     #[test]
     fn access_level_as_str() {
@@ -277,6 +326,15 @@ mod tests {
     }
 
     #[test]
+    fn enable_state_from_bool() {
+        let items = &[(EnableState::Enabled, true), (EnableState::Disabled, false)];
+
+        for (i, s) in items {
+            assert_eq!(*i, (*s).into());
+        }
+    }
+
+    #[test]
     fn name_or_id_as_str() {
         let items: &[(NameOrId, _)] = &[
             ("user".into(), "user"),
@@ -303,6 +361,24 @@ mod tests {
 
         for (i, s) in items {
             assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn yes_no_as_str() {
+        let items = &[(YesNo::Yes, "yes"), (YesNo::No, "no")];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn yes_no_from_bool() {
+        let items = &[(YesNo::Yes, true), (YesNo::No, false)];
+
+        for (i, s) in items {
+            assert_eq!(*i, (*s).into());
         }
     }
 }

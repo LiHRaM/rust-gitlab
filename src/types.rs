@@ -2870,54 +2870,40 @@ pub struct CreateGroupParams {
     #[builder(setter(skip))]
     pub(crate) path: Option<String>,
     /// The group description
-    description: Option<String>,
+    pub(crate) description: Option<String>,
     /// The group visibility level, can be `private`, `internal` or `public`
-    visibility: Option<VisibilityLevel>,
+    pub(crate) visibility: Option<VisibilityLevel>,
     /// Prevent sharing a project with another group within this group
-    share_with_group_lock: Option<bool>,
+    pub(crate) share_with_group_lock: Option<bool>,
     /// Require all users in this group to setup two-factor authentication
-    require_two_factor_authentication: Option<bool>,
+    pub(crate) require_two_factor_authentication: Option<bool>,
     /// Time before two-factor authentication is enforced
-    two_factor_grace_period: Option<u64>,
+    pub(crate) two_factor_grace_period: Option<u64>,
     /// Determine if developers can create projects in the group
-    #[builder(setter(name = "_project_creation_level"))]
-    project_creation_level: Option<String>,
+    pub(crate) project_creation_level: Option<AccessLevel>,
     /// Default to Auto Devops pipeline for all projects within this group
-    auto_devops_enabled: Option<bool>,
+    pub(crate) auto_devops_enabled: Option<bool>,
     /// Role allowed to create subgroups
-    #[builder(setter(name = "_subgroup_creation_level"))]
-    subgroup_creation_level: Option<String>,
+    pub(crate) subgroup_creation_level: Option<AccessLevel>,
     /// Disable email notification
-    emails_disabled: Option<bool>,
+    pub(crate) emails_disabled: Option<bool>,
     /// Disable the capability of a group from getting mentioned
-    mentions_disabled: Option<bool>,
+    pub(crate) mentions_disabled: Option<bool>,
     /// Enable/disable Large File Storage (LFS) for the projects in this group
-    lfs_enabled: Option<bool>,
+    pub(crate) lfs_enabled: Option<bool>,
     /// Allow users to request membership
-    request_access_enabled: Option<bool>,
+    pub(crate) request_access_enabled: Option<bool>,
     /// The parent group ID for creating a nesting group
-    parent_id: Option<GroupId>,
+    pub(crate) parent_id: Option<GroupId>,
     /// [Gitlab Starter and higher] pipeline minutes quota for this group
-    shared_runners_minutes_limit: Option<u64>,
+    pub(crate) shared_runners_minutes_limit: Option<u64>,
     /// [Gitlab Starter and higher] extra pipeline minutes quota for this group
-    extra_shared_runners_minutes_limit: Option<u64>,
+    pub(crate) extra_shared_runners_minutes_limit: Option<u64>,
 }
 
 impl CreateGroupParams {
     pub fn builder() -> CreateGroupParamsBuilder {
         CreateGroupParamsBuilder::default()
-    }
-}
-
-impl CreateGroupParamsBuilder {
-    pub fn project_creation_level(&mut self, level: AccessLevel) -> &mut Self {
-        self.project_creation_level = Some(Some(level.as_str().to_string()));
-        self
-    }
-
-    pub fn subgroup_creation_level(&mut self, level: AccessLevel) -> &mut Self {
-        self.subgroup_creation_level = Some(Some(level.as_str().to_string()));
-        self
     }
 }
 
@@ -2936,108 +2922,105 @@ pub struct CreateProjectParams {
     #[builder(setter(skip))]
     pub(crate) path: Option<String>,
     /// Namespace for the new projects (defaults to current user namespaces)
-    namespace_id: Option<u64>,
+    pub(crate) namespace_id: Option<u64>,
     /// `master` by default
-    default_branch: Option<String>,
+    pub(crate) default_branch: Option<String>,
     /// Short project description
-    description: Option<String>,
+    pub(crate) description: Option<String>,
     /// One of `disabled`, `private`, `enabled`
-    issues_access_level: Option<FeatureVisibilityLevel>,
+    pub(crate) issues_access_level: Option<FeatureVisibilityLevel>,
     /// One of `disabled`, `private`, `enabled`
-    repository_access_level: Option<FeatureVisibilityLevel>,
+    pub(crate) repository_access_level: Option<FeatureVisibilityLevel>,
     /// One of `disabled`, `private`, `enabled`
-    merge_requests_access_level: Option<FeatureVisibilityLevel>,
+    pub(crate) merge_requests_access_level: Option<FeatureVisibilityLevel>,
     /// One of `disabled`, `private`, `enabled`
-    builds_access_level: Option<FeatureVisibilityLevel>,
+    pub(crate) builds_access_level: Option<FeatureVisibilityLevel>,
     /// One of `disabled`, `private`, `enabled`
-    wiki_access_level: Option<FeatureVisibilityLevel>,
+    pub(crate) wiki_access_level: Option<FeatureVisibilityLevel>,
     /// One of `disabled`, `private`, `enabled`
-    snippets_access_level: Option<FeatureVisibilityLevel>,
+    pub(crate) snippets_access_level: Option<FeatureVisibilityLevel>,
     /// One of `disabled`, `private`, `enabled`, `public`
-    pages_access_level: Option<FeatureVisibilityLevel>,
+    pub(crate) pages_access_level: Option<FeatureVisibilityLevel>,
     /// Automatically resolve merge requests diffs discussions on lines changed with a push
-    resolve_outdated_diff_discussions: Option<bool>,
+    pub(crate) resolve_outdated_diff_discussions: Option<bool>,
     /// Enable container registry for this project
-    container_registry_enabled: Option<bool>,
+    pub(crate) container_registry_enabled: Option<bool>,
     /// Update the container expiration for this project.
+    #[deprecated(note = "this field did not turn into parameters correctly")]
     container_expiration_policy_attributes: Option<Vec<String>>,
     /// Enable shared runners for this project
-    shared_runners_enabled: Option<bool>,
+    pub(crate) shared_runners_enabled: Option<bool>,
     /// Project visibility level
-    visibility: Option<VisibilityLevel>,
+    pub(crate) visibility: Option<VisibilityLevel>,
     /// URL to import repository from
     #[builder(setter(name = "_import_url"))]
-    import_url: Option<String>,
+    pub(crate) import_url: Option<String>,
     /// If `true` jobs can be viewed by non-project members
-    public_builds: Option<bool>,
+    pub(crate) public_builds: Option<bool>,
     /// Set wether merge requests can only be merged with successful jobs
-    only_allow_merge_if_pipeline_succeeds: Option<bool>,
+    pub(crate) only_allow_merge_if_pipeline_succeeds: Option<bool>,
     /// Set wether merge requests can only be merged when all the discussions are resolved
-    only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
+    pub(crate) only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
     /// Set the merge method used
-    merge_method: Option<MergeMethod>,
+    pub(crate) merge_method: Option<MergeMethod>,
     /// Set wether auto-closing referenced issues on default branch
-    autoclose_referenced_issues: Option<bool>,
+    pub(crate) autoclose_referenced_issues: Option<bool>,
     /// Enable LFS
-    lfs_enabled: Option<bool>,
+    pub(crate) lfs_enabled: Option<bool>,
     /// Allow user to request member access
-    request_access_enabled: Option<bool>,
+    pub(crate) request_access_enabled: Option<bool>,
     /// The list of tags for a project
-    tag_list: Option<Vec<String>>,
-    /// Image file for avatar of the project
-    // TODO: Handle the mixed type for avatar data
-    #[builder(setter(skip))]
-    avatar: Option<Vec<u8>>,
+    pub(crate) tag_list: Option<Vec<String>>,
     /// Show link to create/view merge request wehen pushing from the command line
-    printing_merge_request_link_enabled: Option<bool>,
+    pub(crate) printing_merge_request_link_enabled: Option<bool>,
     /// The git strategy. Defaults to fetch
-    build_git_strategy: Option<BuildGitStrategy>,
+    pub(crate) build_git_strategy: Option<BuildGitStrategy>,
     /// The maximum amount of time in minutes a job is allowed to run
-    build_timeout: Option<u64>,
+    pub(crate) build_timeout: Option<u64>,
     /// Auto-cancel pending pipeline
-    auto_cancel_pending_pipelines: Option<bool>,
+    pub(crate) auto_cancel_pending_pipelines: Option<bool>,
     /// Test coverage parsing
-    build_coverage_regex: Option<String>,
+    pub(crate) build_coverage_regex: Option<String>,
     /// The path to CI config file
-    ci_config_path: Option<String>,
+    pub(crate) ci_config_path: Option<String>,
     /// Enable Auto DevOps for this project
-    auto_devops_enabled: Option<bool>,
+    pub(crate) auto_devops_enabled: Option<bool>,
     /// Auto Deploy strategy (`continuous`, `manual` or `timed_incremental`)
-    auto_devops_deploy_strategy: Option<String>,
+    pub(crate) auto_devops_deploy_strategy: Option<String>,
     /// [Gitlab starter and higher]
     /// Which storage shard the repository is on. Available only to admins
-    repository_storage: Option<String>,
+    pub(crate) repository_storage: Option<String>,
     /// [Gitlab starter and higher]
     /// How many approvers should approve merge requests by default
-    approvals_before_merge: Option<u64>,
+    pub(crate) approvals_before_merge: Option<u64>,
     /// [Gitlab starter and higher]
     /// The classification label for the project
-    external_authorization_classification_label: Option<String>,
+    pub(crate) external_authorization_classification_label: Option<String>,
     /// [Gitlab starter and higher] Enables pull mirroring in a project
-    mirror: Option<bool>,
+    pub(crate) mirror: Option<bool>,
     /// [Gitlab starter and higher]
     /// Pull mirroring triggers builds
-    mirror_trigger_builds: Option<String>,
+    pub(crate) mirror_trigger_builds: Option<bool>,
     /// `false` by default
-    initialize_with_readme: Option<bool>,
+    pub(crate) initialize_with_readme: Option<bool>,
     /// When used without `use_custom_template`, name of a built-in project template.
     /// When used with `use_custom_template`, name of a custom project template
-    template_name: Option<String>,
+    pub(crate) template_name: Option<String>,
     /// [Gitlab silver and higher]
     /// When used with `use_custom_template`, project ID of a custom project template.
     /// This is preferable to using `template_name` since `template_name` may be ambiguous
-    template_project_id: Option<u64>,
+    pub(crate) template_project_id: Option<u64>,
     /// [Gitlab silver and higher]
     /// When used with `use_custom_template`, project ID of a custom project template.
     /// This is preferable to using `template_name` since `template_name` may be ambiguous
-    use_custom_template: Option<bool>,
+    pub(crate) use_custom_template: Option<bool>,
     /// [Gitlab silver and higher]
     /// For group-level custom templates, specifies ID of group from which all the custom project templates are sourced.
     /// Leave empty for instance-level templates. Requires `use_custom_template` to be true
-    group_with_project_templates_id: Option<u64>,
+    pub(crate) group_with_project_templates_id: Option<u64>,
     /// [Gitlab silver and higher]
     /// Enable or disable packages repository feature
-    packages_enabled: Option<bool>,
+    pub(crate) packages_enabled: Option<bool>,
 }
 
 impl CreateProjectParams {

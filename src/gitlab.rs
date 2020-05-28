@@ -10,7 +10,7 @@ use std::fmt::{self, Debug, Display};
 
 use graphql_client::{GraphQLQuery, QueryBody, Response};
 use itertools::Itertools;
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
 use reqwest::blocking::{Client, RequestBuilder, Response as HttpResponse};
 use reqwest::{Method, Url};
@@ -25,12 +25,6 @@ use crate::api::users::{CurrentUser, User, Users};
 use crate::api::{self, common, groups, Query};
 use crate::auth::{Auth, AuthError};
 use crate::types::*;
-
-macro_rules! query_param_slice {
-    ( $( $x:expr ),* ) => (
-        &[$($x),*] as QueryParamSlice
-    )
-}
 
 const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b' ')
@@ -427,7 +421,7 @@ impl Gitlab {
     ///                     .unwrap();
     /// gitlab.create_project("My Project", Some("project"), Some(params));
     /// ```
-    #[allow(deprecated)]
+    #[allow(clippy::cognitive_complexity)]
     #[deprecated(
         since = "0.1210.1",
         note = "use `gitlab::api::projects::CreateProject.query()` instead"
@@ -438,18 +432,214 @@ impl Gitlab {
         path: Option<P>,
         params: Option<CreateProjectParams>,
     ) -> GitlabResult<Project> {
-        let url = "projects";
+        let mut builder = projects::CreateProject::builder();
 
-        let mut merged_params = params.unwrap_or_default();
+        builder.name(name.as_ref());
 
-        let path = match path.as_ref() {
-            None => name.as_ref(),
-            Some(s) => s.as_ref(),
+        let convert = |level| {
+            match level {
+                FeatureVisibilityLevel::Disabled => projects::FeatureAccessLevel::Disabled,
+                FeatureVisibilityLevel::Private => projects::FeatureAccessLevel::Private,
+                FeatureVisibilityLevel::Enabled | FeatureVisibilityLevel::Public => {
+                    projects::FeatureAccessLevel::Enabled
+                },
+            }
         };
-        merged_params.name = Some(name.as_ref().to_string());
-        merged_params.path = Some(path.to_string());
+        let convert_pub = |level| {
+            match level {
+                FeatureVisibilityLevel::Disabled => projects::FeatureAccessLevelPublic::Disabled,
+                FeatureVisibilityLevel::Private => projects::FeatureAccessLevelPublic::Private,
+                FeatureVisibilityLevel::Enabled => projects::FeatureAccessLevelPublic::Enabled,
+                FeatureVisibilityLevel::Public => projects::FeatureAccessLevelPublic::Public,
+            }
+        };
+        let convert_vis = |level| {
+            match level {
+                VisibilityLevel::Public => api::common::VisibilityLevel::Public,
+                VisibilityLevel::Internal => api::common::VisibilityLevel::Internal,
+                VisibilityLevel::Private => api::common::VisibilityLevel::Private,
+            }
+        };
+        let convert_mm = |method| {
+            match method {
+                MergeMethod::Merge => api::projects::MergeMethod::Merge,
+                MergeMethod::RebaseMerge => api::projects::MergeMethod::RebaseMerge,
+                MergeMethod::FastForward => api::projects::MergeMethod::FastForward,
+            }
+        };
+        let convert_git = |strategy| {
+            match strategy {
+                BuildGitStrategy::Fetch => api::projects::BuildGitStrategy::Fetch,
+                BuildGitStrategy::Clone => api::projects::BuildGitStrategy::Clone,
+            }
+        };
+        let convert_auto_deploy = |strategy| {
+            match strategy {
+                "continuous" => Some(api::projects::AutoDevOpsDeployStrategy::Continuous),
+                "manual" => Some(api::projects::AutoDevOpsDeployStrategy::Manual),
+                "timed_incremental" => {
+                    Some(api::projects::AutoDevOpsDeployStrategy::TimedIncremental)
+                },
+                unknown => {
+                    warn!(
+                        target: "gitlab",
+                        "unknown auto_devops_deploy_strategy '{}'; ignoring",
+                        unknown,
+                    );
+                    None
+                },
+            }
+        };
 
-        self.post_with_param(url, &merged_params)
+        let path_save;
+        if let Some(path) = path {
+            path_save = path;
+            builder.path(path_save.as_ref());
+        }
+        if let Some(params) = params {
+            if let Some(namespace_id) = params.namespace_id {
+                builder.namespace_id(namespace_id);
+            }
+            if let Some(default_branch) = params.default_branch {
+                builder.default_branch(default_branch);
+            }
+            if let Some(description) = params.description {
+                builder.description(description);
+            }
+            if let Some(issues_access_level) = params.issues_access_level {
+                builder.issues_access_level(convert(issues_access_level));
+            }
+            if let Some(repository_access_level) = params.repository_access_level {
+                builder.repository_access_level(convert(repository_access_level));
+            }
+            if let Some(merge_requests_access_level) = params.merge_requests_access_level {
+                builder.merge_requests_access_level(convert(merge_requests_access_level));
+            }
+            if let Some(builds_access_level) = params.builds_access_level {
+                builder.builds_access_level(convert(builds_access_level));
+            }
+            if let Some(wiki_access_level) = params.wiki_access_level {
+                builder.wiki_access_level(convert(wiki_access_level));
+            }
+            if let Some(snippets_access_level) = params.snippets_access_level {
+                builder.snippets_access_level(convert(snippets_access_level));
+            }
+            if let Some(pages_access_level) = params.pages_access_level {
+                builder.pages_access_level(convert_pub(pages_access_level));
+            }
+            if let Some(resolve_outdated_diff_discussions) =
+                params.resolve_outdated_diff_discussions
+            {
+                builder.resolve_outdated_diff_discussions(resolve_outdated_diff_discussions);
+            }
+            if let Some(container_registry_enabled) = params.container_registry_enabled {
+                builder.container_registry_enabled(container_registry_enabled);
+            }
+            if let Some(shared_runners_enabled) = params.shared_runners_enabled {
+                builder.shared_runners_enabled(shared_runners_enabled);
+            }
+            if let Some(visibility) = params.visibility {
+                builder.visibility(convert_vis(visibility));
+            }
+            if let Some(import_url) = params.import_url {
+                builder.import_url(import_url);
+            }
+            if let Some(public_builds) = params.public_builds {
+                builder.public_builds(public_builds);
+            }
+            if let Some(only_allow_merge_if_pipeline_succeeds) =
+                params.only_allow_merge_if_pipeline_succeeds
+            {
+                builder
+                    .only_allow_merge_if_pipeline_succeeds(only_allow_merge_if_pipeline_succeeds);
+            }
+            if let Some(only_allow_merge_if_all_discussions_are_resolved) =
+                params.only_allow_merge_if_all_discussions_are_resolved
+            {
+                builder.only_allow_merge_if_all_discussions_are_resolved(
+                    only_allow_merge_if_all_discussions_are_resolved,
+                );
+            }
+            if let Some(merge_method) = params.merge_method {
+                builder.merge_method(convert_mm(merge_method));
+            }
+            if let Some(autoclose_referenced_issues) = params.autoclose_referenced_issues {
+                builder.autoclose_referenced_issues(autoclose_referenced_issues);
+            }
+            if let Some(lfs_enabled) = params.lfs_enabled {
+                builder.lfs_enabled(lfs_enabled);
+            }
+            if let Some(request_access_enabled) = params.request_access_enabled {
+                builder.request_access_enabled(request_access_enabled);
+            }
+            if let Some(tag_list) = params.tag_list {
+                builder.tags(tag_list.into_iter());
+            }
+            if let Some(printing_merge_request_link_enabled) =
+                params.printing_merge_request_link_enabled
+            {
+                builder.printing_merge_request_link_enabled(printing_merge_request_link_enabled);
+            }
+            if let Some(build_git_strategy) = params.build_git_strategy {
+                builder.build_git_strategy(convert_git(build_git_strategy));
+            }
+            if let Some(build_timeout) = params.build_timeout {
+                builder.build_timeout(build_timeout);
+            }
+            if let Some(auto_cancel_pending_pipelines) = params.auto_cancel_pending_pipelines {
+                builder.auto_cancel_pending_pipelines(auto_cancel_pending_pipelines);
+            }
+            if let Some(build_coverage_regex) = params.build_coverage_regex {
+                builder.build_coverage_regex(build_coverage_regex);
+            }
+            if let Some(ci_config_path) = params.ci_config_path {
+                builder.ci_config_path(ci_config_path);
+            }
+            if let Some(auto_devops_enabled) = params.auto_devops_enabled {
+                builder.auto_devops_enabled(auto_devops_enabled);
+            }
+            if let Some(auto_devops_deploy_strategy) = params.auto_devops_deploy_strategy {
+                if let Some(strategy) = convert_auto_deploy(&auto_devops_deploy_strategy) {
+                    builder.auto_devops_deploy_strategy(strategy);
+                }
+            }
+            if let Some(repository_storage) = params.repository_storage {
+                builder.repository_storage(repository_storage);
+            }
+            if let Some(approvals_before_merge) = params.approvals_before_merge {
+                builder.approvals_before_merge(approvals_before_merge);
+            }
+            if let Some(external_authorization_classification_label) =
+                params.external_authorization_classification_label
+            {
+                builder.external_authorization_classification_label(
+                    external_authorization_classification_label,
+                );
+            }
+            if let Some(mirror) = params.mirror {
+                builder.mirror(mirror);
+            }
+            if let Some(mirror_trigger_builds) = params.mirror_trigger_builds {
+                builder.mirror_trigger_builds(mirror_trigger_builds);
+            }
+            if let Some(template_name) = params.template_name {
+                builder.template_name(template_name);
+            }
+            if let Some(template_project_id) = params.template_project_id {
+                builder.template_project_id(template_project_id);
+            }
+            if let Some(use_custom_template) = params.use_custom_template {
+                builder.use_custom_template(use_custom_template);
+            }
+            if let Some(group_with_project_templates_id) = params.group_with_project_templates_id {
+                builder.group_with_project_templates_id(group_with_project_templates_id);
+            }
+            if let Some(packages_enabled) = params.packages_enabled {
+                builder.packages_enabled(packages_enabled);
+            }
+        }
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Create a new file in repository
@@ -692,13 +882,124 @@ impl Gitlab {
         path: P,
         params: Option<CreateGroupParams>,
     ) -> GitlabResult<Group> {
-        let url = "groups";
+        let mut builder = groups::CreateGroup::builder();
 
-        let mut merged_params = params.unwrap_or_default();
-        merged_params.name = Some(name.as_ref().to_string());
-        merged_params.path = Some(path.as_ref().to_string());
+        builder.name(name.as_ref()).path(path.as_ref());
 
-        self.post_with_param(url, &merged_params)
+        if let Some(params) = params {
+            let convert_vis = |level| {
+                match level {
+                    VisibilityLevel::Public => api::common::VisibilityLevel::Public,
+                    VisibilityLevel::Internal => api::common::VisibilityLevel::Internal,
+                    VisibilityLevel::Private => api::common::VisibilityLevel::Private,
+                }
+            };
+            let convert_project_level = |level| {
+                match level {
+                    AccessLevel::Admin | AccessLevel::Owner => {
+                        warn!(
+                            target: "gitlab",
+                            "project creation may not be limited to {:?}; setting to NoOne",
+                            level,
+                        );
+                        Some(api::groups::GroupProjectCreationAccessLevel::NoOne)
+                    },
+                    AccessLevel::Maintainer => {
+                        Some(api::groups::GroupProjectCreationAccessLevel::Maintainer)
+                    },
+                    AccessLevel::Developer => {
+                        Some(api::groups::GroupProjectCreationAccessLevel::Developer)
+                    },
+                    AccessLevel::Reporter | AccessLevel::Guest | AccessLevel::Anonymous => {
+                        warn!(
+                            target: "gitlab",
+                            "project creation may not be limited to {:?}; ignoring",
+                            level,
+                        );
+                        None
+                    },
+                }
+            };
+            let convert_subgroup_level = |level| {
+                match level {
+                    AccessLevel::Admin => {
+                        warn!(
+                            target: "gitlab",
+                            "subgroup creation may not be limited to administrators; downgrading to Owner",
+                        );
+                        Some(api::groups::SubgroupCreationAccessLevel::Owner)
+                    },
+                    AccessLevel::Owner => Some(api::groups::SubgroupCreationAccessLevel::Owner),
+                    AccessLevel::Maintainer => {
+                        Some(api::groups::SubgroupCreationAccessLevel::Maintainer)
+                    },
+                    AccessLevel::Developer
+                    | AccessLevel::Reporter
+                    | AccessLevel::Guest
+                    | AccessLevel::Anonymous => {
+                        warn!(
+                            target: "gitlab",
+                            "subgroup creation may not be limited to {:?}; ignoring",
+                            level,
+                        );
+                        None
+                    },
+                }
+            };
+
+            if let Some(description) = params.description {
+                builder.description(description);
+            }
+            if let Some(visibility) = params.visibility {
+                builder.visibility(convert_vis(visibility));
+            }
+            if let Some(share_with_group_lock) = params.share_with_group_lock {
+                builder.share_with_group_lock(share_with_group_lock);
+            }
+            if let Some(require_two_factor_authentication) =
+                params.require_two_factor_authentication
+            {
+                builder.require_two_factor_authentication(require_two_factor_authentication);
+            }
+            if let Some(project_creation_level) = params.project_creation_level {
+                if let Some(level) = convert_project_level(project_creation_level) {
+                    builder.project_creation_level(level);
+                }
+            }
+            if let Some(auto_devops_enabled) = params.auto_devops_enabled {
+                builder.auto_devops_enabled(auto_devops_enabled);
+            }
+            if let Some(subgroup_creation_level) = params.subgroup_creation_level {
+                if let Some(level) = convert_subgroup_level(subgroup_creation_level) {
+                    builder.subgroup_creation_level(level);
+                }
+            }
+            if let Some(emails_disabled) = params.emails_disabled {
+                builder.emails_disabled(emails_disabled);
+            }
+            if let Some(mentions_disabled) = params.mentions_disabled {
+                builder.mentions_disabled(mentions_disabled);
+            }
+            if let Some(lfs_enabled) = params.lfs_enabled {
+                builder.lfs_enabled(lfs_enabled);
+            }
+            if let Some(request_access_enabled) = params.request_access_enabled {
+                builder.request_access_enabled(request_access_enabled);
+            }
+            if let Some(parent_id) = params.parent_id {
+                builder.parent_id(parent_id.value());
+            }
+            if let Some(shared_runners_minutes_limit) = params.shared_runners_minutes_limit {
+                builder.shared_runners_minutes_limit(shared_runners_minutes_limit);
+            }
+            if let Some(extra_shared_runners_minutes_limit) =
+                params.extra_shared_runners_minutes_limit
+            {
+                builder.extra_shared_runners_minutes_limit(extra_shared_runners_minutes_limit);
+            }
+        }
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get all accessible groups.
@@ -1489,6 +1790,10 @@ impl Gitlab {
     }
 
     /// Get the notes from a issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::IssueNotes.query()` instead"
+    )]
     pub fn issue_notes<I, K, V>(
         &self,
         project: ProjectId,
@@ -1508,6 +1813,10 @@ impl Gitlab {
     }
 
     /// Get the notes from a issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::IssueNotes.query()` instead"
+    )]
     pub fn issue_notes_by_name<P, I, K, V>(
         &self,
         project: P,
@@ -1537,51 +1846,64 @@ impl Gitlab {
         note = "use `gitlab::api::projects::labels::CreateLabel.query()` instead"
     )]
     pub fn create_label(&self, project: ProjectId, label: Label) -> GitlabResult<Label> {
-        let path = format!("projects/{}/labels", project);
+        let mut builder = projects::labels::CreateLabel::builder();
 
-        let mut params: Vec<(&str, String)> = Vec::new();
+        builder
+            .project(project.value())
+            .name(label.name)
+            .color(label.color.value());
 
-        params.push(("name", label.name));
-        params.push(("color", label.color.value()));
-
-        if let Some(d) = label.description {
-            params.push(("description", d));
+        if let Some(description) = label.description {
+            builder.description(description);
+        }
+        if let Some(priority) = label.priority {
+            builder.priority(priority);
         }
 
-        if let Some(p) = label.priority {
-            params.push(("priority", p.to_string()));
-        }
-
-        self.post_with_param(path, &params)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Create a new milestone
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::{groups,projects}::milestones::Create{Group,Project}Milestone.query()` instead"
+    )]
     pub fn create_milestone(&self, milestone: Milestone) -> GitlabResult<Milestone> {
-        let path = if let Some(project) = milestone.project_id {
-            format!("projects/{}/milestones", project)
+        if let Some(project) = milestone.project_id {
+            let mut builder = projects::milestones::CreateProjectMilestone::builder();
+
+            builder.project(project.value()).title(milestone.title);
+
+            if let Some(d) = milestone.description {
+                builder.description(d);
+            }
+            if let Some(d) = milestone.due_date {
+                builder.due_date(d);
+            }
+            if let Some(s) = milestone.start_date {
+                builder.start_date(s);
+            }
+
+            Ok(builder.build().unwrap().query(self)?)
         } else if let Some(group) = milestone.group_id {
-            format!("groups/{}/milestones", group)
+            let mut builder = groups::milestones::CreateGroupMilestone::builder();
+
+            builder.group(group.value()).title(milestone.title);
+
+            if let Some(d) = milestone.description {
+                builder.description(d);
+            }
+            if let Some(d) = milestone.due_date {
+                builder.due_date(d);
+            }
+            if let Some(s) = milestone.start_date {
+                builder.start_date(s);
+            }
+
+            Ok(builder.build().unwrap().query(self)?)
         } else {
-            return Err(GitlabError::InvalidMilestone);
-        };
-
-        let mut params: Vec<(&str, String)> = Vec::new();
-
-        params.push(("title", milestone.title));
-
-        if let Some(d) = milestone.description {
-            params.push(("description", d));
+            Err(GitlabError::InvalidMilestone)
         }
-
-        if let Some(d) = milestone.due_date {
-            params.push(("due_date", d.to_string()))
-        }
-
-        if let Some(s) = milestone.start_date {
-            params.push(("start_date", s.to_string()))
-        }
-
-        self.post_with_param(path, &params)
     }
 
     /// Create a new issue
@@ -1590,59 +1912,62 @@ impl Gitlab {
         note = "use `gitlab::api::projects::issues::CreateIssue.query()` instead"
     )]
     pub fn create_issue(&self, project: ProjectId, issue: Issue) -> GitlabResult<Issue> {
-        let path = format!("projects/{}/issues", project);
+        let mut builder = projects::issues::CreateIssue::builder();
 
-        let mut params: Vec<(&str, String)> = Vec::new();
+        builder
+            .project(project.value())
+            .title(issue.title)
+            .confidential(issue.confidential)
+            .created_at(issue.created_at);
 
         if issue.iid.value() != 0 {
-            params.push(("iid", issue.iid.value().to_string()));
+            builder.iid(issue.iid.value());
         }
-
-        params.push(("title", issue.title));
-
-        if let Some(d) = issue.description {
-            params.push(("description", d));
+        if let Some(description) = issue.description {
+            builder.description(description);
         }
-
-        params.push(("confidential", issue.confidential.to_string()));
-
-        if let Some(v) = issue.assignees {
-            params.extend(
-                v.into_iter()
-                    .map(|x| ("assignee_ids[]", x.id.value().to_string())),
-            );
+        if let Some(assignees) = issue.assignees {
+            builder.assignee_ids(assignees.into_iter().map(|u| u.id.value()));
         }
-
-        if let Some(m) = issue.milestone {
-            params.push(("milestone_id", m.id.value().to_string()))
+        if let Some(milestone) = issue.milestone {
+            builder.milestone_id(milestone.id.value());
         }
-
         if !issue.labels.is_empty() {
-            params.push(("labels", issue.labels.join(",")));
+            builder.labels(issue.labels);
+        }
+        if let Some(due_date) = issue.due_date {
+            builder.due_date(due_date);
         }
 
-        params.push(("created_at", issue.created_at.to_string()));
-
-        if let Some(d) = issue.due_date {
-            params.push(("due_date", d.to_string()))
-        }
-
-        self.post_with_param(path, &params)
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get the resource label events from an issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::IssueResourceLabelEvents.query()` instead"
+    )]
     pub fn issue_label_events(
         &self,
         project: ProjectId,
         issue: IssueInternalId,
     ) -> GitlabResult<Vec<ResourceLabelEvent>> {
-        self.get_paged(format!(
-            "projects/{}/issues/{}/resource_label_events",
-            project, issue,
-        ))
+        Ok(api::paged(
+            projects::issues::IssueResourceLabelEvents::builder()
+                .project(project.value())
+                .issue(issue.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
+        )
+        .query(self)?)
     }
 
     /// Create a note on a issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::CreateIssueNote.query()` instead"
+    )]
     pub fn create_issue_note<C>(
         &self,
         project: ProjectId,
@@ -1652,12 +1977,20 @@ impl Gitlab {
     where
         C: AsRef<str>,
     {
-        let path = format!("projects/{}/issues/{}/notes", project, issue);
-
-        self.post_with_param(path, &[("body", content.as_ref())])
+        Ok(projects::issues::notes::CreateIssueNote::builder()
+            .project(project.value())
+            .issue(issue.value())
+            .body(content.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Create a note on a issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::CreateIssueNote.query()` instead"
+    )]
     pub fn create_issue_note_by_name<P, C>(
         &self,
         project: P,
@@ -1668,16 +2001,20 @@ impl Gitlab {
         P: AsRef<str>,
         C: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/issues/{}/notes",
-            Self::url_name(project.as_ref()),
-            issue,
-        );
-
-        self.post_with_param(path, &[("body", content.as_ref())])
+        Ok(projects::issues::notes::CreateIssueNote::builder()
+            .project(project.as_ref())
+            .issue(issue.value())
+            .body(content.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Edit a note on an issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::EditIssueNote.query()` instead"
+    )]
     pub fn set_issue_note<C>(
         &self,
         project: ProjectId,
@@ -1688,12 +2025,21 @@ impl Gitlab {
     where
         C: AsRef<str>,
     {
-        let path = format!("projects/{}/issues/{}/notes/{}", project, issue, note);
-
-        self.put_with_param(path, &[("body", content.as_ref())])
+        Ok(projects::issues::notes::EditIssueNote::builder()
+            .project(project.value())
+            .issue(issue.value())
+            .note(note.value())
+            .body(content.as_ref())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the merge requests for a project.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequests.query()` instead"
+    )]
     pub fn merge_requests<I, K, V>(
         &self,
         project: ProjectId,
@@ -1709,24 +2055,93 @@ impl Gitlab {
     }
 
     /// Get the merge requests with a given state.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequests.query()` instead"
+    )]
     pub fn merge_requests_with_state(
         &self,
         project: ProjectId,
         state: MergeRequestStateFilter,
     ) -> GitlabResult<Vec<MergeRequest>> {
-        self.get_paged_with_param(
-            format!("projects/{}/merge_requests", project),
-            &[("state", state.as_str())],
+        let convert = |state| {
+            match state {
+                MergeRequestStateFilter::Opened => {
+                    projects::merge_requests::MergeRequestState::Opened
+                },
+                MergeRequestStateFilter::Closed => {
+                    projects::merge_requests::MergeRequestState::Closed
+                },
+                MergeRequestStateFilter::Merged => {
+                    projects::merge_requests::MergeRequestState::Merged
+                },
+            }
+        };
+
+        Ok(api::paged(
+            projects::merge_requests::MergeRequests::builder()
+                .project(project.value())
+                .state(convert(state))
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Create a new merge request
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::CreateMergeRequest.query()` instead"
+    )]
     pub fn create_merge_request(
         &self,
         project: ProjectId,
         params: CreateMergeRequestParams,
     ) -> GitlabResult<MergeRequest> {
-        self.post_with_param(format!("projects/{}/merge_requests", project), &params)
+        let mut builder = projects::merge_requests::CreateMergeRequest::builder();
+
+        builder
+            .project(project.value())
+            .source_branch(params.source_branch)
+            .target_branch(params.target_branch)
+            .title(params.title);
+
+        if let Some(assignee_id) = params.assignee_id {
+            builder.assignee(assignee_id.value());
+        }
+        if let Some(assignee_ids) = params.assignee_ids {
+            if assignee_ids.is_empty() {
+                builder.unassigned();
+            } else {
+                builder.assignees(assignee_ids.into_iter().map(|id| id.value()));
+            }
+        }
+        if let Some(description) = params.description {
+            builder.description(description);
+        }
+        if let Some(target_project_id) = params.target_project_id {
+            builder.target_project_id(target_project_id.value());
+        }
+        let labels_save;
+        if let Some(labels) = params.labels {
+            labels_save = labels;
+            builder.labels(labels_save.split(','));
+        }
+        if let Some(milestone_id) = params.milestone_id {
+            builder.milestone_id(milestone_id.value());
+        }
+        if let Some(remove_source_branch) = params.remove_source_branch {
+            builder.remove_source_branch(remove_source_branch);
+        }
+        if let Some(allow_collaboration) = params.allow_collaboration {
+            builder.allow_collaboration(allow_collaboration);
+        }
+        if let Some(squash) = params.squash {
+            builder.squash(squash);
+        }
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get all pipelines for a project.
@@ -1772,7 +2187,15 @@ impl Gitlab {
         project: ProjectId,
         id: PipelineId,
     ) -> GitlabResult<Vec<PipelineVariable>> {
-        self.get(format!("projects/{}/pipelines/{}/variables", project, id))
+        Ok(api::paged(
+            projects::pipelines::PipelineVariables::builder()
+                .project(project.value())
+                .pipeline(id.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
+        )
+        .query(self)?)
     }
 
     /// Create a new pipeline.
@@ -1872,7 +2295,11 @@ impl Gitlab {
         .query(self)?)
     }
 
-    /// Get merge requests.
+    /// Get a single merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequest.query()` instead"
+    )]
     pub fn merge_request<I, K, V>(
         &self,
         project: ProjectId,
@@ -1892,11 +2319,15 @@ impl Gitlab {
     }
 
     /// Get the issues that will be closed when a merge request is merged.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::IssuesClosedBy.query()` instead"
+    )]
     pub fn merge_request_closes_issues<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<IssueReference>>
     where
         I: IntoIterator,
@@ -1904,21 +2335,24 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/closes_issues",
-                project, merge_request,
-            ),
-            params,
-        )
+        Ok(projects::merge_requests::IssuesClosedBy::builder()
+            .project(project.value())
+            .merge_request(merge_request.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the discussions from a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequestDiscussions.query()` instead"
+    )]
     pub fn merge_request_discussions<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<Discussion>>
     where
         I: IntoIterator,
@@ -1926,16 +2360,22 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/discussions",
-                project, merge_request,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::discussions::MergeRequestDiscussions::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the notes from a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::MergeRequestNotes.query()` instead"
+    )]
     pub fn merge_request_notes<I, K, V>(
         &self,
         project: ProjectId,
@@ -1958,6 +2398,10 @@ impl Gitlab {
     }
 
     /// Get the notes from a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::MergeRequestNotes.query()` instead"
+    )]
     pub fn merge_request_notes_by_name<P, I, K, V>(
         &self,
         project: P,
@@ -1982,6 +2426,10 @@ impl Gitlab {
     }
 
     /// Award a merge request note with an award.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::awards::CreateMergeRequestNoteAward.query()` instead"
+    )]
     pub fn award_merge_request_note(
         &self,
         project: ProjectId,
@@ -1989,14 +2437,23 @@ impl Gitlab {
         note: NoteId,
         award: &str,
     ) -> GitlabResult<AwardEmoji> {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-            project, merge_request, note,
-        );
-        self.post_with_param(path, &[("name", award)])
+        Ok(
+            projects::merge_requests::notes::awards::CreateMergeRequestNoteAward::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .name(award)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Award a merge request note with an award.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::awards::CreateMergeRequestNoteAward.query()` instead"
+    )]
     pub fn award_merge_request_note_by_name<P>(
         &self,
         project: P,
@@ -2007,21 +2464,28 @@ impl Gitlab {
     where
         P: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-            Self::url_name(project.as_ref()),
-            merge_request,
-            note,
-        );
-        self.post_with_param(path, &[("name", award)])
+        Ok(
+            projects::merge_requests::notes::awards::CreateMergeRequestNoteAward::builder()
+                .project(project.as_ref())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .name(award)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Get the awards for a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::awards::MergeRequestAwards.query()` instead"
+    )]
     pub fn merge_request_awards<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<AwardEmoji>>
     where
         I: IntoIterator,
@@ -2029,21 +2493,27 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/award_emoji",
-                project, merge_request,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::awards::MergeRequestAwards::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the awards for a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::awards::MergeRequestAwards.query()` instead"
+    )]
     pub fn merge_request_awards_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<AwardEmoji>>
     where
         P: AsRef<str>,
@@ -2052,23 +2522,28 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/award_emoji",
-                Self::url_name(project.as_ref()),
-                merge_request,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::awards::MergeRequestAwards::builder()
+                .project(project.as_ref())
+                .merge_request(merge_request.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the awards for a merge request note.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::awards::MergeRequestNoteAwards.query()` instead"
+    )]
     pub fn merge_request_note_awards<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         note: NoteId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<AwardEmoji>>
     where
         I: IntoIterator,
@@ -2076,22 +2551,29 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-                project, merge_request, note,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::notes::awards::MergeRequestNoteAwards::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the awards for a merge request note.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::awards::MergeRequestNoteAwards.query()` instead"
+    )]
     pub fn merge_request_note_awards_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
         note: NoteId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<AwardEmoji>>
     where
         P: AsRef<str>,
@@ -2100,56 +2582,87 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-                Self::url_name(project.as_ref()),
-                merge_request,
-                note,
-            ),
-            params,
+        Ok(api::paged(
+            projects::merge_requests::notes::awards::MergeRequestNoteAwards::builder()
+                .project(project.as_ref())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
         )
+        .query(self)?)
     }
 
     /// Get the resource label events from a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::MergeRequestResourceLabelEvents.query()` instead"
+    )]
     pub fn merge_request_label_events(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
     ) -> GitlabResult<Vec<ResourceLabelEvent>> {
-        self.get_paged(format!(
-            "projects/{}/merge_requests/{}/resource_label_events",
-            project, merge_request,
-        ))
+        Ok(api::paged(
+            projects::merge_requests::MergeRequestResourceLabelEvents::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .build()
+                .unwrap(),
+            api::Pagination::All,
+        )
+        .query(self)?)
     }
 
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::discussions::CreateMergeRequestDiscussion.query()` instead"
+    )]
     pub fn create_merge_request_discussion(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         content: &str,
     ) -> GitlabResult<Discussion> {
-        let path = format!(
-            "projects/{}/merge_requests/{}/discussions",
-            project, merge_request
-        );
-        self.post_with_param(path, &[("body", content)])
+        Ok(
+            projects::merge_requests::discussions::CreateMergeRequestDiscussion::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .body(content)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
+
     /// Create a note on a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::CreateMergeRequestNote.query()` instead"
+    )]
     pub fn create_merge_request_note(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
         content: &str,
     ) -> GitlabResult<Note> {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes",
-            project, merge_request,
-        );
-        self.post_with_param(path, &[("body", content)])
+        Ok(
+            projects::merge_requests::notes::CreateMergeRequestNote::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .body(content)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Create a note on a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::CreateMergeRequestNote.query()` instead"
+    )]
     pub fn create_merge_request_note_by_name<P>(
         &self,
         project: P,
@@ -2159,15 +2672,22 @@ impl Gitlab {
     where
         P: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes",
-            Self::url_name(project.as_ref()),
-            merge_request,
-        );
-        self.post_with_param(path, &[("body", content)])
+        Ok(
+            projects::merge_requests::notes::CreateMergeRequestNote::builder()
+                .project(project.as_ref())
+                .merge_request(merge_request.value())
+                .body(content)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Edit a note on a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::EditMergeRequestNote.query()` instead"
+    )]
     pub fn set_merge_request_note<C>(
         &self,
         project: ProjectId,
@@ -2178,14 +2698,23 @@ impl Gitlab {
     where
         C: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes/{}",
-            project, merge_request, note,
-        );
-        self.put_with_param(path, &[("body", content.as_ref())])
+        Ok(
+            projects::merge_requests::notes::EditMergeRequestNote::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .body(content.as_ref())
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Edit a note on a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::EditMergeRequestNote.query()` instead"
+    )]
     pub fn modify_merge_request_note<C>(
         &self,
         project: ProjectId,
@@ -2196,19 +2725,28 @@ impl Gitlab {
     where
         C: AsRef<str>,
     {
-        let path = &format!(
-            "projects/{}/merge_requests/{}/notes/{}",
-            project, merge_request, note,
-        );
-        self.put_with_param(path, &[("body", content.as_ref())])
+        Ok(
+            projects::merge_requests::notes::EditMergeRequestNote::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .body(content.as_ref())
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Get issues closed by a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::IssuesClosedBy.query()` instead"
+    )]
     pub fn get_issues_closed_by_merge_request<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<Issue>>
     where
         I: IntoIterator,
@@ -2216,21 +2754,24 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/closes_issues",
-                project, merge_request,
-            ),
-            params,
-        )
+        Ok(projects::merge_requests::IssuesClosedBy::builder()
+            .project(project.value())
+            .merge_request(merge_request.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get issues closed by a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::IssuesClosedBy.query()` instead"
+    )]
     pub fn get_issues_closed_by_merge_request_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<Issue>>
     where
         P: AsRef<str>,
@@ -2239,14 +2780,12 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/closes_issues",
-                Self::url_name(project.as_ref()),
-                merge_request,
-            ),
-            params,
-        )
+        Ok(projects::merge_requests::IssuesClosedBy::builder()
+            .project(project.as_ref())
+            .merge_request(merge_request.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Closes an issue
@@ -2314,6 +2853,10 @@ impl Gitlab {
     }
 
     /// Set the labels on a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::EditMergeRequest.query()` instead"
+    )]
     pub fn set_merge_request_labels<I, L>(
         &self,
         project: ProjectId,
@@ -2324,8 +2867,13 @@ impl Gitlab {
         I: IntoIterator<Item = L>,
         L: Display,
     {
-        let path = format!("projects/{}/merge_requests/{}", project, merge_request);
-        self.put_with_param(path, &[("labels", labels.into_iter().join(","))])
+        Ok(projects::merge_requests::EditMergeRequest::builder()
+            .project(project.value())
+            .merge_request(merge_request.value())
+            .labels(labels.into_iter().map(|l| format!("{}", l)))
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Create a URL to an API endpoint.
@@ -2378,15 +2926,6 @@ impl Gitlab {
         serde_json::from_value::<T>(v).map_err(GitlabError::data_type::<T>)
     }
 
-    /// Create a `GET` request to an API endpoint.
-    fn get<T, U>(&self, url: U) -> GitlabResult<T>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-    {
-        self.get_with_param(url, query_param_slice![])
-    }
-
     /// Create a `GET` request to an API endpoint with query parameters.
     fn get_with_param<T, U, I, K, V>(&self, url: U, params: I) -> GitlabResult<T>
     where
@@ -2400,37 +2939,6 @@ impl Gitlab {
         let full_url = self.create_url_with_param(url, params.into_iter())?;
         let req = self.client.get(full_url);
         self.send(req)
-    }
-
-    /// Create a `POST` request to an API endpoint with query parameters.
-    fn post_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-        P: Serialize,
-    {
-        let full_url = self.create_url(url)?;
-        self.send(self.client.post(full_url).form(&param))
-    }
-
-    /// Create a `PUT` request to an API endpoint with query parameters.
-    fn put_with_param<T, U, P>(&self, url: U, param: P) -> GitlabResult<T>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-        P: Serialize,
-    {
-        let full_url = self.create_url(url)?;
-        self.send(self.client.put(full_url).form(&param))
-    }
-
-    /// Handle paginated queries. Returns all results.
-    fn get_paged<T, U>(&self, url: U) -> GitlabResult<Vec<T>>
-    where
-        T: DeserializeOwned,
-        U: AsRef<str>,
-    {
-        self.get_paged_with_param(url, query_param_slice![])
     }
 
     /// Handle paginated queries with query parameters. Returns all results.

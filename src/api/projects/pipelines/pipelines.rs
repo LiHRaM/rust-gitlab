@@ -4,8 +4,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::borrow::Cow;
-
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 

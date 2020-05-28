@@ -4,8 +4,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::borrow::Cow;
-
 use derive_builder::Builder;
 
 use crate::api::common::{self, NameOrId};

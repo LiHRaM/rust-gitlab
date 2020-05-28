@@ -1,0 +1,617 @@
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
+use std::collections::BTreeSet;
+
+use chrono::{DateTime, Utc};
+use derive_builder::Builder;
+
+use crate::api::common::{NameOrId, SortOrder, YesNo};
+use crate::api::endpoint_prelude::*;
+use crate::api::helpers::{Labels, Milestone, ReactionEmoji};
+use crate::api::ParamValue;
+
+/// Filters for merge request states.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeRequestState {
+    /// Filter merge requests that are open.
+    Opened,
+    /// Filter merge requests that are closed.
+    Closed,
+    /// Filter merge requests that are locked.
+    Locked,
+    /// Filter merge requests that are merged.
+    Merged,
+}
+
+impl MergeRequestState {
+    fn as_str(self) -> &'static str {
+        match self {
+            MergeRequestState::Opened => "opened",
+            MergeRequestState::Closed => "closed",
+            MergeRequestState::Locked => "locked",
+            MergeRequestState::Merged => "merged",
+        }
+    }
+}
+
+impl ParamValue<'static> for MergeRequestState {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
+/// Parameters for a merge reques view.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeRequestView {
+    /// Return just the IID, URL, title, description, and basic state information.
+    Simple,
+}
+
+impl MergeRequestView {
+    fn as_str(self) -> &'static str {
+        match self {
+            MergeRequestView::Simple => "simple",
+        }
+    }
+}
+
+impl ParamValue<'static> for MergeRequestView {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
+/// Filter merge requests by a scope.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeRequestScope {
+    /// Filter merge requests created by the API caller.
+    CreatedByMe,
+    /// Filter merge requests assigned to the API caller.
+    AssignedToMe,
+    /// Return all merge requests.
+    All,
+}
+
+impl MergeRequestScope {
+    fn as_str(self) -> &'static str {
+        match self {
+            MergeRequestScope::CreatedByMe => "created_by_me",
+            MergeRequestScope::AssignedToMe => "assigned_to_me",
+            MergeRequestScope::All => "all",
+        }
+    }
+}
+
+impl ParamValue<'static> for MergeRequestScope {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
+#[derive(Debug, Clone)]
+enum Assignee {
+    Assigned,
+    Unassigned,
+    Id(u64),
+}
+
+impl Assignee {
+    fn add_params<'a>(&'a self, params: &mut QueryParams<'a>) {
+        match self {
+            Assignee::Assigned => {
+                params.push("assignee_id", "Any");
+            },
+            Assignee::Unassigned => {
+                params.push("assignee_id", "None");
+            },
+            Assignee::Id(id) => {
+                params.push("assignee_id", *id);
+            },
+        }
+    }
+}
+
+/// Keys merge request results may be ordered by.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeRequestOrderBy {
+    /// Sort by creation date.
+    CreatedAt,
+    /// Sort by last updated date.
+    UpdatedAt,
+}
+
+impl Default for MergeRequestOrderBy {
+    fn default() -> Self {
+        MergeRequestOrderBy::CreatedAt
+    }
+}
+
+impl MergeRequestOrderBy {
+    fn as_str(self) -> &'static str {
+        match self {
+            MergeRequestOrderBy::CreatedAt => "created_at",
+            MergeRequestOrderBy::UpdatedAt => "updated_at",
+        }
+    }
+}
+
+impl ParamValue<'static> for MergeRequestOrderBy {
+    fn as_value(self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
+#[derive(Debug, Clone)]
+enum ApproverIds {
+    Any,
+    None,
+    AllOf(BTreeSet<u64>),
+}
+
+impl ApproverIds {
+    fn add_params<'a>(&'a self, params: &mut QueryParams<'a>) {
+        match self {
+            ApproverIds::Any => {
+                params.push("approver_ids", "Any");
+            },
+            ApproverIds::None => {
+                params.push("approver_ids", "None");
+            },
+            ApproverIds::AllOf(ids) => {
+                params.extend(ids.iter().map(|&id| ("approver_ids[]", id)));
+            },
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+enum ApprovedByIds {
+    Any,
+    None,
+    AllOf(BTreeSet<u64>),
+}
+
+impl ApprovedByIds {
+    fn add_params<'a>(&'a self, params: &mut QueryParams<'a>) {
+        match self {
+            ApprovedByIds::Any => {
+                params.push("approved_by_ids", "Any");
+            },
+            ApprovedByIds::None => {
+                params.push("approved_by_ids", "None");
+            },
+            ApprovedByIds::AllOf(ids) => {
+                params.extend(ids.iter().map(|&id| ("approved_by_ids[]", id)));
+            },
+        }
+    }
+}
+
+/// Query for merge requests within a project.
+#[derive(Debug, Builder)]
+#[builder(setter(strip_option))]
+pub struct MergeRequests<'a> {
+    /// The project to query for merge requests.
+    #[builder(setter(into))]
+    project: NameOrId<'a>,
+
+    /// Filter merge requests with specific internal IDs.
+    #[builder(setter(name = "_iids"), default, private)]
+    iids: BTreeSet<u64>,
+    /// Filter merge requests based on state.
+    #[builder(default)]
+    state: Option<MergeRequestState>,
+    /// Filter merge requests with a milestone title.
+    #[builder(setter(name = "_milestone"), default, private)]
+    milestone: Option<Milestone<'a>>,
+    /// The view of the merge request.
+    ///
+    /// This field can restrict the amount of data returned.
+    #[builder(default)]
+    view: Option<MergeRequestView>,
+    /// Filter merge requests based on labels.
+    #[builder(setter(name = "_labels"), default, private)]
+    labels: Option<Labels<'a>>,
+    /// Include label details in the result.
+    #[builder(default)]
+    with_labels_details: Option<bool>,
+    /// Filter merge requests created after a point in time.
+    #[builder(default)]
+    created_after: Option<DateTime<Utc>>,
+    /// Filter merge requests created before a point in time.
+    #[builder(default)]
+    created_before: Option<DateTime<Utc>>,
+    /// Filter merge requests last updated after a point in time.
+    #[builder(default)]
+    updated_after: Option<DateTime<Utc>>,
+    /// Filter merge requests last updated before a point in time.
+    #[builder(default)]
+    updated_before: Option<DateTime<Utc>>,
+    /// Filter merge requests within a scope.
+    #[builder(default)]
+    scope: Option<MergeRequestScope>,
+    /// Filter merge requests by author.
+    #[builder(setter(into), default)]
+    author: Option<NameOrId<'a>>,
+    /// Filter merge requests by assignees.
+    #[builder(setter(name = "_assignee"), default, private)]
+    assignee: Option<Assignee>,
+    /// Filter merge requests by approvers.
+    #[builder(setter(name = "_approver_ids"), default, private)]
+    approver_ids: Option<ApproverIds>,
+    /// Filter merge requests by approvals.
+    #[builder(setter(name = "_approved_by_ids"), default, private)]
+    approved_by_ids: Option<ApprovedByIds>,
+    /// Filter merge requests by the API caller's reactions.
+    #[builder(setter(name = "_my_reaction_emoji"), default, private)]
+    my_reaction_emoji: Option<ReactionEmoji<'a>>,
+    /// Filter merge requests with a search query.
+    #[builder(setter(into), default)]
+    source_branch: Option<Cow<'a, str>>,
+    /// Filter merge requests with a search query.
+    #[builder(setter(into), default)]
+    target_branch: Option<Cow<'a, str>>,
+    /// Filter merge requests with a search query.
+    #[builder(setter(into), default)]
+    wip: Option<YesNo>,
+
+    /// Filter merge requests with a search query.
+    #[builder(setter(into), default)]
+    search: Option<Cow<'a, str>>,
+
+    /// Order results by a given key.
+    #[builder(default)]
+    order_by: Option<MergeRequestOrderBy>,
+    /// The sort order for return results.
+    #[builder(default)]
+    sort: Option<SortOrder>,
+}
+
+impl<'a> MergeRequests<'a> {
+    /// Create a builder for the endpoint.
+    pub fn builder() -> MergeRequestsBuilder<'a> {
+        MergeRequestsBuilder::default()
+    }
+}
+
+impl<'a> MergeRequestsBuilder<'a> {
+    /// Return a merge request with an internal ID.
+    pub fn iid(&mut self, iid: u64) -> &mut Self {
+        self.iids.get_or_insert_with(BTreeSet::new).insert(iid);
+        self
+    }
+
+    /// Return merge requests with one of a set of internal IDs.
+    pub fn iids<I>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = u64>,
+    {
+        self.iids.get_or_insert_with(BTreeSet::new).extend(iter);
+        self
+    }
+
+    /// Filter unlabeled merge requests.
+    pub fn unlabeled(&mut self) -> &mut Self {
+        self.labels = Some(Some(Labels::None));
+        self
+    }
+
+    /// Filter merge requests with any label.
+    pub fn with_any_label(&mut self) -> &mut Self {
+        self.labels = Some(Some(Labels::Any));
+        self
+    }
+
+    /// Filter merge requests with a given label.
+    pub fn label<L>(&mut self, label: L) -> &mut Self
+    where
+        L: Into<Cow<'a, str>>,
+    {
+        let label = label.into();
+        let labels = if let Some(Some(Labels::AllOf(mut set))) = self.labels.take() {
+            set.insert(label);
+            set
+        } else {
+            let mut set = BTreeSet::new();
+            set.insert(label);
+            set
+        };
+        self.labels = Some(Some(Labels::AllOf(labels)));
+        self
+    }
+
+    /// Filter merge requests with all of the given labels.
+    pub fn labels<I, L>(&mut self, iter: I) -> &mut Self
+    where
+        I: IntoIterator<Item = L>,
+        L: Into<Cow<'a, str>>,
+    {
+        let iter = iter.into_iter().map(Into::into);
+        let labels = if let Some(Some(Labels::AllOf(mut set))) = self.labels.take() {
+            set.extend(iter);
+            set
+        } else {
+            iter.collect()
+        };
+        self.labels = Some(Some(Labels::AllOf(labels)));
+        self
+    }
+
+    /// Filter merge requests without a milestone.
+    pub fn without_milestone(&mut self) -> &mut Self {
+        self.milestone = Some(Some(Milestone::None));
+        self
+    }
+
+    /// Filter merge requests with any milestone.
+    pub fn any_milestone(&mut self) -> &mut Self {
+        self.milestone = Some(Some(Milestone::Any));
+        self
+    }
+
+    /// Filter merge requests with a given milestone.
+    pub fn milestone<M>(&mut self, milestone: M) -> &mut Self
+    where
+        M: Into<Cow<'a, str>>,
+    {
+        self.milestone = Some(Some(Milestone::Named(milestone.into())));
+        self
+    }
+
+    /// Filter unassigned merge requests.
+    pub fn unassigned(&mut self) -> &mut Self {
+        self.assignee = Some(Some(Assignee::Unassigned));
+        self
+    }
+
+    /// Filter assigned merge requests.
+    pub fn assigned(&mut self) -> &mut Self {
+        self.assignee = Some(Some(Assignee::Assigned));
+        self
+    }
+
+    /// Filter merge requests assigned to a user (by ID).
+    pub fn assignee_id(&mut self, assignee: u64) -> &mut Self {
+        self.assignee = Some(Some(Assignee::Id(assignee)));
+        self
+    }
+
+    /// Filter unassigned merge requests.
+    pub fn no_approvers(&mut self) -> &mut Self {
+        self.approver_ids = Some(Some(ApproverIds::None));
+        self
+    }
+
+    /// Filter assigned merge requests.
+    pub fn any_approvers(&mut self) -> &mut Self {
+        self.approver_ids = Some(Some(ApproverIds::Any));
+        self
+    }
+
+    /// Filter merge requests assigned to a user (by ID).
+    pub fn approver_id(&mut self, approver: u64) -> &mut Self {
+        let approver_ids = if let Some(Some(ApproverIds::AllOf(mut set))) = self.approver_ids.take()
+        {
+            set.insert(approver);
+            set
+        } else {
+            [approver].iter().copied().collect()
+        };
+        self.approver_ids = Some(Some(ApproverIds::AllOf(approver_ids)));
+        self
+    }
+
+    /// Filter merge requests assigned to a user (by ID).
+    pub fn approver_ids<I>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = u64>,
+    {
+        let approver_ids = if let Some(Some(ApproverIds::AllOf(mut set))) = self.approver_ids.take()
+        {
+            set.extend(iter);
+            set
+        } else {
+            iter.collect()
+        };
+        self.approver_ids = Some(Some(ApproverIds::AllOf(approver_ids)));
+        self
+    }
+
+    /// Filter unassigned merge requests.
+    pub fn no_approvals(&mut self) -> &mut Self {
+        self.approved_by_ids = Some(Some(ApprovedByIds::None));
+        self
+    }
+
+    /// Filter assigned merge requests.
+    pub fn any_approvals(&mut self) -> &mut Self {
+        self.approved_by_ids = Some(Some(ApprovedByIds::Any));
+        self
+    }
+
+    /// Filter merge requests assigned to a user (by ID).
+    pub fn approve_by_id(&mut self, approved_by: u64) -> &mut Self {
+        let approved_by_ids =
+            if let Some(Some(ApprovedByIds::AllOf(mut set))) = self.approved_by_ids.take() {
+                set.insert(approved_by);
+                set
+            } else {
+                [approved_by].iter().copied().collect()
+            };
+        self.approved_by_ids = Some(Some(ApprovedByIds::AllOf(approved_by_ids)));
+        self
+    }
+
+    /// Filter merge requests assigned to a user (by ID).
+    pub fn approve_by_ids<I>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = u64>,
+    {
+        let approved_by_ids =
+            if let Some(Some(ApprovedByIds::AllOf(mut set))) = self.approved_by_ids.take() {
+                set.extend(iter);
+                set
+            } else {
+                iter.collect()
+            };
+        self.approved_by_ids = Some(Some(ApprovedByIds::AllOf(approved_by_ids)));
+        self
+    }
+
+    /// Filter merge requests without a reaction by the API caller.
+    pub fn no_reaction(&mut self) -> &mut Self {
+        self.my_reaction_emoji = Some(Some(ReactionEmoji::None));
+        self
+    }
+
+    /// Filter merge requests with any reaction by the API caller.
+    pub fn any_reaction(&mut self) -> &mut Self {
+        self.my_reaction_emoji = Some(Some(ReactionEmoji::Any));
+        self
+    }
+
+    /// Filter merge requests with a specific reaction by the API caller.
+    pub fn my_reaction<E>(&mut self, emoji: E) -> &mut Self
+    where
+        E: Into<Cow<'a, str>>,
+    {
+        self.my_reaction_emoji = Some(Some(ReactionEmoji::Emoji(emoji.into())));
+        self
+    }
+}
+
+impl<'a> Endpoint for MergeRequests<'a> {
+    fn method(&self) -> Method {
+        Method::GET
+    }
+
+    fn endpoint(&self) -> Cow<'static, str> {
+        format!("projects/{}/merge_requests", self.project).into()
+    }
+
+    fn parameters(&self) -> QueryParams {
+        let mut params = QueryParams::default();
+
+        params
+            .extend(self.iids.iter().map(|&value| ("iids[]", value)))
+            .push_opt("state", self.state)
+            .push_opt("milestone", self.milestone.as_ref())
+            .push_opt("view", self.view)
+            .push_opt("labels", self.labels.as_ref())
+            .push_opt("with_labels_details", self.with_labels_details)
+            .push_opt("created_after", self.created_after)
+            .push_opt("created_before", self.created_before)
+            .push_opt("updated_after", self.updated_after)
+            .push_opt("updated_before", self.updated_before)
+            .push_opt("scope", self.scope)
+            .push_opt("my_reaction_emoji", self.my_reaction_emoji.as_ref())
+            .push_opt("source_branch", self.source_branch.as_ref())
+            .push_opt("target_branch", self.target_branch.as_ref())
+            .push_opt("search", self.search.as_ref())
+            .push_opt("wip", self.wip)
+            .push_opt("order_by", self.order_by)
+            .push_opt("sort", self.sort);
+
+        if let Some(author) = self.author.as_ref() {
+            match author {
+                NameOrId::Name(name) => {
+                    params.push("author_username", name);
+                },
+                NameOrId::Id(id) => {
+                    params.push("author_id", *id);
+                },
+            }
+        }
+        if let Some(assignee) = self.assignee.as_ref() {
+            assignee.add_params(&mut params);
+        }
+        if let Some(approver_ids) = self.approver_ids.as_ref() {
+            approver_ids.add_params(&mut params);
+        }
+        if let Some(approved_by_ids) = self.approved_by_ids.as_ref() {
+            approved_by_ids.add_params(&mut params);
+        }
+
+        params
+    }
+}
+
+impl<'a> Pageable for MergeRequests<'a> {}
+
+#[cfg(test)]
+mod tests {
+    use crate::api::projects::merge_requests::{
+        MergeRequestOrderBy, MergeRequestScope, MergeRequestState, MergeRequestView, MergeRequests,
+    };
+
+    #[test]
+    fn merge_request_state_as_str() {
+        let items = &[
+            (MergeRequestState::Opened, "opened"),
+            (MergeRequestState::Closed, "closed"),
+            (MergeRequestState::Locked, "locked"),
+            (MergeRequestState::Merged, "merged"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn merge_request_view_as_str() {
+        let items = &[(MergeRequestView::Simple, "simple")];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn merge_request_scope_as_str() {
+        let items = &[
+            (MergeRequestScope::CreatedByMe, "created_by_me"),
+            (MergeRequestScope::AssignedToMe, "assigned_to_me"),
+            (MergeRequestScope::All, "all"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn merge_request_order_by_default() {
+        assert_eq!(
+            MergeRequestOrderBy::default(),
+            MergeRequestOrderBy::CreatedAt,
+        );
+    }
+
+    #[test]
+    fn merge_request_order_by_as_str() {
+        let items = &[
+            (MergeRequestOrderBy::CreatedAt, "created_at"),
+            (MergeRequestOrderBy::UpdatedAt, "updated_at"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn project_is_needed() {
+        let err = MergeRequests::builder().build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
+    }
+
+    #[test]
+    fn project_is_sufficient() {
+        MergeRequests::builder().project(1).build().unwrap();
+    }
+}

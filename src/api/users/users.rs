@@ -4,7 +4,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::borrow::Cow;
 use std::collections::BTreeMap;
 
 use chrono::{DateTime, Utc};
@@ -119,7 +118,7 @@ pub struct Users<'a> {
     #[builder(default)]
     sort: Option<SortOrder>,
     /// Return users with a two-factor enabled or not.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     two_factor: Option<EnableState>,
     /// If set to `true`, filter out users without any projects.
     #[builder(default)]

@@ -74,6 +74,8 @@ pub mod groups;
 pub mod projects;
 pub mod users;
 
+pub(crate) mod helpers;
+
 pub use self::client::Client;
 
 pub use self::endpoint::Endpoint;

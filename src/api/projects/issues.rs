@@ -12,6 +12,8 @@ mod create;
 mod edit;
 mod issue;
 mod issues;
+pub mod notes;
+mod resource_label_events;
 
 pub use self::create::CreateIssue;
 pub use self::create::CreateIssueBuilder;
@@ -29,3 +31,6 @@ pub use self::issues::IssueState;
 pub use self::issues::IssueWeight;
 pub use self::issues::Issues;
 pub use self::issues::IssuesBuilder;
+
+pub use self::resource_label_events::IssueResourceLabelEvents;
+pub use self::resource_label_events::IssueResourceLabelEventsBuilder;
