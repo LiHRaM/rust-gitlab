@@ -48,7 +48,7 @@ impl<'a> Endpoint for AddProjectMember<'a> {
 
         params
             .push("user_id", self.user)
-            .push("access_level", self.access_level.as_str())
+            .push("access_level", self.access_level.as_u64())
             .push_opt("expires_at", self.expires_at);
 
         params.into_body()

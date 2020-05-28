@@ -138,7 +138,7 @@ impl<'a> Endpoint for Groups<'a> {
             .push_opt("owned", self.owned)
             .push_opt(
                 "min_access_level",
-                self.min_access_level.map(|level| level.as_str()),
+                self.min_access_level.map(|level| level.as_u64()),
             )
             .push_opt("statistics", self.statistics)
             .push_opt("with_custom_attributes", self.with_custom_attributes)
