@@ -14,6 +14,12 @@
   * The `api::projects::pipelines::PipelineVariables` endpoint is now pageable.
   * All `EnableState` fields may now be set using `bool` values.
 
+## Fixes
+
+  * The `min_access_level` field for `api::groups::Groups` and the
+    `access_level` for `api::projects::members::AddProjectMember` are now
+    properly passed as integers to the API. (#42)
+
 # v0.1210.2
 
 ## New request body handling
