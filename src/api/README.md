@@ -12,6 +12,8 @@ These API endpoints have been implemented.
   * `POST   /groups` `groups/create.rs`
   * `GET    /groups/:group` `groups/group.rs`
   * `GET    /groups/:group/members` `groups/members/members.rs`
+  * `POST   /groups/:group/members` `group/members/add.rs`
+  * `DELETE /groups/:group/members/:id` `group/members/remove.rs`
   * `GET    /groups/:group/members/:id` `groups/members/member.rs`
   * `GET    /projects` `projects/projects.rs`
   * `POST   /projects` `projects/projects/create.rs`
@@ -90,11 +92,9 @@ instead of having to search the page for missing endpoints.
   * `DELETE /groups/:group/ldap_group_links/:cn` https://gitlab.kitware.com/help/api/groups.md#delete-ldap-group-link-starter (deprecated)
   * `DELETE /groups/:group/ldap_group_links/:provider/:cn` https://gitlab.kitware.com/help/api/groups.md#delete-ldap-group-link-starter (deprecated)
   * `DELETE /groups/:group/ldap_group_links` https://gitlab.kitware.com/help/api/groups.md#delete-ldap-group-link-with-cn-or-filter-starter
-  * `POST   /groups/:group/members` https://gitlab.kitware.com/help/api/members.md#add-a-member-to-a-group-or-project
   * `GET    /groups/:group/members/all` https://gitlab.kitware.com/help/api/members.md#list-all-members-of-a-group-or-project-including-inherited-members
   * `GET    /groups/:group/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
   * `PUT    /groups/:group/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
-  * `DELETE /groups/:group/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
   * `GET    /groups/:group/projects` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-projects
   * `POST   /groups/:group/projects/:id` https://gitlab.kitware.com/help/api/groups.md#transfer-project-to-group
   * `POST   /groups/:group/restore` https://gitlab.kitware.com/help/api/groups.md#restore-group-marked-for-deletion-premium
