@@ -1800,12 +1800,58 @@ impl Gitlab {
     }
 
     /// Create a new merge request
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::CreateMergeRequest.query()` instead"
+    )]
     pub fn create_merge_request(
         &self,
         project: ProjectId,
         params: CreateMergeRequestParams,
     ) -> GitlabResult<MergeRequest> {
-        self.post_with_param(format!("projects/{}/merge_requests", project), &params)
+        let mut builder = projects::merge_requests::CreateMergeRequest::builder();
+
+        builder
+            .project(project.value())
+            .source_branch(params.source_branch)
+            .target_branch(params.target_branch)
+            .title(params.title);
+
+        if let Some(assignee_id) = params.assignee_id {
+            builder.assignee(assignee_id.value());
+        }
+        if let Some(assignee_ids) = params.assignee_ids {
+            if assignee_ids.is_empty() {
+                builder.unassigned();
+            } else {
+                builder.assignees(assignee_ids.into_iter().map(|id| id.value()));
+            }
+        }
+        if let Some(description) = params.description {
+            builder.description(description);
+        }
+        if let Some(target_project_id) = params.target_project_id {
+            builder.target_project_id(target_project_id.value());
+        }
+        let labels_save;
+        if let Some(labels) = params.labels {
+            labels_save = labels;
+            builder.labels(labels_save.split(','));
+        }
+        if let Some(milestone_id) = params.milestone_id {
+            builder.milestone_id(milestone_id.value());
+        }
+        if let Some(remove_source_branch) = params.remove_source_branch {
+            builder.remove_source_branch(remove_source_branch);
+        }
+        if let Some(allow_collaboration) = params.allow_collaboration {
+            builder.allow_collaboration(allow_collaboration);
+        }
+        if let Some(squash) = params.squash {
+            builder.squash(squash);
+        }
+
+        Ok(builder.build().unwrap().query(self)?)
     }
 
     /// Get all pipelines for a project.

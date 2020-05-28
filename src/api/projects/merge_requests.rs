@@ -9,11 +9,15 @@
 //! These endpoints are used for querying projects merge requests.
 
 pub mod awards;
+mod create;
 mod issues_closed_by;
 mod merge_request;
 mod merge_requests;
 pub mod notes;
 mod resource_label_events;
+
+pub use self::create::CreateMergeRequest;
+pub use self::create::CreateMergeRequestBuilder;
 
 pub use self::issues_closed_by::IssuesClosedBy;
 pub use self::issues_closed_by::IssuesClosedByBuilder;
