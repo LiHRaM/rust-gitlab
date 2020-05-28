@@ -1927,11 +1927,15 @@ impl Gitlab {
     }
 
     /// Get the issues that will be closed when a merge request is merged.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::IssuesClosedBy.query()` instead"
+    )]
     pub fn merge_request_closes_issues<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<IssueReference>>
     where
         I: IntoIterator,
@@ -1939,13 +1943,12 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/closes_issues",
-                project, merge_request,
-            ),
-            params,
-        )
+        Ok(projects::merge_requests::IssuesClosedBy::builder()
+            .project(project.value())
+            .merge_request(merge_request.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get the discussions from a merge request.
@@ -2264,11 +2267,15 @@ impl Gitlab {
     }
 
     /// Get issues closed by a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::IssuesClosedBy.query()` instead"
+    )]
     pub fn get_issues_closed_by_merge_request<I, K, V>(
         &self,
         project: ProjectId,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<Issue>>
     where
         I: IntoIterator,
@@ -2276,21 +2283,24 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/closes_issues",
-                project, merge_request,
-            ),
-            params,
-        )
+        Ok(projects::merge_requests::IssuesClosedBy::builder()
+            .project(project.value())
+            .merge_request(merge_request.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Get issues closed by a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::IssuesClosedBy.query()` instead"
+    )]
     pub fn get_issues_closed_by_merge_request_by_name<P, I, K, V>(
         &self,
         project: P,
         merge_request: MergeRequestInternalId,
-        params: I,
+        _: I,
     ) -> GitlabResult<Vec<Issue>>
     where
         P: AsRef<str>,
@@ -2299,14 +2309,12 @@ impl Gitlab {
         K: AsRef<str>,
         V: AsRef<str>,
     {
-        self.get_paged_with_param(
-            format!(
-                "projects/{}/merge_requests/{}/closes_issues",
-                Self::url_name(project.as_ref()),
-                merge_request,
-            ),
-            params,
-        )
+        Ok(projects::merge_requests::IssuesClosedBy::builder()
+            .project(project.as_ref())
+            .merge_request(merge_request.value())
+            .build()
+            .unwrap()
+            .query(self)?)
     }
 
     /// Closes an issue

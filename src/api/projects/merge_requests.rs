@@ -8,8 +8,12 @@
 //!
 //! These endpoints are used for querying projects merge requests.
 
+mod issues_closed_by;
 pub mod notes;
 mod resource_label_events;
+
+pub use self::issues_closed_by::IssuesClosedBy;
+pub use self::issues_closed_by::IssuesClosedByBuilder;
 
 pub use self::resource_label_events::MergeRequestResourceLabelEvents;
 pub use self::resource_label_events::MergeRequestResourceLabelEventsBuilder;
