@@ -8,6 +8,7 @@
 //!
 //! These endpoints are used for querying project merge request notes.
 
+pub mod awards;
 mod create;
 mod edit;
 mod notes;

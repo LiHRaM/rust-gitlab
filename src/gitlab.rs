@@ -2045,6 +2045,10 @@ impl Gitlab {
     }
 
     /// Award a merge request note with an award.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::awards::CreateMergeRequestNoteAward.query()` instead"
+    )]
     pub fn award_merge_request_note(
         &self,
         project: ProjectId,
@@ -2052,14 +2056,23 @@ impl Gitlab {
         note: NoteId,
         award: &str,
     ) -> GitlabResult<AwardEmoji> {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-            project, merge_request, note,
-        );
-        self.post_with_param(path, &[("name", award)])
+        Ok(
+            projects::merge_requests::notes::awards::CreateMergeRequestNoteAward::builder()
+                .project(project.value())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .name(award)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Award a merge request note with an award.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::awards::CreateMergeRequestNoteAward.query()` instead"
+    )]
     pub fn award_merge_request_note_by_name<P>(
         &self,
         project: P,
@@ -2070,13 +2083,16 @@ impl Gitlab {
     where
         P: AsRef<str>,
     {
-        let path = format!(
-            "projects/{}/merge_requests/{}/notes/{}/award_emoji",
-            Self::url_name(project.as_ref()),
-            merge_request,
-            note,
-        );
-        self.post_with_param(path, &[("name", award)])
+        Ok(
+            projects::merge_requests::notes::awards::CreateMergeRequestNoteAward::builder()
+                .project(project.as_ref())
+                .merge_request(merge_request.value())
+                .note(note.value())
+                .name(award)
+                .build()
+                .unwrap()
+                .query(self)?,
+        )
     }
 
     /// Get the awards for a merge request.
