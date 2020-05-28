@@ -1489,6 +1489,10 @@ impl Gitlab {
     }
 
     /// Get the notes from a issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::IssueNotes.query()` instead"
+    )]
     pub fn issue_notes<I, K, V>(
         &self,
         project: ProjectId,
@@ -1508,6 +1512,10 @@ impl Gitlab {
     }
 
     /// Get the notes from a issue.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::issues::notes::IssueNotes.query()` instead"
+    )]
     pub fn issue_notes_by_name<P, I, K, V>(
         &self,
         project: P,
@@ -1974,6 +1982,10 @@ impl Gitlab {
     }
 
     /// Get the notes from a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::MergeRequestNotes.query()` instead"
+    )]
     pub fn merge_request_notes<I, K, V>(
         &self,
         project: ProjectId,
@@ -1996,6 +2008,10 @@ impl Gitlab {
     }
 
     /// Get the notes from a merge request.
+    #[deprecated(
+        since = "0.1300.0",
+        note = "use `gitlab::api::projects::merge_requests::notes::MergeRequestNotes.query()` instead"
+    )]
     pub fn merge_request_notes_by_name<P, I, K, V>(
         &self,
         project: P,

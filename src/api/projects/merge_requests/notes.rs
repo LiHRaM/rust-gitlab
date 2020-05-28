@@ -9,6 +9,11 @@
 //! These endpoints are used for querying project merge request notes.
 
 mod create;
+mod notes;
 
 pub use self::create::CreateMergeRequestNote;
 pub use self::create::CreateMergeRequestNoteBuilder;
+
+pub use self::notes::MergeRequestNotes;
+pub use self::notes::MergeRequestNotesBuilder;
+pub use crate::api::projects::issues::notes::NoteOrderBy;

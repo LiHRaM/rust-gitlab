@@ -9,6 +9,11 @@
 //! These endpoints are used for querying project issue notes.
 
 mod create;
+mod notes;
 
 pub use self::create::CreateIssueNote;
 pub use self::create::CreateIssueNoteBuilder;
+
+pub use self::notes::IssueNotes;
+pub use self::notes::IssueNotesBuilder;
+pub use self::notes::NoteOrderBy;
