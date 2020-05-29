@@ -22,23 +22,21 @@ use crate::types::{AccessLevel, GroupId, ObjectId, ProjectId, SshKeyId, UserId};
 use crate::webhooks::{CommitHookAttrs, ProjectHookAttrs};
 
 /// Events which occur at the project level.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectEvent {
     /// A project was created.
+    #[serde(rename = "project_create")]
     Create,
     /// A project was deleted.
+    #[serde(rename = "project_destroy")]
     Destroy,
     /// A project was renamed.
+    #[serde(rename = "project_rename")]
     Rename,
     /// A project moved from one namespace to another.
+    #[serde(rename = "project_transfer")]
     Transfer,
 }
-enum_serialize!(ProjectEvent -> "project event",
-    Create => "project_create",
-    Destroy => "project_destroy",
-    Rename => "project_rename",
-    Transfer => "project_transfer",
-);
 
 /// Visibility levels for projects.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -85,20 +83,18 @@ pub struct ProjectSystemHook {
 }
 
 /// Events which occur when users are added and removed from projects.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectMemberEvent {
     /// A user was added to a project.
+    #[serde(rename = "user_add_to_team")]
     Add,
     /// A user was removed from a project.
+    #[serde(rename = "user_remove_from_team")]
     Remove,
 }
-enum_serialize!(ProjectMemberEvent -> "project member event",
-    Add => "user_add_to_team",
-    Remove => "user_remove_from_team",
-);
 
 /// Access levels for groups and projects.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum HumanAccessLevel {
     /// Guest access (can see the project).
     Guest,
@@ -111,13 +107,6 @@ pub enum HumanAccessLevel {
     /// Owner access (full rights).
     Owner,
 }
-enum_serialize!(HumanAccessLevel -> "human access level",
-    Guest => "Guest",
-    Reporter => "Reporter",
-    Developer => "Developer",
-    Maintainer => "Maintainer",
-    Owner => "Owner",
-);
 
 impl From<HumanAccessLevel> for AccessLevel {
     fn from(access: HumanAccessLevel) -> Self {
@@ -163,17 +152,15 @@ pub struct ProjectMemberSystemHook {
 }
 
 /// Events which occur for user accounts.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserEvent {
     /// The user account was created.
+    #[serde(rename = "user_create")]
     Create,
     /// The user account was deleted.
+    #[serde(rename = "user_destroy")]
     Destroy,
 }
-enum_serialize!(UserEvent -> "user event",
-    Create => "user_create",
-    Destroy => "user_destroy",
-);
 
 /// A user hook.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -195,17 +182,15 @@ pub struct UserSystemHook {
 }
 
 /// Events which occur for SSH keys.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyEvent {
     /// An SSH key was uploaded.
+    #[serde(rename = "key_create")]
     Create,
     /// An SSH key was deleted.
+    #[serde(rename = "key_destroy")]
     Destroy,
 }
-enum_serialize!(KeyEvent -> "key event",
-    Create => "key_create",
-    Destroy => "key_destroy",
-);
 
 /// An SSH key hook.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -225,17 +210,15 @@ pub struct KeySystemHook {
 }
 
 /// Events which occur for groups.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GroupEvent {
     /// The group was created.
+    #[serde(rename = "group_create")]
     Create,
     /// The group was deleted.
+    #[serde(rename = "group_destrpy")]
     Destroy,
 }
-enum_serialize!(GroupEvent -> "group event",
-    Create => "group_create",
-    Destroy => "group_destroy",
-);
 
 /// A group hook.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -259,17 +242,15 @@ pub struct GroupSystemHook {
 }
 
 /// Events which occur for group memberships.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GroupMemberEvent {
     /// A user was added to the group.
+    #[serde(rename = "user_add_to_group")]
     Add,
     /// A user was removed from the group.
+    #[serde(rename = "user_remove_from_group")]
     Remove,
 }
-enum_serialize!(GroupMemberEvent -> "group member event",
-    Add => "user_add_to_group",
-    Remove => "user_remove_from_group",
-);
 
 /// A group membership hook.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -299,17 +280,15 @@ pub struct GroupMemberSystemHook {
 }
 
 /// Events which occur when a push happens.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PushEvent {
     /// A non-tag push occurred.
+    #[serde(rename = "push")]
     Push,
     /// A tag was pushed.
+    #[serde(rename = "tag_push")]
     TagPush,
 }
-enum_serialize!(PushEvent -> "push event",
-    Push => "push",
-    TagPush => "tag_push",
-);
 
 /// A push hook.
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -188,23 +188,21 @@ pub struct PushHook {
 }
 
 /// Actions which may occur on an issue.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IssueAction {
     /// The issue was updated.
+    #[serde(rename = "update")]
     Update,
     /// The issue was opened.
+    #[serde(rename = "open")]
     Open,
     /// The issue was closed.
+    #[serde(rename = "close")]
     Close,
     /// The issue was reopened.
+    #[serde(rename = "reopen")]
     Reopen,
 }
-enum_serialize!(IssueAction -> "issue action",
-    Update => "update",
-    Open => "open",
-    Close => "close",
-    Reopen => "reopen",
-);
 
 /// Issue information exposed in hooks.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -276,26 +274,24 @@ pub struct IssueHook {
 }
 
 /// Actions which may occur on a merge request.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestAction {
     /// The merge request was updated.
+    #[serde(rename = "update")]
     Update,
     /// The merge request was opened.
+    #[serde(rename = "open")]
     Open,
     /// The merge request was closed.
+    #[serde(rename = "close")]
     Close,
     /// The merge request was reopened.
+    #[serde(rename = "reopen")]
     Reopen,
     /// The merge request was merged.
+    #[serde(rename = "merge")]
     Merge,
 }
-enum_serialize!(MergeRequestAction -> "merge request action",
-    Update => "update",
-    Open => "open",
-    Close => "close",
-    Reopen => "reopen",
-    Merge => "merge",
-);
 
 /// Merge parameters for a merge request.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -417,17 +413,15 @@ pub struct MergeRequestHook {
 }
 
 /// The type of a snippet.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SnippetType {
     /// A project-owned snippet.
+    #[serde(rename = "ProjectSnippet")]
     Project,
     /// A user-owned snippet.
+    #[serde(rename = "PersonalSnippet")]
     Personal,
 }
-enum_serialize!(SnippetType -> "snippet type",
-    Project => "ProjectSnippet",
-    Personal => "PersonalSnippet",
-);
 
 /// Snippet information exposed in hooks.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -454,17 +448,15 @@ pub struct SnippetHookAttrs {
 }
 
 /// Actions which may occur on a wiki page.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WikiPageAction {
     /// A wiki page was created.
+    #[serde(rename = "create")]
     Create,
     /// A wiki page was updated.
+    #[serde(rename = "update")]
     Update,
 }
-enum_serialize!(WikiPageAction -> "wiki page action",
-    Create => "create",
-    Update => "update",
-);
 
 /// Wiki information exposed in hooks.
 #[derive(Serialize, Deserialize, Debug, Clone)]

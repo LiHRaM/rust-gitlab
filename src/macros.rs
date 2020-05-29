@@ -5,7 +5,7 @@
 // except according to those terms.
 
 macro_rules! impl_id {
-    ( $name:ident, $doc:expr ) => {
+    ( $name:ident, $doc:expr$(,)? ) => {
         #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         #[doc = $doc]
         pub struct $name(u64);
