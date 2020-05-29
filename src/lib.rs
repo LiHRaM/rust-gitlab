@@ -27,9 +27,10 @@ mod auth;
 #[cfg(feature = "client_api")]
 pub use crate::auth::AuthError;
 #[cfg(feature = "client_api")]
-pub use crate::gitlab::{
-    CommitStatusInfo, Gitlab, GitlabBuilder, GitlabError, MergeRequestStateFilter,
-};
+#[allow(deprecated)]
+pub use crate::gitlab::{CommitStatusInfo, MergeRequestStateFilter};
+#[cfg(feature = "client_api")]
+pub use crate::gitlab::{Gitlab, GitlabBuilder, GitlabError};
 pub use crate::types::*;
 
 #[cfg(test)]

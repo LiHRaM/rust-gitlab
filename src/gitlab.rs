@@ -51,6 +51,7 @@ pub enum GitlabError {
         source: url::ParseError,
     },
     #[error("no such user: {}", user)]
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     NoSuchUser { user: String },
     #[error("error setting auth header: {}", source)]
     AuthError {
@@ -65,13 +66,16 @@ pub enum GitlabError {
     #[error("gitlab HTTP error: {}", status)]
     Http { status: reqwest::StatusCode },
     #[error("could not parse JSON response: {}", source)]
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     Json {
         #[source]
         source: serde_json::Error,
     },
     #[error("milestone without an ID found")]
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     InvalidMilestone,
     #[error("gitlab server error: {}", msg)]
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     Gitlab { msg: String },
     #[error("graphql error: [\"{}\"]", message.iter().format("\", \""))]
     GraphQL { message: Vec<graphql_client::Error> },
@@ -89,6 +93,7 @@ pub enum GitlabError {
         source: api::ApiError<RestError>,
     },
     #[error("invalid status state for new commit status: {}", state.as_str())]
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     InvalidStatusState { state: StatusState },
     /// This is here to force `_` matching right now.
     ///
@@ -100,6 +105,7 @@ pub enum GitlabError {
 
 impl GitlabError {
     fn no_such_user(user: &str) -> Self {
+        #[allow(deprecated)]
         GitlabError::NoSuchUser {
             user: user.into(),
         }
@@ -111,19 +117,21 @@ impl GitlabError {
         }
     }
 
-    pub(crate) fn json(source: serde_json::Error) -> Self {
+    fn json(source: serde_json::Error) -> Self {
+        #[allow(deprecated)]
         GitlabError::Json {
             source,
         }
     }
 
-    pub(crate) fn from_gitlab(value: serde_json::Value) -> Self {
+    fn from_gitlab(value: serde_json::Value) -> Self {
         let msg = value
             .pointer("/message")
             .or_else(|| value.pointer("/error"))
             .and_then(|s| s.as_str())
             .unwrap_or_else(|| "<unknown error>");
 
+        #[allow(deprecated)]
         GitlabError::Gitlab {
             msg: msg.into(),
         }
@@ -139,7 +147,7 @@ impl GitlabError {
         GitlabError::NoResponse {}
     }
 
-    pub(crate) fn data_type<T>(source: serde_json::Error) -> Self {
+    fn data_type<T>(source: serde_json::Error) -> Self {
         GitlabError::DataType {
             source,
             typename: any::type_name::<T>(),
@@ -175,6 +183,7 @@ impl Debug for Gitlab {
 
 /// Optional information for commit statuses.
 #[derive(Debug)]
+#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub struct CommitStatusInfo<'a> {
     /// The refname of the commit being tested.
     pub refname: Option<&'a str>,
@@ -188,6 +197,7 @@ pub struct CommitStatusInfo<'a> {
 
 /// Optional information for merge requests.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub enum MergeRequestStateFilter {
     /// Get the opened/reopened merge requests.
     Opened,
@@ -429,6 +439,7 @@ impl Gitlab {
         since = "0.1210.1",
         note = "use `gitlab::api::projects::CreateProject.query()` instead"
     )]
+    #[allow(deprecated)]
     pub fn create_project<N: AsRef<str>, P: AsRef<str>>(
         &self,
         name: N,
@@ -650,6 +661,7 @@ impl Gitlab {
         since = "0.1210.1",
         note = "use `gitlab::api::projects::repository::files::CreateFile.query()` instead"
     )]
+    #[allow(deprecated)]
     pub fn create_file<F, B, C, M>(
         &self,
         project: ProjectId,
@@ -716,6 +728,7 @@ impl Gitlab {
         since = "0.1210.1",
         note = "use `gitlab::api::projects::EditProject.query()` instead"
     )]
+    #[allow(deprecated)]
     pub fn set_project_feature_access_level(
         &self,
         project: ProjectId,
@@ -1631,6 +1644,7 @@ impl Gitlab {
         since = "0.1210.1",
         note = "use `gitlab::api::projects::repository::commits::CreateCommitStatus.query()` instead"
     )]
+    #[allow(deprecated)]
     pub fn create_commit_status<S>(
         &self,
         project: ProjectId,
@@ -1673,6 +1687,7 @@ impl Gitlab {
         since = "0.1210.1",
         note = "use `gitlab::api::projects::repository::commits::CreateCommitStatus.query()` instead"
     )]
+    #[allow(deprecated)]
     pub fn create_commit_status_by_name<P, S>(
         &self,
         project: P,
@@ -1871,6 +1886,7 @@ impl Gitlab {
         since = "0.1300.0",
         note = "use `gitlab::api::{groups,projects}::milestones::Create{Group,Project}Milestone.query()` instead"
     )]
+    #[allow(deprecated)]
     pub fn create_milestone(&self, milestone: Milestone) -> GitlabResult<Milestone> {
         if let Some(project) = milestone.project_id {
             let mut builder = projects::milestones::CreateProjectMilestone::builder();
@@ -2062,6 +2078,7 @@ impl Gitlab {
         since = "0.1300.0",
         note = "use `gitlab::api::projects::merge_requests::MergeRequests.query()` instead"
     )]
+    #[allow(deprecated)]
     pub fn merge_requests_with_state(
         &self,
         project: ProjectId,

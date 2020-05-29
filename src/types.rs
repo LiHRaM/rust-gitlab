@@ -31,9 +31,11 @@ use url::Url;
 //}
 
 /// Type alias for slice of string two-tuples
+#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub type QueryParamSlice<'a> = &'a [(&'a str, &'a str)];
 
 /// Type alias for Vec of string two-tuples
+#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub type QueryParamVec<'a> = Vec<(&'a str, &'a str)>;
 
 /// Type-safe user ID.
@@ -387,6 +389,7 @@ pub struct WebhookEvents {
 
 impl WebhookEvents {
     /// Create a new, empty webhook event set.
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     pub fn new() -> Self {
         WebhookEvents {
             job: false,
@@ -1975,6 +1978,7 @@ pub struct CreateMergeRequestParams {
 }
 
 impl CreateMergeRequestParams {
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     pub fn builder() -> CreateMergeRequestParamsBuilder {
         CreateMergeRequestParamsBuilder::default()
     }
@@ -2817,11 +2821,14 @@ pub struct EventLabel {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct RepoFile {
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     pub file_path: String,
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     pub branch: String,
 }
 
 #[derive(Debug, Clone)]
+#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub enum ProjectFeatures {
     Issues(FeatureVisibilityLevel),
     Repository(FeatureVisibilityLevel),
@@ -2831,6 +2838,7 @@ pub enum ProjectFeatures {
     Snippets(FeatureVisibilityLevel),
 }
 
+#[allow(deprecated)]
 impl ProjectFeatures {
     pub fn name(&self) -> &'static str {
         match self {
@@ -2902,6 +2910,7 @@ pub struct CreateGroupParams {
 }
 
 impl CreateGroupParams {
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     pub fn builder() -> CreateGroupParamsBuilder {
         CreateGroupParamsBuilder::default()
     }
@@ -2962,6 +2971,7 @@ pub struct CreateProjectParams {
     /// Set wether merge requests can only be merged when all the discussions are resolved
     pub(crate) only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
     /// Set the merge method used
+    #[allow(deprecated)]
     pub(crate) merge_method: Option<MergeMethod>,
     /// Set wether auto-closing referenced issues on default branch
     pub(crate) autoclose_referenced_issues: Option<bool>,
@@ -2974,6 +2984,7 @@ pub struct CreateProjectParams {
     /// Show link to create/view merge request wehen pushing from the command line
     pub(crate) printing_merge_request_link_enabled: Option<bool>,
     /// The git strategy. Defaults to fetch
+    #[allow(deprecated)]
     pub(crate) build_git_strategy: Option<BuildGitStrategy>,
     /// The maximum amount of time in minutes a job is allowed to run
     pub(crate) build_timeout: Option<u64>,
@@ -3024,6 +3035,7 @@ pub struct CreateProjectParams {
 }
 
 impl CreateProjectParams {
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     pub fn builder() -> CreateProjectParamsBuilder {
         CreateProjectParamsBuilder::default()
     }
@@ -3038,6 +3050,7 @@ impl CreateProjectParamsBuilder {
 
 /// Merge methods
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub enum MergeMethod {
     /// A merge commit is created for every merge,
     /// and merging is allowed as long as there are no conflicts
@@ -3057,6 +3070,7 @@ enum_serialize!(MergeMethod -> "merge_method",
 
 /// Build git strategy
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub enum BuildGitStrategy {
     Fetch,
     Clone,
@@ -3069,6 +3083,7 @@ enum_serialize!(BuildGitStrategy -> "build_git_strategy",
 
 /// Auto devops deply strategy
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub enum AutoDeployStrategy {
     Continuous,
     Manual,
