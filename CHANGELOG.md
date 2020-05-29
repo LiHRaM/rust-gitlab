@@ -20,6 +20,7 @@
   * The `api::Client` trait has been changed to use the `http` crate types.
     This allows for clients to not be tied to `reqwest` and for mocking and
     testing of the endpoints themselves.
+  * GitLab errors now detect error objects returned from the API.
 
 ## Fixes
 
