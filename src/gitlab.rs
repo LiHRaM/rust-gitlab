@@ -92,7 +92,7 @@ pub enum GitlabError {
         #[from]
         source: api::ApiError<RestError>,
     },
-    #[error("invalid status state for new commit status: {}", state.as_str())]
+    #[error("invalid status state for new commit status: {:?}", state)]
     #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
     InvalidStatusState { state: StatusState },
     /// This is here to force `_` matching right now.

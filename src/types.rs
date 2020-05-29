@@ -17,7 +17,6 @@ use std::str::FromStr;
 
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
-use log::error;
 use serde::de::{DeserializeOwned, Error};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{self, Value};
@@ -38,26 +37,21 @@ pub type QueryParamSlice<'a> = &'a [(&'a str, &'a str)];
 #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub type QueryParamVec<'a> = Vec<(&'a str, &'a str)>;
 
-/// Type-safe user ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct UserId(u64);
-impl_id!(UserId);
+impl_id!(UserId, "Type-safe user ID.");
 
 /// The states a user account can be in.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserState {
     /// The user is active and may perform actions.
+    #[serde(rename = "active")]
     Active,
     /// Blocked from logging in.
+    #[serde(rename = "blocked")]
     Blocked,
     /// Blocked from logging in via LDAP.
+    #[serde(rename = "ldap_blocked")]
     LdapBlocked,
 }
-enum_serialize!(UserState -> "user state",
-    Active => "active",
-    Blocked => "blocked",
-    LdapBlocked => "ldap_blocked",
-);
 
 /// Basic user information.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -152,15 +146,9 @@ pub struct Identity {
     pub extern_uid: String,
 }
 
-/// Type-safe theme ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ThemeId(u64);
-impl_id!(ThemeId);
+impl_id!(ThemeId, "Type-safe theme ID.");
 
-/// Type-safe color scheme ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ColorSchemeId(u64);
-impl_id!(ColorSchemeId);
+impl_id!(ColorSchemeId, "Type-safe color scheme ID.");
 
 /// Full user structure information.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -276,10 +264,7 @@ impl From<UserPublic> for User {
     }
 }
 
-/// Type-safe email ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct EmailId(u64);
-impl_id!(EmailId);
+impl_id!(EmailId, "Type-safe email ID.");
 
 /// Email address.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -290,10 +275,7 @@ pub struct Email {
     pub email: String,
 }
 
-/// Type-safe hook ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct HookId(u64);
-impl_id!(HookId);
+impl_id!(HookId, "Type-safe hook ID.");
 
 /// A web hook to notify of events.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -422,10 +404,7 @@ impl WebhookEvents {
     get_event! {wiki_page}
 }
 
-/// Type-safe project ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ProjectId(u64);
-impl_id!(ProjectId);
+impl_id!(ProjectId, "Type-safe project ID.");
 
 /// Basic project information.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -447,39 +426,35 @@ pub struct BasicProjectDetails {
 }
 
 /// Visibility levels of projects.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum VisibilityLevel {
     /// The project is visible to anonymous users.
+    #[serde(rename = "public")]
     Public,
     /// The project is visible to logged in users.
+    #[serde(rename = "internal")]
     Internal,
     /// The project is visible only to users with explicit access.
+    #[serde(rename = "private")]
     Private,
 }
-enum_serialize!(VisibilityLevel -> "visibility level",
-    Public => "public",
-    Internal => "internal",
-    Private => "private",
-);
 
 /// Visibility levels for project features.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum FeatureVisibilityLevel {
     /// Feature is disabled.
+    #[serde(rename = "disabled")]
     Disabled,
     /// Feature is enabled and accessible privately.
+    #[serde(rename = "private")]
     Private,
     /// Feature is enabled and accessible with project-wide visibility level.
+    #[serde(rename = "enabled")]
     Enabled,
     /// Feature is enabled and accessible publicly.
+    #[serde(rename = "public")]
     Public,
 }
-enum_serialize!(FeatureVisibilityLevel -> "feature visibility level",
-    Disabled => "disabled",
-    Private => "private",
-    Enabled => "enabled",
-    Public => "public",
-);
 
 // TODO: enum for NotificationLevel
 
@@ -841,10 +816,7 @@ impl From<AccessRequester> for UserBasic {
     }
 }
 
-/// Type-safe group ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct GroupId(u64);
-impl_id!(GroupId);
+impl_id!(GroupId, "Type-safe group ID.");
 
 /// Group information.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -992,17 +964,15 @@ impl ObjectId {
 }
 
 /// The kinds of objects Gitlab can return.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ObjectType {
     /// A `tree` object.
+    #[serde(rename = "tree")]
     Tree,
     /// A `blob` object.
+    #[serde(rename = "blob")]
     Blob,
 }
-enum_serialize!(ObjectType -> "object type",
-    Tree => "tree",
-    Blob => "blob",
-);
 
 /// An object inside of a repository.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1096,10 +1066,7 @@ pub struct RepoCommitDetail {
     status: Value,
 }
 
-/// Type-safe snippet ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct SnippetId(u64);
-impl_id!(SnippetId);
+impl_id!(SnippetId, "Type-safe snippet ID.");
 
 /// A project-specific snippet.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1165,28 +1132,23 @@ pub struct DiffRefs {
     pub start_sha: Option<ObjectId>,
 }
 
-/// Type-safe milestone ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MilestoneId(u64);
-impl_id!(MilestoneId);
+impl_id!(MilestoneId, "Type-safe milestone ID.");
 
-/// Type-safe milestone internal ID (internal to a project).
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MilestoneInternalId(u64);
-impl_id!(MilestoneInternalId);
+impl_id!(
+    MilestoneInternalId,
+    "Type-safe milestone internal ID (internal to a project).",
+);
 
 /// The states a milestone may be in.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MilestoneState {
     /// The milestone is active.
+    #[serde(rename = "active")]
     Active,
     /// The milestone has been closed.
+    #[serde(rename = "closed")]
     Closed,
 }
-enum_serialize!(MilestoneState -> "milestone type",
-    Active => "active",
-    Closed => "closed",
-);
 
 /// A milestone in a project.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1267,10 +1229,7 @@ impl Milestone {
     }
 }
 
-/// Type-safe label ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LabelId(u64);
-impl_id!(LabelId);
+impl_id!(LabelId, "Type-safe label ID.");
 
 /// Type-safe label color.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -1369,31 +1328,26 @@ impl Label {
     }
 }
 
-/// Type-safe issue ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct IssueId(u64);
-impl_id!(IssueId);
+impl_id!(IssueId, "Type-safe issue ID.");
 
-/// Type-safe issue internal ID (internal to a project).
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct IssueInternalId(u64);
-impl_id!(IssueInternalId);
+impl_id!(
+    IssueInternalId,
+    "Type-safe issue internal ID (internal to a project).",
+);
 
 /// The states an issue may be in.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IssueState {
     /// The issue is open.
+    #[serde(rename = "opened")]
     Opened,
     /// The issue has been closed.
+    #[serde(rename = "closed")]
     Closed,
     /// The issue has been opened after being closed.
+    #[serde(rename = "reopened")]
     Reopened,
 }
-enum_serialize!(IssueState -> "issue type",
-    Opened => "opened",
-    Closed => "closed",
-    Reopened => "reopened",
-);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct IssueLinks {
@@ -1617,62 +1571,55 @@ impl<'de> Deserialize<'de> for IssueReference {
     }
 }
 
-/// Type-safe merge request ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MergeRequestId(u64);
-impl_id!(MergeRequestId);
+impl_id!(MergeRequestId, "Type-safe merge request ID.");
 
-/// Type-safe merge request internal ID (internal to a project).
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MergeRequestInternalId(u64);
-impl_id!(MergeRequestInternalId);
+impl_id!(
+    MergeRequestInternalId,
+    "Type-safe merge request internal ID (internal to a project).",
+);
 
 /// The status of the possible merge for a merge request.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeStatus {
     /// The merge request has not been checked yet.
+    #[serde(rename = "unchecked")]
     Unchecked,
     /// The merge request is currently being checked.
+    #[serde(rename = "checking")]
     Checking,
     /// The merge request may be merged.
+    #[serde(rename = "can_be_merged")]
     CanBeMerged,
     /// The merge request may not be merged yet.
+    #[serde(rename = "cannot_be_merged")]
     CannotBeMerged,
     /// The merge request has not been checked but previously could not be merged.
+    #[serde(rename = "cannot_be_merged_recheck")]
     CannotBeMergedRecheck,
     /// The merge request could not be merged previously, but is being rechecked.
+    #[serde(rename = "cannot_be_merged_rechecking")]
     CannotBeMergedRechecking,
 }
-enum_serialize!(MergeStatus -> "merge status",
-    Unchecked => "unchecked",
-    Checking => "checking",
-    CanBeMerged => "can_be_merged",
-    CannotBeMerged => "cannot_be_merged",
-    CannotBeMergedRecheck => "cannot_be_merged_recheck",
-    CannotBeMergedRechecking => "cannot_be_merged_rechecking",
-);
 
 /// The states a merge request may be in.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestState {
     /// The merge request is open.
+    #[serde(rename = "opened")]
     Opened,
     /// The merge request has been closed before merging.
+    #[serde(rename = "closed")]
     Closed,
     /// The merge request has been opened after closing.
+    #[serde(rename = "reopened")]
     Reopened,
     /// The merge request has been merged.
+    #[serde(rename = "merged")]
     Merged,
     /// The merge request is locked from further discussion or updates.
+    #[serde(rename = "locked")]
     Locked,
 }
-enum_serialize!(MergeRequestState -> "merge request state",
-    Opened => "opened",
-    Closed => "closed",
-    Reopened => "reopened",
-    Merged => "merged",
-    Locked => "locked",
-);
 
 /// Information about current user's access to the merge request.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1984,10 +1931,7 @@ impl CreateMergeRequestParams {
     }
 }
 
-/// Type-safe SSH key ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct SshKeyId(u64);
-impl_id!(SshKeyId);
+impl_id!(SshKeyId, "Type-safe SSH key ID.");
 
 /// An uploaded SSH key.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2020,7 +1964,7 @@ pub struct SshKeyWithUser {
 }
 
 /// The entities a note may be added to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NoteType {
     /// A note on a commit.
     Commit,
@@ -2031,26 +1975,15 @@ pub enum NoteType {
     /// A note on a snippet.
     Snippet,
 }
-enum_serialize!(NoteType -> "note type",
-    Commit => "Commit",
-    Issue => "Issue",
-    MergeRequest => "MergeRequest",
-    Snippet => "Snippet",
-);
 
 /// The various types a note can have
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiscussionNoteType {
     /// A note in a standard discussion
     DiscussionNote,
     /// A note attached to a diff
     DiffNote,
 }
-
-enum_serialize!(DiscussionNoteType -> "discussion note type",
-    DiscussionNote => "DiscussionNote",
-    DiffNote => "DiffNote",
-);
 
 /// The ID of an entity a note is attached to.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2075,22 +2008,16 @@ pub enum NoteableInternalId {
     MergeRequest(MergeRequestInternalId),
 }
 
-/// Type-safe note (comment) ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct NoteId(u64);
-impl_id!(NoteId);
+impl_id!(NoteId, "Type-safe note (comment) ID.");
 
 /// A note can be attached to text or an image
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum NotePositionType {
+    #[serde(rename = "text")]
     Text,
+    #[serde(rename = "image")]
     Image,
 }
-
-enum_serialize!(NotePositionType -> "note position type",
-    Text => "text",
-    Image => "image",
-);
 
 /// When a note is against a diff, the position of the note
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2213,10 +2140,7 @@ pub struct Discussion {
     pub notes: Vec<Note>,
 }
 
-/// Type-safe award ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct AwardId(u64);
-impl_id!(AwardId);
+impl_id!(AwardId, "Type-safe award ID.");
 
 /// An ID of an entity which may receive an award.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2232,7 +2156,7 @@ pub enum AwardableId {
 }
 
 /// The entities which may be awarded.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AwardableType {
     /// An award on an issue.
     Issue,
@@ -2243,12 +2167,6 @@ pub enum AwardableType {
     /// An award on a note.
     Note,
 }
-enum_serialize!(AwardableType -> "awardable type",
-    Issue => "Issue",
-    MergeRequest => "MergeRequest",
-    Snippet => "Snippet",
-    Note => "Note",
-);
 
 /// An awarded emoji on an entity.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2283,17 +2201,15 @@ impl AwardEmoji {
 }
 
 /// The type of line commented on.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LineType {
     /// An added line was commented on.
+    #[serde(rename = "new")]
     New,
     /// An deleted line was commented on.
+    #[serde(rename = "old")]
     Old,
 }
-enum_serialize!(LineType -> "line type",
-    New => "new",
-    Old => "old",
-);
 
 /// A note on a commit diff.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2312,42 +2228,36 @@ pub struct CommitNote {
     pub created_at: DateTime<Utc>,
 }
 
-/// Type-safe commit status ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CommitStatusId(u64);
-impl_id!(CommitStatusId);
+impl_id!(CommitStatusId, "Type-safe commit status ID.");
 
 /// States for commit statuses.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StatusState {
     /// The check was created.
+    #[serde(rename = "created")]
     Created,
     /// The check is queued.
+    #[serde(rename = "pending")]
     Pending,
     /// The check is currently running.
+    #[serde(rename = "running")]
     Running,
     /// The check succeeded.
+    #[serde(rename = "success")]
     Success,
     /// The check failed.
+    #[serde(rename = "failed")]
     Failed,
     /// The check was canceled.
+    #[serde(rename = "canceled")]
     Canceled,
     /// The check was skipped.
+    #[serde(rename = "skipped")]
     Skipped,
     /// The check is waiting for manual action.
+    #[serde(rename = "manual")]
     Manual,
 }
-
-enum_serialize!(StatusState -> "status state",
-    Created => "created",
-    Pending => "pending",
-    Running => "running",
-    Success => "success",
-    Failed => "failed",
-    Canceled => "canceled",
-    Skipped => "skipped",
-    Manual => "manual",
-);
 
 /// A status of a commit.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2380,10 +2290,7 @@ pub struct CommitStatus {
     pub author: UserBasic,
 }
 
-/// Type-safe environment ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct EnvironmentId(u64);
-impl_id!(EnvironmentId);
+impl_id!(EnvironmentId, "Type-safe environment ID.");
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Environment {
@@ -2395,10 +2302,7 @@ pub struct Environment {
     pub last_deployment: Option<Deployment>,
 }
 
-/// Type-safe deployment ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct DeploymentId(u64);
-impl_id!(DeploymentId);
+impl_id!(DeploymentId, "Type-safe deployment ID.");
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Deployment {
@@ -2427,26 +2331,24 @@ pub struct Commit {
 }
 
 /// The target of an event.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EventTargetType {
     /// An event targeted a commit.
+    #[serde(rename = "commit")]
     Commit,
     /// An event targeted an issue.
+    #[serde(rename = "issue")]
     Issue,
     /// An event targeted a merge request.
+    #[serde(rename = "merge_request")]
     MergeRequest,
     /// An event targeted a snippet.
+    #[serde(rename = "snippet")]
     Snippet,
     /// An event targeted a project snippet.
+    #[serde(rename = "project_snippet")]
     ProjectSnippet,
 }
-enum_serialize!(EventTargetType -> "event target type",
-    Commit => "commit",
-    Issue => "issue",
-    MergeRequest => "merge_request",
-    Snippet => "snippet",
-    ProjectSnippet => "project_snippet",
-);
 
 /// The ID of an event target.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2522,17 +2424,15 @@ impl Event {
 }
 
 /// The kinds of namespaces supported by Gitlab.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NamespaceKind {
     /// A user namespace.
+    #[serde(rename = "user")]
     User,
     /// A group namespace.
+    #[serde(rename = "group")]
     Group,
 }
-enum_serialize!(NamespaceKind -> "namespace kind",
-    User => "user",
-    Group => "group",
-);
 
 /// The ID of a namespace.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2574,10 +2474,7 @@ impl Namespace {
     }
 }
 
-/// Type-safe runner ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct RunnerId(u64);
-impl_id!(RunnerId);
+impl_id!(RunnerId, "Type-safe runner ID.");
 
 /// A Gitlab CI runner.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2614,10 +2511,7 @@ pub struct JobArtifact {
     pub size: u64,
 }
 
-/// Type-safe job ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct JobId(u64);
-impl_id!(JobId);
+impl_id!(JobId, "Type-safe job ID.");
 
 /// Information about a job in Gitlab CI.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2657,10 +2551,7 @@ pub struct Job {
     pub web_url: String,
 }
 
-/// Type-safe pipeline ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct PipelineId(u64);
-impl_id!(PipelineId);
+impl_id!(PipelineId, "Type-safe pipeline ID.");
 
 /// Information about a pipeline in Gitlab CI.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2723,15 +2614,13 @@ pub struct Pipeline {
     pub detailed_status: Value,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PipelineVariableType {
+    #[serde(rename = "env_var")]
     EnvVar,
+    #[serde(rename = "file")]
     File,
 }
-enum_serialize!(PipelineVariableType -> "variable type",
-    EnvVar => "env_var",
-    File => "file",
-);
 
 impl Default for PipelineVariableType {
     fn default() -> Self {
@@ -2752,10 +2641,7 @@ pub struct PipelineVariable {
     pub variable_type: PipelineVariableType,
 }
 
-/// Type-safe label event ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LabelEventId(u64);
-impl_id!(LabelEventId);
+impl_id!(LabelEventId, "Type-safe label event ID.");
 
 /// A resource label event
 ///
@@ -3048,50 +2934,47 @@ impl CreateProjectParamsBuilder {
     }
 }
 
-/// Merge methods
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
-pub enum MergeMethod {
-    /// A merge commit is created for every merge,
-    /// and merging is allowed as long as there are no conflicts
-    Merge,
-    /// A merge commit is created for every merge, but merging is possible only if
-    /// fast-forward merge is possible
-    RebaseMerge,
-    /// No merge commit create, all merges are fast-forwarded
-    FastForward,
+#[allow(deprecated)]
+mod deprecated {
+    use serde::{Deserialize, Serialize};
+
+    /// Merge methods
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
+    pub enum MergeMethod {
+        /// A merge commit is created for every merge,
+        /// and merging is allowed as long as there are no conflicts
+        #[serde(rename = "merge")]
+        Merge,
+        /// A merge commit is created for every merge, but merging is possible only if
+        /// fast-forward merge is possible
+        #[serde(rename = "rebase_merge")]
+        RebaseMerge,
+        /// No merge commit create, all merges are fast-forwarded
+        #[serde(rename = "ff")]
+        FastForward,
+    }
+
+    /// Build git strategy
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
+    pub enum BuildGitStrategy {
+        #[serde(rename = "fetch")]
+        Fetch,
+        #[serde(rename = "clone")]
+        Clone,
+    }
+
+    /// Auto devops deply strategy
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
+    pub enum AutoDeployStrategy {
+        #[serde(rename = "continuous")]
+        Continuous,
+        #[serde(rename = "manual")]
+        Manual,
+        #[serde(rename = "timed_incremental")]
+        TimedIncremental,
+    }
 }
-
-enum_serialize!(MergeMethod -> "merge_method",
-    Merge => "merge",
-    RebaseMerge => "rebase_merge",
-    FastForward => "ff",
-);
-
-/// Build git strategy
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
-pub enum BuildGitStrategy {
-    Fetch,
-    Clone,
-}
-
-enum_serialize!(BuildGitStrategy -> "build_git_strategy",
-    Fetch => "fetch",
-    Clone => "clone",
-);
-
-/// Auto devops deply strategy
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
-pub enum AutoDeployStrategy {
-    Continuous,
-    Manual,
-    TimedIncremental,
-}
-
-enum_serialize!(AutoDeployStrategy -> "auto_devops_deploy_strategy",
-    Continuous => "continuous",
-    Manual => "manual",
-    TimedIncremental => "timed_incremental",
-);
+pub use self::deprecated::*;

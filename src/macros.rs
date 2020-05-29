@@ -5,13 +5,10 @@
 // except according to those terms.
 
 macro_rules! impl_id {
-    ( $name:ident ) => {
-        /* This bit of the macro handles the repetitive nature of creating new identifiers.
-         * Unfortunately, it doesn't work with serde_codegen, so until either plugins are stable or
-         * nightly is required, just implement things by hand.
-        #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    ( $name:ident, $doc:expr$(,)? ) => {
+        #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+        #[doc = $doc]
         pub struct $name(u64);
-         */
 
         impl $name {
             /// Create a new id.

@@ -5,6 +5,8 @@
   * All methods on the `Gitlab` structure now have `Endpoint` structures
     implemented. In a future release, these methods (and their support types)
     will be removed.
+  * The `Serialize` implementations of the API types are deprecated (though
+    marking them as such is difficult).
 
 ## Changes
 
