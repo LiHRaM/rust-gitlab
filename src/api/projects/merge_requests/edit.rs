@@ -15,6 +15,21 @@ use crate::api::endpoint_prelude::*;
 use crate::api::projects::merge_requests::create::Assignee;
 use crate::api::ParamValue;
 
+#[derive(Debug, Clone)]
+enum MergeRequestLabels<'a> {
+    Unlabeled,
+    Labeled(BTreeSet<Cow<'a, str>>),
+}
+
+impl<'a, 'b: 'a> ParamValue<'a> for &'b MergeRequestLabels<'a> {
+    fn as_value(self) -> Cow<'a, str> {
+        match self {
+            MergeRequestLabels::Unlabeled => "".into(),
+            MergeRequestLabels::Labeled(labels) => format!("{}", labels.iter().format(",")).into(),
+        }
+    }
+}
+
 /// States an issue may be set to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestStateEvent {
@@ -63,7 +78,7 @@ pub struct EditMergeRequest<'a> {
     milestone_id: Option<u64>,
     /// Labels to add to the merge request.
     #[builder(setter(name = "_labels"), default, private)]
-    labels: BTreeSet<Cow<'a, str>>,
+    labels: Option<MergeRequestLabels<'a>>,
     /// The description of the merge request.
     #[builder(setter(into), default)]
     description: Option<Cow<'a, str>>,
@@ -140,14 +155,27 @@ impl<'a> EditMergeRequestBuilder<'a> {
         self
     }
 
+    /// Clear all labels
+    pub fn remove_labels(&mut self) -> &mut Self {
+        self.labels = Some(Some(MergeRequestLabels::Unlabeled));
+        self
+    }
+
     /// Add a label.
     pub fn label<L>(&mut self, label: L) -> &mut Self
     where
         L: Into<Cow<'a, str>>,
     {
-        self.labels
-            .get_or_insert_with(BTreeSet::new)
-            .insert(label.into());
+        let label = label.into();
+        let labels = if let Some(Some(MergeRequestLabels::Labeled(mut set))) = self.labels.take() {
+            set.insert(label);
+            set
+        } else {
+            let mut set = BTreeSet::new();
+            set.insert(label);
+            set
+        };
+        self.labels = Some(Some(MergeRequestLabels::Labeled(labels)));
         self
     }
 
@@ -157,9 +185,14 @@ impl<'a> EditMergeRequestBuilder<'a> {
         I: Iterator<Item = L>,
         L: Into<Cow<'a, str>>,
     {
-        self.labels
-            .get_or_insert_with(BTreeSet::new)
-            .extend(iter.map(Into::into));
+        let iter = iter.map(Into::into);
+        let labels = if let Some(Some(MergeRequestLabels::Labeled(mut set))) = self.labels.take() {
+            set.extend(iter);
+            set
+        } else {
+            iter.collect()
+        };
+        self.labels = Some(Some(MergeRequestLabels::Labeled(labels)));
         self
     }
 }
@@ -184,6 +217,7 @@ impl<'a> Endpoint for EditMergeRequest<'a> {
             .push_opt("target_branch", self.target_branch.as_ref())
             .push_opt("title", self.title.as_ref())
             .push_opt("milestone_id", self.milestone_id)
+            .push_opt("labels", self.labels.as_ref())
             .push_opt("description", self.description.as_ref())
             .push_opt("state_event", self.state_event)
             .push_opt("remove_source_branch", self.remove_source_branch)
@@ -191,9 +225,6 @@ impl<'a> Endpoint for EditMergeRequest<'a> {
             .push_opt("discussion_locked", self.discussion_locked)
             .push_opt("allow_collaboration", self.allow_collaboration);
 
-        if !self.labels.is_empty() {
-            params.push("labels", format!("{}", self.labels.iter().format(",")));
-        }
         if let Some(assignee) = self.assignee.as_ref() {
             assignee.add_params(&mut params);
         }
@@ -209,7 +240,19 @@ impl<'a> Endpoint for EditMergeRequest<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::merge_requests::EditMergeRequest;
+    use crate::api::projects::merge_requests::{EditMergeRequest, MergeRequestStateEvent};
+
+    #[test]
+    fn merge_request_state_event_as_str() {
+        let items = &[
+            (MergeRequestStateEvent::Close, "close"),
+            (MergeRequestStateEvent::Reopen, "reopen"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn project_and_merge_request_are_necessary() {

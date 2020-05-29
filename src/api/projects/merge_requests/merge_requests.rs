@@ -434,7 +434,7 @@ impl<'a> MergeRequestsBuilder<'a> {
     }
 
     /// Filter merge requests assigned to a user (by ID).
-    pub fn approve_by_id(&mut self, approved_by: u64) -> &mut Self {
+    pub fn approved_by_id(&mut self, approved_by: u64) -> &mut Self {
         let approved_by_ids =
             if let Some(Some(ApprovedByIds::AllOf(mut set))) = self.approved_by_ids.take() {
                 set.insert(approved_by);
@@ -447,7 +447,7 @@ impl<'a> MergeRequestsBuilder<'a> {
     }
 
     /// Filter merge requests assigned to a user (by ID).
-    pub fn approve_by_ids<I>(&mut self, iter: I) -> &mut Self
+    pub fn approved_by_ids<I>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = u64>,
     {

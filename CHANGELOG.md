@@ -13,12 +13,15 @@
     options).
   * The `api::projects::pipelines::PipelineVariables` endpoint is now pageable.
   * All `EnableState` fields may now be set using `bool` values.
+  * The `api::projects::merge_requests::EditMergeRequest` endpoint now supports
+    unlabeling a merge request.
 
 ## Fixes
 
   * The `min_access_level` field for `api::groups::Groups` and the
     `access_level` for `api::projects::members::AddProjectMember` are now
     properly passed as integers to the API. (#42)
+  * The path used for the project and group milestone endpoints has been fixed.
 
 # v0.1210.2
 

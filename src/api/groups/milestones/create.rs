@@ -46,7 +46,7 @@ impl<'a> Endpoint for CreateGroupMilestone<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("groups/{}/issues", self.group).into()
+        format!("groups/{}/milestones", self.group).into()
     }
 
     fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
