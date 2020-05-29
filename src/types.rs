@@ -38,10 +38,7 @@ pub type QueryParamSlice<'a> = &'a [(&'a str, &'a str)];
 #[deprecated(since = "0.1300.0", note = "unnecessary with the new API pattern")]
 pub type QueryParamVec<'a> = Vec<(&'a str, &'a str)>;
 
-/// Type-safe user ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct UserId(u64);
-impl_id!(UserId);
+impl_id!(UserId, "Type-safe user ID.");
 
 /// The states a user account can be in.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -152,15 +149,9 @@ pub struct Identity {
     pub extern_uid: String,
 }
 
-/// Type-safe theme ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ThemeId(u64);
-impl_id!(ThemeId);
+impl_id!(ThemeId, "Type-safe theme ID.");
 
-/// Type-safe color scheme ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ColorSchemeId(u64);
-impl_id!(ColorSchemeId);
+impl_id!(ColorSchemeId, "Type-safe color scheme ID.");
 
 /// Full user structure information.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -276,10 +267,7 @@ impl From<UserPublic> for User {
     }
 }
 
-/// Type-safe email ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct EmailId(u64);
-impl_id!(EmailId);
+impl_id!(EmailId, "Type-safe email ID.");
 
 /// Email address.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -290,10 +278,7 @@ pub struct Email {
     pub email: String,
 }
 
-/// Type-safe hook ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct HookId(u64);
-impl_id!(HookId);
+impl_id!(HookId, "Type-safe hook ID.");
 
 /// A web hook to notify of events.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -422,10 +407,7 @@ impl WebhookEvents {
     get_event! {wiki_page}
 }
 
-/// Type-safe project ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ProjectId(u64);
-impl_id!(ProjectId);
+impl_id!(ProjectId, "Type-safe project ID.");
 
 /// Basic project information.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -841,10 +823,7 @@ impl From<AccessRequester> for UserBasic {
     }
 }
 
-/// Type-safe group ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct GroupId(u64);
-impl_id!(GroupId);
+impl_id!(GroupId, "Type-safe group ID.");
 
 /// Group information.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1096,10 +1075,7 @@ pub struct RepoCommitDetail {
     status: Value,
 }
 
-/// Type-safe snippet ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct SnippetId(u64);
-impl_id!(SnippetId);
+impl_id!(SnippetId, "Type-safe snippet ID.");
 
 /// A project-specific snippet.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1165,15 +1141,12 @@ pub struct DiffRefs {
     pub start_sha: Option<ObjectId>,
 }
 
-/// Type-safe milestone ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MilestoneId(u64);
-impl_id!(MilestoneId);
+impl_id!(MilestoneId, "Type-safe milestone ID.");
 
-/// Type-safe milestone internal ID (internal to a project).
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MilestoneInternalId(u64);
-impl_id!(MilestoneInternalId);
+impl_id!(
+    MilestoneInternalId,
+    "Type-safe milestone internal ID (internal to a project)."
+);
 
 /// The states a milestone may be in.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1267,10 +1240,7 @@ impl Milestone {
     }
 }
 
-/// Type-safe label ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LabelId(u64);
-impl_id!(LabelId);
+impl_id!(LabelId, "Type-safe label ID.");
 
 /// Type-safe label color.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -1369,15 +1339,12 @@ impl Label {
     }
 }
 
-/// Type-safe issue ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct IssueId(u64);
-impl_id!(IssueId);
+impl_id!(IssueId, "Type-safe issue ID.");
 
-/// Type-safe issue internal ID (internal to a project).
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct IssueInternalId(u64);
-impl_id!(IssueInternalId);
+impl_id!(
+    IssueInternalId,
+    "Type-safe issue internal ID (internal to a project)."
+);
 
 /// The states an issue may be in.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1617,15 +1584,12 @@ impl<'de> Deserialize<'de> for IssueReference {
     }
 }
 
-/// Type-safe merge request ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MergeRequestId(u64);
-impl_id!(MergeRequestId);
+impl_id!(MergeRequestId, "Type-safe merge request ID.");
 
-/// Type-safe merge request internal ID (internal to a project).
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MergeRequestInternalId(u64);
-impl_id!(MergeRequestInternalId);
+impl_id!(
+    MergeRequestInternalId,
+    "Type-safe merge request internal ID (internal to a project)."
+);
 
 /// The status of the possible merge for a merge request.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1984,10 +1948,7 @@ impl CreateMergeRequestParams {
     }
 }
 
-/// Type-safe SSH key ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct SshKeyId(u64);
-impl_id!(SshKeyId);
+impl_id!(SshKeyId, "Type-safe SSH key ID.");
 
 /// An uploaded SSH key.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2075,10 +2036,7 @@ pub enum NoteableInternalId {
     MergeRequest(MergeRequestInternalId),
 }
 
-/// Type-safe note (comment) ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct NoteId(u64);
-impl_id!(NoteId);
+impl_id!(NoteId, "Type-safe note (comment) ID.");
 
 /// A note can be attached to text or an image
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2213,10 +2171,7 @@ pub struct Discussion {
     pub notes: Vec<Note>,
 }
 
-/// Type-safe award ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct AwardId(u64);
-impl_id!(AwardId);
+impl_id!(AwardId, "Type-safe award ID.");
 
 /// An ID of an entity which may receive an award.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2312,10 +2267,7 @@ pub struct CommitNote {
     pub created_at: DateTime<Utc>,
 }
 
-/// Type-safe commit status ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CommitStatusId(u64);
-impl_id!(CommitStatusId);
+impl_id!(CommitStatusId, "Type-safe commit status ID.");
 
 /// States for commit statuses.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2380,10 +2332,7 @@ pub struct CommitStatus {
     pub author: UserBasic,
 }
 
-/// Type-safe environment ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct EnvironmentId(u64);
-impl_id!(EnvironmentId);
+impl_id!(EnvironmentId, "Type-safe environment ID.");
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Environment {
@@ -2395,10 +2344,7 @@ pub struct Environment {
     pub last_deployment: Option<Deployment>,
 }
 
-/// Type-safe deployment ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct DeploymentId(u64);
-impl_id!(DeploymentId);
+impl_id!(DeploymentId, "Type-safe deployment ID.");
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Deployment {
@@ -2574,10 +2520,7 @@ impl Namespace {
     }
 }
 
-/// Type-safe runner ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct RunnerId(u64);
-impl_id!(RunnerId);
+impl_id!(RunnerId, "Type-safe runner ID.");
 
 /// A Gitlab CI runner.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2614,10 +2557,7 @@ pub struct JobArtifact {
     pub size: u64,
 }
 
-/// Type-safe job ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct JobId(u64);
-impl_id!(JobId);
+impl_id!(JobId, "Type-safe job ID.");
 
 /// Information about a job in Gitlab CI.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2657,10 +2597,7 @@ pub struct Job {
     pub web_url: String,
 }
 
-/// Type-safe pipeline ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct PipelineId(u64);
-impl_id!(PipelineId);
+impl_id!(PipelineId, "Type-safe pipeline ID.");
 
 /// Information about a pipeline in Gitlab CI.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2752,10 +2689,7 @@ pub struct PipelineVariable {
     pub variable_type: PipelineVariableType,
 }
 
-/// Type-safe label event ID.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LabelEventId(u64);
-impl_id!(LabelEventId);
+impl_id!(LabelEventId, "Type-safe label event ID.");
 
 /// A resource label event
 ///
