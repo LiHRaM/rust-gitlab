@@ -240,7 +240,11 @@ impl<'a> Endpoint for EditMergeRequest<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::merge_requests::{EditMergeRequest, MergeRequestStateEvent};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn merge_request_state_event_as_str() {
@@ -282,5 +286,327 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_target_branch() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("target_branch=target%2Fbranch")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .target_branch("target/branch")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_title() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("title=title")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .title("title")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_unassigned() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("assignee_ids=0")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .unassigned()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignee() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("assignee_id=1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .assignee(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignees() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("assignee_ids%5B%5D=1", "&assignee_ids%5B%5D=2"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .assignee(1)
+            .assignees([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_milestone_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("milestone_id=1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .milestone_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("labels=label%2Clabel1%2Clabel2")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .label("label")
+            .labels(["label1", "label2"].iter().cloned())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels_remove() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("labels=")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .remove_labels()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("description=description")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_state_event() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("state_event=reopen")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .state_event(MergeRequestStateEvent::Reopen)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_remove_source_branch() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("remove_source_branch=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .remove_source_branch(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_squash() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("squash=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .squash(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_discussion_locked() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("discussion_locked=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .discussion_locked(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_allow_collaboration() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("allow_collaboration=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .allow_collaboration(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_allow_maintainer_to_push() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("allow_maintainer_to_push=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .allow_maintainer_to_push(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

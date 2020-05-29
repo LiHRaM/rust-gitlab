@@ -176,7 +176,11 @@ impl<'a> Endpoint for CreateFile<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::repository::files::{CreateFile, Encoding};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn encoding_default() {
@@ -296,5 +300,170 @@ mod tests {
             .content(&b"contents"[..])
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "branch=branch",
+                "&commit_message=commit+message",
+                "&content=file+contents",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateFile::builder()
+            .project("simple/project")
+            .file_path("path/to/file")
+            .branch("branch")
+            .content(&b"file contents"[..])
+            .commit_message("commit message")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_start_branch() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "branch=branch",
+                "&commit_message=commit+message",
+                "&start_branch=master",
+                "&content=file+contents",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateFile::builder()
+            .project("simple/project")
+            .file_path("path/to/file")
+            .branch("branch")
+            .content(&b"file contents"[..])
+            .commit_message("commit message")
+            .start_branch("master")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_encoding() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "branch=branch",
+                "&commit_message=commit+message",
+                "&content=ZmlsZSBjb250ZW50cw%3D%3D",
+                "&encoding=base64",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateFile::builder()
+            .project("simple/project")
+            .file_path("path/to/file")
+            .branch("branch")
+            .content(&b"file contents"[..])
+            .commit_message("commit message")
+            .encoding(Encoding::Base64)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_encoding_upgrade() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "branch=branch",
+                "&commit_message=commit+message",
+                "&content=%2Fw%3D%3D",
+                "&encoding=base64",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateFile::builder()
+            .project("simple/project")
+            .file_path("path/to/file")
+            .branch("branch")
+            .content(&b"\xff"[..])
+            .commit_message("commit message")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_author_email() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "branch=branch",
+                "&commit_message=commit+message",
+                "&author_email=author%40email.invalid",
+                "&content=file+contents",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateFile::builder()
+            .project("simple/project")
+            .file_path("path/to/file")
+            .branch("branch")
+            .content(&b"file contents"[..])
+            .commit_message("commit message")
+            .author_email("author@email.invalid")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_author_name() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "branch=branch",
+                "&commit_message=commit+message",
+                "&author_name=Arthur+Developer",
+                "&content=file+contents",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateFile::builder()
+            .project("simple/project")
+            .file_path("path/to/file")
+            .branch("branch")
+            .content(&b"file contents"[..])
+            .commit_message("commit message")
+            .author_name("Arthur Developer")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

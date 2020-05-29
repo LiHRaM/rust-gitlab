@@ -460,7 +460,12 @@ impl<'a> Pageable for Issues<'a> {}
 
 #[cfg(test)]
 mod tests {
+    use chrono::{TimeZone, Utc};
+
+    use crate::api::common::SortOrder;
     use crate::api::projects::issues::{IssueOrderBy, IssueScope, IssueState, IssueWeight, Issues};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn issue_state_as_str() {
@@ -533,5 +538,465 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         Issues::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder().project("simple/project").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_iids() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("iids[]", "1"), ("iids[]", "2")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .iid(1)
+            .iids([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_state() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("state", "closed")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .state(IssueState::Closed)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("labels", "label,label1,label2")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .label("label")
+            .labels(["label1", "label2"].iter().cloned())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels_unlabeled() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("labels", "None")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .unlabeled()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels_any() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("labels", "Any")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .with_any_label()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_labels_details() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("with_labels_details", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .with_labels_details(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_milestone() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("milestone", "1.0")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .milestone("1.0")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_scope() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("scope", "all")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .scope(IssueScope::All)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_author_id() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("author_id", "1")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .author(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_author_name() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("author_username", "name")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .author("name")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignee_unassigned() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("assignee_id", "None")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .unassigned()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignee_assigned() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("assignee_id", "Any")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .assigned()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignee_id() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("assignee_id", "1")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .assignee_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignee_user() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[
+                ("assignee_username[]", "name1"),
+                ("assignee_username[]", "name2"),
+            ])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .assignee("name1")
+            .assignees(["name1", "name2"].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_my_reaction_emoji() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("my_reaction_emoji", "tada")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .my_reaction("tada")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_my_reaction_emoji_no_reaction() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("my_reaction_emoji", "None")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .no_reaction()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_my_reaction_emoji_any_reaction() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("my_reaction_emoji", "Any")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .any_reaction()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_weight() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("weight", "Any")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .weight(IssueWeight::Any)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("search", "query")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .search("query")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_created_after() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("created_after", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .created_after(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_created_before() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("created_before", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .created_before(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_updated_after() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("updated_after", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .updated_after(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_updated_before() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("updated_before", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .updated_before(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_confidential() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("confidential", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .confidential(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_order_by() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("order_by", "due_date")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .order_by(IssueOrderBy::DueDate)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_sort() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("sort", "desc")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .sort(SortOrder::Descending)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

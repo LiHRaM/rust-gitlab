@@ -39,6 +39,8 @@ impl<'a> Endpoint for Hook<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::hooks::Hook;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_hook_are_needed() {
@@ -61,5 +63,21 @@ mod tests {
     #[test]
     fn project_and_hook_are_sufficient() {
         Hook::builder().project(1).hook(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/hooks/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Hook::builder()
+            .project("simple/project")
+            .hook(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

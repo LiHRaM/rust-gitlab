@@ -38,7 +38,11 @@ impl<'a> Endpoint for RemoveGroupMember<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::groups::members::RemoveGroupMember;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn all_parameters_are_needed() {
@@ -65,5 +69,22 @@ mod tests {
             .user(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::DELETE)
+            .endpoint("groups/group%2Fsubgroup/members/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = RemoveGroupMember::builder()
+            .group("group/subgroup")
+            .user(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

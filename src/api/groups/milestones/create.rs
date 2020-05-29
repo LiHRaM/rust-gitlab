@@ -64,7 +64,12 @@ impl<'a> Endpoint for CreateGroupMilestone<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::NaiveDate;
+    use http::Method;
+
     use crate::api::groups::milestones::CreateGroupMilestone;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_and_title_are_necessary() {
@@ -97,5 +102,84 @@ mod tests {
             .title("title")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups/group%2Fsubgroup/milestones")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("title=title")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroupMilestone::builder()
+            .group("group/subgroup")
+            .title("title")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups/group%2Fsubgroup/milestones")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&description=description"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroupMilestone::builder()
+            .group("group/subgroup")
+            .title("title")
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_due_date() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups/group%2Fsubgroup/milestones")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&due_date=2020-01-01"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroupMilestone::builder()
+            .group("group/subgroup")
+            .title("title")
+            .due_date(NaiveDate::from_ymd(2020, 1, 1))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_start_date() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups/group%2Fsubgroup/milestones")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&start_date=2020-01-01"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroupMilestone::builder()
+            .group("group/subgroup")
+            .title("title")
+            .start_date(NaiveDate::from_ymd(2020, 1, 1))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

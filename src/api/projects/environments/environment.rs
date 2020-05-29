@@ -43,6 +43,8 @@ impl<'a> Endpoint for Environment<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::environments::Environment;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_environment_are_needed() {
@@ -69,5 +71,21 @@ mod tests {
             .environment(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/environments/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Environment::builder()
+            .project("simple/project")
+            .environment(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

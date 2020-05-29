@@ -47,6 +47,8 @@ impl<'a> Pageable for MergeRequestNoteAwards<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::projects::merge_requests::notes::awards::MergeRequestNoteAwards;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_merge_request_and_note_are_necessary() {
@@ -92,5 +94,22 @@ mod tests {
             .note(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1/notes/1/award_emoji")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequestNoteAwards::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .note(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

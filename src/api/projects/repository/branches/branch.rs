@@ -45,6 +45,8 @@ impl<'a> Endpoint for Branch<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::repository::branches::Branch;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_branch_are_necessary() {
@@ -71,5 +73,21 @@ mod tests {
             .branch("master")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/branches/special%2Fbranch")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Branch::builder()
+            .project("simple/project")
+            .branch("special/branch")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

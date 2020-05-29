@@ -59,7 +59,10 @@ impl<'a> Pageable for IssueNotes<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::issues::notes::IssueNotes;
+    use crate::api::common::SortOrder;
+    use crate::api::projects::issues::notes::{IssueNotes, NoteOrderBy};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_issue_are_necessary() {
@@ -82,5 +85,57 @@ mod tests {
     #[test]
     fn project_and_issue_are_sufficient() {
         IssueNotes::builder().project(1).issue(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues/1/notes")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = IssueNotes::builder()
+            .project("simple/project")
+            .issue(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_order_by() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues/1/notes")
+            .add_query_params(&[("order_by", "created_at")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = IssueNotes::builder()
+            .project("simple/project")
+            .issue(1)
+            .order_by(NoteOrderBy::CreatedAt)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_sort() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues/1/notes")
+            .add_query_params(&[("sort", "desc")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = IssueNotes::builder()
+            .project("simple/project")
+            .issue(1)
+            .sort(SortOrder::Descending)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

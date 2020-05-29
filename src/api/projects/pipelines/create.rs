@@ -138,7 +138,11 @@ impl<'a> Endpoint for CreatePipeline<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::pipelines::{CreatePipeline, PipelineVariable, PipelineVariableType};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn pipeline_variable_type_default() {
@@ -218,5 +222,68 @@ mod tests {
             .ref_("testref")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/pipeline")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("ref=master")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreatePipeline::builder()
+            .project("simple/project")
+            .ref_("master")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_pipeline_variables() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/1/pipeline")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "ref=master",
+                "&variables%5B%5D%5Bkey%5D=key",
+                "&variables%5B%5D%5Bvalue%5D=value",
+                "&variables%5B%5D%5Bvariable_type%5D=env_var",
+                "&variables%5B%5D%5Bkey%5D=file",
+                "&variables%5B%5D%5Bvalue%5D=contents",
+                "&variables%5B%5D%5Bvariable_type%5D=file",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreatePipeline::builder()
+            .project(1)
+            .ref_("master")
+            .variable(
+                PipelineVariable::builder()
+                    .key("key")
+                    .value("value")
+                    .build()
+                    .unwrap(),
+            )
+            .variables(
+                [PipelineVariable::builder()
+                    .key("file")
+                    .value("contents")
+                    .variable_type(PipelineVariableType::File)
+                    .build()
+                    .unwrap()]
+                .iter()
+                .cloned(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

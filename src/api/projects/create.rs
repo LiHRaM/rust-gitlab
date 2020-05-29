@@ -788,11 +788,16 @@ impl<'a> Endpoint for CreateProject<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
+    use crate::api::common::{EnableState, VisibilityLevel};
     use crate::api::projects::{
         AutoDevOpsDeployStrategy, BuildGitStrategy, ContainerExpirationCadence,
         ContainerExpirationKeepN, ContainerExpirationOlderThan, ContainerExpirationPolicy,
         CreateProject, FeatureAccessLevel, FeatureAccessLevelPublic, MergeMethod,
     };
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn feature_access_level_as_str() {
@@ -970,5 +975,1231 @@ mod tests {
     #[test]
     fn path_is_sufficient() {
         CreateProject::builder().path("path").build().unwrap();
+    }
+
+    #[test]
+    fn endpoint_name() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("name=name")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder().name("name").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_path() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("path=path")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder().path("path").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_name_and_path() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&path=path"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .path("path")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_path_and_name() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&path=path"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .path("path")
+            .name("name")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_namespace_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&namespace_id=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .namespace_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_default_branch() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&default_branch=master"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .default_branch("master")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&description=description"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_issues_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&issues_access_level=enabled"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .issues_access_level(FeatureAccessLevel::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_repository_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&repository_access_level=disabled"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .repository_access_level(FeatureAccessLevel::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_requests_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&merge_requests_access_level=private"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .merge_requests_access_level(FeatureAccessLevel::Private)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_forking_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&forking_access_level=enabled"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .forking_access_level(FeatureAccessLevel::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_builds_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&builds_access_level=enabled"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .builds_access_level(FeatureAccessLevel::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_wiki_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&wiki_access_level=disabled"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .wiki_access_level(FeatureAccessLevel::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_snippets_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&snippets_access_level=disabled"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .snippets_access_level(FeatureAccessLevel::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_pages_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&pages_access_level=public"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .pages_access_level(FeatureAccessLevelPublic::Public)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_emails_disabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&emails_disabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .emails_disabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_resolve_outdated_diff_discussions() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&resolve_outdated_diff_discussions=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .resolve_outdated_diff_discussions(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_registry_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&container_registry_enabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_registry_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_cadence() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bcadence%5D=7d",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .cadence(ContainerExpirationCadence::OneWeek)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Benabled%5D=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .enabled(true)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_keep_n() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bkeep_n%5D=5",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .keep_n(ContainerExpirationKeepN::Five)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_older_than() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bolder_than%5D=7d",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .older_than(ContainerExpirationOlderThan::OneWeek)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_name_regex() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bname_regex%5D=%3Alatest",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .name_regex(":latest")
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_all() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bcadence%5D=7d",
+                "&container_expiration_policy_attributes%5Benabled%5D=true",
+                "&container_expiration_policy_attributes%5Bkeep_n%5D=5",
+                "&container_expiration_policy_attributes%5Bolder_than%5D=7d",
+                "&container_expiration_policy_attributes%5Bname_regex%5D=%3Alatest",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .cadence(ContainerExpirationCadence::OneWeek)
+                    .enabled(true)
+                    .keep_n(ContainerExpirationKeepN::Five)
+                    .older_than(ContainerExpirationOlderThan::OneWeek)
+                    .name_regex(":latest")
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_shared_runners_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&shared_runners_enabled=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .shared_runners_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_visibility() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&visibility=public"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .visibility(VisibilityLevel::Public)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_import_url() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&import_url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .import_url("https://test.invalid/path?some=foo")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_public_builds() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&public_builds=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .public_builds(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_only_allow_merge_if_pipeline_succeeds() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&only_allow_merge_if_pipeline_succeeds=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .only_allow_merge_if_pipeline_succeeds(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_only_allow_merge_if_all_discussions_are_resolved() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&only_allow_merge_if_all_discussions_are_resolved=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .only_allow_merge_if_all_discussions_are_resolved(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_method() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&merge_method=ff"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .merge_method(MergeMethod::FastForward)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_autoclose_referenced_issues() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&autoclose_referenced_issues=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .autoclose_referenced_issues(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_remove_source_branch_after_merge() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&remove_source_branch_after_merge=true",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .remove_source_branch_after_merge(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_lfs_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&lfs_enabled=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .lfs_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_request_access_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&request_access_enabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .request_access_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_tag_list() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&tag_list%5B%5D=tag1",
+                "&tag_list%5B%5D=tag2",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .tag("tag1")
+            .tags(["tag1", "tag2"].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_printing_merge_request_link_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&printing_merge_request_link_enabled=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .printing_merge_request_link_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_build_git_strategy() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&build_git_strategy=fetch"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .build_git_strategy(BuildGitStrategy::Fetch)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_build_timeout() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&build_timeout=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .build_timeout(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_auto_cancel_pending_pipelines() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&auto_cancel_pending_pipelines=enabled",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .auto_cancel_pending_pipelines(EnableState::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_build_coverage_regex() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&build_coverage_regex=%5Cd%25"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .build_coverage_regex("\\d%")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_ci_config_path() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&ci_config_path=.gitlab-ci.yaml"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .ci_config_path(".gitlab-ci.yaml")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_auto_devops_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&auto_devops_enabled=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .auto_devops_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_auto_devops_deploy_strategy() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&auto_devops_deploy_strategy=manual"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .auto_devops_deploy_strategy(AutoDevOpsDeployStrategy::Manual)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_repository_storage() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&repository_storage=shard1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .repository_storage("shard1")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_approvals_before_merge() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&approvals_before_merge=2"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .approvals_before_merge(2)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_external_authorization_classification_label() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&external_authorization_classification_label=external",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .external_authorization_classification_label("external")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_mirror() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&mirror=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .mirror(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_mirror_trigger_builds() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&mirror_trigger_builds=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .mirror_trigger_builds(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_initialize_with_readme() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&initialize_with_readme=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .initialize_with_readme(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_template_name() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&template_name=template"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .template_name("template")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_template_project_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&template_project_id=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .template_project_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_use_custom_template() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&use_custom_template=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .use_custom_template(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_group_with_project_templates_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&use_custom_template=true",
+                "&group_with_project_templates_id=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .group_with_project_templates_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_packages_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&packages_enabled=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .packages_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_issues_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&issues_enabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .issues_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_merge_requests_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&merge_requests_enabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .merge_requests_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_jobs_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&jobs_enabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .jobs_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_wiki_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&wiki_enabled=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .wiki_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_snippets_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&snippets_enabled=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .snippets_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

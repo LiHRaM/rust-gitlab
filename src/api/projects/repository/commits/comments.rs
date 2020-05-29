@@ -47,6 +47,8 @@ impl<'a> Pageable for CommitComments<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::projects::repository::commits::CommitComments;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_commit_are_necessary() {
@@ -76,5 +78,18 @@ mod tests {
             .commit("master")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder().endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/comments").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommitComments::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

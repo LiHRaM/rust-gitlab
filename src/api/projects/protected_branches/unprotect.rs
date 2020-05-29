@@ -44,7 +44,11 @@ impl<'a> Endpoint for UnprotectBranch<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::protected_branches::UnprotectBranch;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_name_are_needed() {
@@ -74,5 +78,22 @@ mod tests {
             .name("master")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::DELETE)
+            .endpoint("projects/simple%2Fproject/protected_branches/branch%2Fname")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = UnprotectBranch::builder()
+            .project("simple/project")
+            .name("branch/name")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -4,5 +4,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#[cfg(feature = "client_api")]
+pub mod client;
+
 mod types;
 mod webhooks;

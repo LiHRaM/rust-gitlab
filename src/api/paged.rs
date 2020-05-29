@@ -4,12 +4,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use reqwest::header::{self, HeaderMap};
+use http::{header, HeaderMap, Request};
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 use url::Url;
 
-use crate::api::{ApiError, Client, Endpoint, Query};
+use crate::api::{query, ApiError, Client, Endpoint, Query};
 
 /// Errors which may occur with pagination.
 #[derive(Debug, Error)]
@@ -221,20 +221,23 @@ where
                 page_url
             };
 
-            let req = client.build_rest(self.endpoint.method(), page_url);
-            let req = if let Some((mime, data)) = body.as_ref() {
-                req.header(header::CONTENT_TYPE, *mime).body(data.clone())
+            let req = Request::builder()
+                .method(self.endpoint.method())
+                .uri(query::url_to_http_uri(page_url));
+            let (req, data) = if let Some((mime, data)) = body.as_ref() {
+                let req = req.header(header::CONTENT_TYPE, *mime);
+                (req, data.clone())
             } else {
-                req
+                (req, Vec::new())
             };
-            let rsp = client.rest(req)?;
+            let rsp = client.rest(req, data)?;
             let status = rsp.status();
 
             if use_keyset_pagination {
                 next_url = next_page_from_headers(rsp.headers())?;
             }
 
-            let v = serde_json::from_reader(rsp)?;
+            let v = serde_json::from_slice(rsp.body())?;
             if !status.is_success() {
                 return Err(ApiError::from_gitlab(v));
             }
@@ -295,8 +298,14 @@ fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, Pagination
 
 #[cfg(test)]
 mod tests {
+    use http::StatusCode;
+    use serde::{Deserialize, Serialize};
+    use serde_json::json;
+
+    use crate::api::endpoint_prelude::*;
     use crate::api::paged::LinkHeader;
-    use crate::api::{LinkHeaderParseError, Pagination};
+    use crate::api::{self, ApiError, LinkHeaderParseError, Pagination, Query};
+    use crate::test::client::{ExpectedUrl, PagedTestClient, SingleTestClient};
 
     #[test]
     fn test_link_header_no_brackets() {
@@ -350,5 +359,297 @@ mod tests {
     #[test]
     fn pagination_default() {
         assert_eq!(Pagination::default(), Pagination::All);
+    }
+
+    #[derive(Debug, Default)]
+    struct Dummy {
+        with_keyset: bool,
+    }
+
+    impl Endpoint for Dummy {
+        fn method(&self) -> Method {
+            Method::GET
+        }
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "paged_dummy".into()
+        }
+    }
+
+    impl Pageable for Dummy {
+        fn use_keyset_pagination(&self) -> bool {
+            self.with_keyset
+        }
+    }
+
+    #[derive(Debug, Deserialize, Serialize)]
+    struct DummyResult {
+        value: u8,
+    }
+
+    #[test]
+    fn test_gitlab_non_json_response() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "not json");
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Json {
+            source,
+        } = err
+        {
+            assert_eq!(format!("{}", source), "expected ident at line 1 column 2");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_bad_json() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Json {
+            source,
+        } = err
+        {
+            assert_eq!(
+                format!("{}", source),
+                "EOF while parsing a value at line 1 column 0",
+            );
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "message": "dummy error message",
+            }),
+        );
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection_legacy() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "error": "dummy error message",
+            }),
+        );
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection_unknown() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "bogus": "dummy error message",
+            }),
+        );
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "<unknown error>");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_pagination_limit() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: false,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(25))
+            .query(&client)
+            .unwrap();
+        assert_eq!(res.len(), 25);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[test]
+    fn test_pagination_all() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy::default();
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::All).query(&client).unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[test]
+    fn test_keyset_pagination_limit() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(25))
+            .query(&client)
+            .unwrap();
+        assert_eq!(res.len(), 25);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[test]
+    fn test_keyset_pagination_all() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::All).query(&client).unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[test]
+    fn test_keyset_pagination_missing_header() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("pagination", "keyset"), ("per_page", "100")])
+            .build()
+            .unwrap();
+        let data: Vec<_> = (0..=255)
+            .map(|value| {
+                DummyResult {
+                    value,
+                }
+            })
+            .collect();
+        let client = SingleTestClient::new_raw(endpoint, serde_json::to_vec(&data).unwrap());
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(300))
+            .query(&client)
+            .unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
     }
 }

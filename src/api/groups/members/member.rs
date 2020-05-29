@@ -39,6 +39,8 @@ impl<'a> Endpoint for GroupMember<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::groups::members::GroupMember;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_and_user_are_needed() {
@@ -61,5 +63,21 @@ mod tests {
     #[test]
     fn group_and_user_are_sufficient() {
         GroupMember::builder().group(1).user(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups/group%2Fsubgroup/members/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = GroupMember::builder()
+            .group("group/subgroup")
+            .user(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

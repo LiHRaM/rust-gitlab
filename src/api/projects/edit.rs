@@ -350,7 +350,16 @@ impl<'a> Endpoint for EditProject<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::EditProject;
+    use http::Method;
+
+    use crate::api::common::{EnableState, VisibilityLevel};
+    use crate::api::projects::{
+        AutoDevOpsDeployStrategy, BuildGitStrategy, ContainerExpirationCadence,
+        ContainerExpirationKeepN, ContainerExpirationOlderThan, ContainerExpirationPolicy,
+        EditProject, FeatureAccessLevel, FeatureAccessLevelPublic, MergeMethod,
+    };
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
@@ -361,5 +370,1114 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         EditProject::builder().project("project").build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_name() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("name=name")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .name("name")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_path() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("path=path")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .path("path")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_default_branch() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("default_branch=master")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .default_branch("master")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("description=description")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_issues_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("issues_access_level=enabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .issues_access_level(FeatureAccessLevel::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_repository_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("repository_access_level=disabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .repository_access_level(FeatureAccessLevel::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_requests_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("merge_requests_access_level=private")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .merge_requests_access_level(FeatureAccessLevel::Private)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_forking_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("forking_access_level=enabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .forking_access_level(FeatureAccessLevel::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_builds_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("builds_access_level=enabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .builds_access_level(FeatureAccessLevel::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_wiki_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("wiki_access_level=disabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .wiki_access_level(FeatureAccessLevel::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_snippets_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("snippets_access_level=disabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .snippets_access_level(FeatureAccessLevel::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_pages_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("pages_access_level=public")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .pages_access_level(FeatureAccessLevelPublic::Public)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_emails_disabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("emails_disabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .emails_disabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_resolve_outdated_diff_discussions() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("resolve_outdated_diff_discussions=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .resolve_outdated_diff_discussions(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_registry_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("container_registry_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .container_registry_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_cadence() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("container_expiration_policy_attributes%5Bcadence%5D=7d")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .cadence(ContainerExpirationCadence::OneWeek)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("container_expiration_policy_attributes%5Benabled%5D=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .enabled(true)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_keep_n() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("container_expiration_policy_attributes%5Bkeep_n%5D=5")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .keep_n(ContainerExpirationKeepN::Five)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_older_than() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("container_expiration_policy_attributes%5Bolder_than%5D=7d")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .older_than(ContainerExpirationOlderThan::OneWeek)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_name_regex() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("container_expiration_policy_attributes%5Bname_regex%5D=%3Alatest")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .name_regex(":latest")
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_all() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "container_expiration_policy_attributes%5Bcadence%5D=7d",
+                "&container_expiration_policy_attributes%5Benabled%5D=true",
+                "&container_expiration_policy_attributes%5Bkeep_n%5D=5",
+                "&container_expiration_policy_attributes%5Bolder_than%5D=7d",
+                "&container_expiration_policy_attributes%5Bname_regex%5D=%3Alatest",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .cadence(ContainerExpirationCadence::OneWeek)
+                    .enabled(true)
+                    .keep_n(ContainerExpirationKeepN::Five)
+                    .older_than(ContainerExpirationOlderThan::OneWeek)
+                    .name_regex(":latest")
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_shared_runners_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("shared_runners_enabled=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .shared_runners_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_visibility() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("visibility=public")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .visibility(VisibilityLevel::Public)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_import_url() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("import_url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .import_url("https://test.invalid/path?some=foo")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_public_builds() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("public_builds=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .public_builds(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_only_allow_merge_if_pipeline_succeeds() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("only_allow_merge_if_pipeline_succeeds=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .only_allow_merge_if_pipeline_succeeds(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_only_allow_merge_if_all_discussions_are_resolved() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("only_allow_merge_if_all_discussions_are_resolved=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .only_allow_merge_if_all_discussions_are_resolved(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_method() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("merge_method=ff")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .merge_method(MergeMethod::FastForward)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_autoclose_referenced_issues() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("autoclose_referenced_issues=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .autoclose_referenced_issues(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_suggestion_commit_message() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("suggestion_commit_message=suggested+change")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .suggestion_commit_message("suggested change")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_remove_source_branch_after_merge() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("remove_source_branch_after_merge=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .remove_source_branch_after_merge(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_lfs_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("lfs_enabled=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .lfs_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_request_access_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("request_access_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .request_access_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_tag_list() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("tag_list%5B%5D=tag1", "&tag_list%5B%5D=tag2"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .tag("tag1")
+            .tags(["tag1", "tag2"].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_build_git_strategy() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("build_git_strategy=fetch")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .build_git_strategy(BuildGitStrategy::Fetch)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_build_timeout() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("build_timeout=1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .build_timeout(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_auto_cancel_pending_pipelines() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("auto_cancel_pending_pipelines=enabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .auto_cancel_pending_pipelines(EnableState::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_build_coverage_regex() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("build_coverage_regex=%5Cd%25")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .build_coverage_regex("\\d%")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_ci_config_path() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("ci_config_path=.gitlab-ci.yaml")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .ci_config_path(".gitlab-ci.yaml")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_ci_default_git_depth() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("ci_default_git_depth=1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .ci_default_git_depth(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_auto_devops_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("auto_devops_enabled=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .auto_devops_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_auto_devops_deploy_strategy() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("auto_devops_deploy_strategy=manual")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .auto_devops_deploy_strategy(AutoDevOpsDeployStrategy::Manual)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_repository_storage() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("repository_storage=shard1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .repository_storage("shard1")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_approvals_before_merge() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("approvals_before_merge=2")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .approvals_before_merge(2)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_external_authorization_classification_label() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("external_authorization_classification_label=external")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .external_authorization_classification_label("external")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_mirror() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("mirror=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .mirror(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_mirror_trigger_builds() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("mirror_trigger_builds=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .mirror_trigger_builds(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_only_mirror_protected_branches() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("only_mirror_protected_branches=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .only_mirror_protected_branches(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_mirror_overwrites_diverged_branches() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("mirror_overwrites_diverged_branches=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .mirror_overwrites_diverged_branches(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_packages_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("packages_enabled=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .packages_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_issues_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("issues_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .issues_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_merge_requests_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("merge_requests_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .merge_requests_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_jobs_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("jobs_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .jobs_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_wiki_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("wiki_enabled=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .wiki_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_snippets_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("snippets_enabled=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .snippets_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

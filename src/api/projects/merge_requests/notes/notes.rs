@@ -63,7 +63,10 @@ impl<'a> Pageable for MergeRequestNotes<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::merge_requests::notes::MergeRequestNotes;
+    use crate::api::common::SortOrder;
+    use crate::api::projects::merge_requests::notes::{MergeRequestNotes, NoteOrderBy};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_merge_request_are_necessary() {
@@ -93,5 +96,57 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1/notes")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequestNotes::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_order_by() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1/notes")
+            .add_query_params(&[("order_by", "created_at")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequestNotes::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .order_by(NoteOrderBy::CreatedAt)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_sort() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1/notes")
+            .add_query_params(&[("sort", "desc")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequestNotes::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .sort(SortOrder::Descending)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -63,7 +63,12 @@ impl<'a> Endpoint for CreateMergeRequestNote<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::{TimeZone, Utc};
+    use http::Method;
+
     use crate::api::projects::merge_requests::notes::CreateMergeRequestNote;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_merge_request_and_body_are_necessary() {
@@ -109,5 +114,46 @@ mod tests {
             .body("body")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/notes")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("body=body")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestNote::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_created_at() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/notes")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("body=body", "&created_at=2020-01-01T00%3A00%3A00Z"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestNote::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .created_at(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

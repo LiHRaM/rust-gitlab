@@ -73,6 +73,8 @@ impl<'a> Pageable for CommitStatuses<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::projects::repository::commits::CommitStatuses;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_commit_are_necessary() {
@@ -102,5 +104,93 @@ mod tests {
             .commit("master")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/statuses")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommitStatuses::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_ref() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/statuses")
+            .add_query_params(&[("ref", "master")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommitStatuses::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .ref_("master")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_stage() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/statuses")
+            .add_query_params(&[("stage", "stage")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommitStatuses::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .stage("stage")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_name() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/statuses")
+            .add_query_params(&[("name", "jobname")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommitStatuses::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .name("jobname")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_all() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/statuses")
+            .add_query_params(&[("all", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommitStatuses::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .all(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -6,19 +6,22 @@
 
 use std::any;
 use std::borrow::Borrow;
+use std::convert::TryInto;
 use std::fmt::{self, Debug, Display};
 
+use bytes::Bytes;
 use graphql_client::{GraphQLQuery, QueryBody, Response};
+use http::{HeaderMap, Response as HttpResponse};
 use itertools::Itertools;
 use log::{debug, error, info, warn};
 use percent_encoding::{utf8_percent_encode, AsciiSet, PercentEncode, CONTROLS};
-use reqwest::blocking::{Client, RequestBuilder, Response as HttpResponse};
-use reqwest::{Method, Url};
+use reqwest::blocking::{Client, Response as ReqwestResponse};
 use serde::de::DeserializeOwned;
 use serde::de::Error as SerdeError;
 use serde::ser::Serialize;
 use serde::{Deserialize, Deserializer, Serializer};
 use thiserror::Error;
+use url::Url;
 
 use crate::api::projects::{self, pipelines};
 use crate::api::users::{CurrentUser, User, Users};
@@ -2900,8 +2903,13 @@ impl Gitlab {
     }
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
-    fn send_impl(&self, req: RequestBuilder) -> GitlabResult<HttpResponse> {
-        let rsp = self.auth.set_header(req)?.send()?;
+    fn send_impl(&self, req: reqwest::blocking::RequestBuilder) -> GitlabResult<ReqwestResponse> {
+        let auth_headers = {
+            let mut headers = HeaderMap::default();
+            self.auth.set_header(&mut headers)?;
+            headers
+        };
+        let rsp = req.headers(auth_headers).send()?;
         let status = rsp.status();
         if status.is_server_error() {
             return Err(GitlabError::http(status));
@@ -2911,7 +2919,7 @@ impl Gitlab {
     }
 
     /// Refactored code which talks to Gitlab and transforms error messages properly.
-    fn send<T>(&self, req: RequestBuilder) -> GitlabResult<T>
+    fn send<T>(&self, req: reqwest::blocking::RequestBuilder) -> GitlabResult<T>
     where
         T: DeserializeOwned,
     {
@@ -2998,6 +3006,11 @@ pub enum RestError {
         #[from]
         source: reqwest::Error,
     },
+    #[error("`http` error: {}", source)]
+    Http {
+        #[from]
+        source: http::Error,
+    },
     /// This is here to force `_` matching right now.
     ///
     /// **DO NOT USE**
@@ -3014,18 +3027,27 @@ impl api::Client for Gitlab {
         Ok(self.rest_url.join(endpoint)?)
     }
 
-    fn build_rest(&self, method: Method, url: Url) -> RequestBuilder {
-        self.client.request(method, url)
-    }
+    fn rest(
+        &self,
+        mut request: http::request::Builder,
+        body: Vec<u8>,
+    ) -> Result<HttpResponse<Bytes>, api::ApiError<Self::Error>> {
+        let call = || -> Result<_, RestError> {
+            self.auth.set_header(request.headers_mut().unwrap())?;
+            let http_request = request.body(body)?;
+            let request = http_request.try_into()?;
+            let rsp = self.client.execute(request)?;
 
-    fn rest(&self, request: RequestBuilder) -> Result<HttpResponse, api::ApiError<Self::Error>> {
-        self.auth
-            .set_header(request)
-            .map_err(RestError::from)
-            .map_err(api::ApiError::client)?
-            .send()
-            .map_err(RestError::from)
-            .map_err(api::ApiError::client)
+            let mut http_rsp = HttpResponse::builder()
+                .status(rsp.status())
+                .version(rsp.version());
+            let headers = http_rsp.headers_mut().unwrap();
+            for (key, value) in rsp.headers() {
+                headers.insert(key, value.clone());
+            }
+            Ok(http_rsp.body(rsp.bytes()?)?)
+        };
+        call().map_err(api::ApiError::client)
     }
 }
 

@@ -57,6 +57,8 @@ impl<'a> Endpoint for Labels<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::labels::Labels;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
@@ -67,5 +69,51 @@ mod tests {
     #[test]
     fn project_is_sufficient() {
         Labels::builder().project(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/labels")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Labels::builder().project("simple/project").build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_counts() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/labels")
+            .add_query_params(&[("with_counts", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Labels::builder()
+            .project("simple/project")
+            .with_counts(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_include_ancestor_groups() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/labels")
+            .add_query_params(&[("include_ancestor_groups", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Labels::builder()
+            .project("simple/project")
+            .include_ancestor_groups(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

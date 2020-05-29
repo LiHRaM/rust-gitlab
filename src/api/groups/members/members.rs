@@ -78,6 +78,8 @@ impl<'a> Pageable for GroupMembers<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::groups::members::GroupMembers;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_is_needed() {
@@ -88,5 +90,55 @@ mod tests {
     #[test]
     fn group_is_sufficient() {
         GroupMembers::builder().group(1).build().unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups/group%2Fsubgroup/members")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = GroupMembers::builder()
+            .group("group/subgroup")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_query() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups/group%2Fsubgroup/members")
+            .add_query_params(&[("query", "search")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = GroupMembers::builder()
+            .group("group/subgroup")
+            .query("search")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_user_ids() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups/group%2Fsubgroup/members")
+            .add_query_params(&[("user_ids[]", "1"), ("user_ids[]", "2")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = GroupMembers::builder()
+            .group("group/subgroup")
+            .user_id(1)
+            .user_ids([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

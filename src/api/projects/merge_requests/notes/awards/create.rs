@@ -55,7 +55,11 @@ impl<'a> Endpoint for CreateMergeRequestNoteAward<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::merge_requests::notes::awards::CreateMergeRequestNoteAward;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_merge_request_note_and_name_are_necessary() {
@@ -116,5 +120,26 @@ mod tests {
             .name("award")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/notes/1/award_emoji")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("name=emoji")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestNoteAward::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .note(1)
+            .name("emoji")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

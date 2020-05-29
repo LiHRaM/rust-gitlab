@@ -57,8 +57,13 @@ impl<'a> Endpoint for AddGroupMember<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::NaiveDate;
+    use http::Method;
+
     use crate::api::common::AccessLevel;
     use crate::api::groups::members::AddGroupMember;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn all_parameters_are_needed() {
@@ -104,5 +109,50 @@ mod tests {
             .access_level(AccessLevel::Developer)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups/group%2Fsubgroup/members")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("user_id=1", "&access_level=30"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = AddGroupMember::builder()
+            .group("group/subgroup")
+            .user(1)
+            .access_level(AccessLevel::Developer)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_expires_at() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups/group%2Fsubgroup/members")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "user_id=1",
+                "&access_level=30",
+                "&expires_at=2020-01-01",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = AddGroupMember::builder()
+            .group("group/subgroup")
+            .user(1)
+            .access_level(AccessLevel::Developer)
+            .expires_at(NaiveDate::from_ymd(2020, 1, 1))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

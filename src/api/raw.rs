@@ -4,9 +4,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use reqwest::header;
+use http::{header, Request};
 
-use crate::api::{ApiError, Client, Endpoint, Query};
+use crate::api::{query, ApiError, Client, Endpoint, Query};
 
 /// A query modifier that returns the raw data from the endpoint.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -30,18 +30,155 @@ where
         let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
         self.endpoint.parameters().add_to_url(&mut url);
 
-        let req = client.build_rest(self.endpoint.method(), url);
-        let req = if let Some((mime, data)) = self.endpoint.body()? {
-            req.header(header::CONTENT_TYPE, mime).body(data)
+        let req = Request::builder()
+            .method(self.endpoint.method())
+            .uri(query::url_to_http_uri(url));
+        let (req, data) = if let Some((mime, data)) = self.endpoint.body()? {
+            let req = req.header(header::CONTENT_TYPE, mime);
+            (req, data)
         } else {
-            req
+            (req, Vec::new())
         };
-        let rsp = client.rest(req)?;
+        let rsp = client.rest(req, data)?;
         if !rsp.status().is_success() {
-            let v = serde_json::from_reader(rsp)?;
+            let v = serde_json::from_slice(rsp.body())?;
             return Err(ApiError::from_gitlab(v));
         }
 
-        Ok(rsp.bytes().unwrap().as_ref().into())
+        Ok(rsp.into_body().as_ref().into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use http::StatusCode;
+    use serde_json::json;
+
+    use crate::api::endpoint_prelude::*;
+    use crate::api::{self, ApiError, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
+
+    struct Dummy;
+
+    impl Endpoint for Dummy {
+        fn method(&self) -> Method {
+            Method::GET
+        }
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "dummy".into()
+        }
+    }
+
+    #[derive(Debug)]
+    struct DummyResult {
+        value: u8,
+    }
+
+    #[test]
+    fn test_gitlab_non_json_response() {
+        let endpoint = ExpectedUrl::builder().endpoint("dummy").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "not json");
+
+        let data = api::raw(Dummy).query(&client).unwrap();
+        itertools::assert_equal(data, "not json".bytes());
+    }
+
+    #[test]
+    fn test_gitlab_error_bad_json() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let err = api::raw(Dummy).query(&client).unwrap_err();
+        if let ApiError::Json {
+            source,
+        } = err
+        {
+            assert_eq!(
+                format!("{}", source),
+                "EOF while parsing a value at line 1 column 0",
+            );
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "message": "dummy error message",
+            }),
+        );
+
+        let err = api::raw(Dummy).query(&client).unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection_legacy() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "error": "dummy error message",
+            }),
+        );
+
+        let err = api::raw(Dummy).query(&client).unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn test_gitlab_error_detection_unknown() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "bogus": "dummy error message",
+            }),
+        );
+
+        let err = api::raw(Dummy).query(&client).unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "<unknown error>");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
     }
 }

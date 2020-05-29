@@ -45,6 +45,8 @@ impl<'a> Pageable for MergeRequestDiscussions<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::projects::merge_requests::discussions::MergeRequestDiscussions;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_merge_request_are_necessary() {
@@ -77,5 +79,21 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1/discussions")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequestDiscussions::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -181,7 +181,12 @@ impl<'a> Endpoint for CreateIssue<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::{NaiveDate, TimeZone, Utc};
+    use http::Method;
+
     use crate::api::projects::issues::CreateIssue;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_title_are_necessary() {
@@ -208,5 +213,336 @@ mod tests {
             .title("title")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("title=title+of+issue")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title of issue")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_iid() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&iid=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .iid(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_description() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&description=description"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .description("description")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_confidential() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&confidential=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .confidential(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_assignee_ids() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "title=title",
+                "&assignee_ids%5B%5D=1",
+                "&assignee_ids%5B%5D=2",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .assignee_id(1)
+            .assignee_ids([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_milestone_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&milestone_id=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .milestone_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&labels=label"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .label("label")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels_multiple() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&labels=label1%2Clabel2"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .labels(["label1", "label2"].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_created_at() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "title=title",
+                "&created_at=2020-01-01T00%3A00%3A00Z",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .created_at(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_due_date() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&due_date=2020-01-01"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .due_date(NaiveDate::from_ymd(2020, 1, 1))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_request_to_resolve_discussions_of() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "title=title",
+                "&merge_request_to_resolve_discussions_of=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .merge_request_to_resolve_discussions_of(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_request_to_resolve_discussions_of_no_title() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("merge_request_to_resolve_discussions_of=1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("") // This should trigger logic to not send the parameter.
+            .merge_request_to_resolve_discussions_of(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_discussion_to_resolve() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&discussion_to_resolve=deadbeef"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .discussion_to_resolve("deadbeef")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_weight() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&weight=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .weight(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_epic_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&epic_id=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .epic_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    #[allow(deprecated)]
+    fn endpoint_epic_iid() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("title=title", "&epic_iid=1"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssue::builder()
+            .project("simple/project")
+            .title("title")
+            .epic_iid(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

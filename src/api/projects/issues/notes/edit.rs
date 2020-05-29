@@ -56,7 +56,11 @@ impl<'a> Endpoint for EditIssueNote<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::issues::notes::EditIssueNote;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_issue_note_and_body_are_necessary() {
@@ -117,5 +121,26 @@ mod tests {
             .body("body")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/issues/1/notes/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("body=body")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditIssueNote::builder()
+            .project("simple/project")
+            .issue(1)
+            .note(1)
+            .body("body")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

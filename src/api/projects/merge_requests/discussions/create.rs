@@ -247,9 +247,14 @@ impl<'a> Endpoint for CreateMergeRequestDiscussion<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::{TimeZone, Utc};
+    use http::Method;
+
     use crate::api::projects::merge_requests::discussions::{
         CreateMergeRequestDiscussion, ImagePosition, LineRange, Position, TextPosition,
     };
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     use super::FilePosition;
 
@@ -419,5 +424,219 @@ mod tests {
             .body("body")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/discussions")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("body=body")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestDiscussion::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_created_at() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/discussions")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("body=body", "&created_at=2020-01-01T00%3A00%3A00Z"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestDiscussion::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .created_at(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_position_file() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/discussions")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "body=body",
+                "&position%5Bbase_sha%5D=0000000000000000000000000000000000000000",
+                "&position%5Bstart_sha%5D=deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+                "&position%5Bhead_sha%5D=cafebabecafebabecafebabecafebabecafebabe",
+                "&position%5Bposition_type%5D=text",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestDiscussion::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .position(
+                Position::builder()
+                    .base_sha("0000000000000000000000000000000000000000")
+                    .start_sha("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
+                    .head_sha("cafebabecafebabecafebabecafebabecafebabe")
+                    .text_position(TextPosition::builder().build().unwrap())
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_position_file_full() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/discussions")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "body=body",
+                "&position%5Bbase_sha%5D=0000000000000000000000000000000000000000",
+                "&position%5Bstart_sha%5D=deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+                "&position%5Bhead_sha%5D=cafebabecafebabecafebabecafebabecafebabe",
+                "&position%5Bposition_type%5D=text",
+                "&position%5Bnew_path%5D=path%2Fto%2Ffile%2Fnew",
+                "&position%5Bnew_line%5D=0",
+                "&position%5Bold_path%5D=path%2Fto%2Ffile%2Fold",
+                "&position%5Bold_line%5D=0",
+                "&position%5Bline_range%5D%5Bstart_line_code%5D=some_complicated_line_code_thing",
+                "&position%5Bline_range%5D%5Bend_line_code%5D=some_complicated_line_code_thing",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestDiscussion::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .position(
+                Position::builder()
+                    .base_sha("0000000000000000000000000000000000000000")
+                    .start_sha("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
+                    .head_sha("cafebabecafebabecafebabecafebabecafebabe")
+                    .text_position(
+                        TextPosition::builder()
+                            .new_path("path/to/file/new")
+                            .new_line(0)
+                            .old_path("path/to/file/old")
+                            .old_line(0)
+                            .line_range(
+                                LineRange::builder()
+                                    .start_line_code("some_complicated_line_code_thing")
+                                    .end_line_code("some_complicated_line_code_thing")
+                                    .build()
+                                    .unwrap(),
+                            )
+                            .build()
+                            .unwrap(),
+                    )
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_position_image() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/discussions")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "body=body",
+                "&position%5Bbase_sha%5D=0000000000000000000000000000000000000000",
+                "&position%5Bstart_sha%5D=deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+                "&position%5Bhead_sha%5D=cafebabecafebabecafebabecafebabecafebabe",
+                "&position%5Bposition_type%5D=image",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestDiscussion::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .position(
+                Position::builder()
+                    .base_sha("0000000000000000000000000000000000000000")
+                    .start_sha("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
+                    .head_sha("cafebabecafebabecafebabecafebabecafebabe")
+                    .image_position(ImagePosition::builder().build().unwrap())
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_position_image_full() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/discussions")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "body=body",
+                "&position%5Bbase_sha%5D=0000000000000000000000000000000000000000",
+                "&position%5Bstart_sha%5D=deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+                "&position%5Bhead_sha%5D=cafebabecafebabecafebabecafebabecafebabe",
+                "&position%5Bposition_type%5D=image",
+                "&position%5Bwidth%5D=100",
+                "&position%5Bheight%5D=100",
+                "&position%5Bx%5D=0",
+                "&position%5By%5D=0",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestDiscussion::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .position(
+                Position::builder()
+                    .base_sha("0000000000000000000000000000000000000000")
+                    .start_sha("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
+                    .head_sha("cafebabecafebabecafebabecafebabecafebabe")
+                    .image_position(
+                        ImagePosition::builder()
+                            .width(100)
+                            .height(100)
+                            .x(0)
+                            .y(0)
+                            .build()
+                            .unwrap(),
+                    )
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

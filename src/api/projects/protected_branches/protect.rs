@@ -208,9 +208,13 @@ impl<'a> Endpoint for ProtectBranch<'a> {
 mod tests {
     use std::cmp;
 
+    use http::Method;
+
     use crate::api::projects::protected_branches::{
         ProtectBranch, ProtectedAccess, ProtectedAccessLevel,
     };
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn protected_access_level_default() {
@@ -344,5 +348,165 @@ mod tests {
             .name("master")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/protected_branches")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("name=master")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProtectBranch::builder()
+            .project("simple/project")
+            .name("master")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_push_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/protected_branches")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=master", "&push_access_level=40"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProtectBranch::builder()
+            .project("simple/project")
+            .name("master")
+            .push_access_level(ProtectedAccessLevel::Maintainer)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/protected_branches")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=master", "&merge_access_level=40"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProtectBranch::builder()
+            .project("simple/project")
+            .name("master")
+            .merge_access_level(ProtectedAccessLevel::Maintainer)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_unprotect_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/protected_branches")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=master", "&unprotect_access_level=40"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProtectBranch::builder()
+            .project("simple/project")
+            .name("master")
+            .unprotect_access_level(ProtectedAccessLevel::Maintainer)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_allowed_to_push_user() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/protected_branches")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=master",
+                "&allowed_to_push%5B%5D%5Buser_id%5D=1",
+                "&allowed_to_push%5B%5D%5Bgroup_id%5D=1",
+                "&allowed_to_push%5B%5D%5Baccess_level%5D=30",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProtectBranch::builder()
+            .project("simple/project")
+            .name("master")
+            .allowed_to_push(ProtectedAccess::User(1))
+            .allowed_to_push(ProtectedAccess::Group(1))
+            .allowed_to_push(ProtectedAccess::Level(ProtectedAccessLevel::Developer))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_allowed_to_merge_user() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/protected_branches")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=master",
+                "&allowed_to_merge%5B%5D%5Buser_id%5D=1",
+                "&allowed_to_merge%5B%5D%5Bgroup_id%5D=1",
+                "&allowed_to_merge%5B%5D%5Baccess_level%5D=30",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProtectBranch::builder()
+            .project("simple/project")
+            .name("master")
+            .allowed_to_merge(ProtectedAccess::User(1))
+            .allowed_to_merge(ProtectedAccess::Group(1))
+            .allowed_to_merge(ProtectedAccess::Level(ProtectedAccessLevel::Developer))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_allowed_to_unprotect_user() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/protected_branches")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=master",
+                "&allowed_to_unprotect%5B%5D%5Buser_id%5D=1",
+                "&allowed_to_unprotect%5B%5D%5Bgroup_id%5D=1",
+                "&allowed_to_unprotect%5B%5D%5Baccess_level%5D=30",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProtectBranch::builder()
+            .project("simple/project")
+            .name("master")
+            .allowed_to_unprotect(ProtectedAccess::User(1))
+            .allowed_to_unprotect(ProtectedAccess::Group(1))
+            .allowed_to_unprotect(ProtectedAccess::Level(ProtectedAccessLevel::Developer))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

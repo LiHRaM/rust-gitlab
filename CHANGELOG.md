@@ -15,6 +15,9 @@
   * All `EnableState` fields may now be set using `bool` values.
   * The `api::projects::merge_requests::EditMergeRequest` endpoint now supports
     unlabeling a merge request.
+  * The `api::Client` trait has been changed to use the `http` crate types.
+    This allows for clients to not be tied to `reqwest` and for mocking and
+    testing of the endpoints themselves.
 
 ## Fixes
 

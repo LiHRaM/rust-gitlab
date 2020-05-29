@@ -97,7 +97,11 @@ impl<'a> Endpoint for CommentOnCommit<'a> {
 
 #[cfg(test)]
 mod tests {
+    use http::Method;
+
     use crate::api::projects::repository::commits::{CommentOnCommit, LineType};
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn line_type_as_str() {
@@ -152,5 +156,97 @@ mod tests {
             .note("note")
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/comments")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("note=comment+content")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommentOnCommit::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .note("comment content")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_path() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/comments")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "note=comment+content",
+                "&path=path%2Fto%2Ffile",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommentOnCommit::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .note("comment content")
+            .path("path/to/file")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_line() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/comments")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "note=comment+content",
+                "&line=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommentOnCommit::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .note("comment content")
+            .line(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_line_type() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/repository/commits/0000000000000000000000000000000000000000/comments")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "note=comment+content",
+                "&line_type=new",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CommentOnCommit::builder()
+            .project("simple/project")
+            .commit("0000000000000000000000000000000000000000")
+            .note("comment content")
+            .line_type(LineType::New)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }

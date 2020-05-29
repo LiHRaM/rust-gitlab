@@ -71,6 +71,8 @@ impl<'a> Endpoint for MergeRequest<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::projects::merge_requests::MergeRequest;
+    use crate::api::{self, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_merge_request_are_needed() {
@@ -100,5 +102,75 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap();
+    }
+
+    #[test]
+    fn endpoint() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_render_html() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .add_query_params(&[("render_html", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .render_html(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_include_diverged_commits_count() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .add_query_params(&[("include_diverged_commits_count", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .include_diverged_commits_count(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_include_rebase_in_progress() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .add_query_params(&[("include_rebase_in_progress", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .include_rebase_in_progress(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
     }
 }
