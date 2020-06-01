@@ -1,4 +1,4 @@
-# v0.1300.0 (unreleased)
+# v0.1300.0
 
 ## Deprecations
 
