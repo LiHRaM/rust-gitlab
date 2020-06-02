@@ -70,6 +70,18 @@ where
         /// The error message from GitLab.
         msg: String,
     },
+    /// GitLab returned an error object.
+    #[error("gitlab server error: {:?}", obj)]
+    GitlabObject {
+        /// The error object from GitLab.
+        obj: serde_json::Value,
+    },
+    /// GitLab returned an HTTP error with JSON we did not recognize.
+    #[error("gitlab server error: {:?}", obj)]
+    GitlabUnrecognized {
+        /// The full object from GitLab.
+        obj: serde_json::Value,
+    },
     /// Failed to parse an expected data type from JSON.
     #[error("could not parse {} data from JSON: {}", typename, source)]
     DataType {
@@ -105,14 +117,24 @@ where
     }
 
     pub(crate) fn from_gitlab(value: serde_json::Value) -> Self {
-        let msg = value
+        let error_value = value
             .pointer("/message")
-            .or_else(|| value.pointer("/error"))
-            .and_then(|s| s.as_str())
-            .unwrap_or_else(|| "<unknown error>");
+            .or_else(|| value.pointer("/error"));
 
-        ApiError::Gitlab {
-            msg: msg.into(),
+        if let Some(error_value) = error_value {
+            if let Some(msg) = error_value.as_str() {
+                ApiError::Gitlab {
+                    msg: msg.into(),
+                }
+            } else {
+                ApiError::GitlabObject {
+                    obj: error_value.clone(),
+                }
+            }
+        } else {
+            ApiError::GitlabUnrecognized {
+                obj: value,
+            }
         }
     }
 
@@ -120,6 +142,89 @@ where
         ApiError::DataType {
             source,
             typename: any::type_name::<T>(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+    use thiserror::Error;
+
+    use crate::api::ApiError;
+
+    #[derive(Debug, Error)]
+    #[error("my error")]
+    enum MyError {}
+
+    #[test]
+    fn gitlab_error_error() {
+        let obj = json!({
+            "error": "error contents",
+        });
+
+        let err: ApiError<MyError> = ApiError::from_gitlab(obj);
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "error contents");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn gitlab_error_message_string() {
+        let obj = json!({
+            "message": "error contents",
+        });
+
+        let err: ApiError<MyError> = ApiError::from_gitlab(obj);
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "error contents");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn gitlab_error_message_object() {
+        let err_obj = json!({
+            "blah": "foo",
+        });
+        let obj = json!({
+            "message": err_obj.clone(),
+        });
+
+        let err: ApiError<MyError> = ApiError::from_gitlab(obj);
+        if let ApiError::GitlabObject {
+            obj,
+        } = err
+        {
+            assert_eq!(obj, err_obj);
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn gitlab_error_message_unrecognized() {
+        let err_obj = json!({
+            "some_weird_key": "an even weirder value",
+        });
+
+        let err: ApiError<MyError> = ApiError::from_gitlab(err_obj.clone());
+        if let ApiError::GitlabUnrecognized {
+            obj,
+        } = err
+        {
+            assert_eq!(obj, err_obj);
+        } else {
+            panic!("unexpected error: {}", err);
         }
     }
 }

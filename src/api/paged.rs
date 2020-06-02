@@ -499,21 +499,19 @@ mod tests {
             .status(StatusCode::NOT_FOUND)
             .build()
             .unwrap();
-        let client = SingleTestClient::new_json(
-            endpoint,
-            &json!({
-                "bogus": "dummy error message",
-            }),
-        );
+        let err_obj = json!({
+            "bogus": "dummy error message",
+        });
+        let client = SingleTestClient::new_json(endpoint, &err_obj);
         let endpoint = Dummy::default();
 
         let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All).query(&client);
         let err = res.unwrap_err();
-        if let ApiError::Gitlab {
-            msg,
+        if let ApiError::GitlabUnrecognized {
+            obj,
         } = err
         {
-            assert_eq!(msg, "<unknown error>");
+            assert_eq!(obj, err_obj);
         } else {
             panic!("unexpected error: {}", err);
         }
