@@ -4,24 +4,30 @@ This library implements an interface to communicate with a Gitlab instance. Not
 all API endpoints are implemented, but patches are welcome.
 
 The API is based off of the GitLab 13.00 API v4 and will likely aggressively track
-new API additions, so the newest release may not support talking to older
-releases where fields have been added.
+new API additions, so not all available parameters or types will support
+arbitrarily old GitLab instances (usually query parameters will be ignored and
+type fields cause deserialization errors).
 
-All API types should be implemented in the [types](src/types.rs) module. These
-types should generally be implemented based on the `lib/api/entities.rb`
-module in the Gitlab repository. However, in the interest of usability,
-entities may be combined using `Option` to handle the differences. Generally,
-this should be done where the difference is "small". As a concrete example,
-the `Project` entity has dozens of fields and `ProjectWithAccess` has one
-additional field (`permissions`) which is added using `Option` rather than
-creating a new `ProjectWithAccess` structure which only differs in this field.
+The endpoints that are supported all live under the [`api`](src/api.rs) module.
+Each endpoint may be constructed using a "builder" pattern to provide supported
+fields. To use an endpoint, you may query it using the
+[`Query`](src/api/query.rs) trait. There are additional helpers to handle
+different cases:
 
-In short, map the API as close as possible, but also know when to bend the
-rules.
+  - [`api::ignore`](src/api/ignore.rs): Ignore the GitLab response (useful for
+    `POST` or `PUT` endpoints).
+  - [`api::paged`](src/api/paged.rs): Fetch results that are paginated.
+  - [`api::raw`](src/api/raw.rs): Return the raw data from GitLab instead of
+    deserializing into a structure.
+  - [`api::sudo`](src/api/sudo.rs): Modify an endpoint using GitLab's `sudo`
+    parameter for masquerading as another user (requires an administrator
+    token).
 
-If you run into places where Gitlab dumps a JSON value rather than an actual
-entity, please consider updating upstream to use a real entity so that changes
-to the structure are easier to track.
+All endpoints return data types of the caller's choosing that implement
+`serde`'s `Deserialize` trait. Callers should define their own structures for
+obtaining data from the API. This allows the structure to be more easily
+changeable for different GitLab versions (rather than this crate being pinned
+to a given version).
 
 # Versioning
 
