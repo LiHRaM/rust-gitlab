@@ -11,6 +11,8 @@
 
   * Added the `api::groups::projects::GroupProjects` endpoint to list a groups
     projects.
+  * Added the `api::groups::subgroups::GroupSubgroups` endpoint to list a
+    groups subgroups.
 
 # v0.1301.0
 

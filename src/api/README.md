@@ -17,6 +17,7 @@ These API endpoints have been implemented.
   * `DELETE /groups/:group/members/:id` `groups/members/remove.rs`
   * `POST   /groups/:group/milestones` `groups/milestones/create.rs`
   * `GET    /groups/:group/projects` `groups/projects/projects.rs`
+  * `GET    /groups/:group/subgroups` `groups/subgroups/subgroups.rs`
   * `GET    /projects` `projects/projects.rs`
   * `POST   /projects` `projects/projects/create.rs`
   * `GET    /projects/:project` `projects/projects/project.rs`
@@ -142,7 +143,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /groups/:group/milestones/:milestone/merge_requests` https://gitlab.kitware.com/help/api/group_milestones.md#get-all-merge-requests-assigned-to-a-single-milestone
   * `POST   /groups/:group/projects/:id` https://gitlab.kitware.com/help/api/groups.md#transfer-project-to-group
   * `POST   /groups/:group/restore` https://gitlab.kitware.com/help/api/groups.md#restore-group-marked-for-deletion-premium
-  * `GET    /groups/:group/subgroups` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-subgroups
   * `DELETE /projects/:project` https://gitlab.kitware.com/help/api/projects.md#remove-project
   * `POST   /projects/:project/archive` https://gitlab.kitware.com/help/api/projects.md#archive-a-project
   * `GET    /projects/:project/commits/:sha/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-project-commit-discussion-items
