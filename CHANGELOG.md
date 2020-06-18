@@ -7,6 +7,11 @@
     of belonging to ancestor/enclosing groups, in addition to directly added
     members.
 
+## Additions
+
+  * Added the `api::groups::projects::GroupProjects` endpoint to list a groups
+    projects.
+
 # v0.1301.0
 
 ## Deprecations
