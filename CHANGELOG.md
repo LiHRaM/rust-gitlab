@@ -13,6 +13,8 @@
     projects.
   * Added the `api::groups::subgroups::GroupSubgroups` endpoint to list a
     groups subgroups.
+  * Added the `api::projects::protected_branches::ProtectedBranches` endpoint
+    to list a projects protected branches.
 
 # v0.1301.0
 
