@@ -25,6 +25,9 @@ pub struct ProjectMembers<'a> {
     /// A search string to filter members by.
     #[builder(setter(name = "_user_ids"), default, private)]
     user_ids: BTreeSet<u64>,
+    /// Whether to include ancestor users from enclosing Groups.
+    #[builder(default = "false", private)]
+    include_ancestors: bool,
 }
 
 impl<'a> ProjectMembers<'a> {
@@ -59,7 +62,11 @@ impl<'a> Endpoint for ProjectMembers<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/members", self.project).into()
+        if self.include_ancestors {
+            format!("projects/{}/members/all", self.project).into()
+        } else {
+            format!("projects/{}/members", self.project).into()
+        }
     }
 
     fn parameters(&self) -> QueryParams {
@@ -102,6 +109,24 @@ mod tests {
 
         let endpoint = ProjectMembers::builder()
             .project("simple/project")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_query_include_ancestors() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members/all")
+            .add_query_params(&[("query", "search")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMembers::builder()
+            .project("simple/project")
+            .include_ancestors(true)
+            .query("search")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
