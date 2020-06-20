@@ -17,6 +17,9 @@ pub struct ProjectMember<'a> {
     project: NameOrId<'a>,
     /// The ID of the user.
     user: u64,
+    /// Whether to include ancestor users from enclosing Groups in the queried list of members.
+    #[builder(default = "false")]
+    include_ancestors: bool,
 }
 
 impl<'a> ProjectMember<'a> {
@@ -32,7 +35,11 @@ impl<'a> Endpoint for ProjectMember<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/members/{}", self.project, self.user).into()
+        if self.include_ancestors {
+            format!("projects/{}/members/all/{}", self.project, self.user).into()
+        } else {
+            format!("projects/{}/members/{}", self.project, self.user).into()
+        }
     }
 }
 
@@ -75,6 +82,23 @@ mod tests {
 
         let endpoint = ProjectMember::builder()
             .project("simple/project")
+            .user(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_include_ancestors() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members/all/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMember::builder()
+            .project("simple/project")
+            .include_ancestors(true)
             .user(1)
             .build()
             .unwrap();

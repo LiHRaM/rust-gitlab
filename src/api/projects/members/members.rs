@@ -26,7 +26,7 @@ pub struct ProjectMembers<'a> {
     #[builder(setter(name = "_user_ids"), default, private)]
     user_ids: BTreeSet<u64>,
     /// Whether to include ancestor users from enclosing Groups.
-    #[builder(default = "false", private)]
+    #[builder(default = "false")]
     include_ancestors: bool,
 }
 
