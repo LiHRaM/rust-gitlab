@@ -197,7 +197,7 @@ mod tests {
             "blah": "foo",
         });
         let obj = json!({
-            "message": err_obj.clone(),
+            "message": err_obj,
         });
 
         let err: ApiError<MyError> = ApiError::from_gitlab(obj);
