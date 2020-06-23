@@ -77,6 +77,10 @@ These API endpoints have been implemented.
   * `DELETE /projects/:project/protected_branches/*branch` `projects/protected_branches/unprotect.rs`
   * `GET    /projects/:project/protected_branches` `projects/protected_branches/protected_branches.rs`
   * `GET    /projects/:project/protected_branches/:branch` `projects/protected_branches/protected_branch.rs`
+  * `GET    /projects/:project/protected_tags` `projects/protected_tags/protected_tags.rs`
+  * `GET    /projects/:project/protected_tags/:name` `projects/protected_tags/protected_tag.rs`
+  * `POST   /projects/:project/protected_tags` `projects/protected_tags/protect.rs`
+  * `DELETE /projects/:project/protected_tags/:name` `projects/protected_tags/unprotect.rs`
   * `GET    /projects/:project/repository/branches` `projects/repository/branches/branches.rs`
   * `POST   /projects/:project/repository/branches` `projects/repository/branches/create.rs`
   * `GET    /projects/:project/repository/branches/:branch` `projects/repository/branches/branch.rs`
@@ -380,7 +384,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/project_snippets.md
   * https://gitlab.kitware.com/help/api/project_templates.md
   * https://gitlab.kitware.com/help/api/protected_environments.md
-  * https://gitlab.kitware.com/help/api/protected_tags.md
   * https://gitlab.kitware.com/help/api/releases/index.md
   * https://gitlab.kitware.com/help/api/releases/links.md
   * https://gitlab.kitware.com/help/api/remote_mirrors.md

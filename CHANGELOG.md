@@ -1,3 +1,13 @@
+# v0.1301.2 (unreleased)
+
+## Additions
+
+  * Added the `api::projects::protected_tags::ProtectTag`
+    `api::projects::protected_tags::UnprotectTag`
+    `api::projects::protected_tags::ProtectedTag`
+    `api::projects::protected_tags::ProtectedTags` endpoint to query, protect
+    and unprotect a projects tags.
+
 # v0.1301.1
 
 ## Changes

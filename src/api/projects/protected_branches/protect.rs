@@ -11,43 +11,9 @@ use derive_builder::Builder;
 
 use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
-use crate::api::ParamValue;
 
-/// Access levels for protected branches.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ProtectedAccessLevel {
-    /// Developers and maintainers may perform the action.
-    Developer,
-    /// Maintainers may perform the action.
-    Maintainer,
-    /// Only administrators may perform the action.
-    Admin,
-    /// The action is not allowed at all.
-    NoAccess,
-}
-
-impl Default for ProtectedAccessLevel {
-    fn default() -> Self {
-        ProtectedAccessLevel::Maintainer
-    }
-}
-
-impl ProtectedAccessLevel {
-    fn as_str(self) -> &'static str {
-        match self {
-            ProtectedAccessLevel::Developer => "30",
-            ProtectedAccessLevel::Maintainer => "40",
-            ProtectedAccessLevel::Admin => "60",
-            ProtectedAccessLevel::NoAccess => "0",
-        }
-    }
-}
-
-impl ParamValue<'static> for ProtectedAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
-        self.as_str().into()
-    }
-}
+#[deprecated(note = "use `api/common/ProtectedAccessLevel` instead")]
+pub use crate::api::common::ProtectedAccessLevel;
 
 /// Granular protected access controls for branches.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -210,72 +176,10 @@ mod tests {
 
     use http::Method;
 
-    use crate::api::projects::protected_branches::{
-        ProtectBranch, ProtectedAccess, ProtectedAccessLevel,
-    };
+    use crate::api::common::ProtectedAccessLevel;
+    use crate::api::projects::protected_branches::{ProtectBranch, ProtectedAccess};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
-
-    #[test]
-    fn protected_access_level_default() {
-        assert_eq!(
-            ProtectedAccessLevel::default(),
-            ProtectedAccessLevel::Maintainer,
-        );
-    }
-
-    #[test]
-    fn protected_access_level_ord() {
-        let items = &[
-            ProtectedAccessLevel::Developer,
-            ProtectedAccessLevel::Maintainer,
-            ProtectedAccessLevel::Admin,
-            ProtectedAccessLevel::NoAccess,
-        ];
-
-        for i in items {
-            assert_eq!(*i, *i);
-            assert_eq!(i.cmp(i), cmp::Ordering::Equal);
-
-            let mut expect = cmp::Ordering::Greater;
-            for j in items {
-                let is_same = i == j;
-                if is_same {
-                    expect = cmp::Ordering::Equal;
-                }
-                assert_eq!(i.cmp(j), expect);
-                if is_same {
-                    expect = cmp::Ordering::Less;
-                }
-            }
-
-            let mut expect = cmp::Ordering::Less;
-            for j in items.iter().rev() {
-                let is_same = i == j;
-                if is_same {
-                    expect = cmp::Ordering::Equal;
-                }
-                assert_eq!(i.cmp(j), expect);
-                if is_same {
-                    expect = cmp::Ordering::Greater;
-                }
-            }
-        }
-    }
-
-    #[test]
-    fn protected_access_level_as_str() {
-        let items = &[
-            (ProtectedAccessLevel::Developer, "30"),
-            (ProtectedAccessLevel::Maintainer, "40"),
-            (ProtectedAccessLevel::Admin, "60"),
-            (ProtectedAccessLevel::NoAccess, "0"),
-        ];
-
-        for (i, s) in items {
-            assert_eq!(i.as_str(), *s);
-        }
-    }
 
     #[test]
     fn protected_access_ord() {
