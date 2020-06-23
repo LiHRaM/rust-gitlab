@@ -25,15 +25,24 @@ pub struct ProjectMembers<'a> {
     /// A search string to filter members by.
     #[builder(setter(name = "_user_ids"), default, private)]
     user_ids: BTreeSet<u64>,
-    /// Whether to include ancestor users from enclosing Groups.
-    #[builder(default = "false")]
-    include_ancestors: bool,
+    // Whether to include ancestor users from enclosing Groups in the queried list of members.
+    #[builder(private)]
+    _include_ancestors: bool,
 }
 
 impl<'a> ProjectMembers<'a> {
     /// Create a builder for the endpoint.
     pub fn builder() -> ProjectMembersBuilder<'a> {
-        ProjectMembersBuilder::default()
+        let mut builder = ProjectMembersBuilder::default();
+        builder._include_ancestors(false);
+        builder
+    }
+
+    /// Create a builder for the endpoint.
+    pub fn all_builder() -> ProjectMembersBuilder<'a> {
+        let mut builder = ProjectMembersBuilder::default();
+        builder._include_ancestors(true);
+        builder
     }
 }
 
@@ -62,7 +71,7 @@ impl<'a> Endpoint for ProjectMembers<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        if self.include_ancestors {
+        if self._include_ancestors {
             format!("projects/{}/members/all", self.project).into()
         } else {
             format!("projects/{}/members", self.project).into()
@@ -92,11 +101,16 @@ mod tests {
     fn project_is_needed() {
         let err = ProjectMembers::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
+
+        let err = ProjectMembers::all_builder().build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
     fn project_is_sufficient() {
         ProjectMembers::builder().project(1).build().unwrap();
+
+        ProjectMembers::all_builder().project(1).build().unwrap();
     }
 
     #[test]
@@ -109,24 +123,6 @@ mod tests {
 
         let endpoint = ProjectMembers::builder()
             .project("simple/project")
-            .build()
-            .unwrap();
-        api::ignore(endpoint).query(&client).unwrap();
-    }
-
-    #[test]
-    fn endpoint_query_include_ancestors() {
-        let endpoint = ExpectedUrl::builder()
-            .endpoint("projects/simple%2Fproject/members/all")
-            .add_query_params(&[("query", "search")])
-            .build()
-            .unwrap();
-        let client = SingleTestClient::new_raw(endpoint, "");
-
-        let endpoint = ProjectMembers::builder()
-            .project("simple/project")
-            .include_ancestors(true)
-            .query("search")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
