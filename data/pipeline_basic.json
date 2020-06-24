@@ -1,9 +1,9 @@
 {
-  "created_at": "2019-10-25T15:22:38.463-04:00",
-  "id": 149249,
+  "created_at": "2020-06-24T04:19:19.291Z",
+  "id": 178744,
   "ref": "master",
-  "sha": "f6ebd73d4a8f42f6a642030c27b66330023b7a88",
+  "sha": "c3d2fe98d7ac07566556e4b4fef515265e3b33d0",
   "status": "success",
-  "updated_at": "2019-10-25T15:35:24.570-04:00",
-  "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/149249"
+  "updated_at": "2020-06-24T04:35:13.293Z",
+  "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/178744"
 }

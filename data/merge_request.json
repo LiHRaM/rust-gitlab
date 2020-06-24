@@ -31,7 +31,7 @@
   "changes_count": "3",
   "closed_at": null,
   "closed_by": null,
-  "created_at": "2016-10-04T15:56:43.276-04:00",
+  "created_at": "2016-10-04T19:56:43.276Z",
   "description": "Fixes #5.",
   "diff_refs": {
     "base_sha": "981262b03fc0149c1677ca51ea47b570e30d6a90",
@@ -48,9 +48,9 @@
     "before_sha": "0000000000000000000000000000000000000000",
     "committed_at": null,
     "coverage": null,
-    "created_at": "2016-10-04T15:56:53.822-04:00",
+    "created_at": "2016-10-04T19:56:53.822Z",
     "detailed_status": {
-      "details_path": "/ben.boeckel/rust-gitlab/pipelines/29191",
+      "details_path": "/ben.boeckel/rust-gitlab/-/pipelines/29191",
       "favicon": "/assets/ci_favicons/favicon_status_success-8451333011eee8ce9f2ab25dc487fe24a8758c694827a582f17f42b0a90446a2.png",
       "group": "success",
       "has_details": true,
@@ -61,14 +61,14 @@
       "tooltip": "passed"
     },
     "duration": null,
-    "finished_at": "2016-10-04T15:56:53.868-04:00",
+    "finished_at": "2016-10-04T19:56:53.868Z",
     "id": 29191,
     "ref": "add_hook-api",
     "sha": "04e94ae667024a62a90179f395bfdc2b35f3efd2",
     "started_at": null,
     "status": "success",
     "tag": false,
-    "updated_at": "2016-10-04T15:56:53.869-04:00",
+    "updated_at": "2016-10-04T19:56:53.869Z",
     "user": {
       "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
       "id": 11,
@@ -77,7 +77,7 @@
       "username": "kwrobot",
       "web_url": "https://gitlab.kitware.com/kwrobot"
     },
-    "web_url": "https://gitlab.kitware.com/ben.boeckel/rust-gitlab/pipelines/29191",
+    "web_url": "https://gitlab.kitware.com/ben.boeckel/rust-gitlab/-/pipelines/29191",
     "yaml_errors": null
   },
   "id": 20215,
@@ -89,7 +89,7 @@
   "merge_error": null,
   "merge_status": "can_be_merged",
   "merge_when_pipeline_succeeds": false,
-  "merged_at": "2016-10-04T16:18:57.914-04:00",
+  "merged_at": "2016-10-04T20:18:57.914Z",
   "merged_by": null,
   "milestone": null,
   "pipeline": null,
@@ -121,7 +121,7 @@
     "total_time_spent": 0
   },
   "title": "gitlab: expose hook addition API",
-  "updated_at": "2019-08-29T13:30:19.352-04:00",
+  "updated_at": "2019-08-29T17:30:19.352Z",
   "upvotes": 0,
   "user": {
     "can_merge": true

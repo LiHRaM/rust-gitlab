@@ -21,6 +21,10 @@ def write_result(token, name, endpoint, dumpall=False):
         result.pop('runners_token', None)
         if type(result.get('identities')) == list:
             result['identities'] = []
+        if type(result.get('current_sign_in_ip')) == str:
+            result['current_sign_in_ip'] = "0.0.0.0"
+        if type(result.get('last_sign_in_ip')) == str:
+            result['last_sign_in_ip'] = "0.0.0.0"
     with open('%s.json' % name, 'w+') as fout:
         json.dump(result, fout, indent = 2, separators=(',', ': '), sort_keys=True)
         fout.write('\n')

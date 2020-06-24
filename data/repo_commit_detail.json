@@ -8,13 +8,13 @@
   "created_at": "2016-11-08T09:30:13.000-05:00",
   "id": "de4ac3cf96cb8a0893be22b03f5171d934f9d392",
   "last_pipeline": {
-    "created_at": "2016-11-08T09:30:16.081-05:00",
+    "created_at": "2016-11-08T14:30:16.081Z",
     "id": 34289,
     "ref": "master",
     "sha": "de4ac3cf96cb8a0893be22b03f5171d934f9d392",
     "status": "success",
-    "updated_at": "2016-11-08T09:35:32.670-05:00",
-    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/34289"
+    "updated_at": "2016-11-08T14:35:32.670Z",
+    "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/34289"
   },
   "message": "Merge topic 'mr-awards'\n\na222c553 gitlab: add a method for MR award queries\n\nAcked-by: Kitware Robot <kwrobot@kitware.com>\nReviewed-by: Brad King <brad.king@kitware.com>\nMerge-request: !46\n",
   "parent_ids": [

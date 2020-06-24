@@ -22,5 +22,6 @@
   "developers_can_push": false,
   "merged": false,
   "name": "master",
-  "protected": true
+  "protected": true,
+  "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/tree/master"
 }
