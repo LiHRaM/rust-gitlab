@@ -362,12 +362,12 @@ fn test_read_merge_request() {
 fn test_read_note() {
     let note: Note = read_test_file("note");
 
-    assert_eq!(note.id, NoteId::new(177_373));
-    assert_eq!(note.body, "Status changed to merged");
+    assert_eq!(note.id, NoteId::new(619_275));
+    assert_eq!(note.body, "resolved all threads");
     assert_eq!(note.attachment, None);
-    check_user_kwrobot(&note.author);
-    assert_eq!(note.created_at, datetime((2016, 10, 4), (20, 18, 57, 937)));
-    assert_eq!(note.updated_at, datetime((2016, 10, 4), (20, 18, 57, 937)));
+    check_user_brad_king(&note.author);
+    assert_eq!(note.created_at, datetime((2019, 8, 29), (17, 31, 17, 886)));
+    assert_eq!(note.updated_at, datetime((2019, 8, 29), (17, 31, 17, 889)));
     assert_eq!(note.resolvable, false);
     assert_eq!(note.resolved, None);
     assert!(note.resolved_by.is_none());
@@ -487,7 +487,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.last_activity_at,
-        datetime((2020, 4, 27), (19, 4, 8, 517)),
+        datetime((2020, 6, 23), (23, 19, 42, 70)),
     );
 }
 
@@ -500,9 +500,9 @@ fn check_project_b(project: &Project) {
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
-    assert_eq!(project.star_count, 8);
-    assert_eq!(project.forks_count, 29);
-    assert_eq!(project.open_issues_count, Some(15));
+    assert_eq!(project.star_count, 9);
+    assert_eq!(project.forks_count, 31);
+    assert_eq!(project.open_issues_count, Some(13));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
@@ -682,7 +682,7 @@ fn test_read_repo_commit_detail() {
     );
     assert_eq!(
         last_pipeline.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/34289",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/34289",
     );
     assert_eq!(repo_commit_detail.project_id, ProjectId::new(855));
 }
@@ -730,11 +730,11 @@ fn test_read_user_public() {
     assert_eq!(user_public.organization, None);
     assert_eq!(
         user_public.last_sign_in_at.unwrap(),
-        datetime((2018, 10, 8), (17, 25, 29, 86)),
+        datetime((2020, 6, 4), (23, 14, 45, 772)),
     );
     assert_eq!(
         user_public.last_activity_on.unwrap(),
-        NaiveDate::from_ymd(2018, 10, 25),
+        NaiveDate::from_ymd(2020, 6, 24),
     );
     assert_eq!(
         user_public.confirmed_at.unwrap(),
@@ -746,7 +746,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(
         user_public.current_sign_in_at.unwrap(),
-        datetime((2018, 10, 11), (12, 36, 9, 687)),
+        datetime((2020, 6, 19), (10, 41, 31, 756)),
     );
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);
@@ -780,24 +780,24 @@ fn test_read_resource_label_events() {
 fn test_read_pipelines() {
     let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
 
-    assert_eq!(pipeline_basic.id, PipelineId::new(149_249));
+    assert_eq!(pipeline_basic.id, PipelineId::new(178_744));
     assert_eq!(pipeline_basic.status, StatusState::Success);
     assert_eq!(pipeline_basic.ref_.as_ref().unwrap(), "master");
     assert_eq!(
         pipeline_basic.sha,
-        ObjectId::new("f6ebd73d4a8f42f6a642030c27b66330023b7a88"),
+        ObjectId::new("c3d2fe98d7ac07566556e4b4fef515265e3b33d0"),
     );
     assert_eq!(
         pipeline_basic.created_at.unwrap(),
-        datetime((2019, 10, 25), (19, 22, 38, 463)),
+        datetime((2020, 6, 24), (4, 19, 19, 291)),
     );
     assert_eq!(
         pipeline_basic.updated_at.unwrap(),
-        datetime((2019, 10, 25), (19, 35, 24, 570)),
+        datetime((2020, 6, 24), (4, 35, 13, 293)),
     );
     assert_eq!(
         pipeline_basic.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/149249",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/178744",
     );
 }
 
@@ -839,7 +839,7 @@ fn test_read_pipeline() {
     assert_eq!(pipeline.coverage, None);
     assert_eq!(
         pipeline.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/145400",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/145400",
     );
 
     // nested user
@@ -849,7 +849,7 @@ fn test_read_pipeline() {
     assert_eq!(
         pipeline.detailed_status,
         json!({
-            "details_path": "/utils/rust-gitlab/pipelines/145400",
+            "details_path": "/utils/rust-gitlab/-/pipelines/145400",
             "favicon": "/assets/ci_favicons/favicon_status_success-8451333011eee8ce9f2ab25dc487fe24a8758c694827a582f17f42b0a90446a2.png",
             "group": "success",
             "has_details": true,
@@ -995,11 +995,11 @@ fn test_read_pending_job() {
     );
     assert_eq!(
         job.pipeline.updated_at,
-        Some(datetime((2020, 4, 13), (4, 19, 48, 685)))
+        Some(datetime((2020, 4, 13), (4, 36, 12, 508)))
     );
     assert_eq!(
         job.pipeline.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"
     );
     assert_eq!(job.allow_failure, false);
     assert_eq!(job.duration, None);
@@ -1059,11 +1059,11 @@ fn test_read_success_job() {
     );
     assert_eq!(
         job.pipeline.updated_at,
-        Some(datetime((2020, 4, 13), (4, 19, 48, 685)))
+        Some(datetime((2020, 4, 13), (4, 36, 12, 508)))
     );
     assert_eq!(
         job.pipeline.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"
     );
     assert_eq!(job.allow_failure, false);
     assert_eq!(job.duration, Some(61.019_904));
@@ -1143,14 +1143,14 @@ fn test_read_running_job() {
     );
     assert_eq!(
         job.pipeline.updated_at,
-        Some(datetime((2020, 4, 13), (4, 19, 48, 685)))
+        Some(datetime((2020, 4, 13), (4, 36, 12, 508)))
     );
     assert_eq!(
         job.pipeline.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/pipelines/168478"
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"
     );
     assert_eq!(job.allow_failure, false);
-    assert_eq!(job.duration, Some(6.604_018_343));
+    assert_eq!(job.duration, Some(49.516_176));
     check_job_artifacts(&job.artifacts, &[]);
     assert_eq!(job.artifacts_expire_at, None);
     assert_eq!(
