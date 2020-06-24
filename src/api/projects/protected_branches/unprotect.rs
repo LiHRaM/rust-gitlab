@@ -9,10 +9,10 @@ use derive_builder::Builder;
 use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
 
-/// Create a new file in a project.
+/// Unprotect a branch in a project.
 #[derive(Debug, Builder)]
 pub struct UnprotectBranch<'a> {
-    /// The project to create a file within.
+    /// The project to unprotect a branch within.
     #[builder(setter(into))]
     project: NameOrId<'a>,
     /// The name or glob of the branch to unprotect.
