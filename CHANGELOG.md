@@ -1,3 +1,28 @@
+# v0.1301.0 (unreleased)
+
+## Deprecations
+
+  * The REST endpoint methods on the `Gitlab` structure have been removed.
+    Associated helper structures for resource creation endpoints have been
+    removed as well:
+    - `CreateMergeRequestParams`
+    - `CreateMergeRequestParamsBuilder`
+    - `CreateGroupParams`
+    - `CreateGroupParamsBuilder`
+    - `CreateProjectParams`
+    - `CreateProjectParamsBuilder`
+    - `MergeMethod`
+    - `BuildGitStrategy`
+    - `AutoDeployStrategy`
+    - `WebhookEvents`
+    - `CommitStatusInfo`
+    - `MergeRequestStateFilter`
+    - `RepoFile`
+    - `ProjectFeatures`
+    - `QueryParamSlice`
+    - `QueryParamVec`
+  * Now-impossible error conditions have been removed from `GitlabError`.
+
 # v0.1300.0
 
 ## Deprecations

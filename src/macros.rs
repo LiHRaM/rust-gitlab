@@ -69,20 +69,3 @@ macro_rules! enum_serialize {
         }
     };
 }
-
-macro_rules! with_event {
-    { $method: ident, $name: ident } => {
-        pub fn $method(mut self) -> Self {
-            self.$name = true;
-            self
-        }
-    };
-}
-
-macro_rules! get_event {
-    { $name: ident } => {
-        pub fn $name(&self) -> bool {
-            self.$name
-        }
-    };
-}
