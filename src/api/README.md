@@ -15,7 +15,7 @@ These API endpoints have been implemented.
   * `POST   /groups/:group/members` `groups/members/add.rs`
   * `GET    /groups/:group/members/:id` `groups/members/member.rs`
   * `DELETE /groups/:group/members/:id` `groups/members/remove.rs`
-  * `POST   /groups/:group/milestones` groups/milestones/create.rs
+  * `POST   /groups/:group/milestones` `groups/milestones/create.rs`
   * `GET    /projects` `projects/projects.rs`
   * `POST   /projects` `projects/projects/create.rs`
   * `GET    /projects/:project` `projects/projects/project.rs`
@@ -29,10 +29,10 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/issues` `projects/issues/create.rs`
   * `GET    /projects/:project/issues/:issue` `projects/issues/issue.rs`
   * `PUT    /projects/:project/issues/:issue` `projects/issues/edit.rs`
-  * `GET    /projects/:project/issues/:issue/notes` projects/issues/notes/notes.rs
-  * `POST   /projects/:project/issues/:issue/notes` projects/issues/notes/create.rs
-  * `PUT    /projects/:project/issues/:issue/notes/:note` projects/issues/notes/edit.rs
-  * `GET    /projects/:project/issues/:issue/resource_label_events` projects/issues/resource_label_events.rs
+  * `GET    /projects/:project/issues/:issue/notes` `projects/issues/notes/notes.rs`
+  * `POST   /projects/:project/issues/:issue/notes` `projects/issues/notes/create.rs`
+  * `PUT    /projects/:project/issues/:issue/notes/:note` `projects/issues/notes/edit.rs`
+  * `GET    /projects/:project/issues/:issue/resource_label_events` `projects/issues/resource_label_events.rs`
   * `GET    /projects/:project/jobs` `projects/jobs/jobs.rs`
   * `GET    /projects/:project/jobs/:id` `projects/jobs/job.rs`
   * `POST   /projects/:project/jobs/:id/cancel` `projects/jobs/cancel.rs`
@@ -48,21 +48,21 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/members/all/:id` `projects/members/member.rs`
   * `POST   /projects/:project/members` `projects/members/add.rs`
   * `GET    /projects/:project/members/:id` `projects/members/member.rs`
-  * `GET    /projects/:project/merge_requests` projects/merge_requests/merge_requests.rs
-  * `POST   /projects/:project/merge_requests` projects/merge_requests/create.rs
-  * `GET    /projects/:project/merge_requests/:merge_request` projects/merge_requests/merge_request.rs
-  * `PUT    /projects/:project/merge_requests/:merge_request` projects/merge_requests/edit.rs
-  * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` projects/merge_requests/awards/awards.rs
-  * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` projects/merge_requests/issues_closed_by.rs
-  * `GET    /projects/:project/merge_requests/:merge_request/discussions` projects/merge_requests/discussions/discussions.rs
-  * `POST   /projects/:project/merge_requests/:merge_request/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-merge-request-thread
-  * `GET    /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/notes.rs
-  * `POST   /projects/:project/merge_requests/:merge_request/notes` projects/merge_requests/notes/create.rs
-  * `PUT    /projects/:project/merge_requests/:merge_request/notes/:note` projects/merge_requests/notes/edit.rs
-  * `GET    /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` projects/merge_requests/notes/awards/awards.rs
-  * `POST   /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` projects/merge_requests/notes/awards/create.rs
-  * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` projects/merge_requests/resource_label_events.rs
-  * `POST   /projects/:project/milestones` projects/milestones/create.rs
+  * `GET    /projects/:project/merge_requests` `projects/merge_requests/merge_requests.rs`
+  * `POST   /projects/:project/merge_requests` `projects/merge_requests/create.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/merge_request.rs`
+  * `PUT    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/edit.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` `projects/merge_requests/awards/awards.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` `projects/merge_requests/issues_closed_by.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/discussions` `projects/merge_requests/discussions/discussions.rs`
+  * `POST   /projects/:project/merge_requests/:merge_request/discussions` `projects/merge_requests/discussions/create.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/notes` `projects/merge_requests/notes/notes.rs`
+  * `POST   /projects/:project/merge_requests/:merge_request/notes` `projects/merge_requests/notes/create.rs`
+  * `PUT    /projects/:project/merge_requests/:merge_request/notes/:note` `projects/merge_requests/notes/edit.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` `projects/merge_requests/notes/awards/awards.rs`
+  * `POST   /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` `projects/merge_requests/notes/awards/create.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` `projects/merge_requests/resource_label_events.rs`
+  * `POST   /projects/:project/milestones` `projects/milestones/create.rs`
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
   * `GET    /projects/:project/pipelines/:pipeline` `projects/pipelines/pipeline.rs`
