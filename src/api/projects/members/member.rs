@@ -17,12 +17,24 @@ pub struct ProjectMember<'a> {
     project: NameOrId<'a>,
     /// The ID of the user.
     user: u64,
+    // Whether to include ancestor users from enclosing Groups in the queried list of members.
+    #[builder(private)]
+    _include_ancestors: bool,
 }
 
 impl<'a> ProjectMember<'a> {
     /// Create a builder for the endpoint.
     pub fn builder() -> ProjectMemberBuilder<'a> {
-        ProjectMemberBuilder::default()
+        let mut builder = ProjectMemberBuilder::default();
+        builder._include_ancestors(false);
+        builder
+    }
+
+    /// Create an ancester-including builder for the endpoint.
+    pub fn all_builder() -> ProjectMemberBuilder<'a> {
+        let mut builder = ProjectMemberBuilder::default();
+        builder._include_ancestors = Some(true);
+        builder
     }
 }
 
@@ -32,7 +44,11 @@ impl<'a> Endpoint for ProjectMember<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/members/{}", self.project, self.user).into()
+        if self._include_ancestors {
+            format!("projects/{}/members/all/{}", self.project, self.user).into()
+        } else {
+            format!("projects/{}/members/{}", self.project, self.user).into()
+        }
     }
 }
 
@@ -46,11 +62,17 @@ mod tests {
     fn project_and_user_are_needed() {
         let err = ProjectMember::builder().build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
+
+        let err = ProjectMember::all_builder().build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
     fn project_is_needed() {
         let err = ProjectMember::builder().user(1).build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
+
+        let err = ProjectMember::all_builder().user(1).build().unwrap_err();
         assert_eq!(err, "`project` must be initialized");
     }
 
@@ -58,11 +80,19 @@ mod tests {
     fn user_is_needed() {
         let err = ProjectMember::builder().project(1).build().unwrap_err();
         assert_eq!(err, "`user` must be initialized");
+
+        let err = ProjectMember::all_builder().project(1).build().unwrap_err();
+        assert_eq!(err, "`user` must be initialized");
     }
 
     #[test]
     fn project_and_user_are_sufficient() {
         ProjectMember::builder().project(1).user(1).build().unwrap();
+        ProjectMember::all_builder()
+            .project(1)
+            .user(1)
+            .build()
+            .unwrap();
     }
 
     #[test]
@@ -74,6 +104,22 @@ mod tests {
         let client = SingleTestClient::new_raw(endpoint, "");
 
         let endpoint = ProjectMember::builder()
+            .project("simple/project")
+            .user(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_all() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members/all/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMember::all_builder()
             .project("simple/project")
             .user(1)
             .build()

@@ -44,6 +44,8 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/labels` `projects/labels/create.rs`
   * `GET    /projects/:project/labels/:label` `projects/labels/labels.rs`
   * `GET    /projects/:project/members` `projects/members/members.rs`
+  * `GET    /projects/:project/members/all` `projects/members/members.rs`
+  * `GET    /projects/:project/members/all/:id` `projects/members/member.rs`
   * `POST   /projects/:project/members` `projects/members/add.rs`
   * `GET    /projects/:project/members/:id` `projects/members/member.rs`
   * `GET    /projects/:project/merge_requests` projects/merge_requests/merge_requests.rs
@@ -206,8 +208,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/labels/:label/subscribe` https://gitlab.kitware.com/help/api/labels.md#subscribe-to-a-label
   * `POST   /projects/:project/labels/:label/unsubscribe` https://gitlab.kitware.com/help/api/labels.md#unsubscribe-from-a-label
   * `GET    /projects/:project/languages` https://gitlab.kitware.com/help/api/projects.md#languages
-  * `GET    /projects/:project/members/all` https://gitlab.kitware.com/help/api/members.md#list-all-members-of-a-group-or-project-including-inherited-members
-  * `GET    /projects/:project/members/all/:id` https://gitlab.kitware.com/help/api/members.md#get-a-member-of-a-group-or-project-including-inherited-members
   * `PUT    /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#edit-a-member-of-a-group-or-project
   * `DELETE /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
   * `DELETE /projects/:project/merge_requests/:merge_request` https://gitlab.kitware.com/help/api/merge_requests.md#delete-a-merge-request
