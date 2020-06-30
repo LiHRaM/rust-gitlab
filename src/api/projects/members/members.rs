@@ -129,6 +129,21 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_all() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members/all")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMembers::all_builder()
+            .project("simple/project")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_query() {
         let endpoint = ExpectedUrl::builder()
             .endpoint("projects/simple%2Fproject/members")

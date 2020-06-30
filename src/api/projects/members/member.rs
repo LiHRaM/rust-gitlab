@@ -110,4 +110,20 @@ mod tests {
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
     }
+
+    #[test]
+    fn endpoint_all() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/members/all/1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = ProjectMember::all_builder()
+            .project("simple/project")
+            .user(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
 }
