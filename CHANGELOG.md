@@ -1,4 +1,13 @@
-# v0.1301.0 (unreleased)
+# v0.1301.1 (unreleased)
+
+# Changes
+
+  * Updated `api::projects::members::ProjectMember[s]` to support the ability
+    to include member details for those members that have access as a result
+    of belonging to ancestor/enclosing groups, in addition to directly added
+    members.
+
+# v0.1301.0
 
 ## Deprecations
 
@@ -46,10 +55,6 @@
     This allows for clients to not be tied to `reqwest` and for mocking and
     testing of the endpoints themselves.
   * GitLab errors now detect error objects returned from the API.
-  * Updated `api::projects::members::ProjectMember[s]` to support the ability
-    to include member details for those members that have access as a result
-    of belonging to ancestor/enclosing groups, in addition to directly added
-    members.
 
 ## Fixes
 
