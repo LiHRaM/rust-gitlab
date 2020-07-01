@@ -54,6 +54,8 @@ impl<'a> Endpoint for Labels<'a> {
     }
 }
 
+impl<'a> Pageable for Labels<'a> {}
+
 #[cfg(test)]
 mod tests {
     use crate::api::projects::labels::Labels;
