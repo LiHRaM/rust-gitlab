@@ -7,6 +7,17 @@
     of belonging to ancestor/enclosing groups, in addition to directly added
     members.
 
+## Additions
+
+  * Added the `api::groups::projects::GroupProjects` endpoint to list a groups
+    projects.
+  * Added the `api::groups::subgroups::GroupSubgroups` endpoint to list a
+    groups subgroups.
+  * Added the `api::projects::protected_branches::ProtectedBranches` endpoint
+    to list a projects protected branches.
+  * Added the `api::projects::protected_branches::ProtectedBranch` endpoint
+    to query a projects protected branch.
+
 # v0.1301.0
 
 ## Deprecations

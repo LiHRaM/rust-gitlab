@@ -15,6 +15,8 @@ mod group;
 mod groups;
 pub mod members;
 pub mod milestones;
+pub mod projects;
+pub mod subgroups;
 
 pub use create::BranchProtection;
 pub use create::CreateGroup;

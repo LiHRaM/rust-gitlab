@@ -16,6 +16,8 @@ These API endpoints have been implemented.
   * `GET    /groups/:group/members/:id` `groups/members/member.rs`
   * `DELETE /groups/:group/members/:id` `groups/members/remove.rs`
   * `POST   /groups/:group/milestones` `groups/milestones/create.rs`
+  * `GET    /groups/:group/projects` `groups/projects/projects.rs`
+  * `GET    /groups/:group/subgroups` `groups/subgroups/subgroups.rs`
   * `GET    /projects` `projects/projects.rs`
   * `POST   /projects` `projects/projects/create.rs`
   * `GET    /projects/:project` `projects/projects/project.rs`
@@ -73,6 +75,8 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/pipelines/:pipeline/variables` `projects/pipelines/variables.rs`
   * `POST   /projects/:project/protected_branches` `projects/protected_branches/protect.rs`
   * `DELETE /projects/:project/protected_branches/*branch` `projects/protected_branches/unprotect.rs`
+  * `GET    /projects/:project/protected_branches` `projects/protected_branches/protected_branches.rs`
+  * `GET    /projects/:project/protected_branches/:branch` `projects/protected_branches/protected_branch.rs`
   * `GET    /projects/:project/repository/branches` `projects/repository/branches/branches.rs`
   * `POST   /projects/:project/repository/branches` `projects/repository/branches/create.rs`
   * `GET    /projects/:project/repository/branches/:branch` `projects/repository/branches/branch.rs`
@@ -139,10 +143,8 @@ instead of having to search the page for missing endpoints.
   * `GET    /groups/:group/milestones/:milestone/burndown_events` https://gitlab.kitware.com/help/api/group_milestones.md#get-all-burndown-chart-events-for-a-single-milestone-starter
   * `GET    /groups/:group/milestones/:milestone/issues` https://gitlab.kitware.com/help/api/group_milestones.md#get-all-issues-assigned-to-a-single-milestone
   * `GET    /groups/:group/milestones/:milestone/merge_requests` https://gitlab.kitware.com/help/api/group_milestones.md#get-all-merge-requests-assigned-to-a-single-milestone
-  * `GET    /groups/:group/projects` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-projects
   * `POST   /groups/:group/projects/:id` https://gitlab.kitware.com/help/api/groups.md#transfer-project-to-group
   * `POST   /groups/:group/restore` https://gitlab.kitware.com/help/api/groups.md#restore-group-marked-for-deletion-premium
-  * `GET    /groups/:group/subgroups` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-subgroups
   * `DELETE /projects/:project` https://gitlab.kitware.com/help/api/projects.md#remove-project
   * `POST   /projects/:project/archive` https://gitlab.kitware.com/help/api/projects.md#archive-a-project
   * `GET    /projects/:project/commits/:sha/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-project-commit-discussion-items
@@ -253,8 +255,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/milestones/:milestone/merge_requests` https://gitlab.kitware.com/help/api/milestones.md#get-all-merge-requests-assigned-to-a-single-milestone
   * `POST   /projects/:project/milestones/:milestone/promote` https://gitlab.kitware.com/help/api/milestones.md#promote-project-milestone-to-a-group-milestone
   * `POST   /projects/:project/mirror/pull` https://gitlab.kitware.com/help/api/projects.md#start-the-pull-mirroring-process-for-a-project-starter
-  * `GET    /projects/:project/protected_branches` https://gitlab.kitware.com/help/api/protected_branches.md#list-protected-branches
-  * `GET    /projects/:project/protected_branches/:branch` https://gitlab.kitware.com/help/api/protected_branches.md#get-a-single-protected-branch-or-wildcard-protected-branch
   * `PATCH  /projects/:project/protected_branches/:branch` https://gitlab.kitware.com/help/api/protected_branches.md#require-code-owner-approvals-for-a-single-branch
   * `POST   /projects/:project/pipeline` https://gitlab.kitware.com/help/api/pipelines.md#create-a-new-pipeline
   * `GET    /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#get-project-push-rules
