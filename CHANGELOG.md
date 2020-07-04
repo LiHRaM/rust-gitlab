@@ -7,6 +7,8 @@
     `api::projects::protected_tags::ProtectedTag`
     `api::projects::protected_tags::ProtectedTags` endpoint to query, protect
     and unprotect a projects tags.
+  * Added the `api::projects::labels::DeleteLabel` endpoint to delete existing
+    labels from a project.
 
 # v0.1301.1
 
