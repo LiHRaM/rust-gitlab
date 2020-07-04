@@ -12,6 +12,7 @@ mod create;
 mod delete;
 mod label;
 mod labels;
+mod promote;
 
 pub use self::create::CreateLabel;
 pub use self::create::CreateLabelBuilder;
@@ -24,3 +25,6 @@ pub use self::labels::LabelsBuilder;
 
 pub use self::delete::DeleteLabel;
 pub use self::delete::DeleteLabelBuilder;
+
+pub use self::promote::PromoteLabel;
+pub use self::promote::PromoteLabelBuilder;

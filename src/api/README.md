@@ -46,6 +46,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/labels` `projects/labels/create.rs`
   * `GET    /projects/:project/labels/:label` `projects/labels/labels.rs`
   * `DELETE /projects/:project/labels/:label` `projects/labels/delete.rs`
+  * `PUT    /projects/:project/labels/:label/promote` `projects/labels/promote.rs`
   * `GET    /projects/:project/members` `projects/members/members.rs`
   * `GET    /projects/:project/members/all` `projects/members/members.rs`
   * `GET    /projects/:project/members/all/:id` `projects/members/member.rs`
@@ -210,7 +211,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/jobs/:id/artifacts/keep` https://gitlab.kitware.com/help/api/jobs.md#keep-artifacts
   * `GET    /projects/:project/jobs/:id/artifacts/*artifact_path` https://gitlab.kitware.com/help/api/jobs.md#download-a-single-artifact-file-by-job-id
   * `PUT    /projects/:project/labels/:label` https://gitlab.kitware.com/help/api/labels.md#edit-an-existing-label
-  * `PUT    /projects/:project/labels/:label/promote` https://gitlab.kitware.com/help/api/labels.md#promote-a-project-label-to-a-group-label
   * `POST   /projects/:project/labels/:label/subscribe` https://gitlab.kitware.com/help/api/labels.md#subscribe-to-a-label
   * `POST   /projects/:project/labels/:label/unsubscribe` https://gitlab.kitware.com/help/api/labels.md#unsubscribe-from-a-label
   * `GET    /projects/:project/languages` https://gitlab.kitware.com/help/api/projects.md#languages

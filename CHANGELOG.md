@@ -9,6 +9,8 @@
     and unprotect a projects tags.
   * Added the `api::projects::labels::DeleteLabel` endpoint to delete existing
     labels from a project.
+  * Added the `api::projects::labels::PromoteLabel` endpoint to promote a project
+    label to a group label.
 
 # v0.1301.1
 
