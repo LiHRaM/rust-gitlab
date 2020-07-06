@@ -6,6 +6,8 @@
     to include member details for those members that have access as a result
     of belonging to ancestor/enclosing groups, in addition to directly added
     members.
+  * Allow a label via the `api::projects::labels::Label` endpoint to be queried
+    by id or name.
 
 ## Additions
 

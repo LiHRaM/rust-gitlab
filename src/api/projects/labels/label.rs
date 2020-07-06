@@ -16,8 +16,9 @@ pub struct Label<'a> {
     /// The project to query for the label.
     #[builder(setter(into))]
     project: NameOrId<'a>,
-    /// The ID of the label.
-    label: u64,
+    /// The ID or title of the label.
+    #[builder(setter(into))]
+    label: NameOrId<'a>,
 
     /// Include ancestor groups.
     ///
@@ -81,6 +82,20 @@ mod tests {
     }
 
     #[test]
+    fn label_by_id() {
+        Label::builder().project(1).label(1).build().unwrap();
+    }
+
+    #[test]
+    fn label_by_name() {
+        Label::builder()
+            .project(1)
+            .label("label_name")
+            .build()
+            .unwrap();
+    }
+
+    #[test]
     fn endpoint() {
         let endpoint = ExpectedUrl::builder()
             .endpoint("projects/simple%2Fproject/labels/1")
@@ -109,6 +124,22 @@ mod tests {
             .project("simple/project")
             .label(1)
             .include_ancestor_groups(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_escapes_label_name() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/labels/simple%2Flabel")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Label::builder()
+            .project("simple/project")
+            .label("simple/label")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
