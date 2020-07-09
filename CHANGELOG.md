@@ -23,6 +23,8 @@
 ## Fixes
 
   * Added pagination support to `api::projects::labels::Labels`
+  * Keyset pagination also supports the to-be-removed (14.0) `Links` HTTP
+    header.
 
 # v0.1301.0
 

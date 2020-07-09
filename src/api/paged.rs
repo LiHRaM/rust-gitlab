@@ -269,9 +269,12 @@ where
 }
 
 fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, PaginationError> {
-    headers
-        .get_all(reqwest::header::LINK)
-        .iter()
+    let link_headers = headers.get_all(reqwest::header::LINK).iter();
+    // GitLab 14.0 will deprecate this header in preference for the W3C spec's `Link` header. Make
+    // it less preferred to it in anticipation for this change.
+    let links_headers = headers.get_all("Links").iter();
+    link_headers
+        .chain(links_headers)
         .map(|link| {
             let value = link
                 .to_str()
