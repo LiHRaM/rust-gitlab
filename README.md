@@ -82,7 +82,7 @@ coverage. It is recommended to depend on the full version of the crate since
 types may change in patch-level updates in order to match Gitlab's interface:
 
 ```toml
-gitlab = "=0.1301.0"
+gitlab = "=0.1301.1"
 ```
 
 # API bugs
