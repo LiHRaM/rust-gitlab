@@ -38,7 +38,7 @@ impl<'a> ProjectMembers<'a> {
         builder
     }
 
-    /// Create a builder for the endpoint.
+    /// Create a builder for the endpoint that includes ancestor groups.
     pub fn all_builder() -> ProjectMembersBuilder<'a> {
         let mut builder = ProjectMembersBuilder::default();
         builder._include_ancestors(true);

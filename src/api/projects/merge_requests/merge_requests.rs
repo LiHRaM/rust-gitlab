@@ -44,7 +44,7 @@ impl ParamValue<'static> for MergeRequestState {
     }
 }
 
-/// Parameters for a merge reques view.
+/// Parameters for a merge request view.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeRequestView {
     /// Return just the IID, URL, title, description, and basic state information.
@@ -249,13 +249,13 @@ pub struct MergeRequests<'a> {
     /// Filter merge requests by the API caller's reactions.
     #[builder(setter(name = "_my_reaction_emoji"), default, private)]
     my_reaction_emoji: Option<ReactionEmoji<'a>>,
-    /// Filter merge requests with a search query.
+    /// Filter merge requests by source branch.
     #[builder(setter(into), default)]
     source_branch: Option<Cow<'a, str>>,
-    /// Filter merge requests with a search query.
+    /// Filter merge requests by target branch.
     #[builder(setter(into), default)]
     target_branch: Option<Cow<'a, str>>,
-    /// Filter merge requests with a search query.
+    /// Filter merge requests by WIP state
     #[builder(setter(into), default)]
     wip: Option<YesNo>,
 
@@ -380,19 +380,19 @@ impl<'a> MergeRequestsBuilder<'a> {
         self
     }
 
-    /// Filter unassigned merge requests.
+    /// Filter merge requests which have no approvers.
     pub fn no_approvers(&mut self) -> &mut Self {
         self.approver_ids = Some(Some(ApproverIds::None));
         self
     }
 
-    /// Filter assigned merge requests.
+    /// Filter merge requests which have any approver(s).
     pub fn any_approvers(&mut self) -> &mut Self {
         self.approver_ids = Some(Some(ApproverIds::Any));
         self
     }
 
-    /// Filter merge requests assigned to a user (by ID).
+    /// Filter merge requests with a specified approver (by ID).
     pub fn approver_id(&mut self, approver: u64) -> &mut Self {
         let approver_ids = if let Some(Some(ApproverIds::AllOf(mut set))) = self.approver_ids.take()
         {
@@ -405,7 +405,7 @@ impl<'a> MergeRequestsBuilder<'a> {
         self
     }
 
-    /// Filter merge requests assigned to a user (by ID).
+    /// Filter merge requests with specified approver (by ID).
     pub fn approver_ids<I>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = u64>,
@@ -421,19 +421,19 @@ impl<'a> MergeRequestsBuilder<'a> {
         self
     }
 
-    /// Filter unassigned merge requests.
+    /// Filter merge requests without approvals.
     pub fn no_approvals(&mut self) -> &mut Self {
         self.approved_by_ids = Some(Some(ApprovedByIds::None));
         self
     }
 
-    /// Filter assigned merge requests.
+    /// Filter merge requests with any approvals.
     pub fn any_approvals(&mut self) -> &mut Self {
         self.approved_by_ids = Some(Some(ApprovedByIds::Any));
         self
     }
 
-    /// Filter merge requests assigned to a user (by ID).
+    /// Filter merge requests approved by a specific user (by ID).
     pub fn approved_by_id(&mut self, approved_by: u64) -> &mut Self {
         let approved_by_ids =
             if let Some(Some(ApprovedByIds::AllOf(mut set))) = self.approved_by_ids.take() {
@@ -446,7 +446,7 @@ impl<'a> MergeRequestsBuilder<'a> {
         self
     }
 
-    /// Filter merge requests assigned to a user (by ID).
+    /// Filter merge requests approved by a specific set of users (by ID).
     pub fn approved_by_ids<I>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = u64>,

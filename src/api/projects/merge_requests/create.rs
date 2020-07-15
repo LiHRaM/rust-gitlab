@@ -115,7 +115,7 @@ impl<'a> CreateMergeRequestBuilder<'a> {
         self
     }
 
-    /// Filter merge requests assigned to a user (by ID).
+    /// Filter merge requests assigned to a users (by ID).
     pub fn assignees<I>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = u64>,
