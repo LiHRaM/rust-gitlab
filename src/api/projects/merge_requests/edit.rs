@@ -112,13 +112,13 @@ impl<'a> EditMergeRequest<'a> {
 }
 
 impl<'a> EditMergeRequestBuilder<'a> {
-    /// Filter unassigned merge requests.
+    /// Unset assignee(s) of merge request
     pub fn unassigned(&mut self) -> &mut Self {
         self.assignee = Some(Some(Assignee::Unassigned));
         self
     }
 
-    /// Filter merge requests assigned to a user (by ID).
+    /// Assign merge request to a user (by ID).
     pub fn assignee(&mut self, assignee: u64) -> &mut Self {
         let assignee = match self.assignee.take() {
             Some(Some(Assignee::Ids(mut set))) => {
@@ -135,7 +135,7 @@ impl<'a> EditMergeRequestBuilder<'a> {
         self
     }
 
-    /// Filter merge requests assigned to a user (by ID).
+    /// Assign merge request to users (by ID).
     pub fn assignees<I>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = u64>,
@@ -161,7 +161,7 @@ impl<'a> EditMergeRequestBuilder<'a> {
         self
     }
 
-    /// Add a label.
+    /// Add a label
     pub fn label<L>(&mut self, label: L) -> &mut Self
     where
         L: Into<Cow<'a, str>>,
@@ -179,7 +179,7 @@ impl<'a> EditMergeRequestBuilder<'a> {
         self
     }
 
-    /// Add multiple labels.
+    /// Add multiple labels
     pub fn labels<I, L>(&mut self, iter: I) -> &mut Self
     where
         I: Iterator<Item = L>,
