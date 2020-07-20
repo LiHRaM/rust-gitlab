@@ -360,8 +360,7 @@ impl<'de> Deserialize<'de> for SystemHook {
         let val = <Value as Deserialize>::deserialize(deserializer)?;
 
         let event_name = match val.pointer("/event_name") {
-            // XXX(1.36.0): NLL makes this clone unnecessary.
-            Some(&Value::String(ref name)) => name.clone(),
+            Some(&Value::String(ref name)) => name,
             Some(_) => {
                 return Err(D::Error::invalid_type(
                     Unexpected::Other("JSON value"),
