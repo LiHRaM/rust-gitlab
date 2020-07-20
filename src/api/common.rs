@@ -289,10 +289,11 @@ impl ParamValue<'static> for ProtectedAccessLevel {
 
 #[cfg(test)]
 mod tests {
+    use std::cmp;
+
     use crate::api::common::{
         AccessLevel, EnableState, NameOrId, ProtectedAccessLevel, SortOrder, VisibilityLevel, YesNo,
     };
-    use std::cmp;
 
     #[test]
     fn access_level_as_str() {
