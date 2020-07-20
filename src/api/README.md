@@ -47,6 +47,8 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/labels/:label` `projects/labels/labels.rs`
   * `DELETE /projects/:project/labels/:label` `projects/labels/delete.rs`
   * `PUT    /projects/:project/labels/:label/promote` `projects/labels/promote.rs`
+    Arguably, this should be `POST /projects/:project/labels/:label/promote`.
+    https://gitlab.com/gitlab-org/gitlab/-/issues/219324#note_382305638
   * `GET    /projects/:project/members` `projects/members/members.rs`
   * `GET    /projects/:project/members/all` `projects/members/members.rs`
   * `GET    /projects/:project/members/all/:id` `projects/members/member.rs`
