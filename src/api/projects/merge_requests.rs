@@ -8,6 +8,7 @@
 //!
 //! These endpoints are used for querying projects merge requests.
 
+mod approve;
 pub mod awards;
 mod create;
 pub mod discussions;
@@ -38,6 +39,9 @@ pub use self::rebase::RebaseMergeRequestBuilder;
 
 pub use self::merge::MergeMergeRequest;
 pub use self::merge::MergeMergeRequestBuilder;
+
+pub use self::approve::ApproveMergeRequest;
+pub use self::approve::ApproveMergeRequestBuilder;
 
 pub use self::merge_requests::MergeRequestOrderBy;
 pub use self::merge_requests::MergeRequestScope;

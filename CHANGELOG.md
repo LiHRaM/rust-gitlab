@@ -15,6 +15,8 @@
     merge open merge requests.
   * Added the `api::projects:merge_requests::RebaseMergeRequest` endpoint to
     rebase open merge requests when using the fast-forward merge model.
+  * Added the `api::projects:merge_requests::ApproveMergeRequest` endpoint to
+    approve open merge requests.
 
 # v0.1301.1
 
