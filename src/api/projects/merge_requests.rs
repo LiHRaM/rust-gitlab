@@ -20,6 +20,7 @@ mod merge_requests;
 pub mod notes;
 mod rebase;
 mod resource_label_events;
+mod unapprove;
 
 pub use self::create::CreateMergeRequest;
 pub use self::create::CreateMergeRequestBuilder;
@@ -42,6 +43,8 @@ pub use self::merge::MergeMergeRequestBuilder;
 
 pub use self::approve::ApproveMergeRequest;
 pub use self::approve::ApproveMergeRequestBuilder;
+pub use self::unapprove::UnapproveMergeRequest;
+pub use self::unapprove::UnapproveMergeRequestBuilder;
 
 pub use self::merge_requests::MergeRequestOrderBy;
 pub use self::merge_requests::MergeRequestScope;

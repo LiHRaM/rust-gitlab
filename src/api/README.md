@@ -61,6 +61,7 @@ These API endpoints have been implemented.
   * `PUT    /projects/:project/merge_requests/:merge_request/merge` `projects/merge_requests/merge.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request/rebase` `projects/merge_requests/rebase.rs`
   * `POST   /projects/:project/merge_requests/:merge_request/approve` `projects/merge_requests/approve.rs`
+  * `POST   /projects/:project/merge_requests/:merge_request/unapprove` `projects/merge_requests/unapprove.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` `projects/merge_requests/awards/awards.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` `projects/merge_requests/issues_closed_by.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/discussions` `projects/merge_requests/discussions/discussions.rs`

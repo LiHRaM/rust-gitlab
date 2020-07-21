@@ -17,6 +17,8 @@
     rebase open merge requests when using the fast-forward merge model.
   * Added the `api::projects:merge_requests::ApproveMergeRequest` endpoint to
     approve open merge requests.
+  * Added the `api::projects:merge_requests::UnapproveMergeRequest` endpoint to
+    unapprove approved merge requests.
 
 # v0.1301.1
 
