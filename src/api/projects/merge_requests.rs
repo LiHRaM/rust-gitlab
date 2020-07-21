@@ -13,6 +13,7 @@ mod create;
 pub mod discussions;
 mod edit;
 mod issues_closed_by;
+mod merge;
 mod merge_request;
 mod merge_requests;
 pub mod notes;
@@ -30,6 +31,9 @@ pub use self::issues_closed_by::IssuesClosedByBuilder;
 
 pub use self::merge_request::MergeRequest;
 pub use self::merge_request::MergeRequestBuilder;
+
+pub use self::merge::MergeMergeRequest;
+pub use self::merge::MergeMergeRequestBuilder;
 
 pub use self::merge_requests::MergeRequestOrderBy;
 pub use self::merge_requests::MergeRequestScope;

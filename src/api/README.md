@@ -58,6 +58,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/merge_requests` `projects/merge_requests/create.rs`
   * `GET    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/merge_request.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/edit.rs`
+  * `PUT    /projects/:project/merge_requests/:merge_request/merge` `projects/merge_requests/merge.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` `projects/merge_requests/awards/awards.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` `projects/merge_requests/issues_closed_by.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/discussions` `projects/merge_requests/discussions/discussions.rs`
@@ -223,7 +224,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/merge_requests/:merge_request/cancel_merge_when_pipeline_succeeds` https://gitlab.kitware.com/help/api/merge_requests.md#cancel-merge-when-pipeline-succeeds
   * `GET    /projects/:project/merge_requests/:merge_request/changes` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-changes
   * `GET    /projects/:project/merge_requests/:merge_request/commits` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-commits
-  * `POST   /projects/:project/merge_requests/:merge_request/merge` https://gitlab.kitware.com/help/api/merge_requests.md#accept-mr
   * `GET    /projects/:project/merge_requests/:merge_request/merge_ref` https://gitlab.kitware.com/help/api/merge_requests.md#merge-to-default-merge-ref-path
   * `GET    /projects/:project/merge_requests/:merge_request/participants` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-participants
   * `GET    /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#list-mr-pipelines

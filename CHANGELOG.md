@@ -11,6 +11,8 @@
     labels from a project.
   * Added the `api::projects::labels::PromoteLabel` endpoint to promote a project
     label to a group label.
+  * Added the `api::projects:merge_requests::MergeMergeRequest` endpoint to
+    merge open merge requests
 
 # v0.1301.1
 
