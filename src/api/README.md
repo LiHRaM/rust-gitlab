@@ -59,6 +59,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/merge_request.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/edit.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request/merge` `projects/merge_requests/merge.rs`
+  * `PUT    /projects/:project/merge_requests/:merge_request/rebase` `projects/merge_requests/rebase.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` `projects/merge_requests/awards/awards.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` `projects/merge_requests/issues_closed_by.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/discussions` `projects/merge_requests/discussions/discussions.rs`
@@ -228,7 +229,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/merge_requests/:merge_request/participants` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-participants
   * `GET    /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#list-mr-pipelines
   * `POST   /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#create-mr-pipeline
-  * `PUT    /projects/:project/merge_requests/:merge_request/rebase` https://gitlab.kitware.com/help/api/merge_requests.md#rebase-a-merge-request
     This should be a `POST` action.
     https://gitlab.com/gitlab-org/gitlab/-/issues/219324
   * `POST   /projects/:project/merge_requests/:merge_request/reset_spent_time` https://gitlab.kitware.com/help/api/merge_requests.md#reset-spent-time-for-a-merge-request

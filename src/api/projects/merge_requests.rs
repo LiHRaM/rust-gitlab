@@ -17,6 +17,7 @@ mod merge;
 mod merge_request;
 mod merge_requests;
 pub mod notes;
+mod rebase;
 mod resource_label_events;
 
 pub use self::create::CreateMergeRequest;
@@ -31,6 +32,9 @@ pub use self::issues_closed_by::IssuesClosedByBuilder;
 
 pub use self::merge_request::MergeRequest;
 pub use self::merge_request::MergeRequestBuilder;
+
+pub use self::rebase::RebaseMergeRequest;
+pub use self::rebase::RebaseMergeRequestBuilder;
 
 pub use self::merge::MergeMergeRequest;
 pub use self::merge::MergeMergeRequestBuilder;
