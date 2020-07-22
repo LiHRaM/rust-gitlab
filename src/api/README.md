@@ -58,7 +58,11 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/merge_requests` `projects/merge_requests/create.rs`
   * `GET    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/merge_request.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/edit.rs`
+    This should be a `POST` action.
+    https://gitlab.com/gitlab-org/gitlab/-/issues/219324
   * `PUT    /projects/:project/merge_requests/:merge_request/merge` `projects/merge_requests/merge.rs`
+    This should be a `POST` action.
+    https://gitlab.com/gitlab-org/gitlab/-/issues/219324
   * `PUT    /projects/:project/merge_requests/:merge_request/rebase` `projects/merge_requests/rebase.rs`
   * `POST   /projects/:project/merge_requests/:merge_request/approve` `projects/merge_requests/approve.rs`
   * `POST   /projects/:project/merge_requests/:merge_request/unapprove` `projects/merge_requests/unapprove.rs`
