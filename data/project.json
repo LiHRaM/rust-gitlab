@@ -76,6 +76,8 @@
   "repository_storage": "default",
   "request_access_enabled": false,
   "resolve_outdated_diff_discussions": null,
+  "service_desk_address": "gitlab-incoming+utils-rust-gitlab-855-issue-@kitware.com",
+  "service_desk_enabled": true,
   "shared_runners_enabled": true,
   "shared_with_groups": [],
   "snippets_access_level": "disabled",
