@@ -288,6 +288,12 @@ pub enum MergeRequestAction {
     /// The merge request was reopened.
     #[serde(rename = "reopen")]
     Reopen,
+    /// The merge request was approved.
+    #[serde(rename = "approved")]
+    Approved,
+    /// A merge request approval was revoked.
+    #[serde(rename = "unapproved")]
+    Unapproved,
     /// The merge request was merged.
     #[serde(rename = "merge")]
     Merge,

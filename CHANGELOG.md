@@ -1,3 +1,10 @@
+# v0.1302.1 (unreleased)
+
+## Fixes
+
+  * GitLab 13.2 added the `approved` and `unapproved` merge request actions for
+    CE.
+
 # v0.1302.0
 
 ## Additions
