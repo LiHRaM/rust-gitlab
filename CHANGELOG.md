@@ -1,8 +1,9 @@
-# v0.1302.1 (unreleased)
+# v0.1302.1
 
 ## Additions
 
-- Added `api::projects::issues::MergeRequestsClosing` and `api::projects::issues::MergeRequestsClosing`
+- Added `api::projects::issues::MergeRequestsClosing` and
+  `api::projects::issues::MergeRequestsClosing`
 
 ## Fixes
 
