@@ -31,6 +31,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/issues` `projects/issues/create.rs`
   * `GET    /projects/:project/issues/:issue` `projects/issues/issue.rs`
   * `PUT    /projects/:project/issues/:issue` `projects/issues/edit.rs`
+  * `GET    /projects/:project/issues/:issue/closed_by` `projects/issues/merge_requests_closing.rs`
   * `GET    /projects/:project/issues/:issue/notes` `projects/issues/notes/notes.rs`
   * `POST   /projects/:project/issues/:issue/notes` `projects/issues/notes/create.rs`
   * `PUT    /projects/:project/issues/:issue/notes/:note` `projects/issues/notes/edit.rs`
@@ -189,7 +190,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/issues/:issue/award_emoji` https://gitlab.kitware.com/help/api/award_emoji.md#award-a-new-emoji
   * `GET    /projects/:project/issues/:issue/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#get-single-award-emoji
   * `DELETE /projects/:project/issues/:issue/award_emoji/:award` https://gitlab.kitware.com/help/api/award_emoji.md#delete-an-award-emoji
-  * `GET    /projects/:project/issues/:issue/closed_by` https://gitlab.kitware.com/help/api/issues.md#list-merge-requests-that-will-close-issue-on-merge
   * `GET    /projects/:project/issues/:issue/discussions` https://gitlab.kitware.com/help/api/discussions.md#list-project-issue-discussion-items
   * `POST   /projects/:project/issues/:issue/discussions` https://gitlab.kitware.com/help/api/discussions.md#create-new-issue-thread
   * `GET    /projects/:project/issues/:issue/discussions/:discussion` https://gitlab.kitware.com/help/api/discussions.md#get-single-issue-discussion-item

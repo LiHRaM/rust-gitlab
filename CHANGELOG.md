@@ -1,5 +1,9 @@
 # v0.1302.1 (unreleased)
 
+## Additions
+
+- Added `api::projects::issues::MergeRequestsClosing` and `api::projects::issues::MergeRequestsClosing`
+
 ## Fixes
 
   * GitLab 13.2 added the `approved` and `unapproved` merge request actions for

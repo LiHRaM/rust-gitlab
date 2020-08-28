@@ -12,6 +12,7 @@ mod create;
 mod edit;
 mod issue;
 mod issues;
+mod merge_requests_closing;
 pub mod notes;
 mod resource_label_events;
 
@@ -31,6 +32,9 @@ pub use self::issues::IssueState;
 pub use self::issues::IssueWeight;
 pub use self::issues::Issues;
 pub use self::issues::IssuesBuilder;
+
+pub use self::merge_requests_closing::MergeRequestsClosing;
+pub use self::merge_requests_closing::MergeRequestsClosingBuilder;
 
 pub use self::resource_label_events::IssueResourceLabelEvents;
 pub use self::resource_label_events::IssueResourceLabelEventsBuilder;
