@@ -102,6 +102,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/repository/commits/:sha/comments` `projects/repository/commits/comment.rs`
   * `GET    /projects/:project/repository/commits/:sha/statuses` `projects/repository/commits/statuses.rs`
   * `POST   /projects/:project/repository/files/*file_path` `projects/repository/files/create.rs`
+  * `GET    /projects/:project/repository/files/*file_path/raw` `projects/repository/files/file_raw.rs`
   * `GET    /projects/:project/statuses/:sha` `projects/repository/commits/create_status.rs`
     Arguably, this should be `POST /projects/:project/repository/commits/:sha/statuses`.
     https://gitlab.com/gitlab-org/gitlab/-/issues/217412
@@ -285,7 +286,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
   * `HEAD   /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
   * `GET    /projects/:project/repository/files/*file_path/blame` https://gitlab.kitware.com/help/api/repository_files.md#get-file-blame-from-repository
-  * `GET    /projects/:project/repository/files/*file_path/raw` https://gitlab.kitware.com/help/api/repository_files.md#get-raw-file-from-repository
   * `PUT    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#update-existing-file-in-repository
   * `DELETE /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#delete-existing-file-in-repository
   * `DELETE /projects/:project/repository/merged_branches` https://gitlab.kitware.com/help/api/branches.md#delete-merged-branches
