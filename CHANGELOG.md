@@ -1,3 +1,9 @@
+# v0.1302.2 (unreleased)
+
+## Additions
+
+- `Id` types now implement `Hash`
+
 # v0.1302.1
 
 ## Additions
