@@ -1,3 +1,10 @@
+# v0.1310.1 (unreleased)
+
+## Additions
+
+  * Added the `api::projects::releases::ProjectReleases` endpoint to list all
+    releases for a project.
+
 # v0.1310.0
 
 ## Additions

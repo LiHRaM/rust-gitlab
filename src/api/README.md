@@ -100,6 +100,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/protected_tags/:name` `projects/protected_tags/protected_tag.rs`
   * `POST   /projects/:project/protected_tags` `projects/protected_tags/protect.rs`
   * `DELETE /projects/:project/protected_tags/:name` `projects/protected_tags/unprotect.rs`
+  * `GET    /projects/:project/releases` `projects/releases/releases.rs`
   * `GET    /projects/:project/repository/branches` `projects/repository/branches/branches.rs`
   * `POST   /projects/:project/repository/branches` `projects/repository/branches/create.rs`
   * `GET    /projects/:project/repository/branches/:branch` `projects/repository/branches/branch.rs`
@@ -304,6 +305,11 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#add-project-push-rule
   * `PUT    /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#edit-project-push-rule
   * `DELETE /projects/:project/push_rule` https://gitlab.kitware.com/help/api/projects.md#delete-project-push-rule
+  * `POST   /projects/:project/releases` https://gitlab.kitware.com/help/api/releases/index.md#create-a-release
+  * `GET    /projects/:project/releases/:tag_name` https://gitlab.kitware.com/help/api/releases/index.md#get-a-release-by-a-tag-name
+  * `PUT    /projects/:project/releases/:tag_name` https://gitlab.kitware.com/help/api/releases/index.md#update-a-release
+  * `DELETE /projects/:project/releases/:tag_name` https://gitlab.kitware.com/help/api/releases/index.md#delete-a-release
+  * `GET    /projects/:project/releases/:tag_name/evidence` https://gitlab.kitware.com/help/api/releases/index.md#collect-release-evidence
   * `DELETE /projects/:project/repository/branches/:branch` https://gitlab.kitware.com/help/api/branches.md#delete-repository-branch
   * `GET    /projects/:project/repository/commits` https://gitlab.kitware.com/help/api/commits.md#list-repository-commits
   * `POST   /projects/:project/repository/commits` https://gitlab.kitware.com/help/api/commits.md#create-a-commit-with-multiple-files-and-actions
@@ -474,7 +480,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/project_templates.md
   * https://gitlab.kitware.com/help/api/project_vulnerabilities.md
   * https://gitlab.kitware.com/help/api/protected_environments.md
-  * https://gitlab.kitware.com/help/api/releases/index.md
   * https://gitlab.kitware.com/help/api/releases/links.md
   * https://gitlab.kitware.com/help/api/remote_mirrors.md
   * https://gitlab.kitware.com/help/api/repositories.md
