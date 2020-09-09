@@ -8,6 +8,8 @@ use chrono::{TimeZone, Utc};
 use serde_json::from_str;
 
 use crate::webhooks::*;
+use std::fs::File;
+use std::io::BufReader;
 
 #[test]
 fn test_hookdate_deserialize() {
@@ -25,5 +27,18 @@ fn test_hookdate_deserialize() {
     assert_eq!(
         *hook.as_ref(),
         Utc.ymd(2019, 3, 1).and_hms_milli(22, 50, 2, 36),
+    );
+}
+
+#[test]
+fn test_pipeline_hook() {
+    let file = File::open("src/test/examples/pipeline.json").unwrap();
+    let reader = BufReader::new(file);
+    let pipeline: PipelineHook = serde_json::from_reader(reader).unwrap();
+    assert_eq!(pipeline.object_kind, "pipeline");
+    assert_eq!(pipeline.user.username, "mr.example");
+    assert_eq!(
+        pipeline.object_attributes.before_sha,
+        "0000000000000000000000000000000000000000"
     );
 }

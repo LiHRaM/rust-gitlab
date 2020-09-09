@@ -19,8 +19,8 @@ use serde_json::{self, Value};
 
 use crate::types::{
     IssueId, IssueInternalId, IssueState, JobId, MergeRequestId, MergeRequestInternalId,
-    MergeRequestState, MergeStatus, MilestoneId, NoteId, NoteType, NoteableId, ObjectId, ProjectId,
-    SnippetId, UserId,
+    MergeRequestState, MergeStatus, MilestoneId, NoteId, NoteType, NoteableId, ObjectId,
+    PipelineId, ProjectId, RunnerId, SnippetId, StatusState, UserId,
 };
 
 /// A wrapper struct for dates in web hooks.
@@ -700,6 +700,114 @@ pub struct BuildHook {
     pub repository: BuildProjectHookAttrs,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PipelineVariable {
+    /// Environment variable key
+    pub key: String,
+    /// Environment variable value
+    pub value: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PipelineHookAttrs {
+    pub id: PipelineId,
+    /// The object ID that was tested.
+    pub sha: ObjectId,
+    #[serde(rename = "ref")]
+    /// The name of the reference that was tested.
+    pub ref_: Option<String>,
+    /// The status of the pipeline.
+    pub status: StatusState,
+    pub before_sha: String,
+    /// Was this pipeline triggered by a tag.
+    pub tag: bool,
+    /// When the pipeline was created.
+    pub created_at: HookDate,
+    /// When the pipeline completed.
+    pub finished_at: Option<HookDate>,
+    /// Duration of pipeline in seconds.
+    pub duration: Option<u64>,
+    /// What triggered the pipeline.
+    pub source: String,
+    /// The stages of the pipeline.
+    pub stages: Vec<String>,
+    /// Environment variables manually set by the user starting the pipeline.
+    pub variables: Vec<PipelineVariable>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PipelineBuildRunner {
+    /// The runner id.
+    pub id: RunnerId,
+    /// The runner description
+    pub description: String,
+    /// Whether the runner is active.
+    pub active: bool,
+    /// Whether the runner is shared.
+    pub is_shared: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PipelineMergeRequestAttrs {
+    pub id: MergeRequestId,
+    pub iid: MergeRequestInternalId,
+    /// The title of the merge request.
+    pub title: String,
+    /// The target branch of the merge request.
+    pub target_branch: String,
+    /// The ID of the target project.
+    pub target_project_id: ProjectId,
+    /// The source branch of the merge request.
+    pub source_branch: String,
+    /// The ID of the source project.
+    pub source_project_id: Option<ProjectId>,
+    pub state: MergeRequestState,
+    pub merge_status: MergeStatus,
+    pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PipelineProjectAttrs {
+    pub id: ProjectId,
+    /// The display name of the project.
+    pub name: String,
+    /// The description of the project.
+    pub description: Option<String>,
+    /// The URL for the project's homepage.
+    pub web_url: String,
+    /// The URL to the project avatar.
+    pub avatar_url: Option<String>,
+    /// The URL to clone the repository over SSH.
+    pub git_ssh_url: String,
+    /// The URL to clone the repository over HTTPS.
+    pub git_http_url: String,
+    /// The namespace the project lives in.
+    pub namespace: String,
+    /// Integral value for the project's visibility.
+    pub visibility_level: u64,
+    /// The path to the project's repository with its namespace.
+    pub path_with_namespace: String,
+    /// The default branch for the project.
+    pub default_branch: Option<String>,
+    pub ci_config_path: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PipelineHook {
+    /// The event which occured.
+    pub object_kind: String,
+    /// The pipeline.
+    pub object_attributes: PipelineHookAttrs,
+    /// The merge request this pipeline is running for.
+    pub merge_request: Option<PipelineMergeRequestAttrs>,
+    /// The user that started the the pipeline.
+    pub user: UserHookAttrs,
+    /// The project this pipeline is running in.
+    pub project: PipelineProjectAttrs,
+    /// The commit this pipeline is running for
+    pub commit: Option<CommitHookAttrs>,
+}
+
 /// A wiki page hook.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WikiPageHook {
@@ -728,6 +836,8 @@ pub enum WebHook {
     Note(Box<NoteHook>),
     /// A build hook.
     Build(Box<BuildHook>),
+    /// A pipeline hook.
+    Pipeline(Box<PipelineHook>),
     /// A wiki page hook.
     WikiPage(Box<WikiPageHook>),
 }
@@ -766,6 +876,8 @@ impl<'de> Deserialize<'de> for WebHook {
             "note" => serde_json::from_value(val).map(|hook| WebHook::Note(Box::new(hook))),
 
             "build" => serde_json::from_value(val).map(|hook| WebHook::Build(Box::new(hook))),
+
+            "pipeline" => serde_json::from_value(val).map(|hook| WebHook::Pipeline(Box::new(hook))),
 
             _ => {
                 return Err(D::Error::invalid_value(
