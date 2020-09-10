@@ -1,3 +1,9 @@
+# (unreleased) v0.1302.3
+
+## Additions
+
+- Added `gitlab::webhooks::PipelineHook`
+
 # v0.1302.2
 
 ## Additions
