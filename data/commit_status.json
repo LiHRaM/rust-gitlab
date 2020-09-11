@@ -9,9 +9,9 @@
     "web_url": "https://gitlab.kitware.com/buildbot"
   },
   "coverage": null,
-  "created_at": "2016-11-08T14:35:32.627Z",
+  "created_at": "2016-11-08T09:35:32.627-05:00",
   "description": "expected",
-  "finished_at": "2016-11-08T14:35:32.629Z",
+  "finished_at": "2016-11-08T09:35:32.629-05:00",
   "id": 931434,
   "name": "rust-gitlab-megas-linux-debug",
   "ref": "master",

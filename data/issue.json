@@ -34,7 +34,7 @@
   "closed_at": null,
   "closed_by": null,
   "confidential": false,
-  "created_at": "2016-10-30T18:54:28.954Z",
+  "created_at": "2016-10-30T14:54:28.954-04:00",
   "description": "",
   "discussion_locked": null,
   "downvotes": 0,
@@ -67,7 +67,7 @@
     "total_time_spent": 0
   },
   "title": "fix documentation warnings",
-  "updated_at": "2019-07-17T13:53:48.869Z",
+  "updated_at": "2019-07-17T09:53:48.869-04:00",
   "upvotes": 0,
   "user_notes_count": 0,
   "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/issues/6"
