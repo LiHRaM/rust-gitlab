@@ -487,7 +487,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.last_activity_at,
-        datetime((2020, 6, 23), (23, 19, 42, 70)),
+        datetime((2020, 9, 10), (13, 43, 17, 163)),
     );
 }
 
@@ -500,9 +500,9 @@ fn check_project_b(project: &Project) {
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
-    assert_eq!(project.star_count, 9);
-    assert_eq!(project.forks_count, 31);
-    assert_eq!(project.open_issues_count, Some(13));
+    assert_eq!(project.star_count, 11);
+    assert_eq!(project.forks_count, 36);
+    assert_eq!(project.open_issues_count, Some(14));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
@@ -730,11 +730,11 @@ fn test_read_user_public() {
     assert_eq!(user_public.organization, None);
     assert_eq!(
         user_public.last_sign_in_at.unwrap(),
-        datetime((2020, 6, 4), (23, 14, 45, 772)),
+        datetime((2020, 7, 30), (11, 45, 26, 637)),
     );
     assert_eq!(
         user_public.last_activity_on.unwrap(),
-        NaiveDate::from_ymd(2020, 6, 24),
+        NaiveDate::from_ymd(2020, 9, 11),
     );
     assert_eq!(
         user_public.confirmed_at.unwrap(),
@@ -746,7 +746,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(
         user_public.current_sign_in_at.unwrap(),
-        datetime((2020, 6, 19), (10, 41, 31, 756)),
+        datetime((2020, 8, 4), (17, 59, 22, 501)),
     );
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);
@@ -780,24 +780,24 @@ fn test_read_resource_label_events() {
 fn test_read_pipelines() {
     let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
 
-    assert_eq!(pipeline_basic.id, PipelineId::new(178_744));
+    assert_eq!(pipeline_basic.id, PipelineId::new(188_623));
     assert_eq!(pipeline_basic.status, StatusState::Success);
     assert_eq!(pipeline_basic.ref_.as_ref().unwrap(), "master");
     assert_eq!(
         pipeline_basic.sha,
-        ObjectId::new("c3d2fe98d7ac07566556e4b4fef515265e3b33d0"),
+        ObjectId::new("767ea705c57ab41b68fa8bf69bb2e48172d3d6b1"),
     );
     assert_eq!(
         pipeline_basic.created_at.unwrap(),
-        datetime((2020, 6, 24), (4, 19, 19, 291)),
+        datetime((2020, 9, 11), (4, 19, 13, 15)),
     );
     assert_eq!(
         pipeline_basic.updated_at.unwrap(),
-        datetime((2020, 6, 24), (4, 35, 13, 293)),
+        datetime((2020, 9, 11), (4, 30, 47, 674)),
     );
     assert_eq!(
         pipeline_basic.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/178744",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/188623",
     );
 }
 

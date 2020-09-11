@@ -16,7 +16,7 @@
         "body": "Basic content checks passed!\n\nBranch-at: 04e94ae667024a62a90179f395bfdc2b35f3efd2  \nAcked-by: @kwrobot",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2016-10-04T19:56:54.015Z",
+        "created_at": "2016-10-04T15:56:54.015-04:00",
         "id": 177359,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -24,7 +24,7 @@
         "resolvable": false,
         "system": false,
         "type": null,
-        "updated_at": "2016-10-04T19:56:54.015Z"
+        "updated_at": "2016-10-04T15:56:54.015-04:00"
       }
     ]
   },
@@ -45,7 +45,7 @@
         "body": "+2\n\nDo: merge",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2016-10-04T20:18:35.548Z",
+        "created_at": "2016-10-04T16:18:35.548-04:00",
         "id": 177368,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -53,7 +53,7 @@
         "resolvable": false,
         "system": false,
         "type": null,
-        "updated_at": "2016-10-04T20:18:35.548Z"
+        "updated_at": "2016-10-04T16:18:35.548-04:00"
       }
     ]
   },
@@ -74,7 +74,7 @@
         "body": "Branch successfully merged and pushed!",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2016-10-04T20:18:57.466Z",
+        "created_at": "2016-10-04T16:18:57.466-04:00",
         "id": 177369,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -82,7 +82,7 @@
         "resolvable": false,
         "system": false,
         "type": null,
-        "updated_at": "2016-10-04T20:18:57.466Z"
+        "updated_at": "2016-10-04T16:18:57.466-04:00"
       }
     ]
   },
@@ -103,7 +103,7 @@
         "body": "Mentioned in commit 47d475d8625424bd37efd27f7097354306842b93",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2016-10-04T20:18:57.786Z",
+        "created_at": "2016-10-04T16:18:57.786-04:00",
         "id": 177371,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -111,7 +111,7 @@
         "resolvable": false,
         "system": true,
         "type": null,
-        "updated_at": "2016-10-04T20:18:57.786Z"
+        "updated_at": "2016-10-04T16:18:57.786-04:00"
       }
     ]
   },
@@ -132,7 +132,7 @@
         "body": "Status changed to merged",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2016-10-04T20:18:57.937Z",
+        "created_at": "2016-10-04T16:18:57.937-04:00",
         "id": 177373,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -140,7 +140,7 @@
         "resolvable": false,
         "system": true,
         "type": null,
-        "updated_at": "2016-10-04T20:18:57.937Z"
+        "updated_at": "2016-10-04T16:18:57.937-04:00"
       }
     ]
   },
@@ -161,7 +161,7 @@
         "body": "mentioned in merge request !158",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-06T18:10:46.934Z",
+        "created_at": "2019-08-06T14:10:46.934-04:00",
         "id": 607465,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -169,7 +169,7 @@
         "resolvable": false,
         "system": true,
         "type": null,
-        "updated_at": "2019-08-06T18:10:46.936Z"
+        "updated_at": "2019-08-06T14:10:46.936-04:00"
       }
     ]
   },
@@ -190,7 +190,7 @@
         "body": "Start sample discussion.",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-07T13:52:52.190Z",
+        "created_at": "2019-08-07T09:52:52.190-04:00",
         "id": 607911,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -207,7 +207,7 @@
         },
         "system": false,
         "type": "DiscussionNote",
-        "updated_at": "2019-08-07T13:52:52.190Z"
+        "updated_at": "2019-08-07T09:52:52.190-04:00"
       },
       {
         "attachment": null,
@@ -222,7 +222,7 @@
         "body": "Comment on sample discussion.",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-07T13:53:00.074Z",
+        "created_at": "2019-08-07T09:53:00.074-04:00",
         "id": 607912,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -239,7 +239,7 @@
         },
         "system": false,
         "type": "DiscussionNote",
-        "updated_at": "2019-08-07T13:53:00.074Z"
+        "updated_at": "2019-08-07T09:53:00.074-04:00"
       },
       {
         "attachment": null,
@@ -254,7 +254,7 @@
         "body": "Comment and resolve sample discussion.",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-07T13:53:08.058Z",
+        "created_at": "2019-08-07T09:53:08.058-04:00",
         "id": 607913,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -271,7 +271,7 @@
         },
         "system": false,
         "type": "DiscussionNote",
-        "updated_at": "2019-08-07T13:53:08.058Z"
+        "updated_at": "2019-08-07T09:53:08.058-04:00"
       }
     ]
   },
@@ -292,7 +292,7 @@
         "body": "resolved all threads",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-07T13:53:08.398Z",
+        "created_at": "2019-08-07T09:53:08.398-04:00",
         "id": 607914,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -300,7 +300,7 @@
         "resolvable": false,
         "system": true,
         "type": null,
-        "updated_at": "2019-08-07T13:53:08.401Z"
+        "updated_at": "2019-08-07T09:53:08.401-04:00"
       }
     ]
   },
@@ -321,7 +321,7 @@
         "body": "Sample note.",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-29T17:30:19.341Z",
+        "created_at": "2019-08-29T13:30:19.341-04:00",
         "id": 619271,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -329,7 +329,7 @@
         "resolvable": false,
         "system": false,
         "type": null,
-        "updated_at": "2019-08-29T17:30:19.341Z"
+        "updated_at": "2019-08-29T13:30:19.341-04:00"
       }
     ]
   },
@@ -350,7 +350,7 @@
         "body": "Start sample review discussion.",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-29T17:30:56.406Z",
+        "created_at": "2019-08-29T13:30:56.406-04:00",
         "id": 619272,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -378,7 +378,7 @@
         },
         "system": false,
         "type": "DiffNote",
-        "updated_at": "2019-08-29T17:30:56.406Z"
+        "updated_at": "2019-08-29T13:30:56.406-04:00"
       },
       {
         "attachment": null,
@@ -393,7 +393,7 @@
         "body": "Comment on sample review discussion.",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-29T17:31:02.993Z",
+        "created_at": "2019-08-29T13:31:02.993-04:00",
         "id": 619273,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -421,7 +421,7 @@
         },
         "system": false,
         "type": "DiffNote",
-        "updated_at": "2019-08-29T17:31:02.993Z"
+        "updated_at": "2019-08-29T13:31:02.993-04:00"
       },
       {
         "attachment": null,
@@ -436,7 +436,7 @@
         "body": "Comment and resolve sample review discussion.",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-29T17:31:17.580Z",
+        "created_at": "2019-08-29T13:31:17.580-04:00",
         "id": 619274,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -464,7 +464,7 @@
         },
         "system": false,
         "type": "DiffNote",
-        "updated_at": "2019-08-29T17:31:17.580Z"
+        "updated_at": "2019-08-29T13:31:17.580-04:00"
       }
     ]
   },
@@ -485,7 +485,7 @@
         "body": "resolved all threads",
         "commands_changes": {},
         "confidential": false,
-        "created_at": "2019-08-29T17:31:17.886Z",
+        "created_at": "2019-08-29T13:31:17.886-04:00",
         "id": 619275,
         "noteable_id": 20215,
         "noteable_iid": 35,
@@ -493,7 +493,7 @@
         "resolvable": false,
         "system": true,
         "type": null,
-        "updated_at": "2019-08-29T17:31:17.889Z"
+        "updated_at": "2019-08-29T13:31:17.889-04:00"
       }
     ]
   }

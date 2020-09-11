@@ -11,7 +11,7 @@
   "body": "resolved all threads",
   "commands_changes": {},
   "confidential": false,
-  "created_at": "2019-08-29T17:31:17.886Z",
+  "created_at": "2019-08-29T13:31:17.886-04:00",
   "id": 619275,
   "noteable_id": 20215,
   "noteable_iid": 35,
@@ -19,5 +19,5 @@
   "resolvable": false,
   "system": true,
   "type": null,
-  "updated_at": "2019-08-29T17:31:17.889Z"
+  "updated_at": "2019-08-29T13:31:17.889-04:00"
 }
