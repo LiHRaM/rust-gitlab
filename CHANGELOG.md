@@ -1,3 +1,9 @@
+# v0.1303.1 (unreleased)
+
+## Changes
+
+  * Error types now use `#[non_exhaustive]`
+
 # v0.1303.0
 
 ## Additions

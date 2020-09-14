@@ -12,8 +12,8 @@ use thiserror::Error;
 use crate::api::PaginationError;
 
 /// Errors which may occur when creating form data.
+#[non_exhaustive]
 #[derive(Debug, Error)]
-// TODO #[non_exhaustive]
 pub enum BodyError {
     /// Body data could not be serialized from form parameters.
     #[error("failed to URL encode form parameters: {}", source)]
@@ -22,17 +22,11 @@ pub enum BodyError {
         #[from]
         source: serde_urlencoded::ser::Error,
     },
-    /// This is here to force `_` matching right now.
-    ///
-    /// **DO NOT USE**
-    #[doc(hidden)]
-    #[error("unreachable...")]
-    _NonExhaustive,
 }
 
 /// Errors which may occur when using API endpoints.
+#[non_exhaustive]
 #[derive(Debug, Error)]
-// TODO #[non_exhaustive]
 pub enum ApiError<E>
 where
     E: Error + Send + Sync + 'static,
@@ -97,12 +91,6 @@ where
         #[from]
         source: PaginationError,
     },
-    /// This is here to force `_` matching right now.
-    ///
-    /// **DO NOT USE**
-    #[doc(hidden)]
-    #[error("unreachable...")]
-    _NonExhaustive,
 }
 
 impl<E> ApiError<E>
