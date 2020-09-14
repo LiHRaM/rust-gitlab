@@ -8,20 +8,20 @@
 
 ## Additions
 
-- Added `gitlab::webhooks::PipelineHook`
+  * Added `gitlab::webhooks::PipelineHook`
 
 # v0.1302.2
 
 ## Additions
 
-- `Id` types now implement `Hash`
+  * `Id` types now implement `Hash`
 
 # v0.1302.1
 
 ## Additions
 
-- Added `api::projects::issues::MergeRequestsClosing` and
-  `api::projects::issues::MergeRequestsClosing`
+  * Added `api::projects::issues::MergeRequestsClosing` and
+    `api::projects::issues::MergeRequestsClosing`
 
 ## Fixes
 
