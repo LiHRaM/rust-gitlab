@@ -8,20 +8,14 @@ use http::{HeaderMap, HeaderValue};
 use log::error;
 use thiserror::Error;
 
+#[non_exhaustive]
 #[derive(Debug, Error)]
-// TODO #[non_exhaustive]
 pub enum AuthError {
     #[error("header value error: {}", source)]
     HeaderValue {
         #[from]
         source: http::header::InvalidHeaderValue,
     },
-    /// This is here to force `_` matching right now.
-    ///
-    /// **DO NOT USE**
-    #[doc(hidden)]
-    #[error("unreachable...")]
-    _NonExhaustive,
 }
 
 type AuthResult<T> = Result<T, AuthError>;

@@ -24,8 +24,8 @@ use crate::api::{self, Query};
 use crate::auth::{Auth, AuthError};
 use crate::types::*;
 
+#[non_exhaustive]
 #[derive(Debug, Error)]
-// TODO #[non_exhaustive]
 pub enum GitlabError {
     #[error("failed to parse url: {}", source)]
     UrlParse {
@@ -59,12 +59,6 @@ pub enum GitlabError {
         #[from]
         source: api::ApiError<RestError>,
     },
-    /// This is here to force `_` matching right now.
-    ///
-    /// **DO NOT USE**
-    #[doc(hidden)]
-    #[error("unreachable...")]
-    _NonExhaustive,
 }
 
 impl GitlabError {
@@ -277,8 +271,8 @@ impl Gitlab {
     }
 }
 
+#[non_exhaustive]
 #[derive(Debug, Error)]
-// TODO #[non_exhaustive]
 pub enum RestError {
     #[error("error setting auth header: {}", source)]
     AuthError {
@@ -295,12 +289,6 @@ pub enum RestError {
         #[from]
         source: http::Error,
     },
-    /// This is here to force `_` matching right now.
-    ///
-    /// **DO NOT USE**
-    #[doc(hidden)]
-    #[error("unreachable...")]
-    _NonExhaustive,
 }
 
 impl api::Client for Gitlab {

@@ -1,21 +1,27 @@
+# v0.1303.1 (unreleased)
+
+## Changes
+
+  * Error types now use `#[non_exhaustive]`
+
 # v0.1303.0
 
 ## Additions
 
-- Added `gitlab::webhooks::PipelineHook`
+  * Added `gitlab::webhooks::PipelineHook`
 
 # v0.1302.2
 
 ## Additions
 
-- `Id` types now implement `Hash`
+  * `Id` types now implement `Hash`
 
 # v0.1302.1
 
 ## Additions
 
-- Added `api::projects::issues::MergeRequestsClosing` and
-  `api::projects::issues::MergeRequestsClosing`
+  * Added `api::projects::issues::MergeRequestsClosing` and
+    `api::projects::issues::MergeRequestsClosing`
 
 ## Fixes
 
