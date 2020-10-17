@@ -1,3 +1,9 @@
+# (unreleased) v0.1304.1
+
+## Additions
+
+- Added `head_pipeline_id` field to `gitlab::webhooks::MergeRequestHookAttrs`
+
 # v0.1304.0
 
 ## Changes

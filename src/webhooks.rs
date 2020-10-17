@@ -393,6 +393,9 @@ pub struct MergeRequestHookAttrs {
     /// The description of the merge request.
     pub description: Option<String>,
 
+    /// The newest pipeline, if any
+    pub head_pipeline_id: Option<PipelineId>,
+
     // It seems that notes miss these properties?
     /// The URL of the merge request.
     pub url: Option<String>,
