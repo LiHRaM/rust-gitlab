@@ -487,7 +487,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.last_activity_at,
-        datetime((2020, 9, 10), (13, 43, 17, 163)),
+        datetime((2020, 10, 27), (14, 56, 53, 128)),
     );
 }
 
@@ -501,7 +501,7 @@ fn check_project_b(project: &Project) {
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
     assert_eq!(project.star_count, 11);
-    assert_eq!(project.forks_count, 36);
+    assert_eq!(project.forks_count, 37);
     assert_eq!(project.open_issues_count, Some(14));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
