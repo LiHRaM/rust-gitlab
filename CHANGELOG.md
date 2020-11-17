@@ -1,8 +1,14 @@
+# v0.1305.1 (unreleased)
+
+## Changes
+
+  * Changed `ci_config_path` to `Option<String>` in `gitlab::webhooks::PipelineHookAttrs`
+
 # v0.1305.0
 
 ## Additions
 
-- Added `head_pipeline_id` field to `gitlab::webhooks::MergeRequestHookAttrs`
+  * Added `head_pipeline_id` field to `gitlab::webhooks::MergeRequestHookAttrs`
 
 # v0.1304.0
 

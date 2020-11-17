@@ -792,7 +792,8 @@ pub struct PipelineProjectAttrs {
     pub path_with_namespace: String,
     /// The default branch for the project.
     pub default_branch: Option<String>,
-    pub ci_config_path: String,
+    /// The path to the ci config file.
+    pub ci_config_path: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
