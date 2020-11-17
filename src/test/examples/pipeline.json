@@ -49,7 +49,7 @@
     "visibility_level": 0,
     "path_with_namespace": "mr.example/webhook-testing",
     "default_branch": "master",
-    "ci_config_path": ""
+    "ci_config_path": null
   },
   "commit": {
     "id": "17dd664bfcda26cd14c5ecad518c16c7ef62b618",
