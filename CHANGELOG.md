@@ -3,6 +3,8 @@
 ## Additions
 
   * Added `api::projects::repository::files::FileRaw`
+  * Added `api::projects::merge_requests::approval_state::MergeRequestApprovalState`
+    query to access the approval rules state of a particular merge request.
 
 # v0.1306.0
 
