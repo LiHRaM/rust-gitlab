@@ -1,4 +1,12 @@
+# v0.1306.1 (unreleased)
+
+## Additions
+
+  * Added `api::projects::repository::files::FileRaw`
+
 # v0.1306.0
+
+  * No changes needed for GitLab 13.6.
 
 # v0.1305.1
 
