@@ -54,6 +54,7 @@
     "relative": "#6",
     "short": "#6"
   },
+  "service_desk_reply_to": null,
   "state": "closed",
   "subscribed": true,
   "task_completion_status": {
