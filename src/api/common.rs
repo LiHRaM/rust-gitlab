@@ -155,7 +155,7 @@ const PATH_SEGMENT_ENCODE_SET: &AsciiSet = &CONTROLS
     .add(b'/');
 
 /// Escape a string for usage as a single URL path component.
-pub fn path_escaped<'a>(input: &'a str) -> impl fmt::Display + 'a {
+pub fn path_escaped(input: &'_ str) -> impl fmt::Display + '_ {
     utf8_percent_encode(input, PATH_SEGMENT_ENCODE_SET)
 }
 
