@@ -296,6 +296,10 @@ fn check_merge_request_a(merge_request: &MergeRequest) {
     assert_eq!(assignees.len(), 1);
     let assignee = &assignees[0];
     check_user_brad_king(assignee);
+    let reviewers = merge_request.reviewers.as_ref().unwrap();
+    assert_eq!(reviewers.len(), 1);
+    let reviewer = &reviewers[0];
+    check_user_brad_king(reviewer);
     assert_eq!(merge_request.source_project_id, ProjectId::new(856));
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
