@@ -18,6 +18,7 @@ use crate::api::BodyError;
 
 /// A trait representing a parameter value.
 pub trait ParamValue<'a> {
+    #[allow(clippy::wrong_self_convention)]
     /// The parameter value as a string.
     fn as_value(self) -> Cow<'a, str>;
 }
