@@ -25,16 +25,18 @@ pub struct ProjectMember<'a> {
 impl<'a> ProjectMember<'a> {
     /// Create a builder for the endpoint.
     pub fn builder() -> ProjectMemberBuilder<'a> {
-        let mut builder = ProjectMemberBuilder::default();
-        builder._include_ancestors(false);
-        builder
+        ProjectMemberBuilder {
+            _include_ancestors: Some(false),
+            ..Default::default()
+        }
     }
 
     /// Create an ancester-including builder for the endpoint.
     pub fn all_builder() -> ProjectMemberBuilder<'a> {
-        let mut builder = ProjectMemberBuilder::default();
-        builder._include_ancestors = Some(true);
-        builder
+        ProjectMemberBuilder {
+            _include_ancestors: Some(true),
+            ..Default::default()
+        }
     }
 }
 

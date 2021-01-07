@@ -195,7 +195,11 @@ mod tests {
         ];
 
         for i in items {
-            assert_eq!(*i, *i);
+            // We are asserting that `Eq` is implemented.
+            #[allow(clippy::eq_op)]
+            {
+                assert_eq!(*i, *i);
+            }
             assert_eq!(i.cmp(i), cmp::Ordering::Equal);
             assert_eq!(i.partial_cmp(i).unwrap(), cmp::Ordering::Equal);
 
