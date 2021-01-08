@@ -1603,6 +1603,8 @@ pub struct MergeRequest {
     pub assignee: Option<UserBasic>,
     /// The assignees of the merge request.
     pub assignees: Option<Vec<UserBasic>>,
+    /// The reviewers of the merge request.
+    pub reviewers: Option<Vec<UserBasic>>,
     /// The ID of the project hosting the source branch.
     pub source_project_id: ProjectId,
     /// The ID of the project hosting the target branch.
@@ -1709,6 +1711,8 @@ pub struct MergeRequestChanges {
     pub assignee: Option<UserBasic>,
     /// The assignees of the merge request.
     pub assignees: Option<Vec<UserBasic>>,
+    /// The reviewers of the merge request.
+    pub reviewers: Option<Vec<UserBasic>>,
     /// The ID of the project hosting the source branch.
     pub source_project_id: ProjectId,
     /// The ID of the project hosting the target branch.
@@ -1793,6 +1797,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             author: mr.author,
             assignee: mr.assignee,
             assignees: mr.assignees,
+            reviewers: mr.reviewers,
             source_project_id: mr.source_project_id,
             target_project_id: mr.target_project_id,
             labels: mr.labels,

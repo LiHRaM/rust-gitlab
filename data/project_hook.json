@@ -13,6 +13,7 @@
   "project_id": 855,
   "push_events": true,
   "push_events_branch_filter": null,
+  "releases_events": false,
   "repository_update_events": false,
   "tag_push_events": true,
   "url": "http://kwrobot02:8082/gitlab.kitware.com",

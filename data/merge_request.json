@@ -100,6 +100,16 @@
     "relative": "!35",
     "short": "!35"
   },
+  "reviewers": [
+    {
+      "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+      "id": 10,
+      "name": "Brad King",
+      "state": "active",
+      "username": "brad.king",
+      "web_url": "https://gitlab.kitware.com/brad.king"
+    }
+  ],
   "sha": "04e94ae667024a62a90179f395bfdc2b35f3efd2",
   "should_remove_source_branch": null,
   "source_branch": "add_hook-api",
@@ -121,7 +131,7 @@
     "total_time_spent": 0
   },
   "title": "gitlab: expose hook addition API",
-  "updated_at": "2019-08-29T13:30:19.352-04:00",
+  "updated_at": "2021-01-07T14:18:28.558-05:00",
   "upvotes": 0,
   "user": {
     "can_merge": true

@@ -277,7 +277,7 @@ fn check_merge_request_a(merge_request: &MergeRequest) {
     );
     assert_eq!(
         merge_request.updated_at,
-        datetime((2019, 8, 29), (17, 30, 19, 352)),
+        datetime((2021, 1, 7), (19, 18, 28, 558)),
     );
     assert_eq!(
         merge_request.merged_at.unwrap(),
@@ -296,6 +296,10 @@ fn check_merge_request_a(merge_request: &MergeRequest) {
     assert_eq!(assignees.len(), 1);
     let assignee = &assignees[0];
     check_user_brad_king(assignee);
+    let reviewers = merge_request.reviewers.as_ref().unwrap();
+    assert_eq!(reviewers.len(), 1);
+    let reviewer = &reviewers[0];
+    check_user_brad_king(reviewer);
     assert_eq!(merge_request.source_project_id, ProjectId::new(856));
     assert_eq!(merge_request.target_project_id, ProjectId::new(855));
     assert!(merge_request.labels.is_empty());
@@ -487,7 +491,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.last_activity_at,
-        datetime((2020, 10, 27), (14, 56, 53, 128)),
+        datetime((2020, 12, 1), (12, 10, 10, 842)),
     );
 }
 
@@ -501,7 +505,7 @@ fn check_project_b(project: &Project) {
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
     assert_eq!(project.star_count, 11);
-    assert_eq!(project.forks_count, 37);
+    assert_eq!(project.forks_count, 39);
     assert_eq!(project.open_issues_count, Some(14));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
