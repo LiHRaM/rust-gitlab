@@ -1,3 +1,7 @@
+# v0.1308.0
+
+  * No changes needed for GitLab 13.8.
+
 # v0.1307.0
 
 ## Additions
