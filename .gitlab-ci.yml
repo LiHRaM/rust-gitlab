@@ -13,11 +13,6 @@ before_script:
     - tags@utils/rust-gitlab
 
 .cargo_update: &cargo_update
-    # XXX(minver<1.41.0): No backwards compatibility is provided. Instead, it
-    # uses the format of the existing `Cargo.lock` file to determine the format
-    # of the to-be-written file. See
-    # https://github.com/rust-lang/cargo/pull/7579#pullrequestreview-323640264
-    - touch Cargo.lock
     - cargo update $GENERATE_LOCKFILE_ARGS
     - cargo fetch --locked
     - mkdir .cargo
@@ -55,7 +50,7 @@ before_script:
     - cargo tarpaulin --frozen $CARGO_FEATURES --exclude-files vendor --ignore-panics --all --verbose --out Html
 
 .rust_minimum: &rust_minimum
-    image: "rust:1.40.0"
+    image: "rust:1.42.0"
 
     variables:
         CARGO_UPDATE_POLICY: newest
