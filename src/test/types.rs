@@ -491,7 +491,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.last_activity_at,
-        datetime((2020, 12, 1), (12, 10, 10, 842)),
+        datetime((2021, 1, 17), (13, 29, 13, 923)),
     );
 }
 
@@ -504,9 +504,9 @@ fn check_project_b(project: &Project) {
     assert!(project.forked_from_project.is_none());
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
-    assert_eq!(project.star_count, 11);
+    assert_eq!(project.star_count, 12);
     assert_eq!(project.forks_count, 39);
-    assert_eq!(project.open_issues_count, Some(14));
+    assert_eq!(project.open_issues_count, Some(15));
     assert_eq!(project.public_jobs, true);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
