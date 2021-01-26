@@ -197,6 +197,7 @@
         "noteable_type": "MergeRequest",
         "resolvable": true,
         "resolved": true,
+        "resolved_at": "2019-08-07T09:53:08.386-04:00",
         "resolved_by": {
           "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
           "id": 10,
@@ -229,6 +230,7 @@
         "noteable_type": "MergeRequest",
         "resolvable": true,
         "resolved": true,
+        "resolved_at": "2019-08-07T09:53:08.386-04:00",
         "resolved_by": {
           "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
           "id": 10,
@@ -261,6 +263,7 @@
         "noteable_type": "MergeRequest",
         "resolvable": true,
         "resolved": true,
+        "resolved_at": "2019-08-07T09:53:08.386-04:00",
         "resolved_by": {
           "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
           "id": 10,
@@ -369,6 +372,7 @@
         },
         "resolvable": true,
         "resolved": true,
+        "resolved_at": "2019-08-29T13:31:17.859-04:00",
         "resolved_by": {
           "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
           "id": 10,
@@ -413,6 +417,7 @@
         },
         "resolvable": true,
         "resolved": true,
+        "resolved_at": "2019-08-29T13:31:17.859-04:00",
         "resolved_by": {
           "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
           "id": 10,
@@ -457,6 +462,7 @@
         },
         "resolvable": true,
         "resolved": true,
+        "resolved_at": "2019-08-29T13:31:17.859-04:00",
         "resolved_by": {
           "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
           "id": 10,
@@ -497,6 +503,35 @@
         "system": true,
         "type": null,
         "updated_at": "2019-08-29T13:31:17.889-04:00"
+      }
+    ]
+  },
+  {
+    "id": "7665adb36b7190c35ca0ec20c3365a07b29c3176",
+    "individual_note": true,
+    "notes": [
+      {
+        "attachment": null,
+        "author": {
+          "avatar_url": "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
+          "id": 10,
+          "name": "Brad King",
+          "state": "active",
+          "username": "brad.king",
+          "web_url": "https://gitlab.kitware.com/brad.king"
+        },
+        "body": "requested review from @brad.king",
+        "commands_changes": {},
+        "confidential": false,
+        "created_at": "2021-01-07T14:18:28.633-05:00",
+        "id": 880929,
+        "noteable_id": 20215,
+        "noteable_iid": 35,
+        "noteable_type": "MergeRequest",
+        "resolvable": false,
+        "system": true,
+        "type": null,
+        "updated_at": "2021-01-07T14:18:28.637-05:00"
       }
     ]
   }
