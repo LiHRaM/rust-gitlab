@@ -545,6 +545,9 @@ pub struct CreateProject<'a> {
     /// Whether the CI pipeline is required to succeed before merges are allowed.
     #[builder(default)]
     only_allow_merge_if_pipeline_succeeds: Option<bool>,
+    /// Whether the CI pipeline can be skipped before merges are allowed.
+    #[builder(default)]
+    allow_merge_on_skipped_pipeline: Option<bool>,
     /// Whether all discussions must be resolved before merges are allowed.
     #[builder(default)]
     only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
@@ -804,6 +807,10 @@ impl<'a> Endpoint for CreateProject<'a> {
             .push_opt(
                 "only_allow_merge_if_pipeline_succeeds",
                 self.only_allow_merge_if_pipeline_succeeds,
+            )
+            .push_opt(
+                "allow_merge_on_skipped_pipeline",
+                self.allow_merge_on_skipped_pipeline,
             )
             .push_opt(
                 "only_allow_merge_if_all_discussions_are_resolved",
@@ -1824,6 +1831,28 @@ mod tests {
         let endpoint = CreateProject::builder()
             .name("name")
             .only_allow_merge_if_pipeline_succeeds(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_allow_merge_on_skipped_pipeline() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&allow_merge_on_skipped_pipeline=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .allow_merge_on_skipped_pipeline(false)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

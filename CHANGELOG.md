@@ -21,6 +21,8 @@
     settings.
   * Projects can now be created and edited with
     `restrict_user_defined_variables` settings.
+  * Projects can now be created and edited with
+    `allow_merge_on_skipped_pipeline` settings.
 
 # v0.1308.0
 
