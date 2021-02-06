@@ -1,3 +1,9 @@
+# v0.1308.1 (unreleased)
+
+## Changes
+
+  * API bindings for the `"minimal"` access level.
+
 # v0.1308.0
 
   * No changes needed for GitLab 13.8.

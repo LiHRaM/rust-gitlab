@@ -21,6 +21,8 @@ use crate::api::ParamValue;
 pub enum AccessLevel {
     /// Anonymous access.
     Anonymous,
+    /// Minimal access.
+    Minimal,
     /// Guest access (can see the project).
     Guest,
     /// Reporter access (can open issues).
@@ -45,6 +47,7 @@ impl AccessLevel {
             AccessLevel::Developer => "developer",
             AccessLevel::Reporter => "reporter",
             AccessLevel::Guest => "guest",
+            AccessLevel::Minimal => "minimal",
             AccessLevel::Anonymous => "anonymous",
         }
     }
@@ -58,6 +61,7 @@ impl AccessLevel {
             AccessLevel::Developer => 30,
             AccessLevel::Reporter => 20,
             AccessLevel::Guest => 10,
+            AccessLevel::Minimal => 5,
             AccessLevel::Anonymous => 0,
         }
     }
@@ -299,6 +303,7 @@ mod tests {
     fn access_level_as_str() {
         let items = &[
             (AccessLevel::Anonymous, "anonymous", 0),
+            (AccessLevel::Minimal, "minimal", 5),
             (AccessLevel::Guest, "guest", 10),
             (AccessLevel::Reporter, "reporter", 20),
             (AccessLevel::Developer, "developer", 30),
