@@ -9,6 +9,8 @@
     score based on the search criteria.
   * Project container expiration policies can now use an arbitrary "keep n"
     count.
+  * Project container expiration policies now have `name_regex_delete`
+    (replacing the now-deprecated `name_regex`) and `name_regex_keep`.
 
 # v0.1308.0
 

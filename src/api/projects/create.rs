@@ -241,8 +241,21 @@ pub struct ContainerExpirationPolicy<'a> {
     ///
     /// See the [Ruby documentation](https://ruby-doc.org/core-2.7.1/Regexp.html) for supported
     /// syntax.
+    #[deprecated(note = "use `name_regex_delete` instead")]
     #[builder(setter(into), default)]
     name_regex: Option<Cow<'a, str>>,
+    /// Delete images with names matching a regular expression.
+    ///
+    /// See the [Ruby documentation](https://ruby-doc.org/core-2.7.1/Regexp.html) for supported
+    /// syntax.
+    #[builder(setter(into), default)]
+    name_regex_delete: Option<Cow<'a, str>>,
+    /// Keep images with names matching a regular expression.
+    ///
+    /// See the [Ruby documentation](https://ruby-doc.org/core-2.7.1/Regexp.html) for supported
+    /// syntax.
+    #[builder(setter(into), default)]
+    name_regex_keep: Option<Cow<'a, str>>,
 }
 
 impl<'a> ContainerExpirationPolicy<'a> {
@@ -270,9 +283,21 @@ impl<'a> ContainerExpirationPolicy<'a> {
                 self.older_than,
             )
             .push_opt(
+                "container_expiration_policy_attributes[name_regex_delete]",
+                self.name_regex_delete.as_ref(),
+            )
+            .push_opt(
+                "container_expiration_policy_attributes[name_regex_keep]",
+                self.name_regex_keep.as_ref(),
+            );
+
+        #[allow(deprecated)]
+        {
+            params.push_opt(
                 "container_expiration_policy_attributes[name_regex]",
                 self.name_regex.as_ref(),
             );
+        }
     }
 }
 
@@ -1485,6 +1510,60 @@ mod tests {
             .container_expiration_policy_attributes(
                 ContainerExpirationPolicy::builder()
                     .name_regex(":latest")
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_name_regex_delete() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bname_regex_delete%5D=%3Alatest",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .name_regex_delete(":latest")
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_name_regex_keep() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bname_regex_keep%5D=%3Alatest",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .name_regex_keep(":latest")
                     .build()
                     .unwrap(),
             )
