@@ -74,6 +74,9 @@ pub struct EditProject<'a> {
     /// Whether to enable email notifications or not.
     #[builder(default)]
     emails_disabled: Option<bool>,
+    /// Whether the default set of award emojis are shown for this project.
+    #[builder(default)]
+    show_default_award_emojis: Option<bool>,
     /// Whether outdated diff discussions are resolved when a merge request is updated or not.
     #[builder(default)]
     resolve_outdated_diff_discussions: Option<bool>,
@@ -272,6 +275,7 @@ impl<'a> Endpoint for EditProject<'a> {
             .push_opt("requirements_access_level", self.requirements_access_level)
             .push_opt("analytics_access_level", self.analytics_access_level)
             .push_opt("emails_disabled", self.emails_disabled)
+            .push_opt("show_default_award_emojis", self.show_default_award_emojis)
             .push_opt(
                 "resolve_outdated_diff_discussions",
                 self.resolve_outdated_diff_discussions,
@@ -701,6 +705,25 @@ mod tests {
         let endpoint = EditProject::builder()
             .project("simple/project")
             .emails_disabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_show_default_award_emojis() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("show_default_award_emojis=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .show_default_award_emojis(false)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

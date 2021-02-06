@@ -17,6 +17,8 @@
     settings.
   * Projects can now be created and edited with `analytics_access_level`
     settings.
+  * Projects can now be created and edited with `show_default_award_emojis`
+    settings.
 
 # v0.1308.0
 
