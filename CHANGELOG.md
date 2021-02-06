@@ -3,6 +3,7 @@
 ## Changes
 
   * API bindings for the `"minimal"` access level.
+  * Groups can have "inherit" set as their shared runner minute limit.
 
 # v0.1308.0
 

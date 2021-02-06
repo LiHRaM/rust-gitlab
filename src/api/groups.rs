@@ -22,6 +22,7 @@ pub use create::BranchProtection;
 pub use create::CreateGroup;
 pub use create::CreateGroupBuilder;
 pub use create::GroupProjectCreationAccessLevel;
+pub use create::SharedRunnersMinutesLimit;
 pub use create::SubgroupCreationAccessLevel;
 
 pub use group::Group;
