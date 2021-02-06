@@ -518,6 +518,9 @@ pub struct CreateProject<'a> {
     /// Whether the default set of award emojis are shown for this project.
     #[builder(default)]
     show_default_award_emojis: Option<bool>,
+    /// Whether to allow non-members to set pipeline variables when triggering piplines or not.
+    #[builder(default)]
+    restrict_user_defined_variables: Option<bool>,
     /// Whether outdated diff discussions are resolved when a merge request is updated or not.
     #[builder(default)]
     resolve_outdated_diff_discussions: Option<bool>,
@@ -782,6 +785,10 @@ impl<'a> Endpoint for CreateProject<'a> {
             .push_opt("analytics_access_level", self.analytics_access_level)
             .push_opt("emails_disabled", self.emails_disabled)
             .push_opt("show_default_award_emojis", self.show_default_award_emojis)
+            .push_opt(
+                "restrict_user_defined_variables",
+                self.restrict_user_defined_variables,
+            )
             .push_opt(
                 "resolve_outdated_diff_discussions",
                 self.resolve_outdated_diff_discussions,
@@ -1429,6 +1436,28 @@ mod tests {
         let endpoint = CreateProject::builder()
             .name("name")
             .show_default_award_emojis(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_restrict_user_defined_variables() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&restrict_user_defined_variables=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .restrict_user_defined_variables(false)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

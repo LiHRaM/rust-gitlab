@@ -19,6 +19,8 @@
     settings.
   * Projects can now be created and edited with `show_default_award_emojis`
     settings.
+  * Projects can now be created and edited with
+    `restrict_user_defined_variables` settings.
 
 # v0.1308.0
 
