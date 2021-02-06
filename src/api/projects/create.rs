@@ -502,6 +502,9 @@ pub struct CreateProject<'a> {
     /// Set the access level for GitLab Pages on the project.
     #[builder(default)]
     pages_access_level: Option<FeatureAccessLevelPublic>,
+    /// Set the access level for operations features.
+    #[builder(default)]
+    operations_access_level: Option<FeatureAccessLevel>,
 
     /// Whether to enable email notifications or not.
     #[builder(default)]
@@ -765,6 +768,7 @@ impl<'a> Endpoint for CreateProject<'a> {
             .push_opt("wiki_access_level", self.wiki_access_level)
             .push_opt("snippets_access_level", self.snippets_access_level)
             .push_opt("pages_access_level", self.pages_access_level)
+            .push_opt("operations_access_level", self.operations_access_level)
             .push_opt("emails_disabled", self.emails_disabled)
             .push_opt(
                 "resolve_outdated_diff_discussions",
@@ -1318,6 +1322,25 @@ mod tests {
         let endpoint = CreateProject::builder()
             .name("name")
             .pages_access_level(FeatureAccessLevelPublic::Public)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_operations_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&operations_access_level=enabled"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .operations_access_level(FeatureAccessLevel::Enabled)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
