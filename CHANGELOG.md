@@ -7,6 +7,8 @@
   * Listing groups can now be set to only return top-level groups.
   * Searching for projects within a group can now be sorted by a similarity
     score based on the search criteria.
+  * Project container expiration policies can now use an arbitrary "keep n"
+    count.
 
 # v0.1308.0
 

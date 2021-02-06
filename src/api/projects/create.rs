@@ -4,6 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::cmp::Ordering;
 use std::collections::BTreeSet;
 
 use derive_builder::Builder;
@@ -112,7 +113,7 @@ impl ParamValue<'static> for ContainerExpirationCadence {
 /// How many container instances to keep around.
 ///
 /// Note that GitLab only supports a few discrete values for this setting.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, Eq)]
 pub enum ContainerExpirationKeepN {
     /// Only one.
     One,
@@ -126,25 +127,64 @@ pub enum ContainerExpirationKeepN {
     Fifty,
     /// Up to one hundred.
     OneHundred,
+    /// Arbitrary number.
+    Arbitrary(u64),
+}
+
+impl From<u64> for ContainerExpirationKeepN {
+    fn from(n: u64) -> Self {
+        Self::Arbitrary(n)
+    }
+}
+
+impl PartialEq for ContainerExpirationKeepN {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u64().eq(&other.as_u64())
+    }
+}
+
+impl PartialOrd for ContainerExpirationKeepN {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.as_u64().partial_cmp(&other.as_u64())
+    }
+}
+
+impl Ord for ContainerExpirationKeepN {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.as_u64().cmp(&other.as_u64())
+    }
 }
 
 impl ContainerExpirationKeepN {
     /// The variable type query parameter.
-    pub(crate) fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> Cow<'static, str> {
         match self {
-            ContainerExpirationKeepN::One => "1",
-            ContainerExpirationKeepN::Five => "5",
-            ContainerExpirationKeepN::Ten => "10",
-            ContainerExpirationKeepN::TwentyFive => "25",
-            ContainerExpirationKeepN::Fifty => "50",
-            ContainerExpirationKeepN::OneHundred => "100",
+            ContainerExpirationKeepN::One => "1".into(),
+            ContainerExpirationKeepN::Five => "5".into(),
+            ContainerExpirationKeepN::Ten => "10".into(),
+            ContainerExpirationKeepN::TwentyFive => "25".into(),
+            ContainerExpirationKeepN::Fifty => "50".into(),
+            ContainerExpirationKeepN::OneHundred => "100".into(),
+            ContainerExpirationKeepN::Arbitrary(n) => format!("{}", n).into(),
+        }
+    }
+
+    fn as_u64(self) -> u64 {
+        match self {
+            ContainerExpirationKeepN::One => 1,
+            ContainerExpirationKeepN::Five => 5,
+            ContainerExpirationKeepN::Ten => 10,
+            ContainerExpirationKeepN::TwentyFive => 25,
+            ContainerExpirationKeepN::Fifty => 50,
+            ContainerExpirationKeepN::OneHundred => 100,
+            ContainerExpirationKeepN::Arbitrary(n) => n,
         }
     }
 }
 
 impl ParamValue<'static> for ContainerExpirationKeepN {
     fn as_value(self) -> Cow<'static, str> {
-        self.as_str().into()
+        self.as_str()
     }
 }
 
@@ -192,7 +232,7 @@ pub struct ContainerExpirationPolicy<'a> {
     #[builder(setter(into), default)]
     enabled: Option<bool>,
     /// How many container images to keep.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     keep_n: Option<ContainerExpirationKeepN>,
     /// Only consider containers older than this age.
     #[builder(default)]
@@ -847,7 +887,9 @@ mod tests {
             ContainerExpirationKeepN::One,
             ContainerExpirationKeepN::Five,
             ContainerExpirationKeepN::Ten,
+            ContainerExpirationKeepN::Arbitrary(11),
             ContainerExpirationKeepN::TwentyFive,
+            30.into(),
             ContainerExpirationKeepN::Fifty,
             ContainerExpirationKeepN::OneHundred,
         ];
@@ -867,7 +909,9 @@ mod tests {
             (ContainerExpirationKeepN::One, "1"),
             (ContainerExpirationKeepN::Five, "5"),
             (ContainerExpirationKeepN::Ten, "10"),
+            (ContainerExpirationKeepN::Arbitrary(11), "11"),
             (ContainerExpirationKeepN::TwentyFive, "25"),
+            (30.into(), "30"),
             (ContainerExpirationKeepN::Fifty, "50"),
             (ContainerExpirationKeepN::OneHundred, "100"),
         ];
