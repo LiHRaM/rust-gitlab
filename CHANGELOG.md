@@ -5,6 +5,8 @@
   * API bindings for the `"minimal"` access level.
   * Groups can have "inherit" set as their shared runner minute limit.
   * Listing groups can now be set to only return top-level groups.
+  * Searching for projects within a group can now be sorted by a similarity
+    score based on the search criteria.
 
 # v0.1308.0
 

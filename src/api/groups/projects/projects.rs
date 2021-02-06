@@ -23,6 +23,8 @@ pub enum GroupProjectsOrderBy {
     CreatedAt,
     /// Order by the last updated date of the project.
     UpdatedAt,
+    /// Order by a similarity score based on the search.
+    Similarity,
     /// Order by the last activity date of the project.
     LastActivityAt,
 }
@@ -42,6 +44,7 @@ impl GroupProjectsOrderBy {
             GroupProjectsOrderBy::Path => "path",
             GroupProjectsOrderBy::CreatedAt => "created_at",
             GroupProjectsOrderBy::UpdatedAt => "updated_at",
+            GroupProjectsOrderBy::Similarity => "similarity",
             GroupProjectsOrderBy::LastActivityAt => "last_activity_at",
         }
     }
@@ -183,6 +186,7 @@ mod tests {
             (GroupProjectsOrderBy::Path, "path"),
             (GroupProjectsOrderBy::CreatedAt, "created_at"),
             (GroupProjectsOrderBy::UpdatedAt, "updated_at"),
+            (GroupProjectsOrderBy::Similarity, "similarity"),
             (GroupProjectsOrderBy::LastActivityAt, "last_activity_at"),
         ];
 
