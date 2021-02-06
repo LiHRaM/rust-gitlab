@@ -13,6 +13,8 @@
     (replacing the now-deprecated `name_regex`) and `name_regex_keep`.
   * Projects can now be created and edited with `operations_access_level`
     settings.
+  * Projects can now be created and edited with `requirements_access_level`
+    settings.
 
 # v0.1308.0
 
