@@ -15,6 +15,8 @@
     settings.
   * Projects can now be created and edited with `requirements_access_level`
     settings.
+  * Projects can now be created and edited with `analytics_access_level`
+    settings.
 
 # v0.1308.0
 

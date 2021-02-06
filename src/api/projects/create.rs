@@ -508,6 +508,9 @@ pub struct CreateProject<'a> {
     /// Set the access level for requirements features.
     #[builder(default)]
     requirements_access_level: Option<FeatureAccessLevelPublic>,
+    /// Set the access level for analytics features.
+    #[builder(default)]
+    analytics_access_level: Option<FeatureAccessLevel>,
 
     /// Whether to enable email notifications or not.
     #[builder(default)]
@@ -773,6 +776,7 @@ impl<'a> Endpoint for CreateProject<'a> {
             .push_opt("pages_access_level", self.pages_access_level)
             .push_opt("operations_access_level", self.operations_access_level)
             .push_opt("requirements_access_level", self.requirements_access_level)
+            .push_opt("analytics_access_level", self.analytics_access_level)
             .push_opt("emails_disabled", self.emails_disabled)
             .push_opt(
                 "resolve_outdated_diff_discussions",
@@ -1364,6 +1368,25 @@ mod tests {
         let endpoint = CreateProject::builder()
             .name("name")
             .requirements_access_level(FeatureAccessLevelPublic::Public)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_analytics_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&analytics_access_level=private"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .analytics_access_level(FeatureAccessLevel::Private)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
