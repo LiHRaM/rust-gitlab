@@ -4,6 +4,7 @@
 
   * API bindings for the `"minimal"` access level.
   * Groups can have "inherit" set as their shared runner minute limit.
+  * Listing groups can now be set to only return top-level groups.
 
 # v0.1308.0
 

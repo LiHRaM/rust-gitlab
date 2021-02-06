@@ -71,6 +71,9 @@ pub struct Groups<'a> {
     /// Filter groups by those where the API caller has a minimum access level.
     #[builder(default)]
     min_access_level: Option<AccessLevel>,
+    /// Only return top-level groups.
+    #[builder(default)]
+    top_level_only: Option<bool>,
 
     /// Include project statistics in the results.
     #[builder(default)]
@@ -140,6 +143,7 @@ impl<'a> Endpoint for Groups<'a> {
                 "min_access_level",
                 self.min_access_level.map(|level| level.as_u64()),
             )
+            .push_opt("top_level_only", self.top_level_only)
             .push_opt("statistics", self.statistics)
             .push_opt("with_custom_attributes", self.with_custom_attributes)
             .push_opt("order_by", self.order_by)
@@ -259,6 +263,19 @@ mod tests {
             .min_access_level(AccessLevel::Developer)
             .build()
             .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_top_level_only() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("groups")
+            .add_query_params(&[("top_level_only", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Groups::builder().top_level_only(true).build().unwrap();
         api::ignore(endpoint).query(&client).unwrap();
     }
 
