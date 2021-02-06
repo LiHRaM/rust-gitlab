@@ -124,7 +124,7 @@ pub enum ContainerExpirationKeepN {
     TwentyFive,
     /// Up to fifty.
     Fifty,
-    /// Up to one hunder.
+    /// Up to one hundred.
     OneHundred,
 }
 
