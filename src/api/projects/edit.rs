@@ -158,6 +158,9 @@ pub struct EditProject<'a> {
     /// The default number of revisions to fetch in CI jobs.
     #[builder(default)]
     ci_default_git_depth: Option<u64>,
+    /// Whether to skip pending deployment jobs when a newer one is started.
+    #[builder(default)]
+    ci_forward_deployment_enabled: Option<bool>,
     /// Whether Auto DevOps are enabled or not.
     #[builder(default)]
     auto_devops_enabled: Option<bool>,
@@ -335,6 +338,10 @@ impl<'a> Endpoint for EditProject<'a> {
             .push_opt("build_coverage_regex", self.build_coverage_regex.as_ref())
             .push_opt("ci_config_path", self.ci_config_path.as_ref())
             .push_opt("ci_default_git_depth", self.ci_default_git_depth)
+            .push_opt(
+                "ci_forward_deployment_enabled",
+                self.ci_forward_deployment_enabled,
+            )
             .push_opt("auto_devops_enabled", self.auto_devops_enabled)
             .push_opt(
                 "auto_devops_deploy_strategy",
@@ -1330,6 +1337,25 @@ mod tests {
         let endpoint = EditProject::builder()
             .project("simple/project")
             .ci_default_git_depth(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_ci_forward_deployment_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("ci_forward_deployment_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .ci_forward_deployment_enabled(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
