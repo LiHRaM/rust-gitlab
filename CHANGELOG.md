@@ -62,6 +62,7 @@
   * Merge requests can now be filtered by reviewer.
   * Merge requests can now be filtered by environment status.
   * API bindings for the `"scheduled"` pipeline status.
+  * Projects can now be sorted by various resource sizes.
 
 # v0.1308.0
 

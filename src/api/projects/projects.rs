@@ -28,6 +28,14 @@ pub enum ProjectOrderBy {
     UpdatedAt,
     /// Order by the last activity date of the project.
     LastActivityAt,
+    /// Order by repository size.
+    RepositorySize,
+    /// Order by storage size.
+    StorageSize,
+    /// Order by packages size.
+    PackagesSize,
+    /// Order by wiki size.
+    WikiSize,
 }
 
 impl Default for ProjectOrderBy {
@@ -50,6 +58,10 @@ impl ProjectOrderBy {
             ProjectOrderBy::CreatedAt => "created_at",
             ProjectOrderBy::UpdatedAt => "updated_at",
             ProjectOrderBy::LastActivityAt => "last_activity_at",
+            ProjectOrderBy::RepositorySize => "repository_size",
+            ProjectOrderBy::StorageSize => "storage_size",
+            ProjectOrderBy::PackagesSize => "packages_size",
+            ProjectOrderBy::WikiSize => "wiki_size",
         }
     }
 }
@@ -265,6 +277,10 @@ mod tests {
             (ProjectOrderBy::CreatedAt, "created_at"),
             (ProjectOrderBy::UpdatedAt, "updated_at"),
             (ProjectOrderBy::LastActivityAt, "last_activity_at"),
+            (ProjectOrderBy::RepositorySize, "repository_size"),
+            (ProjectOrderBy::StorageSize, "storage_size"),
+            (ProjectOrderBy::PackagesSize, "packages_size"),
+            (ProjectOrderBy::WikiSize, "wiki_size"),
         ];
 
         for (i, s) in items {
