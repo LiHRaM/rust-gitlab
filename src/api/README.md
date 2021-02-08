@@ -28,6 +28,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/hooks` `projects/hooks/create.rs`
   * `GET    /projects/:project/hooks/:id` `projects/hooks/hook.rs`
   * `GET    /projects/:project/issues` `projects/issues/issues.rs`
+    - Missing support for `not`.
   * `POST   /projects/:project/issues` `projects/issues/create.rs`
   * `GET    /projects/:project/issues/:issue` `projects/issues/issue.rs`
   * `PUT    /projects/:project/issues/:issue` `projects/issues/edit.rs`
@@ -56,6 +57,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/members` `projects/members/add.rs`
   * `GET    /projects/:project/members/:id` `projects/members/member.rs`
   * `GET    /projects/:project/merge_requests` `projects/merge_requests/merge_requests.rs`
+    - Missing support for `not`.
   * `POST   /projects/:project/merge_requests` `projects/merge_requests/create.rs`
   * `GET    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/merge_request.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/edit.rs`
