@@ -11,6 +11,8 @@
 mod environment;
 mod environments;
 
+pub use self::environments::EnvironmentState;
+
 pub use self::environment::Environment;
 pub use self::environment::EnvironmentBuilder;
 

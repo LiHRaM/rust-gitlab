@@ -34,6 +34,7 @@
   * Projects can now be created and edited with
     `allow_merge_on_skipped_pipeline` settings.
   * Projects can now be edited with `ci_forward_deployment_enabled` settings.
+  * Environments can now be filtered by their deployment state.
 
 # v0.1308.0
 
