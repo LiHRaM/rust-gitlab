@@ -7,7 +7,7 @@
 use chrono::NaiveDate;
 use derive_builder::Builder;
 
-use crate::api::common::{AccessLevel, NameOrId};
+use crate::api::common::{AccessLevel, CommaSeparatedList, NameOrId};
 use crate::api::endpoint_prelude::*;
 
 /// Add a user as a member of a project.
@@ -18,7 +18,8 @@ pub struct AddProjectMember<'a> {
     #[builder(setter(into))]
     project: NameOrId<'a>,
     /// The user to add to the project.
-    user: u64,
+    #[builder(setter(name = "_user"), private)]
+    user_ids: CommaSeparatedList<u64>,
     /// The access level for the user in the project.
     access_level: AccessLevel,
 
@@ -31,6 +32,27 @@ impl<'a> AddProjectMember<'a> {
     /// Create a builder for the endpoint.
     pub fn builder() -> AddProjectMemberBuilder<'a> {
         AddProjectMemberBuilder::default()
+    }
+}
+
+impl<'a> AddProjectMemberBuilder<'a> {
+    /// The user to add (by ID).
+    pub fn user(&mut self, user: u64) -> &mut Self {
+        self.user_ids
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(user);
+        self
+    }
+
+    /// Add a set of users (by ID).
+    pub fn users<I>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = u64>,
+    {
+        self.user_ids
+            .get_or_insert_with(CommaSeparatedList::new)
+            .extend(iter);
+        self
     }
 }
 
@@ -47,7 +69,7 @@ impl<'a> Endpoint for AddProjectMember<'a> {
         let mut params = FormParams::default();
 
         params
-            .push("user_id", self.user)
+            .push("user_id", &self.user_ids)
             .push("access_level", self.access_level.as_u64())
             .push_opt("expires_at", self.expires_at);
 
@@ -88,7 +110,7 @@ mod tests {
             .access_level(AccessLevel::Developer)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`user` must be initialized");
+        assert_eq!(err, "`user_ids` must be initialized");
     }
 
     #[test]
@@ -126,6 +148,32 @@ mod tests {
             .project("simple/project")
             .user(1)
             .access_level(AccessLevel::Developer)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_user_multiple() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/members")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "user_id=1%2C2",
+                "&access_level=30",
+                "&expires_at=2020-01-01",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = AddProjectMember::builder()
+            .project("simple/project")
+            .user(1)
+            .user(2)
+            .access_level(AccessLevel::Developer)
+            .expires_at(NaiveDate::from_ymd(2020, 1, 1))
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

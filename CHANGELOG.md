@@ -47,6 +47,7 @@
     now be scoped.
   * Issue notes can now be created and edited with the confidential flag.
   * Project labels can be filtered by search queries.
+  * Project members can now be edited in batch (using multiple IDs).
 
 # v0.1308.0
 
