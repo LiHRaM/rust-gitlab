@@ -35,6 +35,8 @@
     `allow_merge_on_skipped_pipeline` settings.
   * Projects can now be edited with `ci_forward_deployment_enabled` settings.
   * Environments can now be filtered by their deployment state.
+  * Project hooks can now be registered for events related to confidential
+    notes, deployments, and releases.
 
 # v0.1308.0
 
