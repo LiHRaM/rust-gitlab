@@ -2,7 +2,7 @@
 
 This document categorizes the APIs as they pertain to this crate.
 
-Last synced: 12.10.2
+Last synced: 13.9.0-pre (29cc646679b927158b3315dbc6c5af39524fd6ec)
 
 # Implemented
 
@@ -408,40 +408,66 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/container_registry.md
   * https://gitlab.kitware.com/help/api/custom_attributes.md
   * https://gitlab.kitware.com/help/api/dependencies.md
+  * https://gitlab.kitware.com/help/api/dependency_proxy.md
   * https://gitlab.kitware.com/help/api/deploy_keys.md
+  * https://gitlab.kitware.com/help/api/deploy_tokens.md
   * https://gitlab.kitware.com/help/api/deployments.md
   * https://gitlab.kitware.com/help/api/epic_issues.md
   * https://gitlab.kitware.com/help/api/epic_links.md
   * https://gitlab.kitware.com/help/api/epics.md
   * https://gitlab.kitware.com/help/api/error_tracking.md
   * https://gitlab.kitware.com/help/api/events.md
+  * https://gitlab.kitware.com/help/api/experiments.md
+  * https://gitlab.kitware.com/help/api/feature_flag_specs.md
+  * https://gitlab.kitware.com/help/api/feature_flag_users_lists.md
+  * https://gitlab.kitware.com/help/api/feature_flags.md
   * https://gitlab.kitware.com/help/api/features.md
+  * https://gitlab.kitware.com/help/api/freeze_periods.md
   * https://gitlab.kitware.com/help/api/geo_nodes.md
   * https://gitlab.kitware.com/help/api/group_activity_analytics.md
   * https://gitlab.kitware.com/help/api/group_badges.md
   * https://gitlab.kitware.com/help/api/group_boards.md
+  * https://gitlab.kitware.com/help/api/group_clusters.md
+  * https://gitlab.kitware.com/help/api/group_import_export.md
+  * https://gitlab.kitware.com/help/api/group_iterations.md
   * https://gitlab.kitware.com/help/api/group_labels.md
   * https://gitlab.kitware.com/help/api/group_level_variables.md
+  * https://gitlab.kitware.com/help/api/group_wikis.md
   * https://gitlab.kitware.com/help/api/import.md
+  * https://gitlab.kitware.com/help/api/instance_clusters.md
+  * https://gitlab.kitware.com/help/api/instance_level_ci_variables.md
+  * https://gitlab.kitware.com/help/api/invitations.md
   * https://gitlab.kitware.com/help/api/issue_links.md
   * https://gitlab.kitware.com/help/api/issues_statistics.md
+  * https://gitlab.kitware.com/help/api/iterations.md
   * https://gitlab.kitware.com/help/api/keys.md
   * https://gitlab.kitware.com/help/api/license.md
   * https://gitlab.kitware.com/help/api/lint.md
   * https://gitlab.kitware.com/help/api/managed_licenses.md
   * https://gitlab.kitware.com/help/api/markdown.md
   * https://gitlab.kitware.com/help/api/merge_request_approvals.md
+  * https://gitlab.kitware.com/help/api/merge_request_context_commits.md
+  * https://gitlab.kitware.com/help/api/merge_trains.md
+  * https://gitlab.kitware.com/help/api/metrics_dashboard_annotations.md
+  * https://gitlab.kitware.com/help/api/metrics_user_starred_dashboards.md
   * https://gitlab.kitware.com/help/api/namespaces.md
   * https://gitlab.kitware.com/help/api/notification_settings.md
+  * https://gitlab.kitware.com/help/api/oauth2.md
   * https://gitlab.kitware.com/help/api/packages.md
+  * https://gitlab.kitware.com/help/api/pages.md
   * https://gitlab.kitware.com/help/api/pages_domains.md
+  * https://gitlab.kitware.com/help/api/personal_access_tokens.md
   * https://gitlab.kitware.com/help/api/pipeline_schedules.md
   * https://gitlab.kitware.com/help/api/pipeline_triggers.md
+  * https://gitlab.kitware.com/help/api/project_aliases.md
+  * https://gitlab.kitware.com/help/api/project_analytics.md
   * https://gitlab.kitware.com/help/api/project_badges.md
   * https://gitlab.kitware.com/help/api/project_clusters.md
   * https://gitlab.kitware.com/help/api/project_import_export.md
   * https://gitlab.kitware.com/help/api/project_level_variables.md
+  * https://gitlab.kitware.com/help/api/project_repository_storage_moves.md
   * https://gitlab.kitware.com/help/api/project_snippets.md
+  * https://gitlab.kitware.com/help/api/project_statistics.md
   * https://gitlab.kitware.com/help/api/project_templates.md
   * https://gitlab.kitware.com/help/api/project_vulnerabilities.md
   * https://gitlab.kitware.com/help/api/protected_environments.md
@@ -449,12 +475,21 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/releases/links.md
   * https://gitlab.kitware.com/help/api/remote_mirrors.md
   * https://gitlab.kitware.com/help/api/repositories.md
+  * https://gitlab.kitware.com/help/api/repository_files.md
   * https://gitlab.kitware.com/help/api/repository_submodules.md
+  * https://gitlab.kitware.com/help/api/resource_access_tokens.md
+  * https://gitlab.kitware.com/help/api/resource_iteration_events.md
+  * https://gitlab.kitware.com/help/api/resource_label_events.md
+  * https://gitlab.kitware.com/help/api/resource_milestone_events.md
+  * https://gitlab.kitware.com/help/api/resource_state_events.md
+  * https://gitlab.kitware.com/help/api/resource_weight_events.md
   * https://gitlab.kitware.com/help/api/runners.md
+  * https://gitlab.kitware.com/help/api/scim.md
   * https://gitlab.kitware.com/help/api/search.md
   * https://gitlab.kitware.com/help/api/services.md
   * https://gitlab.kitware.com/help/api/settings.md
   * https://gitlab.kitware.com/help/api/sidekiq_metrics.md
+  * https://gitlab.kitware.com/help/api/snippet_repository_storage_moves.md
   * https://gitlab.kitware.com/help/api/snippets.md
   * https://gitlab.kitware.com/help/api/statistics.md
   * https://gitlab.kitware.com/help/api/suggestions.md
