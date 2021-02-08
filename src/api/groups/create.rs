@@ -32,7 +32,7 @@ impl GroupProjectCreationAccessLevel {
 }
 
 impl ParamValue<'static> for GroupProjectCreationAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -56,7 +56,7 @@ impl SubgroupCreationAccessLevel {
 }
 
 impl ParamValue<'static> for SubgroupCreationAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -83,8 +83,45 @@ impl BranchProtection {
 }
 
 impl ParamValue<'static> for BranchProtection {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
+    }
+}
+
+/// Settings for a group's shared runner minute allocation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SharedRunnersMinutesLimit {
+    /// Inherit the setting from the parent group or instance.
+    Inherit,
+    /// Unlimited shared minutes are allowed.
+    Unlimited,
+    /// A set number of minutes are allowed.
+    Minutes(u64),
+}
+
+impl SharedRunnersMinutesLimit {
+    fn as_str(self) -> Cow<'static, str> {
+        match self {
+            SharedRunnersMinutesLimit::Inherit => "nil".into(),
+            SharedRunnersMinutesLimit::Unlimited => "0".into(),
+            SharedRunnersMinutesLimit::Minutes(m) => format!("{}", m).into(),
+        }
+    }
+}
+
+impl From<u64> for SharedRunnersMinutesLimit {
+    fn from(i: u64) -> Self {
+        if i == 0 {
+            Self::Unlimited
+        } else {
+            Self::Minutes(i)
+        }
+    }
+}
+
+impl ParamValue<'static> for SharedRunnersMinutesLimit {
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str()
     }
 }
 
@@ -148,8 +185,8 @@ pub struct CreateGroup<'a> {
     #[builder(default)]
     default_branch_protection: Option<BranchProtection>,
     /// Pipeline quota (in minutes) for the group on shared runners.
-    #[builder(default)]
-    shared_runners_minutes_limit: Option<u64>,
+    #[builder(setter(into), default)]
+    shared_runners_minutes_limit: Option<SharedRunnersMinutesLimit>,
     /// Pipeline quota excess (in minutes) for the group on shared runners.
     #[builder(default)]
     extra_shared_runners_minutes_limit: Option<u64>,
@@ -214,7 +251,8 @@ mod tests {
 
     use crate::api::common::VisibilityLevel;
     use crate::api::groups::{
-        BranchProtection, CreateGroup, GroupProjectCreationAccessLevel, SubgroupCreationAccessLevel,
+        BranchProtection, CreateGroup, GroupProjectCreationAccessLevel, SharedRunnersMinutesLimit,
+        SubgroupCreationAccessLevel,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -250,6 +288,21 @@ mod tests {
             (BranchProtection::None, "0"),
             (BranchProtection::Partial, "1"),
             (BranchProtection::Full, "2"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn shared_runners_minutes_limit_as_str() {
+        let items = &[
+            (SharedRunnersMinutesLimit::Inherit, "nil"),
+            (SharedRunnersMinutesLimit::Unlimited, "0"),
+            (SharedRunnersMinutesLimit::Minutes(10), "10"),
+            (SharedRunnersMinutesLimit::Minutes(24), "24"),
+            (15.into(), "15"),
         ];
 
         for (i, s) in items {
@@ -645,6 +698,30 @@ mod tests {
 
     #[test]
     fn endpoint_shared_runners_minutes_limit() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("groups")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&path=path",
+                "&shared_runners_minutes_limit=0",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateGroup::builder()
+            .name("name")
+            .path("path")
+            .shared_runners_minutes_limit(SharedRunnersMinutesLimit::Unlimited)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_shared_runners_minutes_limit_into() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::POST)
             .endpoint("groups")

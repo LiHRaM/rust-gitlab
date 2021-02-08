@@ -11,7 +11,10 @@
 
 use std::borrow::Cow;
 use std::fmt;
+use std::iter;
+use std::ops;
 
+use itertools::Itertools;
 use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
 
 use crate::api::ParamValue;
@@ -21,6 +24,8 @@ use crate::api::ParamValue;
 pub enum AccessLevel {
     /// Anonymous access.
     Anonymous,
+    /// Minimal access.
+    Minimal,
     /// Guest access (can see the project).
     Guest,
     /// Reporter access (can open issues).
@@ -45,6 +50,7 @@ impl AccessLevel {
             AccessLevel::Developer => "developer",
             AccessLevel::Reporter => "reporter",
             AccessLevel::Guest => "guest",
+            AccessLevel::Minimal => "minimal",
             AccessLevel::Anonymous => "anonymous",
         }
     }
@@ -58,6 +64,7 @@ impl AccessLevel {
             AccessLevel::Developer => 30,
             AccessLevel::Reporter => 20,
             AccessLevel::Guest => 10,
+            AccessLevel::Minimal => 5,
             AccessLevel::Anonymous => 0,
         }
     }
@@ -89,7 +96,7 @@ impl SortOrder {
 }
 
 impl ParamValue<'static> for SortOrder {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -124,7 +131,7 @@ impl From<bool> for EnableState {
 }
 
 impl ParamValue<'static> for EnableState {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -209,7 +216,7 @@ impl VisibilityLevel {
 }
 
 impl ParamValue<'static> for VisibilityLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -246,7 +253,7 @@ impl From<bool> for YesNo {
 }
 
 impl ParamValue<'static> for YesNo {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -282,23 +289,103 @@ impl ProtectedAccessLevel {
 }
 
 impl ParamValue<'static> for ProtectedAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
+    }
+}
+
+/// A comma-separated list of values.
+#[derive(Debug, Clone, Default)]
+pub struct CommaSeparatedList<T> {
+    data: Vec<T>,
+}
+
+impl<T> CommaSeparatedList<T> {
+    /// Create a new, empty comma-separated list.
+    pub fn new() -> Self {
+        Self {
+            data: Vec::new(),
+        }
+    }
+}
+
+impl<T> From<Vec<T>> for CommaSeparatedList<T> {
+    fn from(data: Vec<T>) -> Self {
+        Self {
+            data,
+        }
+    }
+}
+
+impl<T> iter::FromIterator<T> for CommaSeparatedList<T> {
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+    {
+        Self {
+            data: iter.into_iter().collect(),
+        }
+    }
+}
+
+impl<T> ops::Deref for CommaSeparatedList<T> {
+    type Target = Vec<T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
+impl<T> ops::DerefMut for CommaSeparatedList<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.data
+    }
+}
+
+impl<T> fmt::Display for CommaSeparatedList<T>
+where
+    T: fmt::Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.data.iter().format(","))
+    }
+}
+
+impl<'a, T> ParamValue<'a> for CommaSeparatedList<T>
+where
+    T: ParamValue<'a>,
+{
+    fn as_value(&self) -> Cow<'a, str> {
+        format!("{}", self.data.iter().map(|d| d.as_value()).format(",")).into()
+    }
+}
+
+impl<'a, 'b, T> ParamValue<'a> for &'b CommaSeparatedList<T>
+where
+    T: ParamValue<'a>,
+{
+    fn as_value(&self) -> Cow<'a, str> {
+        format!("{}", self.data.iter().map(|d| d.as_value()).format(",")).into()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
     use std::cmp;
+    use std::iter;
 
     use crate::api::common::{
-        AccessLevel, EnableState, NameOrId, ProtectedAccessLevel, SortOrder, VisibilityLevel, YesNo,
+        AccessLevel, CommaSeparatedList, EnableState, NameOrId, ProtectedAccessLevel, SortOrder,
+        VisibilityLevel, YesNo,
     };
+    use crate::api::params::ParamValue;
 
     #[test]
     fn access_level_as_str() {
         let items = &[
             (AccessLevel::Anonymous, "anonymous", 0),
+            (AccessLevel::Minimal, "minimal", 5),
             (AccessLevel::Guest, "guest", 10),
             (AccessLevel::Reporter, "reporter", 20),
             (AccessLevel::Developer, "developer", 30),
@@ -483,5 +570,43 @@ mod tests {
         for (i, s) in items {
             assert_eq!(i.as_str(), *s);
         }
+    }
+
+    #[test]
+    fn comma_separated_list_default() {
+        let csl = CommaSeparatedList::<u64>::default();
+        assert!(csl.is_empty());
+    }
+
+    #[test]
+    fn comma_separated_list_vec() {
+        let csl = CommaSeparatedList::<u64>::new();
+        let _: &Vec<u64> = &csl;
+    }
+
+    #[test]
+    fn comma_separated_list_from_iter() {
+        let _: CommaSeparatedList<_> = iter::once(2).collect();
+    }
+
+    #[test]
+    fn comma_separated_list_display() {
+        let csl_one: CommaSeparatedList<_> = iter::once(2).collect();
+        assert_eq!(format!("{}", csl_one), "2");
+        let csl_two: CommaSeparatedList<_> = [1, 2].iter().copied().collect();
+        assert_eq!(format!("{}", csl_two), "1,2");
+    }
+
+    #[test]
+    fn comma_separated_list_param_value() {
+        let csl_one: CommaSeparatedList<_> = iter::once(2).collect();
+        assert_eq!(csl_one.as_value(), "2");
+        let csl_two: CommaSeparatedList<_> = [1, 2].iter().copied().collect();
+        assert_eq!(csl_two.as_value(), "1,2");
+        let csl_str_one: CommaSeparatedList<Cow<str>> = iter::once("one".into()).collect();
+        assert_eq!(csl_str_one.as_value(), "one");
+        let csl_str_two: CommaSeparatedList<Cow<str>> =
+            ["one".into(), "two".into()].iter().cloned().collect();
+        assert_eq!(csl_str_two.as_value(), "one,two");
     }
 }

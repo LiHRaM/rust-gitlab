@@ -50,7 +50,7 @@ impl JobScope {
 }
 
 impl ParamValue<'static> for JobScope {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

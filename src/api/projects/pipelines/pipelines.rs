@@ -40,7 +40,7 @@ impl PipelineScope {
 }
 
 impl ParamValue<'static> for PipelineScope {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -64,6 +64,8 @@ pub enum PipelineStatus {
     Created,
     /// Awaiting manual triggering.
     Manual,
+    /// Pipelines which have been scheduled.
+    Scheduled,
 }
 
 impl PipelineStatus {
@@ -78,12 +80,13 @@ impl PipelineStatus {
             PipelineStatus::Skipped => "skipped",
             PipelineStatus::Created => "created",
             PipelineStatus::Manual => "manual",
+            PipelineStatus::Scheduled => "scheduled",
         }
     }
 }
 
 impl ParamValue<'static> for PipelineStatus {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -123,7 +126,7 @@ impl PipelineOrderBy {
 }
 
 impl ParamValue<'static> for PipelineOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -248,6 +251,7 @@ mod tests {
             (PipelineStatus::Skipped, "skipped"),
             (PipelineStatus::Created, "created"),
             (PipelineStatus::Manual, "manual"),
+            (PipelineStatus::Scheduled, "scheduled"),
         ];
 
         for (i, s) in items {

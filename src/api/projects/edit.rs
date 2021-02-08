@@ -61,10 +61,25 @@ pub struct EditProject<'a> {
     /// Set the access level for GitLab Pages on the project.
     #[builder(default)]
     pages_access_level: Option<FeatureAccessLevelPublic>,
+    /// Set the access level for operations features.
+    #[builder(default)]
+    operations_access_level: Option<FeatureAccessLevel>,
+    /// Set the access level for requirements features.
+    #[builder(default)]
+    requirements_access_level: Option<FeatureAccessLevelPublic>,
+    /// Set the access level for analytics features.
+    #[builder(default)]
+    analytics_access_level: Option<FeatureAccessLevel>,
 
     /// Whether to enable email notifications or not.
     #[builder(default)]
     emails_disabled: Option<bool>,
+    /// Whether the default set of award emojis are shown for this project.
+    #[builder(default)]
+    show_default_award_emojis: Option<bool>,
+    /// Whether to allow non-members to set pipeline variables when triggering piplines or not.
+    #[builder(default)]
+    restrict_user_defined_variables: Option<bool>,
     /// Whether outdated diff discussions are resolved when a merge request is updated or not.
     #[builder(default)]
     resolve_outdated_diff_discussions: Option<bool>,
@@ -89,6 +104,9 @@ pub struct EditProject<'a> {
     /// Whether the CI pipeline is required to succeed before merges are allowed.
     #[builder(default)]
     only_allow_merge_if_pipeline_succeeds: Option<bool>,
+    /// Whether the CI pipeline can be skipped before merges are allowed.
+    #[builder(default)]
+    allow_merge_on_skipped_pipeline: Option<bool>,
     /// Whether all discussions must be resolved before merges are allowed.
     #[builder(default)]
     only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
@@ -140,6 +158,9 @@ pub struct EditProject<'a> {
     /// The default number of revisions to fetch in CI jobs.
     #[builder(default)]
     ci_default_git_depth: Option<u64>,
+    /// Whether to skip pending deployment jobs when a newer one is started.
+    #[builder(default)]
+    ci_forward_deployment_enabled: Option<bool>,
     /// Whether Auto DevOps are enabled or not.
     #[builder(default)]
     auto_devops_enabled: Option<bool>,
@@ -259,7 +280,15 @@ impl<'a> Endpoint for EditProject<'a> {
             .push_opt("wiki_access_level", self.wiki_access_level)
             .push_opt("snippets_access_level", self.snippets_access_level)
             .push_opt("pages_access_level", self.pages_access_level)
+            .push_opt("operations_access_level", self.operations_access_level)
+            .push_opt("requirements_access_level", self.requirements_access_level)
+            .push_opt("analytics_access_level", self.analytics_access_level)
             .push_opt("emails_disabled", self.emails_disabled)
+            .push_opt("show_default_award_emojis", self.show_default_award_emojis)
+            .push_opt(
+                "restrict_user_defined_variables",
+                self.restrict_user_defined_variables,
+            )
             .push_opt(
                 "resolve_outdated_diff_discussions",
                 self.resolve_outdated_diff_discussions,
@@ -275,6 +304,10 @@ impl<'a> Endpoint for EditProject<'a> {
             .push_opt(
                 "only_allow_merge_if_pipeline_succeeds",
                 self.only_allow_merge_if_pipeline_succeeds,
+            )
+            .push_opt(
+                "allow_merge_on_skipped_pipeline",
+                self.allow_merge_on_skipped_pipeline,
             )
             .push_opt(
                 "only_allow_merge_if_all_discussions_are_resolved",
@@ -305,6 +338,10 @@ impl<'a> Endpoint for EditProject<'a> {
             .push_opt("build_coverage_regex", self.build_coverage_regex.as_ref())
             .push_opt("ci_config_path", self.ci_config_path.as_ref())
             .push_opt("ci_default_git_depth", self.ci_default_git_depth)
+            .push_opt(
+                "ci_forward_deployment_enabled",
+                self.ci_forward_deployment_enabled,
+            )
             .push_opt("auto_devops_enabled", self.auto_devops_enabled)
             .push_opt(
                 "auto_devops_deploy_strategy",
@@ -619,6 +656,63 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_operations_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("operations_access_level=enabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .operations_access_level(FeatureAccessLevel::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_requirements_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("requirements_access_level=public")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .requirements_access_level(FeatureAccessLevelPublic::Public)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_analytics_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("analytics_access_level=private")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .analytics_access_level(FeatureAccessLevel::Private)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_emails_disabled() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::PUT)
@@ -632,6 +726,44 @@ mod tests {
         let endpoint = EditProject::builder()
             .project("simple/project")
             .emails_disabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_show_default_award_emojis() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("show_default_award_emojis=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .show_default_award_emojis(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_restrict_user_defined_variables() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("restrict_user_defined_variables=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .restrict_user_defined_variables(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
@@ -925,6 +1057,25 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_allow_merge_on_skipped_pipeline() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("allow_merge_on_skipped_pipeline=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .allow_merge_on_skipped_pipeline(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_only_allow_merge_if_all_discussions_are_resolved() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::PUT)
@@ -1186,6 +1337,25 @@ mod tests {
         let endpoint = EditProject::builder()
             .project("simple/project")
             .ci_default_git_depth(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_ci_forward_deployment_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("ci_forward_deployment_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .ci_forward_deployment_enabled(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

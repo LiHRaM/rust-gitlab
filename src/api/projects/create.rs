@@ -4,6 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::cmp::Ordering;
 use std::collections::BTreeSet;
 
 use derive_builder::Builder;
@@ -35,7 +36,7 @@ impl FeatureAccessLevel {
 }
 
 impl ParamValue<'static> for FeatureAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -68,7 +69,7 @@ impl FeatureAccessLevelPublic {
 }
 
 impl ParamValue<'static> for FeatureAccessLevelPublic {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -104,7 +105,7 @@ impl ContainerExpirationCadence {
 }
 
 impl ParamValue<'static> for ContainerExpirationCadence {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -112,7 +113,7 @@ impl ParamValue<'static> for ContainerExpirationCadence {
 /// How many container instances to keep around.
 ///
 /// Note that GitLab only supports a few discrete values for this setting.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, Eq)]
 pub enum ContainerExpirationKeepN {
     /// Only one.
     One,
@@ -124,27 +125,66 @@ pub enum ContainerExpirationKeepN {
     TwentyFive,
     /// Up to fifty.
     Fifty,
-    /// Up to one hunder.
+    /// Up to one hundred.
     OneHundred,
+    /// Arbitrary number.
+    Arbitrary(u64),
+}
+
+impl From<u64> for ContainerExpirationKeepN {
+    fn from(n: u64) -> Self {
+        Self::Arbitrary(n)
+    }
+}
+
+impl PartialEq for ContainerExpirationKeepN {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u64().eq(&other.as_u64())
+    }
+}
+
+impl PartialOrd for ContainerExpirationKeepN {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.as_u64().partial_cmp(&other.as_u64())
+    }
+}
+
+impl Ord for ContainerExpirationKeepN {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.as_u64().cmp(&other.as_u64())
+    }
 }
 
 impl ContainerExpirationKeepN {
     /// The variable type query parameter.
-    pub(crate) fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> Cow<'static, str> {
         match self {
-            ContainerExpirationKeepN::One => "1",
-            ContainerExpirationKeepN::Five => "5",
-            ContainerExpirationKeepN::Ten => "10",
-            ContainerExpirationKeepN::TwentyFive => "25",
-            ContainerExpirationKeepN::Fifty => "50",
-            ContainerExpirationKeepN::OneHundred => "100",
+            ContainerExpirationKeepN::One => "1".into(),
+            ContainerExpirationKeepN::Five => "5".into(),
+            ContainerExpirationKeepN::Ten => "10".into(),
+            ContainerExpirationKeepN::TwentyFive => "25".into(),
+            ContainerExpirationKeepN::Fifty => "50".into(),
+            ContainerExpirationKeepN::OneHundred => "100".into(),
+            ContainerExpirationKeepN::Arbitrary(n) => format!("{}", n).into(),
+        }
+    }
+
+    fn as_u64(self) -> u64 {
+        match self {
+            ContainerExpirationKeepN::One => 1,
+            ContainerExpirationKeepN::Five => 5,
+            ContainerExpirationKeepN::Ten => 10,
+            ContainerExpirationKeepN::TwentyFive => 25,
+            ContainerExpirationKeepN::Fifty => 50,
+            ContainerExpirationKeepN::OneHundred => 100,
+            ContainerExpirationKeepN::Arbitrary(n) => n,
         }
     }
 }
 
 impl ParamValue<'static> for ContainerExpirationKeepN {
-    fn as_value(self) -> Cow<'static, str> {
-        self.as_str().into()
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str()
     }
 }
 
@@ -176,7 +216,7 @@ impl ContainerExpirationOlderThan {
 }
 
 impl ParamValue<'static> for ContainerExpirationOlderThan {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -192,7 +232,7 @@ pub struct ContainerExpirationPolicy<'a> {
     #[builder(setter(into), default)]
     enabled: Option<bool>,
     /// How many container images to keep.
-    #[builder(default)]
+    #[builder(setter(into), default)]
     keep_n: Option<ContainerExpirationKeepN>,
     /// Only consider containers older than this age.
     #[builder(default)]
@@ -201,8 +241,21 @@ pub struct ContainerExpirationPolicy<'a> {
     ///
     /// See the [Ruby documentation](https://ruby-doc.org/core-2.7.1/Regexp.html) for supported
     /// syntax.
+    #[deprecated(note = "use `name_regex_delete` instead")]
     #[builder(setter(into), default)]
     name_regex: Option<Cow<'a, str>>,
+    /// Delete images with names matching a regular expression.
+    ///
+    /// See the [Ruby documentation](https://ruby-doc.org/core-2.7.1/Regexp.html) for supported
+    /// syntax.
+    #[builder(setter(into), default)]
+    name_regex_delete: Option<Cow<'a, str>>,
+    /// Keep images with names matching a regular expression.
+    ///
+    /// See the [Ruby documentation](https://ruby-doc.org/core-2.7.1/Regexp.html) for supported
+    /// syntax.
+    #[builder(setter(into), default)]
+    name_regex_keep: Option<Cow<'a, str>>,
 }
 
 impl<'a> ContainerExpirationPolicy<'a> {
@@ -230,9 +283,21 @@ impl<'a> ContainerExpirationPolicy<'a> {
                 self.older_than,
             )
             .push_opt(
+                "container_expiration_policy_attributes[name_regex_delete]",
+                self.name_regex_delete.as_ref(),
+            )
+            .push_opt(
+                "container_expiration_policy_attributes[name_regex_keep]",
+                self.name_regex_keep.as_ref(),
+            );
+
+        #[allow(deprecated)]
+        {
+            params.push_opt(
                 "container_expiration_policy_attributes[name_regex]",
                 self.name_regex.as_ref(),
             );
+        }
     }
 }
 
@@ -259,7 +324,7 @@ impl AutoDevOpsDeployStrategy {
 }
 
 impl ParamValue<'static> for AutoDevOpsDeployStrategy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -287,7 +352,7 @@ impl MergeMethod {
 }
 
 impl ParamValue<'static> for MergeMethod {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -321,7 +386,7 @@ impl BuildGitStrategy {
 }
 
 impl ParamValue<'static> for BuildGitStrategy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -437,10 +502,25 @@ pub struct CreateProject<'a> {
     /// Set the access level for GitLab Pages on the project.
     #[builder(default)]
     pages_access_level: Option<FeatureAccessLevelPublic>,
+    /// Set the access level for operations features.
+    #[builder(default)]
+    operations_access_level: Option<FeatureAccessLevel>,
+    /// Set the access level for requirements features.
+    #[builder(default)]
+    requirements_access_level: Option<FeatureAccessLevelPublic>,
+    /// Set the access level for analytics features.
+    #[builder(default)]
+    analytics_access_level: Option<FeatureAccessLevel>,
 
     /// Whether to enable email notifications or not.
     #[builder(default)]
     emails_disabled: Option<bool>,
+    /// Whether the default set of award emojis are shown for this project.
+    #[builder(default)]
+    show_default_award_emojis: Option<bool>,
+    /// Whether to allow non-members to set pipeline variables when triggering piplines or not.
+    #[builder(default)]
+    restrict_user_defined_variables: Option<bool>,
     /// Whether outdated diff discussions are resolved when a merge request is updated or not.
     #[builder(default)]
     resolve_outdated_diff_discussions: Option<bool>,
@@ -465,6 +545,9 @@ pub struct CreateProject<'a> {
     /// Whether the CI pipeline is required to succeed before merges are allowed.
     #[builder(default)]
     only_allow_merge_if_pipeline_succeeds: Option<bool>,
+    /// Whether the CI pipeline can be skipped before merges are allowed.
+    #[builder(default)]
+    allow_merge_on_skipped_pipeline: Option<bool>,
     /// Whether all discussions must be resolved before merges are allowed.
     #[builder(default)]
     only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
@@ -700,7 +783,15 @@ impl<'a> Endpoint for CreateProject<'a> {
             .push_opt("wiki_access_level", self.wiki_access_level)
             .push_opt("snippets_access_level", self.snippets_access_level)
             .push_opt("pages_access_level", self.pages_access_level)
+            .push_opt("operations_access_level", self.operations_access_level)
+            .push_opt("requirements_access_level", self.requirements_access_level)
+            .push_opt("analytics_access_level", self.analytics_access_level)
             .push_opt("emails_disabled", self.emails_disabled)
+            .push_opt("show_default_award_emojis", self.show_default_award_emojis)
+            .push_opt(
+                "restrict_user_defined_variables",
+                self.restrict_user_defined_variables,
+            )
             .push_opt(
                 "resolve_outdated_diff_discussions",
                 self.resolve_outdated_diff_discussions,
@@ -716,6 +807,10 @@ impl<'a> Endpoint for CreateProject<'a> {
             .push_opt(
                 "only_allow_merge_if_pipeline_succeeds",
                 self.only_allow_merge_if_pipeline_succeeds,
+            )
+            .push_opt(
+                "allow_merge_on_skipped_pipeline",
+                self.allow_merge_on_skipped_pipeline,
             )
             .push_opt(
                 "only_allow_merge_if_all_discussions_are_resolved",
@@ -847,7 +942,9 @@ mod tests {
             ContainerExpirationKeepN::One,
             ContainerExpirationKeepN::Five,
             ContainerExpirationKeepN::Ten,
+            ContainerExpirationKeepN::Arbitrary(11),
             ContainerExpirationKeepN::TwentyFive,
+            30.into(),
             ContainerExpirationKeepN::Fifty,
             ContainerExpirationKeepN::OneHundred,
         ];
@@ -867,7 +964,9 @@ mod tests {
             (ContainerExpirationKeepN::One, "1"),
             (ContainerExpirationKeepN::Five, "5"),
             (ContainerExpirationKeepN::Ten, "10"),
+            (ContainerExpirationKeepN::Arbitrary(11), "11"),
             (ContainerExpirationKeepN::TwentyFive, "25"),
+            (30.into(), "30"),
             (ContainerExpirationKeepN::Fifty, "50"),
             (ContainerExpirationKeepN::OneHundred, "100"),
         ];
@@ -1255,6 +1354,63 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_operations_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&operations_access_level=enabled"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .operations_access_level(FeatureAccessLevel::Enabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_requirements_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&requirements_access_level=public"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .requirements_access_level(FeatureAccessLevelPublic::Public)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_analytics_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&analytics_access_level=private"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .analytics_access_level(FeatureAccessLevel::Private)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_emails_disabled() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::POST)
@@ -1268,6 +1424,47 @@ mod tests {
         let endpoint = CreateProject::builder()
             .name("name")
             .emails_disabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_show_default_award_emojis() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&show_default_award_emojis=false"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .show_default_award_emojis(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_restrict_user_defined_variables() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&restrict_user_defined_variables=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .restrict_user_defined_variables(false)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
@@ -1450,6 +1647,60 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_container_expiration_policy_attributes_name_regex_delete() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bname_regex_delete%5D=%3Alatest",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .name_regex_delete(":latest")
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_expiration_policy_attributes_name_regex_keep() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_expiration_policy_attributes%5Bname_regex_keep%5D=%3Alatest",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_expiration_policy_attributes(
+                ContainerExpirationPolicy::builder()
+                    .name_regex_keep(":latest")
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_container_expiration_policy_attributes_all() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::POST)
@@ -1580,6 +1831,28 @@ mod tests {
         let endpoint = CreateProject::builder()
             .name("name")
             .only_allow_merge_if_pipeline_succeeds(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_allow_merge_on_skipped_pipeline() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&allow_merge_on_skipped_pipeline=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .allow_merge_on_skipped_pipeline(false)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

@@ -1,3 +1,72 @@
+# v0.1308.1 (unreleased)
+
+## Breaking changes
+
+  * `ParamValue::as_value` now takes its value as `&self` rather than `self`.
+    This was required in order to implement `CommaSeparatedList` reliably.
+  * Merge request discussions on code now have a more fine-grained API. This
+    change was made by GitLab and is just being followed by the crate.
+
+## Additions
+
+  * `api::common::CommaSeparatedList` now exists for easy use of
+    comma-separated values.
+
+## Deprecations
+
+  * `EditIssue::remove_labels` is deprecated in favor of the better
+    `clear_labels` wording.
+  * `EditMergeRequest::remove_labels` is deprecated in favor of the better
+    `clear_labels` wording.
+
+## Changes
+
+  * API bindings for the `"minimal"` access level.
+  * Groups can have "inherit" set as their shared runner minute limit.
+  * Listing groups can now be set to only return top-level groups.
+  * Searching for projects within a group can now be sorted by a similarity
+    score based on the search criteria.
+  * Project container expiration policies can now use an arbitrary "keep n"
+    count.
+  * Project container expiration policies now have `name_regex_delete`
+    (replacing the now-deprecated `name_regex`) and `name_regex_keep`.
+  * Projects can now be created and edited with `operations_access_level`
+    settings.
+  * Projects can now be created and edited with `requirements_access_level`
+    settings.
+  * Projects can now be created and edited with `analytics_access_level`
+    settings.
+  * Projects can now be created and edited with `show_default_award_emojis`
+    settings.
+  * Projects can now be created and edited with
+    `restrict_user_defined_variables` settings.
+  * Projects can now be created and edited with
+    `allow_merge_on_skipped_pipeline` settings.
+  * Projects can now be edited with `ci_forward_deployment_enabled` settings.
+  * Environments can now be filtered by their deployment state.
+  * Project hooks can now be registered for events related to confidential
+    notes, deployments, and releases.
+  * Issues can now be edited with incremental label changes.
+  * Issues can now be filtered by iterations, due dates, and search queries can
+    now be scoped.
+  * Issue notes can now be created and edited with the confidential flag.
+  * Project labels can be filtered by search queries.
+  * Project members can now be edited in batch (using multiple IDs).
+  * Merge requests can now be created and edited with reviewer settings.
+  * Merge requests can now be created with the `approvals_before_merge`
+    setting.
+  * Merge request discussions can now be created on a specific commit.
+  * Merge requests can now be edited with incremental label changes.
+  * Merge requests can now be filtered by search scopes.
+  * Merge requests can now trigger merge status rechecks when listing.
+  * Merge requests can now be filtered by reviewer.
+  * Merge requests can now be filtered by environment status.
+  * API bindings for the `"scheduled"` pipeline status.
+  * Projects can now be sorted by various resource sizes.
+  * Projects can now be filtered by storage backend.
+  * Users can now be filtered by GitLab-internal users and administrator
+    status.
+
 # v0.1308.0
 
   * No changes needed for GitLab 13.8.

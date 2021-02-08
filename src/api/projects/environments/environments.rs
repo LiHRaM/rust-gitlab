@@ -8,11 +8,36 @@ use derive_builder::Builder;
 
 use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
 
 #[derive(Debug, Clone)]
 enum NameOrSearch<'a> {
     Name(Cow<'a, str>),
     Search(Cow<'a, str>),
+}
+
+/// States of environments.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum EnvironmentState {
+    /// Environments that have been deployed and are available.
+    Available,
+    /// Environments that have been stopped.
+    Stopped,
+}
+
+impl EnvironmentState {
+    fn as_str(self) -> &'static str {
+        match self {
+            EnvironmentState::Available => "available",
+            EnvironmentState::Stopped => "stopped",
+        }
+    }
+}
+
+impl ParamValue<'static> for EnvironmentState {
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
 }
 
 /// Query for environments within a project.
@@ -25,6 +50,11 @@ pub struct Environments<'a> {
 
     #[builder(setter(name = "_name_or_search"), default, private)]
     name_or_search: Option<NameOrSearch<'a>>,
+    /// Filter by the state of the environment.
+    ///
+    /// Note that even though the parameter is plural, it only supports a single value.
+    #[builder(setter(into), default)]
+    states: Option<EnvironmentState>,
 }
 
 impl<'a> Environments<'a> {
@@ -70,6 +100,8 @@ impl<'a> Endpoint for Environments<'a> {
     fn parameters(&self) -> QueryParams {
         let mut params = QueryParams::default();
 
+        params.push_opt("states", self.states);
+
         if let Some(name_or_search) = self.name_or_search.as_ref() {
             match name_or_search {
                 NameOrSearch::Name(name) => {
@@ -89,9 +121,21 @@ impl<'a> Pageable for Environments<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::environments::Environments;
+    use crate::api::projects::environments::{EnvironmentState, Environments};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
+
+    #[test]
+    fn environment_state_as_str() {
+        let items = &[
+            (EnvironmentState::Available, "available"),
+            (EnvironmentState::Stopped, "stopped"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
 
     #[test]
     fn project_is_needed() {
@@ -145,6 +189,23 @@ mod tests {
         let endpoint = Environments::builder()
             .project("simple/project")
             .search("query")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_state() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/environments")
+            .add_query_params(&[("states", "available")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Environments::builder()
+            .project("simple/project")
+            .states(EnvironmentState::Available)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

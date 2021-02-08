@@ -25,6 +25,9 @@ pub struct Labels<'a> {
     /// Defaults to `true`.
     #[builder(default)]
     include_ancestor_groups: Option<bool>,
+    /// Search for a term.
+    #[builder(setter(into), default)]
+    search: Option<Cow<'a, str>>,
 }
 
 impl<'a> Labels<'a> {
@@ -48,7 +51,8 @@ impl<'a> Endpoint for Labels<'a> {
 
         params
             .push_opt("with_counts", self.with_counts)
-            .push_opt("include_ancestor_groups", self.include_ancestor_groups);
+            .push_opt("include_ancestor_groups", self.include_ancestor_groups)
+            .push_opt("search", self.search.as_ref());
 
         params
     }
@@ -114,6 +118,23 @@ mod tests {
         let endpoint = Labels::builder()
             .project("simple/project")
             .include_ancestor_groups(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/labels")
+            .add_query_params(&[("search", "query")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Labels::builder()
+            .project("simple/project")
+            .search("query")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

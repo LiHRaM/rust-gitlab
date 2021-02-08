@@ -42,6 +42,9 @@ pub struct CreateHook<'a> {
     /// Whether to send note (comment) events for this webhook or not.
     #[builder(default)]
     note_events: Option<bool>,
+    /// Whether to send confidential note (comment) events for this webhook or not.
+    #[builder(default)]
+    confidential_note_events: Option<bool>,
     /// Whether to send job events for this webhook or not.
     #[builder(default)]
     job_events: Option<bool>,
@@ -51,6 +54,12 @@ pub struct CreateHook<'a> {
     /// Whether to send wiki page events for this webhook or not.
     #[builder(default)]
     wiki_page_events: Option<bool>,
+    /// Whether to send deployment events for this webhook or not.
+    #[builder(default)]
+    deployment_events: Option<bool>,
+    /// Whether to send release events for this webhook or not.
+    #[builder(default)]
+    releases_events: Option<bool>,
 
     /// Whether to verify SSL/TLS certificates for the webhook endpoint or not.
     #[builder(default)]
@@ -96,9 +105,12 @@ impl<'a> Endpoint for CreateHook<'a> {
             .push_opt("merge_requests_events", self.merge_requests_events)
             .push_opt("tag_push_events", self.tag_push_events)
             .push_opt("note_events", self.note_events)
+            .push_opt("confidential_note_events", self.confidential_note_events)
             .push_opt("job_events", self.job_events)
             .push_opt("pipeline_events", self.pipeline_events)
             .push_opt("wiki_page_events", self.wiki_page_events)
+            .push_opt("deployment_events", self.deployment_events)
+            .push_opt("releases_events", self.releases_events)
             .push_opt("enable_ssl_verification", self.enable_ssl_verification)
             .push_opt("token", self.token.as_ref());
 
@@ -325,6 +337,29 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_confidential_note_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&confidential_note_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .confidential_note_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_job_events() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::POST)
@@ -388,6 +423,52 @@ mod tests {
             .project("simple/project")
             .url("https://test.invalid/path?some=foo")
             .wiki_page_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_deployment_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&deployment_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .deployment_events(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_releases_events() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/hooks")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "url=https%3A%2F%2Ftest.invalid%2Fpath%3Fsome%3Dfoo",
+                "&releases_events=false",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateHook::builder()
+            .project("simple/project")
+            .url("https://test.invalid/path?some=foo")
+            .releases_events(false)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

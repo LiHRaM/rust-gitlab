@@ -48,7 +48,7 @@ impl UserOrderBy {
 }
 
 impl ParamValue<'static> for UserOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -123,6 +123,14 @@ pub struct Users<'a> {
     /// If set to `true`, filter out users without any projects.
     #[builder(default)]
     without_projects: Option<bool>,
+    /// Exclude internal users.
+    ///
+    /// These are generally Service Desk users or other GitLab-managed users.
+    #[builder(default)]
+    exclude_internal: Option<bool>,
+    /// Filter uses based on administrator status.
+    #[builder(default)]
+    admins: Option<bool>,
 }
 
 impl<'a> Users<'a> {
@@ -188,7 +196,9 @@ impl<'a> Endpoint for Users<'a> {
             .push_opt("order_by", self.order_by)
             .push_opt("sort", self.sort)
             .push_opt("two_factor", self.two_factor)
-            .push_opt("without_projects", self.without_projects);
+            .push_opt("without_projects", self.without_projects)
+            .push_opt("exclude_internal", self.exclude_internal)
+            .push_opt("admins", self.admins);
 
         if let Some(value) = self.external_provider.as_ref() {
             params
@@ -483,6 +493,32 @@ mod tests {
         let client = SingleTestClient::new_raw(endpoint, "");
 
         let endpoint = Users::builder().without_projects(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_exclude_internal() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("exclude_internal", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().exclude_internal(false).build().unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_admins() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("users")
+            .add_query_params(&[("admins", "false")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Users::builder().admins(false).build().unwrap();
         api::ignore(endpoint).query(&client).unwrap();
     }
 }

@@ -44,6 +44,7 @@ pub use self::merge_request::MergeRequestBuilder;
 
 pub use self::merge_requests::MergeRequestOrderBy;
 pub use self::merge_requests::MergeRequestScope;
+pub use self::merge_requests::MergeRequestSearchScope;
 pub use self::merge_requests::MergeRequestState;
 pub use self::merge_requests::MergeRequestView;
 pub use self::merge_requests::MergeRequests;

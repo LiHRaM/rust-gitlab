@@ -5,11 +5,12 @@
 // except according to those terms.
 
 use std::collections::BTreeSet;
+use std::iter;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::api::common::{NameOrId, SortOrder};
+use crate::api::common::{CommaSeparatedList, NameOrId, SortOrder};
 use crate::api::endpoint_prelude::*;
 use crate::api::helpers::{Labels, Milestone, ReactionEmoji};
 use crate::api::ParamValue;
@@ -33,7 +34,7 @@ impl IssueState {
 }
 
 impl ParamValue<'static> for IssueState {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -60,8 +61,40 @@ impl IssueScope {
 }
 
 impl ParamValue<'static> for IssueScope {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
+    }
+}
+
+/// Filter values for issue iteration values.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IssueIteration<'a> {
+    /// Issues without any iteration.
+    None,
+    /// Issues with any iteration association.
+    Any,
+    /// Issues with a given iteration (by ID).
+    Id(u64),
+    /// Issues with a tiven iteration (by title).
+    Title(Cow<'a, str>),
+}
+
+impl<'a> IssueIteration<'a> {
+    fn add_params<'b>(&'b self, params: &mut QueryParams<'b>) {
+        match self {
+            IssueIteration::None => {
+                params.push("iteration_id", "None");
+            },
+            IssueIteration::Any => {
+                params.push("iteration_id", "Any");
+            },
+            IssueIteration::Id(id) => {
+                params.push("iteration_id", *id);
+            },
+            IssueIteration::Title(title) => {
+                params.push("iteration_title", title);
+            },
+        }
     }
 }
 
@@ -114,8 +147,67 @@ impl IssueWeight {
 }
 
 impl ParamValue<'static> for IssueWeight {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str()
+    }
+}
+
+/// The scope to apply search query terms to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IssueSearchScope {
+    /// Search within titles.
+    Title,
+    /// Search within descriptions.
+    Description,
+}
+
+impl IssueSearchScope {
+    fn as_str(self) -> &'static str {
+        match self {
+            IssueSearchScope::Title => "title",
+            IssueSearchScope::Description => "description",
+        }
+    }
+}
+
+impl ParamValue<'static> for IssueSearchScope {
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
+/// Filter values for due dates.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IssueDueDateFilter {
+    /// Issues without a due date.
+    None,
+    /// Issues due this week.
+    ThisWeek,
+    /// Issues due this month.
+    ThisMonth,
+    /// Issues due between two weeks ago and a month from now.
+    BetweenTwoWeeksAgoAndNextMonth,
+    /// Issues which are overdue.
+    Overdue,
+}
+
+impl IssueDueDateFilter {
+    fn as_str(self) -> &'static str {
+        match self {
+            IssueDueDateFilter::None => "0",
+            IssueDueDateFilter::ThisWeek => "week",
+            IssueDueDateFilter::ThisMonth => "month",
+            IssueDueDateFilter::BetweenTwoWeeksAgoAndNextMonth => {
+                "next_month_and_previous_two_weeks"
+            },
+            IssueDueDateFilter::Overdue => "overdue",
+        }
+    }
+}
+
+impl ParamValue<'static> for IssueDueDateFilter {
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -167,7 +259,7 @@ impl IssueOrderBy {
 }
 
 impl ParamValue<'static> for IssueOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -194,6 +286,9 @@ pub struct Issues<'a> {
     /// Include label details in the result.
     #[builder(default)]
     with_labels_details: Option<bool>,
+    /// Filter by the iteration.
+    #[builder(default)]
+    iteration: Option<IssueIteration<'a>>,
     /// Filter issues with a milestone.
     #[builder(setter(name = "_milestone"), default, private)]
     milestone: Option<Milestone<'a>>,
@@ -216,6 +311,8 @@ pub struct Issues<'a> {
     /// Filter issues with a search query.
     #[builder(setter(into), default)]
     search: Option<Cow<'a, str>>,
+    #[builder(setter(name = "_search_in"), default, private)]
+    search_in: Option<CommaSeparatedList<IssueSearchScope>>,
     /// Filter issues created after a point in time.
     #[builder(default)]
     created_after: Option<DateTime<Utc>>,
@@ -231,6 +328,9 @@ pub struct Issues<'a> {
     /// Filter issues by confidentiality.
     #[builder(default)]
     confidential: Option<bool>,
+    /// Filter issues by due date.
+    #[builder(default)]
+    due_date: Option<IssueDueDateFilter>,
 
     // TODO: How best to support this parameter?
     // not
@@ -284,12 +384,10 @@ impl<'a> IssuesBuilder<'a> {
     {
         let label = label.into();
         let labels = if let Some(Some(Labels::AllOf(mut set))) = self.labels.take() {
-            set.insert(label);
+            set.push(label);
             set
         } else {
-            let mut set = BTreeSet::new();
-            set.insert(label);
-            set
+            iter::once(label).collect()
         };
         self.labels = Some(Some(Labels::AllOf(labels)));
         self
@@ -406,6 +504,15 @@ impl<'a> IssuesBuilder<'a> {
         self.my_reaction_emoji = Some(Some(ReactionEmoji::Emoji(emoji.into())));
         self
     }
+
+    /// The scopes to look for search query within.
+    pub fn search_in(&mut self, scope: IssueSearchScope) -> &mut Self {
+        self.search_in
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(scope);
+        self
+    }
 }
 
 impl<'a> Endpoint for Issues<'a> {
@@ -430,11 +537,13 @@ impl<'a> Endpoint for Issues<'a> {
             .push_opt("my_reaction_emoji", self.my_reaction_emoji.as_ref())
             .push_opt("weight", self.weight)
             .push_opt("search", self.search.as_ref())
+            .push_opt("in", self.search_in.as_ref())
             .push_opt("created_after", self.created_after)
             .push_opt("created_before", self.created_before)
             .push_opt("updated_after", self.updated_after)
             .push_opt("updated_before", self.updated_before)
             .push_opt("confidential", self.confidential)
+            .push_opt("due_date", self.due_date)
             .push_opt("order_by", self.order_by)
             .push_opt("sort", self.sort);
 
@@ -447,6 +556,9 @@ impl<'a> Endpoint for Issues<'a> {
                     params.push("author_id", *id);
                 },
             }
+        }
+        if let Some(iteration) = self.iteration.as_ref() {
+            iteration.add_params(&mut params);
         }
         if let Some(assignee) = self.assignee.as_ref() {
             assignee.add_params(&mut params);
@@ -463,7 +575,10 @@ mod tests {
     use chrono::{TimeZone, Utc};
 
     use crate::api::common::SortOrder;
-    use crate::api::projects::issues::{IssueOrderBy, IssueScope, IssueState, IssueWeight, Issues};
+    use crate::api::projects::issues::{
+        IssueDueDateFilter, IssueIteration, IssueOrderBy, IssueScope, IssueSearchScope, IssueState,
+        IssueWeight, Issues,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -498,6 +613,36 @@ mod tests {
             (IssueWeight::Any, "Any"),
             (IssueWeight::None, "None"),
             (IssueWeight::Weight(0), "0"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn issue_search_scope_as_str() {
+        let items = &[
+            (IssueSearchScope::Title, "title"),
+            (IssueSearchScope::Description, "description"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn issue_due_date_filter_as_str() {
+        let items = &[
+            (IssueDueDateFilter::None, "0"),
+            (IssueDueDateFilter::ThisWeek, "week"),
+            (IssueDueDateFilter::ThisMonth, "month"),
+            (
+                IssueDueDateFilter::BetweenTwoWeeksAgoAndNextMonth,
+                "next_month_and_previous_two_weeks",
+            ),
+            (IssueDueDateFilter::Overdue, "overdue"),
         ];
 
         for (i, s) in items {
@@ -651,6 +796,74 @@ mod tests {
         let endpoint = Issues::builder()
             .project("simple/project")
             .with_labels_details(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_iteration_none() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("iteration_id", "None")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .iteration(IssueIteration::None)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_iteration_any() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("iteration_id", "Any")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .iteration(IssueIteration::Any)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_iteration_id() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("iteration_id", "1")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .iteration(IssueIteration::Id(1))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_iteration_title() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("iteration_title", "title")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .iteration(IssueIteration::Title("title".into()))
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
@@ -882,6 +1095,24 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_search_in() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("in", "title,description")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .search_in(IssueSearchScope::Title)
+            .search_in(IssueSearchScope::Description)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_created_after() {
         let endpoint = ExpectedUrl::builder()
             .endpoint("projects/simple%2Fproject/issues")
@@ -961,6 +1192,23 @@ mod tests {
         let endpoint = Issues::builder()
             .project("simple/project")
             .confidential(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_due_date() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/issues")
+            .add_query_params(&[("due_date", "week")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Issues::builder()
+            .project("simple/project")
+            .due_date(IssueDueDateFilter::ThisWeek)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

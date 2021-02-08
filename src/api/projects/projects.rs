@@ -28,6 +28,14 @@ pub enum ProjectOrderBy {
     UpdatedAt,
     /// Order by the last activity date of the project.
     LastActivityAt,
+    /// Order by repository size.
+    RepositorySize,
+    /// Order by storage size.
+    StorageSize,
+    /// Order by packages size.
+    PackagesSize,
+    /// Order by wiki size.
+    WikiSize,
 }
 
 impl Default for ProjectOrderBy {
@@ -50,12 +58,16 @@ impl ProjectOrderBy {
             ProjectOrderBy::CreatedAt => "created_at",
             ProjectOrderBy::UpdatedAt => "updated_at",
             ProjectOrderBy::LastActivityAt => "last_activity_at",
+            ProjectOrderBy::RepositorySize => "repository_size",
+            ProjectOrderBy::StorageSize => "storage_size",
+            ProjectOrderBy::PackagesSize => "packages_size",
+            ProjectOrderBy::WikiSize => "wiki_size",
         }
     }
 }
 
 impl ParamValue<'static> for ProjectOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -135,6 +147,11 @@ pub struct Projects<'a> {
     /// Filter projects by those without activity before this date.
     #[builder(default)]
     last_activity_before: Option<DateTime<Utc>>,
+    /// Filter projects by which storage backend the repository is on.
+    ///
+    /// Available to administrators only.
+    #[builder(setter(into), default)]
+    repository_storage: Option<Cow<'a, str>>,
 
     /// Order results by a given key.
     #[builder(default)]
@@ -222,6 +239,7 @@ impl<'a> Endpoint for Projects<'a> {
             .push_opt("id_before", self.id_before)
             .push_opt("last_activity_after", self.last_activity_after)
             .push_opt("last_activity_before", self.last_activity_before)
+            .push_opt("repository_storage", self.repository_storage.as_ref())
             .extend(
                 self.custom_attributes
                     .iter()
@@ -265,6 +283,10 @@ mod tests {
             (ProjectOrderBy::CreatedAt, "created_at"),
             (ProjectOrderBy::UpdatedAt, "updated_at"),
             (ProjectOrderBy::LastActivityAt, "last_activity_at"),
+            (ProjectOrderBy::RepositorySize, "repository_size"),
+            (ProjectOrderBy::StorageSize, "storage_size"),
+            (ProjectOrderBy::PackagesSize, "packages_size"),
+            (ProjectOrderBy::WikiSize, "wiki_size"),
         ];
 
         for (i, s) in items {
@@ -579,6 +601,22 @@ mod tests {
 
         let endpoint = Projects::builder()
             .last_activity_before(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_repository_storage() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects")
+            .add_query_params(&[("repository_storage", "default")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = Projects::builder()
+            .repository_storage("default")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

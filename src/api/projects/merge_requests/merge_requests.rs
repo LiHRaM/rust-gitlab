@@ -5,11 +5,12 @@
 // except according to those terms.
 
 use std::collections::BTreeSet;
+use std::iter;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::api::common::{NameOrId, SortOrder, YesNo};
+use crate::api::common::{CommaSeparatedList, NameOrId, SortOrder, YesNo};
 use crate::api::endpoint_prelude::*;
 use crate::api::helpers::{Labels, Milestone, ReactionEmoji};
 use crate::api::ParamValue;
@@ -39,7 +40,7 @@ impl MergeRequestState {
 }
 
 impl ParamValue<'static> for MergeRequestState {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -60,7 +61,7 @@ impl MergeRequestView {
 }
 
 impl ParamValue<'static> for MergeRequestView {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -87,7 +88,7 @@ impl MergeRequestScope {
 }
 
 impl ParamValue<'static> for MergeRequestScope {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -112,6 +113,30 @@ impl Assignee {
                 params.push("assignee_id", *id);
             },
         }
+    }
+}
+
+/// The scope to apply search query terms to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeRequestSearchScope {
+    /// Search within titles.
+    Title,
+    /// Search within descriptions.
+    Description,
+}
+
+impl MergeRequestSearchScope {
+    fn as_str(self) -> &'static str {
+        match self {
+            MergeRequestSearchScope::Title => "title",
+            MergeRequestSearchScope::Description => "description",
+        }
+    }
+}
+
+impl ParamValue<'static> for MergeRequestSearchScope {
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -140,7 +165,7 @@ impl MergeRequestOrderBy {
 }
 
 impl ParamValue<'static> for MergeRequestOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -192,6 +217,8 @@ impl ApprovedByIds {
 }
 
 /// Query for merge requests within a project.
+///
+/// TODO: Negation (not) filters are not yet supported.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct MergeRequests<'a> {
@@ -219,6 +246,9 @@ pub struct MergeRequests<'a> {
     /// Include label details in the result.
     #[builder(default)]
     with_labels_details: Option<bool>,
+    /// Request that the merge status field be updated.
+    #[builder(default)]
+    with_merge_status_recheck: Option<bool>,
     /// Filter merge requests created after a point in time.
     #[builder(default)]
     created_after: Option<DateTime<Utc>>,
@@ -246,6 +276,9 @@ pub struct MergeRequests<'a> {
     /// Filter merge requests by approvals.
     #[builder(setter(name = "_approved_by_ids"), default, private)]
     approved_by_ids: Option<ApprovedByIds>,
+    /// Filter merge requests by reviewers.
+    #[builder(setter(into), default)]
+    reviewer: Option<NameOrId<'a>>,
     /// Filter merge requests by the API caller's reactions.
     #[builder(setter(name = "_my_reaction_emoji"), default, private)]
     my_reaction_emoji: Option<ReactionEmoji<'a>>,
@@ -258,10 +291,21 @@ pub struct MergeRequests<'a> {
     /// Filter merge requests by WIP state
     #[builder(setter(into), default)]
     wip: Option<YesNo>,
+    /// Filter merge requests by deployed environment status.
+    #[builder(setter(into), default)]
+    environment: Option<Cow<'a, str>>,
+    /// Filter merge requests by those deployed after a point in time.
+    #[builder(default)]
+    deployed_after: Option<DateTime<Utc>>,
+    /// Filter merge requests by those deployed before a point in time.
+    #[builder(default)]
+    deployed_before: Option<DateTime<Utc>>,
 
     /// Filter merge requests with a search query.
     #[builder(setter(into), default)]
     search: Option<Cow<'a, str>>,
+    #[builder(setter(name = "_search_in"), default, private)]
+    search_in: Option<CommaSeparatedList<MergeRequestSearchScope>>,
 
     /// Order results by a given key.
     #[builder(default)]
@@ -313,12 +357,10 @@ impl<'a> MergeRequestsBuilder<'a> {
     {
         let label = label.into();
         let labels = if let Some(Some(Labels::AllOf(mut set))) = self.labels.take() {
-            set.insert(label);
+            set.push(label);
             set
         } else {
-            let mut set = BTreeSet::new();
-            set.insert(label);
-            set
+            iter::once(label).collect()
         };
         self.labels = Some(Some(Labels::AllOf(labels)));
         self
@@ -482,6 +524,15 @@ impl<'a> MergeRequestsBuilder<'a> {
         self.my_reaction_emoji = Some(Some(ReactionEmoji::Emoji(emoji.into())));
         self
     }
+
+    /// The scopes to look for search query within.
+    pub fn search_in(&mut self, scope: MergeRequestSearchScope) -> &mut Self {
+        self.search_in
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(scope);
+        self
+    }
 }
 
 impl<'a> Endpoint for MergeRequests<'a> {
@@ -503,6 +554,7 @@ impl<'a> Endpoint for MergeRequests<'a> {
             .push_opt("view", self.view)
             .push_opt("labels", self.labels.as_ref())
             .push_opt("with_labels_details", self.with_labels_details)
+            .push_opt("with_merge_status_recheck", self.with_merge_status_recheck)
             .push_opt("created_after", self.created_after)
             .push_opt("created_before", self.created_before)
             .push_opt("updated_after", self.updated_after)
@@ -512,7 +564,11 @@ impl<'a> Endpoint for MergeRequests<'a> {
             .push_opt("source_branch", self.source_branch.as_ref())
             .push_opt("target_branch", self.target_branch.as_ref())
             .push_opt("search", self.search.as_ref())
+            .push_opt("in", self.search_in.as_ref())
             .push_opt("wip", self.wip)
+            .push_opt("environment", self.environment.as_ref())
+            .push_opt("deployed_after", self.deployed_after)
+            .push_opt("deployed_before", self.deployed_before)
             .push_opt("order_by", self.order_by)
             .push_opt("sort", self.sort);
 
@@ -535,6 +591,16 @@ impl<'a> Endpoint for MergeRequests<'a> {
         if let Some(approved_by_ids) = self.approved_by_ids.as_ref() {
             approved_by_ids.add_params(&mut params);
         }
+        if let Some(reviewer) = self.reviewer.as_ref() {
+            match reviewer {
+                NameOrId::Name(name) => {
+                    params.push("reviewer_username", name);
+                },
+                NameOrId::Id(id) => {
+                    params.push("reviewer_id", *id);
+                },
+            }
+        }
 
         params
     }
@@ -548,7 +614,8 @@ mod tests {
 
     use crate::api::common::{SortOrder, YesNo};
     use crate::api::projects::merge_requests::{
-        MergeRequestOrderBy, MergeRequestScope, MergeRequestState, MergeRequestView, MergeRequests,
+        MergeRequestOrderBy, MergeRequestScope, MergeRequestSearchScope, MergeRequestState,
+        MergeRequestView, MergeRequests,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -802,6 +869,23 @@ mod tests {
         let endpoint = MergeRequests::builder()
             .project("simple/project")
             .with_labels_details(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_merge_status_recheck() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("with_merge_status_recheck", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .with_merge_status_recheck(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
@@ -1082,6 +1166,40 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_reviewer() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("reviewer_id", "1")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .reviewer(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_reviewer_name() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("reviewer_username", "name")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .reviewer("name")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_my_reaction_emoji() {
         let endpoint = ExpectedUrl::builder()
             .endpoint("projects/simple%2Fproject/merge_requests")
@@ -1167,6 +1285,57 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_environment() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("environment", "env")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .environment("env")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_deployed_before() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("deployed_before", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .deployed_before(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_deployed_after() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("deployed_after", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .deployed_after(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_search() {
         let endpoint = ExpectedUrl::builder()
             .endpoint("projects/simple%2Fproject/merge_requests")
@@ -1178,6 +1347,24 @@ mod tests {
         let endpoint = MergeRequests::builder()
             .project("simple/project")
             .search("query")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search_in() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("in", "title,description")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .search_in(MergeRequestSearchScope::Title)
+            .search_in(MergeRequestSearchScope::Description)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
