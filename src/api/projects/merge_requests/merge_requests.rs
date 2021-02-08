@@ -289,6 +289,15 @@ pub struct MergeRequests<'a> {
     /// Filter merge requests by WIP state
     #[builder(setter(into), default)]
     wip: Option<YesNo>,
+    /// Filter merge requests by deployed environment status.
+    #[builder(setter(into), default)]
+    environment: Option<Cow<'a, str>>,
+    /// Filter merge requests by those deployed after a point in time.
+    #[builder(default)]
+    deployed_after: Option<DateTime<Utc>>,
+    /// Filter merge requests by those deployed before a point in time.
+    #[builder(default)]
+    deployed_before: Option<DateTime<Utc>>,
 
     /// Filter merge requests with a search query.
     #[builder(setter(into), default)]
@@ -555,6 +564,9 @@ impl<'a> Endpoint for MergeRequests<'a> {
             .push_opt("search", self.search.as_ref())
             .push_opt("in", self.search_in.as_ref())
             .push_opt("wip", self.wip)
+            .push_opt("environment", self.environment.as_ref())
+            .push_opt("deployed_after", self.deployed_after)
+            .push_opt("deployed_before", self.deployed_before)
             .push_opt("order_by", self.order_by)
             .push_opt("sort", self.sort);
 
@@ -1265,6 +1277,57 @@ mod tests {
         let endpoint = MergeRequests::builder()
             .project("simple/project")
             .wip(YesNo::Yes)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_environment() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("environment", "env")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .environment("env")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_deployed_before() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("deployed_before", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .deployed_before(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_deployed_after() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("deployed_after", "2020-01-01T00:00:00Z")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .deployed_after(Utc.ymd(2020, 1, 1).and_hms_milli(0, 0, 0, 0))
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
