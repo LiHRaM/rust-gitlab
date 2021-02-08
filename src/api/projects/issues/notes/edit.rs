@@ -11,6 +11,7 @@ use crate::api::endpoint_prelude::*;
 
 /// Edit an issue note on a project.
 #[derive(Debug, Builder)]
+#[builder(setter(strip_option))]
 pub struct EditIssueNote<'a> {
     /// The project to add the issue to.
     #[builder(setter(into))]
@@ -23,6 +24,9 @@ pub struct EditIssueNote<'a> {
     /// The content of the note.
     #[builder(setter(into))]
     body: Cow<'a, str>,
+    /// The confidential flag of the note.
+    #[builder(default)]
+    confidential: Option<bool>,
 }
 
 impl<'a> EditIssueNote<'a> {
@@ -48,7 +52,9 @@ impl<'a> Endpoint for EditIssueNote<'a> {
     fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
         let mut params = FormParams::default();
 
-        params.push("body", self.body.as_ref());
+        params
+            .push("body", self.body.as_ref())
+            .push_opt("confidential", self.confidential);
 
         params.into_body()
     }
@@ -139,6 +145,28 @@ mod tests {
             .issue(1)
             .note(1)
             .body("body")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_confidential() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/issues/1/notes/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("body=body&confidential=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditIssueNote::builder()
+            .project("simple/project")
+            .issue(1)
+            .note(1)
+            .body("body")
+            .confidential(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

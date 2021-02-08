@@ -23,6 +23,9 @@ pub struct CreateIssueNote<'a> {
     #[builder(setter(into))]
     body: Cow<'a, str>,
 
+    /// Whether to create a confidential note or not.
+    #[builder(default)]
+    confidential: Option<bool>,
     /// The creation date of the note.
     ///
     /// Requires administrator or owner permissions.
@@ -51,6 +54,7 @@ impl<'a> Endpoint for CreateIssueNote<'a> {
 
         params
             .push("body", self.body.as_ref())
+            .push_opt("confidential", self.confidential)
             .push_opt("created_at", self.created_at);
 
         params.into_body()
@@ -127,6 +131,27 @@ mod tests {
             .project("simple/project")
             .issue(1)
             .body("body")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_confidential() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/issues/1/notes")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("body=body", "&confidential=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateIssueNote::builder()
+            .project("simple/project")
+            .issue(1)
+            .body("body")
+            .confidential(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
