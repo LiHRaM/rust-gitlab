@@ -43,6 +43,8 @@
   * Project hooks can now be registered for events related to confidential
     notes, deployments, and releases.
   * Issues can now be edited with incremental label changes.
+  * Issues can now be filtered by iterations, due dates, and search queries can
+    now be scoped.
 
 # v0.1308.0
 

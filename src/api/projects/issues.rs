@@ -26,8 +26,11 @@ pub use self::edit::IssueStateEvent;
 pub use self::issue::Issue;
 pub use self::issue::IssueBuilder;
 
+pub use self::issues::IssueDueDateFilter;
+pub use self::issues::IssueIteration;
 pub use self::issues::IssueOrderBy;
 pub use self::issues::IssueScope;
+pub use self::issues::IssueSearchScope;
 pub use self::issues::IssueState;
 pub use self::issues::IssueWeight;
 pub use self::issues::Issues;
