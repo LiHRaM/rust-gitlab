@@ -274,6 +274,9 @@ pub struct MergeRequests<'a> {
     /// Filter merge requests by approvals.
     #[builder(setter(name = "_approved_by_ids"), default, private)]
     approved_by_ids: Option<ApprovedByIds>,
+    /// Filter merge requests by reviewers.
+    #[builder(setter(into), default)]
+    reviewer: Option<NameOrId<'a>>,
     /// Filter merge requests by the API caller's reactions.
     #[builder(setter(name = "_my_reaction_emoji"), default, private)]
     my_reaction_emoji: Option<ReactionEmoji<'a>>,
@@ -573,6 +576,16 @@ impl<'a> Endpoint for MergeRequests<'a> {
         }
         if let Some(approved_by_ids) = self.approved_by_ids.as_ref() {
             approved_by_ids.add_params(&mut params);
+        }
+        if let Some(reviewer) = self.reviewer.as_ref() {
+            match reviewer {
+                NameOrId::Name(name) => {
+                    params.push("reviewer_username", name);
+                },
+                NameOrId::Id(id) => {
+                    params.push("reviewer_id", *id);
+                },
+            }
         }
 
         params
@@ -1133,6 +1146,40 @@ mod tests {
             .project("simple/project")
             .approved_by_id(1)
             .approved_by_ids([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_reviewer() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("reviewer_id", "1")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .reviewer(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_reviewer_name() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("reviewer_username", "name")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .reviewer("name")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

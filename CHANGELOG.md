@@ -59,6 +59,7 @@
   * Merge requests can now be edited with incremental label changes.
   * Merge requests can now be filtered by search scopes.
   * Merge requests can now trigger merge status rechecks when listing.
+  * Merge requests can now be filtered by reviewer.
 
 # v0.1308.0
 
