@@ -63,6 +63,7 @@
   * Merge requests can now be filtered by environment status.
   * API bindings for the `"scheduled"` pipeline status.
   * Projects can now be sorted by various resource sizes.
+  * Projects can now be filtered by storage backend.
 
 # v0.1308.0
 
