@@ -4,13 +4,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::collections::BTreeSet;
 use std::iter;
 
 use derive_builder::Builder;
-use itertools::Itertools;
 
-use crate::api::common::NameOrId;
+use crate::api::common::{CommaSeparatedList, NameOrId};
 use crate::api::endpoint_prelude::*;
 use crate::api::projects::merge_requests::create::Assignee;
 use crate::api::ParamValue;
@@ -18,14 +16,14 @@ use crate::api::ParamValue;
 #[derive(Debug, Clone)]
 enum MergeRequestLabels<'a> {
     Unlabeled,
-    Labeled(BTreeSet<Cow<'a, str>>),
+    Labeled(CommaSeparatedList<Cow<'a, str>>),
 }
 
 impl<'a, 'b: 'a> ParamValue<'a> for &'b MergeRequestLabels<'a> {
     fn as_value(&self) -> Cow<'a, str> {
         match self {
             MergeRequestLabels::Unlabeled => "".into(),
-            MergeRequestLabels::Labeled(labels) => format!("{}", labels.iter().format(",")).into(),
+            MergeRequestLabels::Labeled(labels) => format!("{}", labels).into(),
         }
     }
 }
@@ -168,12 +166,10 @@ impl<'a> EditMergeRequestBuilder<'a> {
     {
         let label = label.into();
         let labels = if let Some(Some(MergeRequestLabels::Labeled(mut set))) = self.labels.take() {
-            set.insert(label);
+            set.push(label);
             set
         } else {
-            let mut set = BTreeSet::new();
-            set.insert(label);
-            set
+            iter::once(label).collect()
         };
         self.labels = Some(Some(MergeRequestLabels::Labeled(labels)));
         self

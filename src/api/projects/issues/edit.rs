@@ -5,12 +5,12 @@
 // except according to those terms.
 
 use std::collections::BTreeSet;
+use std::iter;
 
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
-use itertools::Itertools;
 
-use crate::api::common::NameOrId;
+use crate::api::common::{CommaSeparatedList, NameOrId};
 use crate::api::endpoint_prelude::*;
 use crate::api::ParamValue;
 
@@ -47,14 +47,14 @@ enum IssueAssignees {
 #[derive(Debug, Clone)]
 enum IssueLabels<'a> {
     Unlabeled,
-    Labeled(BTreeSet<Cow<'a, str>>),
+    Labeled(CommaSeparatedList<Cow<'a, str>>),
 }
 
 impl<'a, 'b: 'a> ParamValue<'a> for &'b IssueLabels<'a> {
     fn as_value(&self) -> Cow<'a, str> {
         match self {
             IssueLabels::Unlabeled => "".into(),
-            IssueLabels::Labeled(labels) => format!("{}", labels.iter().format(",")).into(),
+            IssueLabels::Labeled(labels) => format!("{}", labels).into(),
         }
     }
 }
@@ -178,12 +178,10 @@ impl<'a> EditIssueBuilder<'a> {
     {
         let label = label.into();
         let labels = if let Some(Some(IssueLabels::Labeled(mut set))) = self.labels.take() {
-            set.insert(label);
+            set.push(label);
             set
         } else {
-            let mut set = BTreeSet::new();
-            set.insert(label);
-            set
+            iter::once(label).collect()
         };
         self.labels = Some(Some(IssueLabels::Labeled(labels)));
         self

@@ -8,9 +8,8 @@ use std::collections::BTreeSet;
 use std::iter;
 
 use derive_builder::Builder;
-use itertools::Itertools;
 
-use crate::api::common::NameOrId;
+use crate::api::common::{CommaSeparatedList, NameOrId};
 use crate::api::endpoint_prelude::*;
 
 #[derive(Debug, Clone)]
@@ -64,7 +63,7 @@ pub struct CreateMergeRequest<'a> {
     target_project_id: Option<u64>,
     /// Labels to add to the merge request.
     #[builder(setter(name = "_labels"), default, private)]
-    labels: BTreeSet<Cow<'a, str>>,
+    labels: Option<CommaSeparatedList<Cow<'a, str>>>,
     /// The ID of the milestone to add the merge request to.
     #[builder(default)]
     milestone_id: Option<u64>,
@@ -141,8 +140,9 @@ impl<'a> CreateMergeRequestBuilder<'a> {
         L: Into<Cow<'a, str>>,
     {
         self.labels
-            .get_or_insert_with(BTreeSet::new)
-            .insert(label.into());
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(label.into());
         self
     }
 
@@ -153,7 +153,8 @@ impl<'a> CreateMergeRequestBuilder<'a> {
         L: Into<Cow<'a, str>>,
     {
         self.labels
-            .get_or_insert_with(BTreeSet::new)
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
             .extend(iter.map(Into::into));
         self
     }
@@ -178,13 +179,11 @@ impl<'a> Endpoint for CreateMergeRequest<'a> {
             .push_opt("description", self.description.as_ref())
             .push_opt("target_project_id", self.target_project_id)
             .push_opt("milestone_id", self.milestone_id)
+            .push_opt("labels", self.labels.as_ref())
             .push_opt("remove_source_branch", self.remove_source_branch)
             .push_opt("allow_collaboration", self.allow_collaboration)
             .push_opt("squash", self.squash);
 
-        if !self.labels.is_empty() {
-            params.push("labels", format!("{}", self.labels.iter().format(",")));
-        }
         if let Some(assignee) = self.assignee.as_ref() {
             assignee.add_params(&mut params);
         }

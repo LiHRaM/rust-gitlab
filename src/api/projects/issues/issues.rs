@@ -5,6 +5,7 @@
 // except according to those terms.
 
 use std::collections::BTreeSet;
+use std::iter;
 
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
@@ -284,12 +285,10 @@ impl<'a> IssuesBuilder<'a> {
     {
         let label = label.into();
         let labels = if let Some(Some(Labels::AllOf(mut set))) = self.labels.take() {
-            set.insert(label);
+            set.push(label);
             set
         } else {
-            let mut set = BTreeSet::new();
-            set.insert(label);
-            set
+            iter::once(label).collect()
         };
         self.labels = Some(Some(Labels::AllOf(labels)));
         self

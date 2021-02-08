@@ -11,10 +11,8 @@
 //! enough" away from their usage to make `super::` access inconvenient.
 
 use std::borrow::Cow;
-use std::collections::BTreeSet;
 
-use itertools::Itertools;
-
+use crate::api::common::CommaSeparatedList;
 use crate::api::ParamValue;
 
 /// Keys note results may be ordered by.
@@ -51,7 +49,7 @@ impl ParamValue<'static> for NoteOrderBy {
 pub(crate) enum Labels<'a> {
     Any,
     None,
-    AllOf(BTreeSet<Cow<'a, str>>),
+    AllOf(CommaSeparatedList<Cow<'a, str>>),
 }
 
 impl<'a> Labels<'a> {
@@ -59,7 +57,7 @@ impl<'a> Labels<'a> {
         match self {
             Labels::Any => "Any".into(),
             Labels::None => "None".into(),
-            Labels::AllOf(labels) => format!("{}", labels.iter().format(",")).into(),
+            Labels::AllOf(labels) => format!("{}", labels).into(),
         }
     }
 }
@@ -118,7 +116,7 @@ impl<'a, 'b: 'a> ParamValue<'a> for &'b ReactionEmoji<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::iter;
 
     use super::{Labels, Milestone, NoteOrderBy, ReactionEmoji};
 
@@ -141,17 +139,8 @@ mod tests {
 
     #[test]
     fn labels_as_str() {
-        let one_user = {
-            let mut set = BTreeSet::new();
-            set.insert("one".into());
-            set
-        };
-        let two_users = {
-            let mut set = BTreeSet::new();
-            set.insert("one".into());
-            set.insert("two".into());
-            set
-        };
+        let one_user = iter::once("one".into()).collect();
+        let two_users = ["one".into(), "two".into()].iter().cloned().collect();
 
         let items = &[
             (Labels::Any, "Any"),

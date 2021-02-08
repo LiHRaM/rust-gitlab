@@ -8,9 +8,8 @@ use std::collections::BTreeSet;
 
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
-use itertools::Itertools;
 
-use crate::api::common::NameOrId;
+use crate::api::common::{CommaSeparatedList, NameOrId};
 use crate::api::endpoint_prelude::*;
 
 /// Create a new issue on a project.
@@ -49,7 +48,7 @@ pub struct CreateIssue<'a> {
     milestone_id: Option<u64>,
     /// Labels to add to the issue.
     #[builder(setter(name = "_labels"), default, private)]
-    labels: BTreeSet<Cow<'a, str>>,
+    labels: Option<CommaSeparatedList<Cow<'a, str>>>,
     /// The creation date of the issue.
     ///
     /// Requires administrator or owner permissions.
@@ -112,8 +111,9 @@ impl<'a> CreateIssueBuilder<'a> {
         L: Into<Cow<'a, str>>,
     {
         self.labels
-            .get_or_insert_with(BTreeSet::new)
-            .insert(label.into());
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(label.into());
         self
     }
 
@@ -124,7 +124,8 @@ impl<'a> CreateIssueBuilder<'a> {
         L: Into<Cow<'a, str>>,
     {
         self.labels
-            .get_or_insert_with(BTreeSet::new)
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
             .extend(iter.into_iter().map(Into::into));
         self
     }
@@ -156,6 +157,7 @@ impl<'a> Endpoint for CreateIssue<'a> {
                     .map(|&value| ("assignee_ids[]", value)),
             )
             .push_opt("milestone_id", self.milestone_id)
+            .push_opt("labels", self.labels.as_ref())
             .push_opt("created_at", self.created_at)
             .push_opt("due_date", self.due_date)
             .push_opt(
@@ -165,10 +167,6 @@ impl<'a> Endpoint for CreateIssue<'a> {
             .push_opt("discussion_to_resolve", self.discussion_to_resolve.as_ref())
             .push_opt("weight", self.weight)
             .push_opt("epic_id", self.epic_id);
-
-        if !self.labels.is_empty() {
-            params.push("labels", format!("{}", self.labels.iter().format(",")));
-        }
 
         #[allow(deprecated)]
         {
