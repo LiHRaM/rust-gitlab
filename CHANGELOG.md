@@ -64,6 +64,8 @@
   * API bindings for the `"scheduled"` pipeline status.
   * Projects can now be sorted by various resource sizes.
   * Projects can now be filtered by storage backend.
+  * Users can now be filtered by GitLab-internal users and administrator
+    status.
 
 # v0.1308.0
 
