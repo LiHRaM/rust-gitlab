@@ -243,6 +243,9 @@ pub struct CreateMergeRequestDiscussion<'a> {
     /// The content of the discussion.
     #[builder(setter(into))]
     body: Cow<'a, str>,
+    #[builder(setter(into), default)]
+    /// A sha referencing a commit to start the thread on.
+    commit_id: Option<Cow<'a, str>>,
 
     /// When the discussion was created.
     ///
@@ -279,6 +282,7 @@ impl<'a> Endpoint for CreateMergeRequestDiscussion<'a> {
 
         params
             .push("body", self.body.as_ref())
+            .push_opt("commit_id", self.commit_id.as_ref())
             .push_opt("created_at", self.created_at);
 
         if let Some(position) = self.position.as_ref() {
@@ -549,6 +553,30 @@ mod tests {
             .project("simple/project")
             .merge_request(1)
             .body("body")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_commit_id() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests/1/discussions")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "body=body",
+                "&commit_id=0000000000000000000000000000000000000000"
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequestDiscussion::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .body("body")
+            .commit_id("0000000000000000000000000000000000000000")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

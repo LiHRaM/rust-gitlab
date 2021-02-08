@@ -53,6 +53,7 @@
   * Merge requests can now be created and edited with reviewer settings.
   * Merge requests can now be created with the `approvals_before_merge`
     setting.
+  * Merge request discussions can now be created on a specific commit.
 
 # v0.1308.0
 
