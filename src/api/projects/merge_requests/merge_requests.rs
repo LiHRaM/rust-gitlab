@@ -10,7 +10,7 @@ use std::iter;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 
-use crate::api::common::{NameOrId, SortOrder, YesNo};
+use crate::api::common::{CommaSeparatedList, NameOrId, SortOrder, YesNo};
 use crate::api::endpoint_prelude::*;
 use crate::api::helpers::{Labels, Milestone, ReactionEmoji};
 use crate::api::ParamValue;
@@ -113,6 +113,30 @@ impl Assignee {
                 params.push("assignee_id", *id);
             },
         }
+    }
+}
+
+/// The scope to apply search query terms to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeRequestSearchScope {
+    /// Search within titles.
+    Title,
+    /// Search within descriptions.
+    Description,
+}
+
+impl MergeRequestSearchScope {
+    fn as_str(self) -> &'static str {
+        match self {
+            MergeRequestSearchScope::Title => "title",
+            MergeRequestSearchScope::Description => "description",
+        }
+    }
+}
+
+impl ParamValue<'static> for MergeRequestSearchScope {
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str().into()
     }
 }
 
@@ -263,6 +287,8 @@ pub struct MergeRequests<'a> {
     /// Filter merge requests with a search query.
     #[builder(setter(into), default)]
     search: Option<Cow<'a, str>>,
+    #[builder(setter(name = "_search_in"), default, private)]
+    search_in: Option<CommaSeparatedList<MergeRequestSearchScope>>,
 
     /// Order results by a given key.
     #[builder(default)]
@@ -481,6 +507,15 @@ impl<'a> MergeRequestsBuilder<'a> {
         self.my_reaction_emoji = Some(Some(ReactionEmoji::Emoji(emoji.into())));
         self
     }
+
+    /// The scopes to look for search query within.
+    pub fn search_in(&mut self, scope: MergeRequestSearchScope) -> &mut Self {
+        self.search_in
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(scope);
+        self
+    }
 }
 
 impl<'a> Endpoint for MergeRequests<'a> {
@@ -511,6 +546,7 @@ impl<'a> Endpoint for MergeRequests<'a> {
             .push_opt("source_branch", self.source_branch.as_ref())
             .push_opt("target_branch", self.target_branch.as_ref())
             .push_opt("search", self.search.as_ref())
+            .push_opt("in", self.search_in.as_ref())
             .push_opt("wip", self.wip)
             .push_opt("order_by", self.order_by)
             .push_opt("sort", self.sort);
@@ -547,7 +583,8 @@ mod tests {
 
     use crate::api::common::{SortOrder, YesNo};
     use crate::api::projects::merge_requests::{
-        MergeRequestOrderBy, MergeRequestScope, MergeRequestState, MergeRequestView, MergeRequests,
+        MergeRequestOrderBy, MergeRequestScope, MergeRequestSearchScope, MergeRequestState,
+        MergeRequestView, MergeRequests,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -1177,6 +1214,24 @@ mod tests {
         let endpoint = MergeRequests::builder()
             .project("simple/project")
             .search("query")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_search_in() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("in", "title,description")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .search_in(MergeRequestSearchScope::Title)
+            .search_in(MergeRequestSearchScope::Description)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

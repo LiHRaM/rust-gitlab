@@ -57,6 +57,7 @@
     setting.
   * Merge request discussions can now be created on a specific commit.
   * Merge requests can now be edited with incremental label changes.
+  * Merge requests can now be filtered by search scopes.
 
 # v0.1308.0
 
