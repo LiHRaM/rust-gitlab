@@ -91,6 +91,11 @@ pub struct CreateMergeRequest<'a> {
     /// The ID of the milestone to add the merge request to.
     #[builder(default)]
     milestone_id: Option<u64>,
+    /// How many approvals are required before merging will be allowed.
+    ///
+    /// Note that this must be more than the project limit (if present).
+    #[builder(default)]
+    approvals_before_merge: Option<u64>,
     /// Whether to remove the source branch once merged or not.
     #[builder(default)]
     remove_source_branch: Option<bool>,
@@ -239,6 +244,7 @@ impl<'a> Endpoint for CreateMergeRequest<'a> {
             .push_opt("target_project_id", self.target_project_id)
             .push_opt("milestone_id", self.milestone_id)
             .push_opt("labels", self.labels.as_ref())
+            .push_opt("approvals_before_merge", self.approvals_before_merge)
             .push_opt("remove_source_branch", self.remove_source_branch)
             .push_opt("allow_collaboration", self.allow_collaboration)
             .push_opt("squash", self.squash);
@@ -623,6 +629,33 @@ mod tests {
             .target_branch("target/branch")
             .title("title")
             .milestone_id(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_approvals_before_merge() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&approvals_before_merge=2",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .approvals_before_merge(2)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
