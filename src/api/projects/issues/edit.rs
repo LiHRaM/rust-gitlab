@@ -85,6 +85,10 @@ pub struct EditIssue<'a> {
     /// Labels to set on the issue.
     #[builder(setter(name = "_labels"), default, private)]
     labels: Option<IssueLabels<'a>>,
+    #[builder(setter(name = "_add_labels"), default, private)]
+    add_labels: Option<CommaSeparatedList<Cow<'a, str>>>,
+    #[builder(setter(name = "_remove_labels"), default, private)]
+    remove_labels: Option<CommaSeparatedList<Cow<'a, str>>>,
     /// Change the state of the issue.
     #[builder(default)]
     state_event: Option<IssueStateEvent>,
@@ -163,7 +167,13 @@ impl<'a> EditIssueBuilder<'a> {
     }
 
     /// Remove all labels from the issue.
+    #[deprecated(note = "use `clear_labels` instead")]
     pub fn remove_labels(&mut self) -> &mut Self {
+        self.clear_labels()
+    }
+
+    /// Remove all labels from the issue.
+    pub fn clear_labels(&mut self) -> &mut Self {
         self.labels = Some(Some(IssueLabels::Unlabeled));
         self
     }
@@ -172,6 +182,8 @@ impl<'a> EditIssueBuilder<'a> {
     ///
     /// Note that the list of labels sent will replace the set on the instance. This only adds it
     /// to the list of labels to add to the set before sending it to the instance.
+    ///
+    /// See: `add_label`.
     pub fn label<L>(&mut self, label: L) -> &mut Self
     where
         L: Into<Cow<'a, str>>,
@@ -191,6 +203,8 @@ impl<'a> EditIssueBuilder<'a> {
     ///
     /// Note that the list of labels sent will replace the set on the instance. This only adds it
     /// to the list of labels to add to the set before sending it to the instance.
+    ///
+    /// See: `add_label`.
     pub fn labels<I, L>(&mut self, iter: I) -> &mut Self
     where
         I: IntoIterator<Item = L>,
@@ -204,6 +218,34 @@ impl<'a> EditIssueBuilder<'a> {
             iter.collect()
         };
         self.labels = Some(Some(IssueLabels::Labeled(labels)));
+        self
+    }
+
+    /// Add a label to the issue.
+    ///
+    /// This is an incremental addition to the existing set of labels on the issue.
+    pub fn add_label<L>(&mut self, label: L) -> &mut Self
+    where
+        L: Into<Cow<'a, str>>,
+    {
+        self.add_labels
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(label.into());
+        self
+    }
+
+    /// Remove a label from the issue.
+    ///
+    /// This is an incremental remove form the existing set of labels on the issue.
+    pub fn remove_label<L>(&mut self, label: L) -> &mut Self
+    where
+        L: Into<Cow<'a, str>>,
+    {
+        self.remove_labels
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(label.into());
         self
     }
 }
@@ -225,6 +267,8 @@ impl<'a> Endpoint for EditIssue<'a> {
             .push_opt("description", self.description.as_ref())
             .push_opt("milestone_id", self.milestone_id)
             .push_opt("labels", self.labels.as_ref())
+            .push_opt("add_labels", self.add_labels.as_ref())
+            .push_opt("remove_labels", self.remove_labels.as_ref())
             .push_opt("state_event", self.state_event)
             .push_opt("updated_at", self.updated_at)
             .push_opt("due_date", self.due_date)
@@ -467,6 +511,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(deprecated)]
     fn endpoint_labels_remove() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::PUT)
@@ -481,6 +526,68 @@ mod tests {
             .project("simple/project")
             .issue(1)
             .remove_labels()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels_clear() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/issues/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("labels=")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditIssue::builder()
+            .project("simple/project")
+            .issue(1)
+            .clear_labels()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_add_labels() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/issues/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("add_labels=one%2Ctwo")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditIssue::builder()
+            .project("simple/project")
+            .issue(1)
+            .add_label("one")
+            .add_label("two")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_remove_labels() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/issues/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("remove_labels=one%2Ctwo")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditIssue::builder()
+            .project("simple/project")
+            .issue(1)
+            .remove_label("one")
+            .remove_label("two")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

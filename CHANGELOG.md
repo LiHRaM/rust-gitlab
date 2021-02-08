@@ -10,6 +10,11 @@
   * `api::common::CommaSeparatedList` now exists for easy use of
     comma-separated values.
 
+## Deprecations
+
+  * `EditIssue::remove_labels` is deprecated in favor of the better
+    `clear_labels` wording.
+
 ## Changes
 
   * API bindings for the `"minimal"` access level.
@@ -37,6 +42,7 @@
   * Environments can now be filtered by their deployment state.
   * Project hooks can now be registered for events related to confidential
     notes, deployments, and releases.
+  * Issues can now be edited with incremental label changes.
 
 # v0.1308.0
 
