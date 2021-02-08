@@ -64,6 +64,8 @@ pub enum PipelineStatus {
     Created,
     /// Awaiting manual triggering.
     Manual,
+    /// Pipelines which have been scheduled.
+    Scheduled,
 }
 
 impl PipelineStatus {
@@ -78,6 +80,7 @@ impl PipelineStatus {
             PipelineStatus::Skipped => "skipped",
             PipelineStatus::Created => "created",
             PipelineStatus::Manual => "manual",
+            PipelineStatus::Scheduled => "scheduled",
         }
     }
 }
@@ -248,6 +251,7 @@ mod tests {
             (PipelineStatus::Skipped, "skipped"),
             (PipelineStatus::Created, "created"),
             (PipelineStatus::Manual, "manual"),
+            (PipelineStatus::Scheduled, "scheduled"),
         ];
 
         for (i, s) in items {

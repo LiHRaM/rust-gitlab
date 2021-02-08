@@ -61,6 +61,7 @@
   * Merge requests can now trigger merge status rechecks when listing.
   * Merge requests can now be filtered by reviewer.
   * Merge requests can now be filtered by environment status.
+  * API bindings for the `"scheduled"` pipeline status.
 
 # v0.1308.0
 
