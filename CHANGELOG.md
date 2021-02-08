@@ -58,6 +58,7 @@
   * Merge request discussions can now be created on a specific commit.
   * Merge requests can now be edited with incremental label changes.
   * Merge requests can now be filtered by search scopes.
+  * Merge requests can now trigger merge status rechecks when listing.
 
 # v0.1308.0
 

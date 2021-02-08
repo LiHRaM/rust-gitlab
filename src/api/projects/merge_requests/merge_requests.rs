@@ -244,6 +244,9 @@ pub struct MergeRequests<'a> {
     /// Include label details in the result.
     #[builder(default)]
     with_labels_details: Option<bool>,
+    /// Request that the merge status field be updated.
+    #[builder(default)]
+    with_merge_status_recheck: Option<bool>,
     /// Filter merge requests created after a point in time.
     #[builder(default)]
     created_after: Option<DateTime<Utc>>,
@@ -537,6 +540,7 @@ impl<'a> Endpoint for MergeRequests<'a> {
             .push_opt("view", self.view)
             .push_opt("labels", self.labels.as_ref())
             .push_opt("with_labels_details", self.with_labels_details)
+            .push_opt("with_merge_status_recheck", self.with_merge_status_recheck)
             .push_opt("created_after", self.created_after)
             .push_opt("created_before", self.created_before)
             .push_opt("updated_after", self.updated_after)
@@ -838,6 +842,23 @@ mod tests {
         let endpoint = MergeRequests::builder()
             .project("simple/project")
             .with_labels_details(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_with_merge_status_recheck() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .add_query_params(&[("with_merge_status_recheck", "true")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = MergeRequests::builder()
+            .project("simple/project")
+            .with_merge_status_recheck(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
