@@ -46,6 +46,7 @@
   * Issues can now be filtered by iterations, due dates, and search queries can
     now be scoped.
   * Issue notes can now be created and edited with the confidential flag.
+  * Project labels can be filtered by search queries.
 
 # v0.1308.0
 
