@@ -79,6 +79,10 @@ pub struct EditMergeRequest<'a> {
     /// Labels to add to the merge request.
     #[builder(setter(name = "_labels"), default, private)]
     labels: Option<MergeRequestLabels<'a>>,
+    #[builder(setter(name = "_add_labels"), default, private)]
+    add_labels: Option<CommaSeparatedList<Cow<'a, str>>>,
+    #[builder(setter(name = "_remove_labels"), default, private)]
+    remove_labels: Option<CommaSeparatedList<Cow<'a, str>>>,
     /// The description of the merge request.
     #[builder(setter(into), default)]
     description: Option<Cow<'a, str>>,
@@ -190,8 +194,14 @@ impl<'a> EditMergeRequestBuilder<'a> {
         self
     }
 
-    /// Clear all labels
+    /// Remove all labels from the issue.
+    #[deprecated(note = "use `clear_labels` instead")]
     pub fn remove_labels(&mut self) -> &mut Self {
+        self.clear_labels()
+    }
+
+    /// Remove all labels from the issue.
+    pub fn clear_labels(&mut self) -> &mut Self {
         self.labels = Some(Some(MergeRequestLabels::Unlabeled));
         self
     }
@@ -228,6 +238,34 @@ impl<'a> EditMergeRequestBuilder<'a> {
         self.labels = Some(Some(MergeRequestLabels::Labeled(labels)));
         self
     }
+
+    /// Add a label to the merge request.
+    ///
+    /// This is an incremental addition to the existing set of labels on the merge request.
+    pub fn add_label<L>(&mut self, label: L) -> &mut Self
+    where
+        L: Into<Cow<'a, str>>,
+    {
+        self.add_labels
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(label.into());
+        self
+    }
+
+    /// Remove a label from the merge request.
+    ///
+    /// This is an incremental remove form the existing set of labels on the merge request.
+    pub fn remove_label<L>(&mut self, label: L) -> &mut Self
+    where
+        L: Into<Cow<'a, str>>,
+    {
+        self.remove_labels
+            .get_or_insert(None)
+            .get_or_insert_with(CommaSeparatedList::new)
+            .push(label.into());
+        self
+    }
 }
 
 impl<'a> Endpoint for EditMergeRequest<'a> {
@@ -251,6 +289,8 @@ impl<'a> Endpoint for EditMergeRequest<'a> {
             .push_opt("title", self.title.as_ref())
             .push_opt("milestone_id", self.milestone_id)
             .push_opt("labels", self.labels.as_ref())
+            .push_opt("add_labels", self.add_labels.as_ref())
+            .push_opt("remove_labels", self.remove_labels.as_ref())
             .push_opt("description", self.description.as_ref())
             .push_opt("state_event", self.state_event)
             .push_opt("remove_source_branch", self.remove_source_branch)
@@ -547,6 +587,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(deprecated)]
     fn endpoint_labels_remove() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::PUT)
@@ -561,6 +602,68 @@ mod tests {
             .project("simple/project")
             .merge_request(1)
             .remove_labels()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_labels_clear() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("labels=")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .clear_labels()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_add_labels() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("add_labels=one%2Ctwo")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .add_label("one")
+            .add_label("two")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_remove_labels() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("remove_labels=one%2Ctwo")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .remove_label("one")
+            .remove_label("two")
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

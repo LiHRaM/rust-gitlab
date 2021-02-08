@@ -16,6 +16,8 @@
 
   * `EditIssue::remove_labels` is deprecated in favor of the better
     `clear_labels` wording.
+  * `EditMergeRequest::remove_labels` is deprecated in favor of the better
+    `clear_labels` wording.
 
 ## Changes
 
@@ -54,6 +56,7 @@
   * Merge requests can now be created with the `approvals_before_merge`
     setting.
   * Merge request discussions can now be created on a specific commit.
+  * Merge requests can now be edited with incremental label changes.
 
 # v0.1308.0
 
