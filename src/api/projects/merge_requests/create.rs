@@ -35,6 +35,28 @@ impl Assignee {
     }
 }
 
+/// Parameters for setting the reviewer(s) of a merge request.
+#[derive(Debug, Clone)]
+pub(crate) enum Reviewer {
+    /// Unset all reviewers.
+    Unassigned,
+    /// A set of reviewers.
+    Ids(BTreeSet<u64>),
+}
+
+impl Reviewer {
+    pub(crate) fn add_params<'a>(&'a self, params: &mut FormParams<'a>) {
+        match self {
+            Reviewer::Unassigned => {
+                params.push("reviewer_ids", "0");
+            },
+            Reviewer::Ids(ids) => {
+                params.extend(ids.iter().map(|&id| ("reviewer_ids[]", id)));
+            },
+        }
+    }
+}
+
 /// Create a new merge request on project.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
@@ -55,6 +77,8 @@ pub struct CreateMergeRequest<'a> {
     /// The assignee of the merge request.
     #[builder(setter(name = "_assignee"), default, private)]
     assignee: Option<Assignee>,
+    #[builder(setter(name = "_reviewer"), default, private)]
+    reviewer: Option<Reviewer>,
     /// The description of the merge request.
     #[builder(setter(into), default)]
     description: Option<Cow<'a, str>>,
@@ -134,6 +158,41 @@ impl<'a> CreateMergeRequestBuilder<'a> {
         self
     }
 
+    /// Filter merge requests without a reviewer.
+    pub fn without_reviewer(&mut self) -> &mut Self {
+        self.reviewer = Some(Some(Reviewer::Unassigned));
+        self
+    }
+
+    /// Filter merge requests reviewed by a user (by ID).
+    pub fn reviewer(&mut self, reviewer: u64) -> &mut Self {
+        let reviewer = match self.reviewer.take() {
+            Some(Some(Reviewer::Ids(mut set))) => {
+                set.insert(reviewer);
+                Reviewer::Ids(set)
+            },
+            _ => Reviewer::Ids(iter::once(reviewer).collect()),
+        };
+        self.reviewer = Some(Some(reviewer));
+        self
+    }
+
+    /// Filter merge requests reviewed by users (by ID).
+    pub fn reviewers<I>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = u64>,
+    {
+        let reviewer = match self.reviewer.take() {
+            Some(Some(Reviewer::Ids(mut set))) => {
+                set.extend(iter);
+                Reviewer::Ids(set)
+            },
+            _ => Reviewer::Ids(iter.collect()),
+        };
+        self.reviewer = Some(Some(reviewer));
+        self
+    }
+
     /// Add a label.
     pub fn label<L>(&mut self, label: L) -> &mut Self
     where
@@ -186,6 +245,9 @@ impl<'a> Endpoint for CreateMergeRequest<'a> {
 
         if let Some(assignee) = self.assignee.as_ref() {
             assignee.add_params(&mut params);
+        }
+        if let Some(reviewer) = self.reviewer.as_ref() {
+            reviewer.add_params(&mut params);
         }
 
         #[allow(deprecated)]
@@ -369,6 +431,89 @@ mod tests {
             .title("title")
             .assignee(1)
             .assignees([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_unreviewed() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&reviewer_ids=0",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .without_reviewer()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_reviewer() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&reviewer_ids%5B%5D=1",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .reviewer(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_reviewers() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects/simple%2Fproject/merge_requests")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "source_branch=source%2Fbranch",
+                "&target_branch=target%2Fbranch",
+                "&title=title",
+                "&reviewer_ids%5B%5D=1",
+                "&reviewer_ids%5B%5D=2",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateMergeRequest::builder()
+            .project("simple/project")
+            .source_branch("source/branch")
+            .target_branch("target/branch")
+            .title("title")
+            .reviewer(1)
+            .reviewers([1, 2].iter().copied())
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

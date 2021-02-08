@@ -10,7 +10,7 @@ use derive_builder::Builder;
 
 use crate::api::common::{CommaSeparatedList, NameOrId};
 use crate::api::endpoint_prelude::*;
-use crate::api::projects::merge_requests::create::Assignee;
+use crate::api::projects::merge_requests::create::{Assignee, Reviewer};
 use crate::api::ParamValue;
 
 #[derive(Debug, Clone)]
@@ -71,6 +71,8 @@ pub struct EditMergeRequest<'a> {
     /// The assignee of the merge request.
     #[builder(setter(name = "_assignee"), default, private)]
     assignee: Option<Assignee>,
+    #[builder(setter(name = "_reviewer"), default, private)]
+    reviewer: Option<Reviewer>,
     /// The ID of the milestone to add the merge request to.
     #[builder(default)]
     milestone_id: Option<u64>,
@@ -153,6 +155,41 @@ impl<'a> EditMergeRequestBuilder<'a> {
         self
     }
 
+    /// Filter merge requests without a reviewer.
+    pub fn without_reviewer(&mut self) -> &mut Self {
+        self.reviewer = Some(Some(Reviewer::Unassigned));
+        self
+    }
+
+    /// Filter merge requests reviewed by a user (by ID).
+    pub fn reviewer(&mut self, reviewer: u64) -> &mut Self {
+        let reviewer = match self.reviewer.take() {
+            Some(Some(Reviewer::Ids(mut set))) => {
+                set.insert(reviewer);
+                Reviewer::Ids(set)
+            },
+            _ => Reviewer::Ids(iter::once(reviewer).collect()),
+        };
+        self.reviewer = Some(Some(reviewer));
+        self
+    }
+
+    /// Filter merge requests reviewed by users (by ID).
+    pub fn reviewers<I>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = u64>,
+    {
+        let reviewer = match self.reviewer.take() {
+            Some(Some(Reviewer::Ids(mut set))) => {
+                set.extend(iter);
+                Reviewer::Ids(set)
+            },
+            _ => Reviewer::Ids(iter.collect()),
+        };
+        self.reviewer = Some(Some(reviewer));
+        self
+    }
+
     /// Clear all labels
     pub fn remove_labels(&mut self) -> &mut Self {
         self.labels = Some(Some(MergeRequestLabels::Unlabeled));
@@ -223,6 +260,9 @@ impl<'a> Endpoint for EditMergeRequest<'a> {
 
         if let Some(assignee) = self.assignee.as_ref() {
             assignee.add_params(&mut params);
+        }
+        if let Some(reviewer) = self.reviewer.as_ref() {
+            reviewer.add_params(&mut params);
         }
 
         #[allow(deprecated)]
@@ -399,6 +439,67 @@ mod tests {
             .merge_request(1)
             .assignee(1)
             .assignees([1, 2].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_unreviewed() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("reviewer_ids=0")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .without_reviewer()
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_reviewer() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("reviewer_ids%5B%5D=1")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .reviewer(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_reviewers() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/merge_requests/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("reviewer_ids%5B%5D=1", "&reviewer_ids%5B%5D=2"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditMergeRequest::builder()
+            .project("simple/project")
+            .merge_request(1)
+            .reviewer(1)
+            .reviewers([1, 2].iter().copied())
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
