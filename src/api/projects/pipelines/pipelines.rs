@@ -40,7 +40,7 @@ impl PipelineScope {
 }
 
 impl ParamValue<'static> for PipelineScope {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -83,7 +83,7 @@ impl PipelineStatus {
 }
 
 impl ParamValue<'static> for PipelineStatus {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -123,7 +123,7 @@ impl PipelineOrderBy {
 }
 
 impl ParamValue<'static> for PipelineOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

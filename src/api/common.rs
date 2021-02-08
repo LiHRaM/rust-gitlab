@@ -93,7 +93,7 @@ impl SortOrder {
 }
 
 impl ParamValue<'static> for SortOrder {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -128,7 +128,7 @@ impl From<bool> for EnableState {
 }
 
 impl ParamValue<'static> for EnableState {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -213,7 +213,7 @@ impl VisibilityLevel {
 }
 
 impl ParamValue<'static> for VisibilityLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -250,7 +250,7 @@ impl From<bool> for YesNo {
 }
 
 impl ParamValue<'static> for YesNo {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -286,7 +286,7 @@ impl ProtectedAccessLevel {
 }
 
 impl ParamValue<'static> for ProtectedAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

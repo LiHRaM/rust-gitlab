@@ -39,7 +39,7 @@ impl MergeRequestState {
 }
 
 impl ParamValue<'static> for MergeRequestState {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -60,7 +60,7 @@ impl MergeRequestView {
 }
 
 impl ParamValue<'static> for MergeRequestView {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -87,7 +87,7 @@ impl MergeRequestScope {
 }
 
 impl ParamValue<'static> for MergeRequestScope {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -140,7 +140,7 @@ impl MergeRequestOrderBy {
 }
 
 impl ParamValue<'static> for MergeRequestOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

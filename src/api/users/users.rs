@@ -48,7 +48,7 @@ impl UserOrderBy {
 }
 
 impl ParamValue<'static> for UserOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

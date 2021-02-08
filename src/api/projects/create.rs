@@ -36,7 +36,7 @@ impl FeatureAccessLevel {
 }
 
 impl ParamValue<'static> for FeatureAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -69,7 +69,7 @@ impl FeatureAccessLevelPublic {
 }
 
 impl ParamValue<'static> for FeatureAccessLevelPublic {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -105,7 +105,7 @@ impl ContainerExpirationCadence {
 }
 
 impl ParamValue<'static> for ContainerExpirationCadence {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -183,7 +183,7 @@ impl ContainerExpirationKeepN {
 }
 
 impl ParamValue<'static> for ContainerExpirationKeepN {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str()
     }
 }
@@ -216,7 +216,7 @@ impl ContainerExpirationOlderThan {
 }
 
 impl ParamValue<'static> for ContainerExpirationOlderThan {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -324,7 +324,7 @@ impl AutoDevOpsDeployStrategy {
 }
 
 impl ParamValue<'static> for AutoDevOpsDeployStrategy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -352,7 +352,7 @@ impl MergeMethod {
 }
 
 impl ParamValue<'static> for MergeMethod {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -386,7 +386,7 @@ impl BuildGitStrategy {
 }
 
 impl ParamValue<'static> for BuildGitStrategy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

@@ -32,7 +32,7 @@ impl GroupProjectCreationAccessLevel {
 }
 
 impl ParamValue<'static> for GroupProjectCreationAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -56,7 +56,7 @@ impl SubgroupCreationAccessLevel {
 }
 
 impl ParamValue<'static> for SubgroupCreationAccessLevel {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -83,7 +83,7 @@ impl BranchProtection {
 }
 
 impl ParamValue<'static> for BranchProtection {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -120,7 +120,7 @@ impl From<u64> for SharedRunnersMinutesLimit {
 }
 
 impl ParamValue<'static> for SharedRunnersMinutesLimit {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str()
     }
 }

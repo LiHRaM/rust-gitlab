@@ -1,5 +1,10 @@
 # v0.1308.1 (unreleased)
 
+## Breaking changes
+
+  * `ParamValue::as_value` now takes its value as `&self` rather than `self`.
+    This was required in order to implement `CommaSeparatedList` reliably.
+
 ## Changes
 
   * API bindings for the `"minimal"` access level.

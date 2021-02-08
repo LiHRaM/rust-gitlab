@@ -38,7 +38,7 @@ impl CommitStatusState {
 }
 
 impl ParamValue<'static> for CommitStatusState {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

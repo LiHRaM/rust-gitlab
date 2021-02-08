@@ -33,7 +33,7 @@ impl IssueStateEvent {
 }
 
 impl ParamValue<'static> for IssueStateEvent {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -51,7 +51,7 @@ enum IssueLabels<'a> {
 }
 
 impl<'a, 'b: 'a> ParamValue<'a> for &'b IssueLabels<'a> {
-    fn as_value(self) -> Cow<'a, str> {
+    fn as_value(&self) -> Cow<'a, str> {
         match self {
             IssueLabels::Unlabeled => "".into(),
             IssueLabels::Labeled(labels) => format!("{}", labels.iter().format(",")).into(),

@@ -41,7 +41,7 @@ impl GroupSubgroupsOrderBy {
 }
 
 impl ParamValue<'static> for GroupSubgroupsOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

@@ -42,7 +42,7 @@ impl NoteOrderBy {
 }
 
 impl ParamValue<'static> for NoteOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -65,7 +65,7 @@ impl<'a> Labels<'a> {
 }
 
 impl<'a, 'b: 'a> ParamValue<'static> for &'b Labels<'a> {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str()
     }
 }
@@ -88,7 +88,7 @@ impl<'a> Milestone<'a> {
 }
 
 impl<'a, 'b: 'a> ParamValue<'a> for &'b Milestone<'a> {
-    fn as_value(self) -> Cow<'a, str> {
+    fn as_value(&self) -> Cow<'a, str> {
         self.as_str().into()
     }
 }
@@ -111,7 +111,7 @@ impl<'a> ReactionEmoji<'a> {
 }
 
 impl<'a, 'b: 'a> ParamValue<'a> for &'b ReactionEmoji<'a> {
-    fn as_value(self) -> Cow<'a, str> {
+    fn as_value(&self) -> Cow<'a, str> {
         self.as_str().into()
     }
 }

@@ -55,7 +55,7 @@ impl ProjectOrderBy {
 }
 
 impl ParamValue<'static> for ProjectOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }

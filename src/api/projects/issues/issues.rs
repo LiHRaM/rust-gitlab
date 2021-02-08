@@ -33,7 +33,7 @@ impl IssueState {
 }
 
 impl ParamValue<'static> for IssueState {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -60,7 +60,7 @@ impl IssueScope {
 }
 
 impl ParamValue<'static> for IssueScope {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
@@ -114,7 +114,7 @@ impl IssueWeight {
 }
 
 impl ParamValue<'static> for IssueWeight {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str()
     }
 }
@@ -167,7 +167,7 @@ impl IssueOrderBy {
 }
 
 impl ParamValue<'static> for IssueOrderBy {
-    fn as_value(self) -> Cow<'static, str> {
+    fn as_value(&self) -> Cow<'static, str> {
         self.as_str().into()
     }
 }
