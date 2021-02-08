@@ -453,7 +453,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/runners.md
   * https://gitlab.kitware.com/help/api/search.md
   * https://gitlab.kitware.com/help/api/services.md
-  * https://gitlab.kitware.com/help/api/projects.md
   * https://gitlab.kitware.com/help/api/settings.md
   * https://gitlab.kitware.com/help/api/sidekiq_metrics.md
   * https://gitlab.kitware.com/help/api/snippets.md
