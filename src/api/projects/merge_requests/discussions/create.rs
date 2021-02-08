@@ -9,19 +9,61 @@ use derive_builder::Builder;
 
 use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
+use crate::api::ParamValue;
+
+/// The type of line to comment on.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LineType {
+    /// A removed or edited line.
+    Old,
+    /// A new or post-edit line.
+    New,
+}
+
+impl LineType {
+    fn as_str(self) -> &'static str {
+        match self {
+            LineType::Old => "old",
+            LineType::New => "new",
+        }
+    }
+}
+
+impl ParamValue<'static> for LineType {
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
+/// The line code for a discussion comment.
+#[derive(Debug, Clone, Builder)]
+pub struct LineCode<'a> {
+    /// The line code.
+    ///
+    /// Note that this is an internal format without much documentation.
+    #[builder(setter(into))]
+    line_code: Cow<'a, str>,
+    /// The type of the line to comment on.
+    type_: LineType,
+}
+
+impl<'a> LineCode<'a> {
+    /// Create a builder for the line range.
+    pub fn builder() -> LineCodeBuilder<'a> {
+        LineCodeBuilder::default()
+    }
+}
 
 /// A range of lines for a discussion.
 #[derive(Debug, Clone, Builder)]
 #[builder(setter(strip_option))]
 pub struct LineRange<'a> {
     /// The line code for the start of the range.
-    // FIXME: Add a type for this.
     #[builder(setter(into))]
-    start_line_code: Cow<'a, str>,
+    start: LineCode<'a>,
     /// The line code for the end of the range.
-    // FIXME: Add a type for this.
     #[builder(setter(into))]
-    end_line_code: Cow<'a, str>,
+    end: LineCode<'a>,
 }
 
 impl<'a> LineRange<'a> {
@@ -33,13 +75,15 @@ impl<'a> LineRange<'a> {
     fn add_params<'b>(&'b self, params: &mut FormParams<'b>) {
         params
             .push(
-                "position[line_range][start_line_code]",
-                self.start_line_code.as_ref(),
+                "position[line_range][start][line_code]",
+                self.start.line_code.as_ref(),
             )
+            .push("position[line_range][start][type]", self.start.type_)
             .push(
-                "position[line_range][end_line_code]",
-                self.end_line_code.as_ref(),
-            );
+                "position[line_range][end][line_code]",
+                self.end.line_code.as_ref(),
+            )
+            .push("position[line_range][end][type]", self.end.type_);
     }
 }
 
@@ -251,7 +295,8 @@ mod tests {
     use http::Method;
 
     use crate::api::projects::merge_requests::discussions::{
-        CreateMergeRequestDiscussion, ImagePosition, LineRange, Position, TextPosition,
+        CreateMergeRequestDiscussion, ImagePosition, LineCode, LineRange, LineType, Position,
+        TextPosition,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -259,34 +304,97 @@ mod tests {
     use super::FilePosition;
 
     #[test]
+    fn line_type_as_str() {
+        let items = &[(LineType::Old, "old"), (LineType::New, "new")];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn line_code_line_code_and_type_are_necessary() {
+        let err = LineCode::builder().build().unwrap_err();
+        assert_eq!(err, "`line_code` must be initialized");
+    }
+
+    #[test]
+    fn line_code_line_code_is_necessary() {
+        let err = LineCode::builder()
+            .type_(LineType::Old)
+            .build()
+            .unwrap_err();
+        assert_eq!(err, "`line_code` must be initialized");
+    }
+
+    #[test]
+    fn line_code_type_is_necessary() {
+        let err = LineCode::builder().line_code("code").build().unwrap_err();
+        assert_eq!(err, "`type_` must be initialized");
+    }
+
+    #[test]
+    fn line_code_line_code_and_type_are_sufficient() {
+        LineCode::builder()
+            .line_code("start")
+            .type_(LineType::Old)
+            .build()
+            .unwrap();
+    }
+
+    #[test]
     fn line_range_start_and_end_are_necessary() {
         let err = LineRange::builder().build().unwrap_err();
-        assert_eq!(err, "`start_line_code` must be initialized");
+        assert_eq!(err, "`start` must be initialized");
     }
 
     #[test]
     fn line_range_start_is_necessary() {
         let err = LineRange::builder()
-            .end_line_code("end")
+            .end(
+                LineCode::builder()
+                    .line_code("end")
+                    .type_(LineType::Old)
+                    .build()
+                    .unwrap(),
+            )
             .build()
             .unwrap_err();
-        assert_eq!(err, "`start_line_code` must be initialized");
+        assert_eq!(err, "`start` must be initialized");
     }
 
     #[test]
     fn line_range_end_is_necessary() {
         let err = LineRange::builder()
-            .start_line_code("start")
+            .start(
+                LineCode::builder()
+                    .line_code("start")
+                    .type_(LineType::Old)
+                    .build()
+                    .unwrap(),
+            )
             .build()
             .unwrap_err();
-        assert_eq!(err, "`end_line_code` must be initialized");
+        assert_eq!(err, "`end` must be initialized");
     }
 
     #[test]
     fn line_range_start_and_end_are_sufficient() {
         LineRange::builder()
-            .start_line_code("start")
-            .end_line_code("end")
+            .start(
+                LineCode::builder()
+                    .line_code("start")
+                    .type_(LineType::Old)
+                    .build()
+                    .unwrap(),
+            )
+            .end(
+                LineCode::builder()
+                    .line_code("end")
+                    .type_(LineType::Old)
+                    .build()
+                    .unwrap(),
+            )
             .build()
             .unwrap();
     }
@@ -518,8 +626,10 @@ mod tests {
                 "&position%5Bnew_line%5D=0",
                 "&position%5Bold_path%5D=path%2Fto%2Ffile%2Fold",
                 "&position%5Bold_line%5D=0",
-                "&position%5Bline_range%5D%5Bstart_line_code%5D=some_complicated_line_code_thing",
-                "&position%5Bline_range%5D%5Bend_line_code%5D=some_complicated_line_code_thing",
+                "&position%5Bline_range%5D%5Bstart%5D%5Bline_code%5D=some_complicated_line_code_thing",
+                "&position%5Bline_range%5D%5Bstart%5D%5Btype%5D=old",
+                "&position%5Bline_range%5D%5Bend%5D%5Bline_code%5D=some_complicated_line_code_thing",
+                "&position%5Bline_range%5D%5Bend%5D%5Btype%5D=new",
             ))
             .build()
             .unwrap();
@@ -542,8 +652,20 @@ mod tests {
                             .old_line(0)
                             .line_range(
                                 LineRange::builder()
-                                    .start_line_code("some_complicated_line_code_thing")
-                                    .end_line_code("some_complicated_line_code_thing")
+                                    .start(
+                                        LineCode::builder()
+                                            .line_code("some_complicated_line_code_thing")
+                                            .type_(LineType::Old)
+                                            .build()
+                                            .unwrap(),
+                                    )
+                                    .end(
+                                        LineCode::builder()
+                                            .line_code("some_complicated_line_code_thing")
+                                            .type_(LineType::New)
+                                            .build()
+                                            .unwrap(),
+                                    )
                                     .build()
                                     .unwrap(),
                             )

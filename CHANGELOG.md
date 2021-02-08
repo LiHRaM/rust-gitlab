@@ -4,6 +4,8 @@
 
   * `ParamValue::as_value` now takes its value as `&self` rather than `self`.
     This was required in order to implement `CommaSeparatedList` reliably.
+  * Merge request discussions on code now have a more fine-grained API. This
+    change was made by GitLab and is just being followed by the crate.
 
 ## Additions
 
