@@ -5,6 +5,11 @@
   * `ParamValue::as_value` now takes its value as `&self` rather than `self`.
     This was required in order to implement `CommaSeparatedList` reliably.
 
+## Additions
+
+  * `api::common::CommaSeparatedList` now exists for easy use of
+    comma-separated values.
+
 ## Changes
 
   * API bindings for the `"minimal"` access level.
