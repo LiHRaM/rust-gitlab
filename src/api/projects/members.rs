@@ -9,12 +9,16 @@
 //! These endpoints are used for querying project members.
 
 mod add;
+mod edit;
 mod member;
 mod members;
 mod remove;
 
 pub use self::add::AddProjectMember;
 pub use self::add::AddProjectMemberBuilder;
+
+pub use self::edit::EditProjectMember;
+pub use self::edit::EditProjectMemberBuilder;
 
 pub use self::member::ProjectMember;
 pub use self::member::ProjectMemberBuilder;

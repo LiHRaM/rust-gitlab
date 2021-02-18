@@ -13,6 +13,7 @@
     comma-separated values.
   * Project members can now be removed via `RemoveProjectMember`.
   * Group members can now be edited via `EditGroupMember`.
+  * Project members can now be edited via `EditProjectMember`.
 
 ## Deprecations
 
