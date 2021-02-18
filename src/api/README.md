@@ -54,6 +54,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/members` `projects/members/members.rs`
   * `GET    /projects/:project/members/all` `projects/members/members.rs`
   * `GET    /projects/:project/members/all/:id` `projects/members/member.rs`
+  * `DELETE /projects/:project/members/:id` `projects/members/remove.rs`
   * `POST   /projects/:project/members` `projects/members/add.rs`
   * `GET    /projects/:project/members/:id` `projects/members/member.rs`
   * `GET    /projects/:project/merge_requests` `projects/merge_requests/merge_requests.rs`

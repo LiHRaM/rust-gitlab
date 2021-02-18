@@ -11,6 +11,7 @@
 mod add;
 mod member;
 mod members;
+mod remove;
 
 pub use self::add::AddProjectMember;
 pub use self::add::AddProjectMemberBuilder;
@@ -20,3 +21,6 @@ pub use self::member::ProjectMemberBuilder;
 
 pub use self::members::ProjectMembers;
 pub use self::members::ProjectMembersBuilder;
+
+pub use self::remove::RemoveProjectMember;
+pub use self::remove::RemoveProjectMemberBuilder;
