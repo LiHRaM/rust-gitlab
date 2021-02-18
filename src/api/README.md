@@ -15,6 +15,7 @@ These API endpoints have been implemented.
   * `POST   /groups/:group/members` `groups/members/add.rs`
   * `GET    /groups/:group/members/:id` `groups/members/member.rs`
   * `DELETE /groups/:group/members/:id` `groups/members/remove.rs`
+  * `PUT    /groups/:group/members/:id` `groups/members/edit.rs`
   * `POST   /groups/:group/milestones` `groups/milestones/create.rs`
   * `GET    /groups/:group/projects` `groups/projects/projects.rs`
   * `GET    /groups/:group/subgroups` `groups/subgroups/subgroups.rs`

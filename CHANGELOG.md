@@ -12,6 +12,7 @@
   * `api::common::CommaSeparatedList` now exists for easy use of
     comma-separated values.
   * Project members can now be removed via `RemoveProjectMember`.
+  * Group members can now be edited via `EditGroupMember`.
 
 ## Deprecations
 
