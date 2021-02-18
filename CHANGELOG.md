@@ -66,6 +66,7 @@
   * Projects can now be filtered by storage backend.
   * Users can now be filtered by GitLab-internal users and administrator
     status.
+  * Group member removal can now specify to unassign issuables.
 
 # v0.1308.0
 

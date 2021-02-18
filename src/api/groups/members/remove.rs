@@ -11,12 +11,16 @@ use crate::api::endpoint_prelude::*;
 
 /// Remove a user from a group.
 #[derive(Debug, Builder)]
+#[builder(setter(strip_option))]
 pub struct RemoveGroupMember<'a> {
     /// The group to remove the user from.
     #[builder(setter(into))]
     group: NameOrId<'a>,
     /// The user to remove from the group.
     user: u64,
+    /// unassign from any issues or merge requests inside a given group.
+    #[builder(default)]
+    unassign_issuables: Option<bool>,
 }
 
 impl<'a> RemoveGroupMember<'a> {
@@ -33,6 +37,14 @@ impl<'a> Endpoint for RemoveGroupMember<'a> {
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("groups/{}/members/{}", self.group, self.user).into()
+    }
+
+    fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
+        let mut params = FormParams::default();
+
+        params.push_opt("unassign_issuables", self.unassign_issuables);
+
+        params.into_body()
     }
 }
 
@@ -76,6 +88,7 @@ mod tests {
         let endpoint = ExpectedUrl::builder()
             .method(Method::DELETE)
             .endpoint("groups/group%2Fsubgroup/members/1")
+            .content_type("application/x-www-form-urlencoded")
             .build()
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
@@ -83,6 +96,26 @@ mod tests {
         let endpoint = RemoveGroupMember::builder()
             .group("group/subgroup")
             .user(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_unassign_issuables() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::DELETE)
+            .endpoint("groups/group%2Fsubgroup/members/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("unassign_issuables=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = RemoveGroupMember::builder()
+            .group("group/subgroup")
+            .user(1)
+            .unassign_issuables(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
