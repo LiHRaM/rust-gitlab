@@ -1,4 +1,4 @@
-# v0.1308.1 (unreleased)
+# v0.1309.0
 
 ## Breaking changes
 
