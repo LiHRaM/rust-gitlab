@@ -9,34 +9,34 @@ use derive_builder::Builder;
 use crate::api::common::NameOrId;
 use crate::api::endpoint_prelude::*;
 
-/// Remove a user from a group.
+/// Remove a user from a project.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
-pub struct RemoveGroupMember<'a> {
-    /// The group to remove the user from.
+pub struct RemoveProjectMember<'a> {
+    /// The project to remove the user from.
     #[builder(setter(into))]
-    group: NameOrId<'a>,
-    /// The user to remove from the group.
+    project: NameOrId<'a>,
+    /// The user to remove from the project.
     user: u64,
-    /// unassign from any issues or merge requests inside a given group.
+    /// unassign from any issues or merge requests inside a given project.
     #[builder(default)]
     unassign_issuables: Option<bool>,
 }
 
-impl<'a> RemoveGroupMember<'a> {
+impl<'a> RemoveProjectMember<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> RemoveGroupMemberBuilder<'a> {
-        RemoveGroupMemberBuilder::default()
+    pub fn builder() -> RemoveProjectMemberBuilder<'a> {
+        RemoveProjectMemberBuilder::default()
     }
 }
 
-impl<'a> Endpoint for RemoveGroupMember<'a> {
+impl<'a> Endpoint for RemoveProjectMember<'a> {
     fn method(&self) -> Method {
         Method::DELETE
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("groups/{}/members/{}", self.group, self.user).into()
+        format!("projects/{}/members/{}", self.project, self.user).into()
     }
 
     fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
@@ -52,32 +52,35 @@ impl<'a> Endpoint for RemoveGroupMember<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::groups::members::RemoveGroupMember;
+    use crate::api::projects::members::RemoveProjectMember;
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn all_parameters_are_needed() {
-        let err = RemoveGroupMember::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        let err = RemoveProjectMember::builder().build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
-    fn group_is_necessary() {
-        let err = RemoveGroupMember::builder().user(1).build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+    fn project_is_necessary() {
+        let err = RemoveProjectMember::builder().user(1).build().unwrap_err();
+        assert_eq!(err, "`project` must be initialized");
     }
 
     #[test]
     fn user_is_necessary() {
-        let err = RemoveGroupMember::builder().group(1).build().unwrap_err();
+        let err = RemoveProjectMember::builder()
+            .project(1)
+            .build()
+            .unwrap_err();
         assert_eq!(err, "`user` must be initialized");
     }
 
     #[test]
     fn sufficient_parameters() {
-        RemoveGroupMember::builder()
-            .group("group")
+        RemoveProjectMember::builder()
+            .project("project")
             .user(1)
             .build()
             .unwrap();
@@ -87,14 +90,14 @@ mod tests {
     fn endpoint() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::DELETE)
-            .endpoint("groups/group%2Fsubgroup/members/1")
+            .endpoint("projects/project%2Fsubproject/members/1")
             .content_type("application/x-www-form-urlencoded")
             .build()
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = RemoveGroupMember::builder()
-            .group("group/subgroup")
+        let endpoint = RemoveProjectMember::builder()
+            .project("project/subproject")
             .user(1)
             .build()
             .unwrap();
@@ -105,15 +108,15 @@ mod tests {
     fn endpoint_unassign_issuables() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::DELETE)
-            .endpoint("groups/group%2Fsubgroup/members/1")
+            .endpoint("projects/project%2Fsubproject/members/1")
             .content_type("application/x-www-form-urlencoded")
             .body_str("unassign_issuables=true")
             .build()
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = RemoveGroupMember::builder()
-            .group("group/subgroup")
+        let endpoint = RemoveProjectMember::builder()
+            .project("project/subproject")
             .user(1)
             .unassign_issuables(true)
             .build()

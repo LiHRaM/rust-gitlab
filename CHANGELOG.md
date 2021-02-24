@@ -11,6 +11,9 @@
 
   * `api::common::CommaSeparatedList` now exists for easy use of
     comma-separated values.
+  * Project members can now be removed via `RemoveProjectMember`.
+  * Group members can now be edited via `EditGroupMember`.
+  * Project members can now be edited via `EditProjectMember`.
 
 ## Deprecations
 
@@ -66,6 +69,7 @@
   * Projects can now be filtered by storage backend.
   * Users can now be filtered by GitLab-internal users and administrator
     status.
+  * Group member removal can now specify to unassign issuables.
 
 # v0.1308.0
 

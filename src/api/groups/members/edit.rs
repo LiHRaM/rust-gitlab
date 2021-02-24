@@ -4,35 +4,39 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use chrono::NaiveDate;
 use derive_builder::Builder;
 
-use crate::api::common::NameOrId;
+use crate::api::common::{AccessLevel, NameOrId};
 use crate::api::endpoint_prelude::*;
 
-/// Remove a user from a group.
+/// Edit a member of a group.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
-pub struct RemoveGroupMember<'a> {
-    /// The group to remove the user from.
+pub struct EditGroupMember<'a> {
+    /// The group to add the user to.
     #[builder(setter(into))]
     group: NameOrId<'a>,
-    /// The user to remove from the group.
+    /// The user to add to the group.
     user: u64,
-    /// unassign from any issues or merge requests inside a given group.
+    /// The access level for the user in the group.
+    access_level: AccessLevel,
+
+    /// When the user's access expires.
     #[builder(default)]
-    unassign_issuables: Option<bool>,
+    expires_at: Option<NaiveDate>,
 }
 
-impl<'a> RemoveGroupMember<'a> {
+impl<'a> EditGroupMember<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> RemoveGroupMemberBuilder<'a> {
-        RemoveGroupMemberBuilder::default()
+    pub fn builder() -> EditGroupMemberBuilder<'a> {
+        EditGroupMemberBuilder::default()
     }
 }
 
-impl<'a> Endpoint for RemoveGroupMember<'a> {
+impl<'a> Endpoint for EditGroupMember<'a> {
     fn method(&self) -> Method {
-        Method::DELETE
+        Method::PUT
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
@@ -42,7 +46,10 @@ impl<'a> Endpoint for RemoveGroupMember<'a> {
     fn body(&self) -> Result<Option<(&'static str, Vec<u8>)>, BodyError> {
         let mut params = FormParams::default();
 
-        params.push_opt("unassign_issuables", self.unassign_issuables);
+        params
+            .push("user_id", self.user)
+            .push("access_level", self.access_level.as_u64())
+            .push_opt("expires_at", self.expires_at);
 
         params.into_body()
     }
@@ -50,35 +57,56 @@ impl<'a> Endpoint for RemoveGroupMember<'a> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::NaiveDate;
     use http::Method;
 
-    use crate::api::groups::members::RemoveGroupMember;
+    use crate::api::common::AccessLevel;
+    use crate::api::groups::members::EditGroupMember;
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn all_parameters_are_needed() {
-        let err = RemoveGroupMember::builder().build().unwrap_err();
+        let err = EditGroupMember::builder().build().unwrap_err();
         assert_eq!(err, "`group` must be initialized");
     }
 
     #[test]
     fn group_is_necessary() {
-        let err = RemoveGroupMember::builder().user(1).build().unwrap_err();
+        let err = EditGroupMember::builder()
+            .user(1)
+            .access_level(AccessLevel::Developer)
+            .build()
+            .unwrap_err();
         assert_eq!(err, "`group` must be initialized");
     }
 
     #[test]
     fn user_is_necessary() {
-        let err = RemoveGroupMember::builder().group(1).build().unwrap_err();
+        let err = EditGroupMember::builder()
+            .group(1)
+            .access_level(AccessLevel::Developer)
+            .build()
+            .unwrap_err();
         assert_eq!(err, "`user` must be initialized");
     }
 
     #[test]
+    fn access_level_is_necessary() {
+        let err = EditGroupMember::builder()
+            .group(1)
+            .user(1)
+            .build()
+            .unwrap_err();
+        assert_eq!(err, "`access_level` must be initialized");
+    }
+
+    #[test]
     fn sufficient_parameters() {
-        RemoveGroupMember::builder()
+        EditGroupMember::builder()
             .group("group")
             .user(1)
+            .access_level(AccessLevel::Developer)
             .build()
             .unwrap();
     }
@@ -86,36 +114,43 @@ mod tests {
     #[test]
     fn endpoint() {
         let endpoint = ExpectedUrl::builder()
-            .method(Method::DELETE)
+            .method(Method::PUT)
             .endpoint("groups/group%2Fsubgroup/members/1")
             .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("user_id=1", "&access_level=30"))
             .build()
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = RemoveGroupMember::builder()
+        let endpoint = EditGroupMember::builder()
             .group("group/subgroup")
             .user(1)
+            .access_level(AccessLevel::Developer)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
     }
 
     #[test]
-    fn endpoint_unassign_issuables() {
+    fn endpoint_expires_at() {
         let endpoint = ExpectedUrl::builder()
-            .method(Method::DELETE)
+            .method(Method::PUT)
             .endpoint("groups/group%2Fsubgroup/members/1")
             .content_type("application/x-www-form-urlencoded")
-            .body_str("unassign_issuables=true")
+            .body_str(concat!(
+                "user_id=1",
+                "&access_level=30",
+                "&expires_at=2020-01-01",
+            ))
             .build()
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = RemoveGroupMember::builder()
+        let endpoint = EditGroupMember::builder()
             .group("group/subgroup")
             .user(1)
-            .unassign_issuables(true)
+            .access_level(AccessLevel::Developer)
+            .expires_at(NaiveDate::from_ymd(2020, 1, 1))
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

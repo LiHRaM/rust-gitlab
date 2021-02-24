@@ -9,12 +9,16 @@
 //! These endpoints are used for querying group members.
 
 mod add;
+mod edit;
 mod member;
 mod members;
 mod remove;
 
 pub use self::add::AddGroupMember;
 pub use self::add::AddGroupMemberBuilder;
+
+pub use self::edit::EditGroupMember;
+pub use self::edit::EditGroupMemberBuilder;
 
 pub use self::member::GroupMember;
 pub use self::member::GroupMemberBuilder;
