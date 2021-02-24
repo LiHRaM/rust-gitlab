@@ -58,11 +58,19 @@
     "started_at": "2020-04-13T00:19:48.299-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -139,11 +147,19 @@
     "started_at": "2020-04-13T00:20:48.062-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -220,11 +236,19 @@
     "started_at": "2020-04-13T00:23:16.620-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -301,11 +325,19 @@
     "started_at": "2020-04-13T00:25:11.989-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -382,11 +414,19 @@
     "started_at": "2020-04-13T00:26:18.594-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -463,11 +503,19 @@
     "started_at": "2020-04-13T00:26:25.811-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -544,11 +592,19 @@
     "started_at": "2020-04-13T00:27:39.173-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -625,11 +681,19 @@
     "started_at": "2020-04-13T00:28:12.909-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -706,11 +770,19 @@
     "started_at": "2020-04-13T00:29:56.390-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -787,11 +859,19 @@
     "started_at": "2020-04-13T00:31:27.785-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -868,11 +948,19 @@
     "started_at": "2020-04-13T00:31:50.693-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -949,11 +1037,19 @@
     "started_at": "2020-04-13T00:32:25.188-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -1030,11 +1126,19 @@
     "started_at": "2020-04-13T00:32:35.112-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -1127,11 +1231,19 @@
     "started_at": "2020-04-13T00:29:56.752-04:00",
     "status": "success",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -1201,11 +1313,19 @@
     "started_at": "2020-04-13T00:33:02.536-04:00",
     "status": "running",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",
@@ -1266,11 +1386,19 @@
     "started_at": null,
     "status": "pending",
     "tag": false,
+    "tag_list": [
+      "build",
+      "docker",
+      "linux"
+    ],
     "user": {
       "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/35/buildbot-logo.png",
       "bio": "",
       "bio_html": "",
+      "bot": false,
       "created_at": "2015-03-05T17:28:27.013-05:00",
+      "followers": 0,
+      "following": 0,
       "id": 35,
       "job_title": "",
       "linkedin": "",

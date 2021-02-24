@@ -734,11 +734,11 @@ fn test_read_user_public() {
     assert_eq!(user_public.organization, None);
     assert_eq!(
         user_public.last_sign_in_at.unwrap(),
-        datetime((2020, 7, 30), (11, 45, 26, 637)),
+        datetime((2021, 2, 15), (15, 59, 14, 546)),
     );
     assert_eq!(
         user_public.last_activity_on.unwrap(),
-        NaiveDate::from_ymd(2020, 9, 11),
+        NaiveDate::from_ymd(2021, 2, 24),
     );
     assert_eq!(
         user_public.confirmed_at.unwrap(),
@@ -750,7 +750,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(
         user_public.current_sign_in_at.unwrap(),
-        datetime((2020, 8, 4), (17, 59, 22, 501)),
+        datetime((2021, 2, 16), (17, 15, 37, 844)),
     );
     assert!(user_public.identities.is_empty());
     assert_eq!(user_public.can_create_group, true);
