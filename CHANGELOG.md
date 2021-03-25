@@ -1,3 +1,9 @@
+# v0.1310.0
+
+## Additions
+
+  * `types::{Pipeline,PipelineBasic}` now have a `project_id` member.
+
 # v0.1309.0
 
 ## Breaking changes
