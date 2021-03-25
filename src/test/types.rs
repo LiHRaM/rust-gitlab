@@ -670,6 +670,7 @@ fn test_read_repo_commit_detail() {
     assert_eq!(stats.total, 8);
     let last_pipeline = repo_commit_detail.last_pipeline.as_ref().unwrap();
     assert_eq!(last_pipeline.id, PipelineId::new(34289));
+    assert_eq!(last_pipeline.project_id, ProjectId::new(855));
     assert_eq!(last_pipeline.ref_.as_ref().unwrap(), "master");
     assert_eq!(
         last_pipeline.sha,
@@ -785,6 +786,7 @@ fn test_read_pipelines() {
     let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
 
     assert_eq!(pipeline_basic.id, PipelineId::new(188_623));
+    assert_eq!(pipeline_basic.project_id, ProjectId::new(855));
     assert_eq!(pipeline_basic.status, StatusState::Success);
     assert_eq!(pipeline_basic.ref_.as_ref().unwrap(), "master");
     assert_eq!(
@@ -810,6 +812,7 @@ fn test_read_pipeline() {
     let pipeline: Pipeline = read_test_file("pipeline");
 
     assert_eq!(pipeline.id, PipelineId::new(145_400));
+    assert_eq!(pipeline.project_id, ProjectId::new(855));
     assert_eq!(pipeline.status, StatusState::Success);
     assert_eq!(pipeline.ref_.as_ref().unwrap(), "master");
     assert_eq!(
@@ -1135,6 +1138,7 @@ fn test_read_running_job() {
     assert_eq!(runner.is_shared, true);
     assert_eq!(runner.name.unwrap(), "gitlab-runner");
     assert_eq!(job.pipeline.id, PipelineId::new(168_478));
+    assert_eq!(job.pipeline.project_id, ProjectId::new(855));
     assert_eq!(job.pipeline.ref_.unwrap(), "master");
     assert_eq!(
         job.pipeline.sha,

@@ -2457,6 +2457,8 @@ impl_id!(PipelineId, "Type-safe pipeline ID.");
 pub struct PipelineBasic {
     /// The ID of the pipeline.
     pub id: PipelineId,
+    /// The ID of the project holding the pipeline.
+    pub project_id: ProjectId,
     #[serde(rename = "ref")]
     /// The name of the reference that was tested.
     pub ref_: Option<String>,
@@ -2477,6 +2479,8 @@ pub struct PipelineBasic {
 pub struct Pipeline {
     /// The ID of the pipeline.
     pub id: PipelineId,
+    /// The ID of the project holding the pipeline.
+    pub project_id: ProjectId,
     /// The object ID that was tested.
     pub sha: ObjectId,
     #[serde(rename = "ref")]
