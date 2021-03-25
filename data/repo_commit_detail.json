@@ -10,6 +10,7 @@
   "last_pipeline": {
     "created_at": "2016-11-08T09:30:16.081-05:00",
     "id": 34289,
+    "project_id": 855,
     "ref": "master",
     "sha": "de4ac3cf96cb8a0893be22b03f5171d934f9d392",
     "status": "success",
