@@ -44,6 +44,7 @@ pub enum GitlabError {
     },
     #[error("gitlab HTTP error: {}", status)]
     Http { status: reqwest::StatusCode },
+    #[allow(clippy::upper_case_acronyms)]
     #[error("graphql error: [\"{}\"]", message.iter().format("\", \""))]
     GraphQL { message: Vec<graphql_client::Error> },
     #[error("no response from gitlab")]
