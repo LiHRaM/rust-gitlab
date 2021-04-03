@@ -866,6 +866,7 @@ pub struct RepoBranch {
     pub default: Option<bool>,
 }
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Deserialize, Debug, Clone)]
 pub struct PRBAccessLevel {
     access_level: u64,

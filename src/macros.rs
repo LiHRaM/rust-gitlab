@@ -6,7 +6,9 @@
 
 macro_rules! impl_id {
     ( $name:ident, $doc:expr$(,)? ) => {
-        #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        #[derive(
+            Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
+        )]
         #[doc = $doc]
         pub struct $name(u64);
 
