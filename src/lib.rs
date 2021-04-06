@@ -30,7 +30,7 @@ mod auth;
 #[cfg(feature = "client_api")]
 pub use crate::auth::AuthError;
 #[cfg(feature = "client_api")]
-pub use crate::gitlab::{Gitlab, GitlabBuilder, GitlabError};
+pub use crate::gitlab::{AsyncGitlab, Gitlab, GitlabBuilder, GitlabError};
 pub use crate::types::*;
 
 #[cfg(test)]

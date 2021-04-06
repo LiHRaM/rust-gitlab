@@ -8,19 +8,21 @@ use std::any;
 use std::convert::TryInto;
 use std::fmt::{self, Debug};
 
+use async_trait::async_trait;
 use bytes::Bytes;
 use graphql_client::{GraphQLQuery, QueryBody, Response};
 use http::{HeaderMap, Response as HttpResponse};
 use itertools::Itertools;
 use log::{debug, error, info};
 use reqwest::blocking::Client;
+use reqwest::Client as AsyncClient;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use thiserror::Error;
 use url::Url;
 
 use crate::api::users::CurrentUser;
-use crate::api::{self, Query};
+use crate::api::{self, AsyncQuery, Query};
 use crate::auth::{Auth, AuthError};
 use crate::types::*;
 
@@ -372,5 +374,113 @@ impl GitlabBuilder {
             self.token.clone(),
             self.cert_validation.clone(),
         )
+    }
+
+    pub async fn build_async(&self) -> GitlabResult<AsyncGitlab> {
+        AsyncGitlab::new_impl(
+            self.protocol,
+            &self.host,
+            self.token.clone(),
+            self.cert_validation.clone(),
+        )
+        .await
+    }
+}
+
+/// A representation of the asynchronous Gitlab API for a single user.
+///
+/// Separate users should use separate instances of this.
+#[derive(Clone)]
+pub struct AsyncGitlab {
+    /// The client to use for API calls.
+    client: reqwest::Client,
+    /// The base URL to use for API calls.
+    rest_url: Url,
+    /// The URL to use for GraphQL API calls.
+    graphql_url: Url,
+    /// The authentication information to use when communicating with Gitlab.
+    auth: Auth,
+}
+
+impl Debug for AsyncGitlab {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("AsyncGitlab")
+            .field("rest_url", &self.rest_url)
+            .field("graphql_url", &self.graphql_url)
+            .finish()
+    }
+}
+
+#[async_trait]
+impl api::AsyncClient for AsyncGitlab {
+    type Error = RestError;
+
+    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, api::ApiError<Self::Error>> {
+        debug!(target: "gitlab", "REST api call {}", endpoint);
+        Ok(self.rest_url.join(endpoint)?)
+    }
+
+    async fn rest_async(
+        &self,
+        mut request: http::request::Builder,
+        body: Vec<u8>,
+    ) -> Result<HttpResponse<Bytes>, api::ApiError<Self::Error>> {
+        use futures_util::TryFutureExt;
+        let call = || {
+            async {
+                self.auth.set_header(request.headers_mut().unwrap())?;
+                let http_request = request.body(body)?;
+                let request = http_request.try_into()?;
+                let rsp = self.client.execute(request).await?;
+
+                let mut http_rsp = HttpResponse::builder()
+                    .status(rsp.status())
+                    .version(rsp.version());
+                let headers = http_rsp.headers_mut().unwrap();
+                for (key, value) in rsp.headers() {
+                    headers.insert(key, value.clone());
+                }
+                Ok(http_rsp.body(rsp.bytes().await?)?)
+            }
+        };
+        call().map_err(api::ApiError::client).await
+    }
+}
+
+impl AsyncGitlab {
+    /// Internal method to create a new Gitlab client.
+    async fn new_impl(
+        protocol: &str,
+        host: &str,
+        auth: Auth,
+        cert_validation: CertPolicy,
+    ) -> GitlabResult<Self> {
+        let rest_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
+        let graphql_url = Url::parse(&format!("{}://{}/api/graphql", protocol, host))?;
+
+        let client = match cert_validation {
+            CertPolicy::Insecure => {
+                AsyncClient::builder()
+                    .danger_accept_invalid_certs(true)
+                    .build()?
+            },
+            CertPolicy::Default => AsyncClient::new(),
+        };
+
+        let api = AsyncGitlab {
+            client,
+            rest_url,
+            graphql_url,
+            auth,
+        };
+
+        // Ensure the API is working.
+        let _: UserPublic = CurrentUser::builder()
+            .build()
+            .unwrap()
+            .query_async(&api)
+            .await?;
+
+        Ok(api)
     }
 }
