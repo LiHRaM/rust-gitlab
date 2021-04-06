@@ -4,9 +4,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use async_trait::async_trait;
 use http::{header, Request};
 
-use crate::api::{query, ApiError, Client, Endpoint, Query};
+use crate::api::{query, ApiError, AsyncClient, AsyncQuery, Client, Endpoint, Query};
 
 /// A query modifier that ignores the data returned from an endpoint.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -40,6 +41,35 @@ where
             (req, Vec::new())
         };
         let rsp = client.rest(req, data)?;
+        if !rsp.status().is_success() {
+            let v = serde_json::from_slice(rsp.body())?;
+            return Err(ApiError::from_gitlab(v));
+        }
+
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl<E, C> AsyncQuery<(), C> for Ignore<E>
+where
+    E: Endpoint + Sync,
+    C: AsyncClient + Sync,
+{
+    async fn query_async(&self, client: &C) -> Result<(), ApiError<C::Error>> {
+        let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
+        self.endpoint.parameters().add_to_url(&mut url);
+
+        let req = Request::builder()
+            .method(self.endpoint.method())
+            .uri(query::url_to_http_uri(url));
+        let (req, data) = if let Some((mime, data)) = self.endpoint.body()? {
+            let req = req.header(header::CONTENT_TYPE, mime);
+            (req, data)
+        } else {
+            (req, Vec::new())
+        };
+        let rsp = client.rest_async(req, data).await?;
         if !rsp.status().is_success() {
             let v = serde_json::from_slice(rsp.body())?;
             return Err(ApiError::from_gitlab(v));
