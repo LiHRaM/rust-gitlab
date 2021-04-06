@@ -100,7 +100,7 @@ mod tests {
     use serde_json::json;
 
     use crate::api::endpoint_prelude::*;
-    use crate::api::{ApiError, Query};
+    use crate::api::{ApiError, AsyncQuery, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     struct Dummy;
@@ -292,6 +292,20 @@ mod tests {
         );
 
         let res: DummyResult = Dummy.query(&client).unwrap();
+        assert_eq!(res.value, 0);
+    }
+
+    #[tokio::test]
+    async fn test_good_deserialization_async() {
+        let endpoint = ExpectedUrl::builder().endpoint("dummy").build().unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "value": 0,
+            }),
+        );
+
+        let res: DummyResult = Dummy.query_async(&client).await.unwrap();
         assert_eq!(res.value, 0);
     }
 }

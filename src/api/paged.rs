@@ -270,7 +270,7 @@ impl<E, T, C> AsyncQuery<Vec<T>, C> for Paged<E>
 where
     E: Endpoint + Sync,
     E: Pageable,
-    T: DeserializeOwned + Send,
+    T: DeserializeOwned + Send + 'static,
     C: AsyncClient + Sync,
 {
     async fn query_async(&self, client: &C) -> Result<Vec<T>, ApiError<C::Error>> {
@@ -401,7 +401,7 @@ mod tests {
 
     use crate::api::endpoint_prelude::*;
     use crate::api::paged::LinkHeader;
-    use crate::api::{self, ApiError, LinkHeaderParseError, Pagination, Query};
+    use crate::api::{self, ApiError, AsyncQuery, LinkHeaderParseError, Pagination, Query};
     use crate::test::client::{ExpectedUrl, PagedTestClient, SingleTestClient};
 
     #[test]
@@ -642,6 +642,35 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn test_pagination_limit_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: false,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(25))
+            .query_async(&client)
+            .await
+            .unwrap();
+        assert_eq!(res.len(), 25);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
     #[test]
     fn test_pagination_all() {
         let endpoint = ExpectedUrl::builder()
@@ -660,6 +689,33 @@ mod tests {
         let query = Dummy::default();
 
         let res: Vec<DummyResult> = api::paged(query, Pagination::All).query(&client).unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_pagination_all_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy::default();
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::All)
+            .query_async(&client)
+            .await
+            .unwrap();
         assert_eq!(res.len(), 256);
         for (i, value) in res.iter().enumerate() {
             assert_eq!(value.value, i as u8);

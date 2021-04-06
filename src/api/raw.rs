@@ -85,7 +85,7 @@ mod tests {
     use serde_json::json;
 
     use crate::api::endpoint_prelude::*;
-    use crate::api::{self, ApiError, Query};
+    use crate::api::{self, ApiError, AsyncQuery, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     struct Dummy;
@@ -111,6 +111,15 @@ mod tests {
         let client = SingleTestClient::new_raw(endpoint, "not json");
 
         let data = api::raw(Dummy).query(&client).unwrap();
+        itertools::assert_equal(data, "not json".bytes());
+    }
+
+    #[tokio::test]
+    async fn test_gitlab_non_json_response_async() {
+        let endpoint = ExpectedUrl::builder().endpoint("dummy").build().unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "not json");
+
+        let data = api::raw(Dummy).query_async(&client).await.unwrap();
         itertools::assert_equal(data, "not json".bytes());
     }
 

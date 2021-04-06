@@ -9,6 +9,7 @@ use std::cmp;
 use std::collections::HashMap;
 use std::ops::Range;
 
+use async_trait::async_trait;
 use bytes::Bytes;
 use derive_builder::Builder;
 use http::request::Builder as RequestBuilder;
@@ -17,7 +18,7 @@ use serde::ser::Serialize;
 use thiserror::Error;
 use url::Url;
 
-use crate::api::{ApiError, Client};
+use crate::api::{ApiError, AsyncClient, Client};
 
 #[derive(Debug, Builder)]
 pub struct ExpectedUrl {
@@ -201,6 +202,23 @@ impl Client for SingleTestClient {
     }
 }
 
+#[async_trait]
+impl AsyncClient for SingleTestClient {
+    type Error = TestClientError;
+
+    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, ApiError<Self::Error>> {
+        <Self as Client>::rest_endpoint(self, endpoint)
+    }
+
+    async fn rest_async(
+        &self,
+        request: RequestBuilder,
+        body: Vec<u8>,
+    ) -> Result<Response<Bytes>, ApiError<Self::Error>> {
+        <Self as Client>::rest(self, request, body)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum Page {
     ByNumber { number: usize, size: usize },
@@ -360,5 +378,25 @@ where
             .body(serde_json::to_vec(data_page).unwrap())
             .unwrap()
             .map(Into::into))
+    }
+}
+
+#[async_trait]
+impl<T> AsyncClient for PagedTestClient<T>
+where
+    T: Serialize + Send + Sync,
+{
+    type Error = TestClientError;
+
+    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, ApiError<Self::Error>> {
+        <Self as Client>::rest_endpoint(self, endpoint)
+    }
+
+    async fn rest_async(
+        &self,
+        request: RequestBuilder,
+        body: Vec<u8>,
+    ) -> Result<Response<Bytes>, ApiError<Self::Error>> {
+        <Self as Client>::rest(self, request, body)
     }
 }
