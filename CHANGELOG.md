@@ -5,6 +5,8 @@
   * Added the `api::projects::releases::ProjectReleases` endpoint to list all
     releases for a project.
   * Listing commits in a repository can now be done via `Commits`
+  * Added asynchronous API for query `api::AsyncQuery` and client `api::AsyncClient`.
+  * Added asynchronous client `AsyncGitlab` (created by `GitlabBuilder::build_async`).
 
 # v0.1310.0
 
