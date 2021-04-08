@@ -50,7 +50,7 @@ before_script:
     - cargo tarpaulin --frozen $CARGO_FEATURES --exclude-files vendor --ignore-panics --all --verbose --out Html
 
 .rust_minimum: &rust_minimum
-    image: "rust:1.42.0"
+    image: "rust:1.43.0"
 
     variables:
         CARGO_UPDATE_POLICY: newest
