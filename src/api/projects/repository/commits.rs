@@ -11,6 +11,7 @@
 mod comment;
 mod comments;
 mod commit;
+mod commits;
 mod create_status;
 mod statuses;
 
@@ -23,6 +24,10 @@ pub use self::comments::CommitCommentsBuilder;
 
 pub use self::commit::Commit;
 pub use self::commit::CommitBuilder;
+
+pub use self::commits::Commits;
+pub use self::commits::CommitsBuilder;
+pub use self::commits::CommitsOrder;
 
 pub use self::create_status::CommitStatusState;
 pub use self::create_status::CreateCommitStatus;
