@@ -4,6 +4,7 @@
 
   * Added the `api::projects::releases::ProjectReleases` endpoint to list all
     releases for a project.
+  * Listing commits in a repository can now be done via `Commits`
 
 # v0.1310.0
 
