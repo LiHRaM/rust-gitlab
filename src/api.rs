@@ -76,6 +76,7 @@ pub mod users;
 
 pub(crate) mod helpers;
 
+pub use self::client::AsyncClient;
 pub use self::client::Client;
 
 pub use self::endpoint::Endpoint;
@@ -97,6 +98,7 @@ pub use self::params::FormParams;
 pub use self::params::ParamValue;
 pub use self::params::QueryParams;
 
+pub use self::query::AsyncQuery;
 pub use self::query::Query;
 
 pub use self::raw::raw;

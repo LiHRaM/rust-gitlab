@@ -4,12 +4,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::sync::{Arc, Mutex};
+
+use async_trait::async_trait;
 use http::{header, HeaderMap, Request};
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 use url::Url;
 
-use crate::api::{query, ApiError, Client, Endpoint, Query};
+use crate::api::{query, ApiError, AsyncClient, AsyncQuery, Client, Endpoint, Query};
 
 /// Errors which may occur with pagination.
 #[non_exhaustive]
@@ -262,6 +265,104 @@ where
     }
 }
 
+#[async_trait]
+impl<E, T, C> AsyncQuery<Vec<T>, C> for Paged<E>
+where
+    E: Endpoint + Sync,
+    E: Pageable,
+    T: DeserializeOwned + Send + 'static,
+    C: AsyncClient + Sync,
+{
+    async fn query_async(&self, client: &C) -> Result<Vec<T>, ApiError<C::Error>> {
+        let url = {
+            let mut url = client.rest_endpoint(&self.endpoint.endpoint())?;
+            self.endpoint.parameters().add_to_url(&mut url);
+            url
+        };
+
+        let mut page_num = 1;
+        let per_page = self.pagination.page_limit();
+        let per_page_str = format!("{}", per_page);
+
+        let results = Arc::new(Mutex::new(Vec::new()));
+        let mut next_url = None;
+        let use_keyset_pagination = self.endpoint.use_keyset_pagination();
+
+        let body = self.endpoint.body()?;
+
+        loop {
+            let page_url = if let Some(url) = next_url.take() {
+                url
+            } else {
+                let page_str = format!("{}", page_num);
+                let mut page_url = url.clone();
+
+                {
+                    let mut pairs = page_url.query_pairs_mut();
+                    pairs.append_pair("per_page", &per_page_str);
+
+                    if use_keyset_pagination {
+                        pairs.append_pair("pagination", "keyset");
+                    } else {
+                        pairs.append_pair("page", &page_str);
+                    }
+                }
+
+                page_url
+            };
+
+            let req = Request::builder()
+                .method(self.endpoint.method())
+                .uri(query::url_to_http_uri(page_url));
+            let (req, data) = if let Some((mime, data)) = body.as_ref() {
+                let req = req.header(header::CONTENT_TYPE, *mime);
+                (req, data.clone())
+            } else {
+                (req, Vec::new())
+            };
+            let rsp = client.rest_async(req, data).await?;
+            let status = rsp.status();
+
+            if use_keyset_pagination {
+                next_url = next_page_from_headers(rsp.headers())?;
+            }
+
+            let v = serde_json::from_slice(rsp.body())?;
+            if !status.is_success() {
+                return Err(ApiError::from_gitlab(v));
+            }
+
+            let page =
+                serde_json::from_value::<Vec<T>>(v).map_err(ApiError::data_type::<Vec<T>>)?;
+            let page_len = page.len();
+
+            // Gitlab used to have issues returning paginated results; these have been fixed since,
+            // but if it is needed, the bug manifests as Gitlab returning *all* results instead of
+            // just the requested results. This can cause an infinite loop here if the number of
+            // total results is exactly equal to `per_page`.
+            let is_last_page = {
+                let mut locked_results = results.lock().expect("poisoned results");
+                locked_results.extend(page);
+                self.pagination.is_last_page(page_len, &locked_results)
+            };
+            if is_last_page {
+                break;
+            }
+
+            if use_keyset_pagination {
+                if next_url.is_none() {
+                    break;
+                }
+            } else {
+                page_num += 1;
+            }
+        }
+
+        let mut locked_results = results.lock().expect("poisoned results");
+        Ok(std::mem::take(&mut locked_results))
+    }
+}
+
 fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, PaginationError> {
     let link_headers = headers.get_all(reqwest::header::LINK).iter();
     // GitLab 14.0 will deprecate this header in preference for the W3C spec's `Link` header. Make
@@ -277,7 +378,7 @@ fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, Pagination
         })
         .collect::<Result<Vec<_>, PaginationError>>()?
         .into_iter()
-        .filter_map(|header| {
+        .find_map(|header| {
             let is_next_link = header
                 .params
                 .into_iter()
@@ -289,7 +390,6 @@ fn next_page_from_headers(headers: &HeaderMap) -> Result<Option<Url>, Pagination
                 None
             }
         })
-        .next()
         .transpose()
 }
 
@@ -301,7 +401,7 @@ mod tests {
 
     use crate::api::endpoint_prelude::*;
     use crate::api::paged::LinkHeader;
-    use crate::api::{self, ApiError, LinkHeaderParseError, Pagination, Query};
+    use crate::api::{self, ApiError, AsyncQuery, LinkHeaderParseError, Pagination, Query};
     use crate::test::client::{ExpectedUrl, PagedTestClient, SingleTestClient};
 
     #[test]
@@ -542,6 +642,35 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn test_pagination_limit_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: false,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(25))
+            .query_async(&client)
+            .await
+            .unwrap();
+        assert_eq!(res.len(), 25);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
     #[test]
     fn test_pagination_all() {
         let endpoint = ExpectedUrl::builder()
@@ -560,6 +689,33 @@ mod tests {
         let query = Dummy::default();
 
         let res: Vec<DummyResult> = api::paged(query, Pagination::All).query(&client).unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_pagination_all_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy::default();
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::All)
+            .query_async(&client)
+            .await
+            .unwrap();
         assert_eq!(res.len(), 256);
         for (i, value) in res.iter().enumerate() {
             assert_eq!(value.value, i as u8);
