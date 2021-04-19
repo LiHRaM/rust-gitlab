@@ -111,6 +111,9 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/repository/commits/:sha/statuses` `projects/repository/commits/statuses.rs`
   * `POST   /projects/:project/repository/files/*file_path` `projects/repository/files/create.rs`
   * `GET    /projects/:project/repository/files/*file_path/raw` `projects/repository/files/file_raw.rs`
+  * `GET    /projects/:project/repository/tags` `projects/repository/tags/tags.rs`
+  * `GET    /projects/:project/repository/tags/:tag` `projects/repository/tags/tag.rs`
+  * `POST   /projects/:project/repository/tags` `projects/repository/tags/create.rs`
   * `GET    /projects/:project/statuses/:sha` `projects/repository/commits/create_status.rs`
     Arguably, this should be `POST /projects/:project/repository/commits/:sha/statuses`.
     https://gitlab.com/gitlab-org/gitlab/-/issues/217412
@@ -326,6 +329,9 @@ instead of having to search the page for missing endpoints.
   * `PUT    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#update-existing-file-in-repository
   * `DELETE /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#delete-existing-file-in-repository
   * `DELETE /projects/:project/repository/merged_branches` https://gitlab.kitware.com/help/api/branches.md#delete-merged-branches
+  * `DELETE /projects/:project/repository/tags/:tag` https://gitlab.kitware.com/help/api/tags.md#delete-a-tag
+  * `POST   /projects/:project/repository/tags/:tag/release` https://gitlab.kitware.com/help/api/tags.md#create-a-new-release
+  * `PUT    /projects/:project/repository/tags/:tag/release` https://gitlab.kitware.com/help/api/tags.md#update-a-release
   * `POST   /projects/:project/restore` https://gitlab.kitware.com/help/api/projects.md#restore-project-marked-for-deletion-premium
   * `POST   /projects/:project/share` https://gitlab.kitware.com/help/api/projects.md#share-project-with-group
   * `DELETE /projects/:project/share/:group` https://gitlab.kitware.com/help/api/projects.md#delete-a-shared-project-link-within-a-group
@@ -502,7 +508,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/statistics.md
   * https://gitlab.kitware.com/help/api/suggestions.md
   * https://gitlab.kitware.com/help/api/system_hooks.md
-  * https://gitlab.kitware.com/help/api/tags.md
   * https://gitlab.kitware.com/help/api/templates/dockerfiles.md
   * https://gitlab.kitware.com/help/api/templates/gitignores.md
   * https://gitlab.kitware.com/help/api/templates/gitlab_ci_ymls.md
