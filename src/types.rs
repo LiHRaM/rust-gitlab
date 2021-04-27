@@ -1516,6 +1516,9 @@ impl_id!(
 /// The status of the possible merge for a merge request.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeStatus {
+    /// The merge request has just been created.
+    #[serde(rename = "preparing")]
+    Preparing,
     /// The merge request has not been checked yet.
     #[serde(rename = "unchecked")]
     Unchecked,
