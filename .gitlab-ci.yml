@@ -23,7 +23,7 @@ before_script:
     # gone wrong here.
     - .gitlab/ci/sccache.sh && export RUSTC_WRAPPER=$PWD/.gitlab/sccache
     - rustup component add clippy
-    - cargo clippy --frozen --tests --all --verbose -- -D warnings
+    - cargo clippy --frozen $CARGO_FEATURES --tests --all --verbose -- -D warnings
     - ".gitlab/sccache --show-stats || :"
 
 .cargo_build: &cargo_build
@@ -211,6 +211,12 @@ build:cargo-clippy:
     <<:
         - *cargo_clippy_job
         - *rust_stable
+        - *cargo_cache_newest
+
+build:cargo-clippy-no-default-features:
+    <<:
+        - *cargo_clippy_job
+        - *rust_stable_no_default_features
         - *cargo_cache_newest
 
 build:cargo-minimum:
