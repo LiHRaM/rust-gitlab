@@ -6,9 +6,6 @@
 
 // TODO: Document API entities.
 // #![warn(missing_docs)]
-// XXX(rust-1.45): #[non_exhaustive] is allowed now.
-#![allow(unknown_lints)]
-#![allow(clippy::manual_non_exhaustive)]
 
 //! A library for communicating with Gitlab instances.
 
