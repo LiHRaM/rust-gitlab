@@ -26,8 +26,8 @@ use crate::api::{self, AsyncQuery, Query};
 use crate::auth::{Auth, AuthError};
 use crate::types::*;
 
-#[non_exhaustive]
 #[derive(Debug, Error)]
+#[non_exhaustive]
 pub enum GitlabError {
     #[error("failed to parse url: {}", source)]
     UrlParse {
@@ -274,8 +274,8 @@ impl Gitlab {
     }
 }
 
-#[non_exhaustive]
 #[derive(Debug, Error)]
+#[non_exhaustive]
 pub enum RestError {
     #[error("error setting auth header: {}", source)]
     AuthError {

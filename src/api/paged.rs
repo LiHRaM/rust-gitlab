@@ -15,8 +15,8 @@ use url::Url;
 use crate::api::{query, ApiError, AsyncClient, AsyncQuery, Client, Endpoint, Query};
 
 /// Errors which may occur with pagination.
-#[non_exhaustive]
 #[derive(Debug, Error)]
+#[non_exhaustive]
 pub enum PaginationError {
     /// A `Link` HTTP header can fail to parse.
     #[error("failed to parse a Link HTTP header: {}", source)]

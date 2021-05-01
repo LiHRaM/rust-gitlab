@@ -8,8 +8,8 @@ use http::{HeaderMap, HeaderValue};
 use log::error;
 use thiserror::Error;
 
-#[non_exhaustive]
 #[derive(Debug, Error)]
+#[non_exhaustive]
 pub enum AuthError {
     #[error("header value error: {}", source)]
     HeaderValue {

@@ -23,7 +23,7 @@ before_script:
     # gone wrong here.
     - .gitlab/ci/sccache.sh && export RUSTC_WRAPPER=$PWD/.gitlab/sccache
     - rustup component add clippy
-    - cargo clippy --frozen --tests --all --verbose -- -D warnings
+    - cargo clippy --frozen $CARGO_FEATURES --tests --all --verbose -- -D warnings
     - ".gitlab/sccache --show-stats || :"
 
 .cargo_build: &cargo_build
@@ -35,7 +35,8 @@ before_script:
     - ".gitlab/sccache --show-stats || :"
 
 .cargo_test: &cargo_test
-    - cargo test $CARGO_FEATURES --frozen --all --verbose
+    - .gitlab/ci/cargo2junit.sh
+    - cargo test --frozen $CARGO_FEATURES --all --verbose -- -Z unstable-options --format json --report-time | ./.gitlab/cargo2junit | tee junit.xml
 
 .cargo_tarpaulin_build: &cargo_tarpaulin_build
     - .gitlab/ci/sccache.sh && export RUSTC_WRAPPER=$PWD/.gitlab/sccache
@@ -143,6 +144,11 @@ before_script:
         - linux
     script: *cargo_test
     interruptible: true
+    artifacts:
+        when: always
+        reports:
+            junit:
+                - junit.xml
 
 .cargo_tarpaulin_build_job: &cargo_tarpaulin_build_job
     stage: build
@@ -205,6 +211,12 @@ build:cargo-clippy:
     <<:
         - *cargo_clippy_job
         - *rust_stable
+        - *cargo_cache_newest
+
+build:cargo-clippy-no-default-features:
+    <<:
+        - *cargo_clippy_job
+        - *rust_stable_no_default_features
         - *cargo_cache_newest
 
 build:cargo-minimum:
