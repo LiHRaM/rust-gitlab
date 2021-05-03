@@ -1,3 +1,9 @@
+# v0.1311.1
+
+## Breaking changes
+
+* Upgraded `reqwest` and `bytes` which use tokio 1.0.
+
 # v0.1311.0
 
 ## Additions
@@ -8,6 +14,7 @@
   * Listing commits in a repository can now be done via `Commits`
   * Added asynchronous API for query `api::AsyncQuery` and client `api::AsyncClient`.
   * Added asynchronous client `AsyncGitlab` (created by `GitlabBuilder::build_async`).
+
 
 # v0.1310.0
 
