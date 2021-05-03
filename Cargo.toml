@@ -1,6 +1,6 @@
 [package]
 name = "gitlab"
-version = "0.1311.0"
+version = "0.1311.1"
 authors = ["Ben Boeckel <ben.boeckel@kitware.com>"]
 license = "MIT/Apache-2.0"
 description = """
