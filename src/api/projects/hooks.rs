@@ -9,11 +9,15 @@
 //! These endpoints are used for querying webhooks for a project.
 
 mod create;
+mod edit;
 mod hook;
 mod hooks;
 
 pub use self::create::CreateHook;
 pub use self::create::CreateHookBuilder;
+
+pub use self::edit::EditHook;
+pub use self::edit::EditHookBuilder;
 
 pub use self::hook::Hook;
 pub use self::hook::HookBuilder;

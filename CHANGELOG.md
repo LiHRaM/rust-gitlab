@@ -1,3 +1,9 @@
+# v0.1311.2 (unreleased)
+
+## Additions
+
+  * Project hooks can now be edited via `EditHook`.
+
 # v0.1311.1
 
 ## Breaking changes
