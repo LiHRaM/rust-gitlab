@@ -1,4 +1,4 @@
-# v0.1311.2 (unreleased)
+# v0.1311.2
 
 ## Additions
 
