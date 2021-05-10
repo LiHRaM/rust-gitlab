@@ -28,6 +28,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/hooks` `projects/hooks/hooks.rs`
   * `POST   /projects/:project/hooks` `projects/hooks/create.rs`
   * `GET    /projects/:project/hooks/:id` `projects/hooks/hook.rs`
+  * `PUT    /projects/:project/hooks/:id` `projects/hooks/edit.rs`
   * `GET    /projects/:project/issues` `projects/issues/issues.rs`
     - Missing support for `not`.
   * `POST   /projects/:project/issues` `projects/issues/create.rs`
@@ -210,7 +211,6 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/fork` https://gitlab.kitware.com/help/api/projects.md#delete-an-existing-forked-from-relationship
   * `POST   /projects/:project/fork/:from` https://gitlab.kitware.com/help/api/projects.md#create-a-forked-fromto-relation-between-existing-projects
   * `GET    /projects/:project/forks` https://gitlab.kitware.com/help/api/projects.md#list-forks-of-a-project
-  * `PUT    /projects/:project/hooks/:id` https://gitlab.kitware.com/help/api/projects.md#edit-project-hook
   * `DELETE /projects/:project/hooks/:id` https://gitlab.kitware.com/help/api/projects.md#delete-project-hook
   * `POST   /projects/:project/housekeeping` https://gitlab.kitware.com/help/api/projects.md#start-the-housekeeping-task-for-a-project
   * `DELETE /projects/:project/issues/:issue` https://gitlab.kitware.com/help/api/issues.md#delete-an-issue
