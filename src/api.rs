@@ -78,6 +78,7 @@ pub(crate) mod helpers;
 
 pub use self::client::AsyncClient;
 pub use self::client::Client;
+pub use self::client::RestClient;
 
 pub use self::endpoint::Endpoint;
 

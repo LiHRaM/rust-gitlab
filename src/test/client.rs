@@ -18,7 +18,7 @@ use serde::ser::Serialize;
 use thiserror::Error;
 use url::Url;
 
-use crate::api::{ApiError, AsyncClient, Client};
+use crate::api::{ApiError, AsyncClient, Client, RestClient};
 
 #[derive(Debug, Builder)]
 pub struct ExpectedUrl {
@@ -157,13 +157,15 @@ impl SingleTestClient {
 #[error("test client error")]
 pub enum TestClientError {}
 
-impl Client for SingleTestClient {
+impl RestClient for SingleTestClient {
     type Error = TestClientError;
 
     fn rest_endpoint(&self, endpoint: &str) -> Result<Url, ApiError<Self::Error>> {
         Ok(Url::parse(&format!("{}/{}", CLIENT_STUB, endpoint))?)
     }
+}
 
+impl Client for SingleTestClient {
     fn rest(
         &self,
         request: RequestBuilder,
@@ -204,12 +206,6 @@ impl Client for SingleTestClient {
 
 #[async_trait]
 impl AsyncClient for SingleTestClient {
-    type Error = TestClientError;
-
-    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, ApiError<Self::Error>> {
-        <Self as Client>::rest_endpoint(self, endpoint)
-    }
-
     async fn rest_async(
         &self,
         request: RequestBuilder,
@@ -264,16 +260,18 @@ impl<T> PagedTestClient<T> {
     }
 }
 
-impl<T> Client for PagedTestClient<T>
-where
-    T: Serialize,
-{
+impl<T> RestClient for PagedTestClient<T> {
     type Error = TestClientError;
 
     fn rest_endpoint(&self, endpoint: &str) -> Result<Url, ApiError<Self::Error>> {
         Ok(Url::parse(&format!("{}/{}", CLIENT_STUB, endpoint))?)
     }
+}
 
+impl<T> Client for PagedTestClient<T>
+where
+    T: Serialize,
+{
     fn rest(
         &self,
         request: RequestBuilder,
@@ -386,12 +384,6 @@ impl<T> AsyncClient for PagedTestClient<T>
 where
     T: Serialize + Send + Sync,
 {
-    type Error = TestClientError;
-
-    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, ApiError<Self::Error>> {
-        <Self as Client>::rest_endpoint(self, endpoint)
-    }
-
     async fn rest_async(
         &self,
         request: RequestBuilder,

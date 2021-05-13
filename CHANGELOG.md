@@ -1,3 +1,10 @@
+# v0.1312.1 (unreleased)
+
+## Changes
+
+  * A new `RestClient` trait has been refactored from `Client` and
+    `AsyncClient`.
+
 # v0.1312.0
 
 ## Breaking changes

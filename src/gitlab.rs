@@ -294,14 +294,16 @@ pub enum RestError {
     },
 }
 
-impl api::Client for Gitlab {
+impl api::RestClient for Gitlab {
     type Error = RestError;
 
     fn rest_endpoint(&self, endpoint: &str) -> Result<Url, api::ApiError<Self::Error>> {
         debug!(target: "gitlab", "REST api call {}", endpoint);
         Ok(self.rest_url.join(endpoint)?)
     }
+}
 
+impl api::Client for Gitlab {
     fn rest(
         &self,
         mut request: http::request::Builder,
@@ -412,14 +414,17 @@ impl Debug for AsyncGitlab {
 }
 
 #[async_trait]
-impl api::AsyncClient for AsyncGitlab {
+impl api::RestClient for AsyncGitlab {
     type Error = RestError;
 
     fn rest_endpoint(&self, endpoint: &str) -> Result<Url, api::ApiError<Self::Error>> {
         debug!(target: "gitlab", "REST api call {}", endpoint);
         Ok(self.rest_url.join(endpoint)?)
     }
+}
 
+#[async_trait]
+impl api::AsyncClient for AsyncGitlab {
     async fn rest_async(
         &self,
         mut request: http::request::Builder,
