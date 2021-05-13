@@ -8,6 +8,7 @@ mod link_header;
 mod pagination;
 
 mod all_at_once;
+mod lazy;
 
 /// A trait to indicate that an endpoint is pageable.
 pub trait Pageable {
@@ -24,3 +25,5 @@ pub use self::pagination::PaginationError;
 
 pub use self::all_at_once::paged;
 pub use self::all_at_once::Paged;
+
+pub use self::lazy::LazilyPagedIter;

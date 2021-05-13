@@ -89,6 +89,7 @@ pub use self::ignore::ignore;
 pub use self::ignore::Ignore;
 
 pub use self::paged::paged;
+pub use self::paged::LazilyPagedIter;
 pub use self::paged::LinkHeaderParseError;
 pub use self::paged::Pageable;
 pub use self::paged::Paged;

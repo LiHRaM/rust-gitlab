@@ -4,6 +4,9 @@
 
   * A new `RestClient` trait has been refactored from `Client` and
     `AsyncClient`.
+  * The `api::paged` type now has an `.iter()` method which may be used to
+    iterate over paginated results using lazily fetched API results. This can
+    be used to reduce memory usage for large result sets.
 
 # v0.1312.0
 
