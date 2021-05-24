@@ -56,8 +56,9 @@ impl ParamValue<'static> for UserOrderBy {
 /// Representation of a user provided by an external service.
 #[derive(Debug, Clone, PartialEq, Eq, Builder)]
 pub struct ExternalProvider<'a> {
-    /// The ID of the user on the service.
-    pub id: u64,
+    /// The UID of the user on the service.
+    #[builder(setter(into))]
+    pub uid: Cow<'a, str>,
     /// The name of the service.
     #[builder(setter(into))]
     pub name: Cow<'a, str>,
@@ -67,6 +68,14 @@ impl<'a> ExternalProvider<'a> {
     /// Create a builder for the external provider.
     pub fn builder() -> ExternalProviderBuilder<'a> {
         ExternalProviderBuilder::default()
+    }
+}
+
+impl<'a> ExternalProviderBuilder<'a> {
+    /// Deprecated compatibility method to set UID.
+    #[deprecated(note = "use `uid` instead")]
+    pub fn id(&mut self, id: u64) -> &mut ExternalProviderBuilder<'a> {
+        self.uid(format!("{}", id))
     }
 }
 
@@ -202,7 +211,7 @@ impl<'a> Endpoint for Users<'a> {
 
         if let Some(value) = self.external_provider.as_ref() {
             params
-                .push("extern_uid", value.id)
+                .push("extern_uid", &value.uid)
                 .push("provider", &value.name);
         }
 
@@ -242,30 +251,30 @@ mod tests {
     }
 
     #[test]
-    fn external_provider_id_and_name_are_necessary() {
+    fn external_provider_uid_and_name_are_necessary() {
         let err = ExternalProvider::builder().build().unwrap_err();
-        assert_eq!(err, "`id` must be initialized");
+        assert_eq!(err, "`uid` must be initialized");
     }
 
     #[test]
-    fn external_provider_id_is_necessary() {
+    fn external_provider_uid_is_necessary() {
         let err = ExternalProvider::builder()
             .name("name")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`id` must be initialized");
+        assert_eq!(err, "`uid` must be initialized");
     }
 
     #[test]
     fn external_provider_name_is_necessary() {
-        let err = ExternalProvider::builder().id(1).build().unwrap_err();
+        let err = ExternalProvider::builder().uid("1").build().unwrap_err();
         assert_eq!(err, "`name` must be initialized");
     }
 
     #[test]
-    fn external_provider_id_and_name_are_sufficient() {
+    fn external_provider_uid_and_name_are_sufficient() {
         ExternalProvider::builder()
-            .id(1)
+            .uid("1")
             .name("name")
             .build()
             .unwrap();
@@ -348,7 +357,7 @@ mod tests {
 
         let endpoint = Users::builder()
             .external_provider(ExternalProvider {
-                id: 1,
+                uid: "1".into(),
                 name: "provider".into(),
             })
             .build()

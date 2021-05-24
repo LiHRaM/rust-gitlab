@@ -1,3 +1,10 @@
+# v0.1311.3 (unreleased)
+
+## Breaking changes
+
+  * Allow arbitrary strings for the UID of `ExternalProvider` matching what the
+    API expects and allows.
+
 # v0.1311.2
 
 ## Additions
