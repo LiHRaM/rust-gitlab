@@ -8,6 +8,7 @@
     "description_html": "Documentation issues",
     "id": 1720,
     "name": "area:doc",
+    "remove_on_close": false,
     "text_color": "#FFFFFF"
   },
   "resource_id": 69328,

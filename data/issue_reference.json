@@ -35,6 +35,7 @@
   "due_date": null,
   "id": 69075,
   "iid": 5,
+  "issue_type": "issue",
   "labels": [],
   "merge_requests_count": 1,
   "milestone": null,
@@ -51,6 +52,7 @@
     "total_time_spent": 0
   },
   "title": "Add project hook APIs",
+  "type": "ISSUE",
   "updated_at": "2017-07-07T02:31:05.370-04:00",
   "upvotes": 0,
   "user_notes_count": 0,

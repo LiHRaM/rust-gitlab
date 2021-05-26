@@ -64,6 +64,7 @@
     "finished_at": "2016-10-04T15:56:53.868-04:00",
     "id": 29191,
     "project_id": 856,
+    "queued_duration": null,
     "ref": "add_hook-api",
     "sha": "04e94ae667024a62a90179f395bfdc2b35f3efd2",
     "started_at": null,
