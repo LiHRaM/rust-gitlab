@@ -42,6 +42,7 @@
   "has_tasks": false,
   "id": 69328,
   "iid": 6,
+  "issue_type": "issue",
   "labels": [
     "area:doc"
   ],
@@ -68,6 +69,7 @@
     "total_time_spent": 0
   },
   "title": "fix documentation warnings",
+  "type": "ISSUE",
   "updated_at": "2019-07-17T09:53:48.869-04:00",
   "upvotes": 0,
   "user_notes_count": 0,
