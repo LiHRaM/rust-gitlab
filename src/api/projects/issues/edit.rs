@@ -112,6 +112,10 @@ pub struct EditIssue<'a> {
     #[deprecated(note = "use `epic_id` instead")]
     #[builder(default)]
     epic_iid: Option<u64>,
+
+    /// Updates an issue to be confidential
+    #[builder(default)]
+    confidential: Option<bool>,
 }
 
 impl<'a> EditIssue<'a> {
@@ -274,7 +278,8 @@ impl<'a> Endpoint for EditIssue<'a> {
             .push_opt("due_date", self.due_date)
             .push_opt("weight", self.weight)
             .push_opt("discussion_locked", self.discussion_locked)
-            .push_opt("epic_id", self.epic_id);
+            .push_opt("epic_id", self.epic_id)
+            .push_opt("confidential", self.confidential);
 
         if let Some(assignees) = self.assignee_ids.as_ref() {
             match assignees {
@@ -729,6 +734,26 @@ mod tests {
             .project("simple/project")
             .issue(1)
             .epic_iid(1)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_confidential() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject/issues/1")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("confidential=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditIssue::builder()
+            .project("simple/project")
+            .issue(1)
+            .confidential(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
