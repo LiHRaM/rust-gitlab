@@ -206,7 +206,11 @@ where
             None
         };
 
-        let v = serde_json::from_slice(rsp.body())?;
+        let v = if let Ok(v) = serde_json::from_slice(rsp.body()) {
+            v
+        } else {
+            return Err(ApiError::server_error(status, rsp.body()));
+        };
         if !status.is_success() {
             return Err(ApiError::from_gitlab(v));
         }
@@ -318,11 +322,11 @@ mod tests {
             .iter(&client)
             .collect();
         let err = res.unwrap_err();
-        if let ApiError::Json {
-            source,
+        if let ApiError::GitlabService {
+            status, ..
         } = err
         {
-            assert_eq!(format!("{}", source), "expected ident at line 1 column 2");
+            assert_eq!(status, http::StatusCode::OK);
         } else {
             panic!("unexpected error: {}", err);
         }
@@ -343,14 +347,11 @@ mod tests {
             .iter(&client)
             .collect();
         let err = res.unwrap_err();
-        if let ApiError::Json {
-            source,
+        if let ApiError::GitlabService {
+            status, ..
         } = err
         {
-            assert_eq!(
-                format!("{}", source),
-                "EOF while parsing a value at line 1 column 0",
-            );
+            assert_eq!(status, http::StatusCode::NOT_FOUND);
         } else {
             panic!("unexpected error: {}", err);
         }

@@ -8,6 +8,9 @@
     iterate over paginated results using lazily fetched API results. This can
     be used to reduce memory usage for large result sets.
   * Added a `confidential` parameter for `api::projects::issues::EditIssue`
+  * GitLab responses which do not return JSON (e.g., 5xx status codes) are now
+    caught as the `ApiError::GitlabService` error variant. Previously, the JSON
+    deserialization would have been exposed.
 
 # v0.1312.0
 
