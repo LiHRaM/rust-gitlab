@@ -124,11 +124,11 @@ mod tests {
 
         let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
         let err = res.unwrap_err();
-        if let ApiError::Json {
-            source,
+        if let ApiError::GitlabService {
+            status, ..
         } = err
         {
-            assert_eq!(format!("{}", source), "expected ident at line 1 column 2");
+            assert_eq!(status, http::StatusCode::OK);
         } else {
             panic!("unexpected error: {}", err);
         }
@@ -145,14 +145,11 @@ mod tests {
 
         let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
         let err = res.unwrap_err();
-        if let ApiError::Json {
-            source,
+        if let ApiError::GitlabService {
+            status, ..
         } = err
         {
-            assert_eq!(
-                format!("{}", source),
-                "EOF while parsing a value at line 1 column 0",
-            );
+            assert_eq!(status, http::StatusCode::OK);
         } else {
             panic!("unexpected error: {}", err);
         }
@@ -170,14 +167,11 @@ mod tests {
 
         let res: Result<DummyResult, _> = api::sudo(Dummy, "user").query(&client);
         let err = res.unwrap_err();
-        if let ApiError::Json {
-            source,
+        if let ApiError::GitlabService {
+            status, ..
         } = err
         {
-            assert_eq!(
-                format!("{}", source),
-                "EOF while parsing a value at line 1 column 0",
-            );
+            assert_eq!(status, http::StatusCode::NOT_FOUND);
         } else {
             panic!("unexpected error: {}", err);
         }

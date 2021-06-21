@@ -64,6 +64,14 @@ where
         /// The error message from GitLab.
         msg: String,
     },
+    /// GitLab returned an error without JSON information.
+    #[error("gitlab internal server error {}", status)]
+    GitlabService {
+        /// The status code for the return.
+        status: http::StatusCode,
+        /// The error data from GitLab.
+        data: Vec<u8>,
+    },
     /// GitLab returned an error object.
     #[error("gitlab server error: {:?}", obj)]
     GitlabObject {
@@ -101,6 +109,13 @@ where
     pub fn client(source: E) -> Self {
         ApiError::Client {
             source,
+        }
+    }
+
+    pub(crate) fn server_error(status: http::StatusCode, body: &bytes::Bytes) -> Self {
+        Self::GitlabService {
+            status,
+            data: body.into_iter().copied().collect(),
         }
     }
 

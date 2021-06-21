@@ -42,7 +42,11 @@ where
         };
         let rsp = client.rest(req, data)?;
         if !rsp.status().is_success() {
-            let v = serde_json::from_slice(rsp.body())?;
+            let v = if let Ok(v) = serde_json::from_slice(rsp.body()) {
+                v
+            } else {
+                return Err(ApiError::server_error(rsp.status(), rsp.body()));
+            };
             return Err(ApiError::from_gitlab(v));
         }
 
@@ -71,7 +75,11 @@ where
         };
         let rsp = client.rest_async(req, data).await?;
         if !rsp.status().is_success() {
-            let v = serde_json::from_slice(rsp.body())?;
+            let v = if let Ok(v) = serde_json::from_slice(rsp.body()) {
+                v
+            } else {
+                return Err(ApiError::server_error(rsp.status(), rsp.body()));
+            };
             return Err(ApiError::from_gitlab(v));
         }
 
@@ -133,14 +141,11 @@ mod tests {
         let client = SingleTestClient::new_raw(endpoint, "");
 
         let err = api::raw(Dummy).query(&client).unwrap_err();
-        if let ApiError::Json {
-            source,
+        if let ApiError::GitlabService {
+            status, ..
         } = err
         {
-            assert_eq!(
-                format!("{}", source),
-                "EOF while parsing a value at line 1 column 0",
-            );
+            assert_eq!(status, http::StatusCode::NOT_FOUND);
         } else {
             panic!("unexpected error: {}", err);
         }
