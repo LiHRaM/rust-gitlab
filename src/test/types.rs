@@ -156,7 +156,7 @@ fn test_read_commit_status() {
         commit_status.finished_at.unwrap(),
         datetime((2016, 11, 8), (14, 35, 32, 629)),
     );
-    assert_eq!(commit_status.allow_failure, false);
+    assert!(!commit_status.allow_failure);
     check_user_buildbot(&commit_status.author);
     assert_eq!(commit_status.coverage, None);
 }
@@ -194,7 +194,7 @@ fn test_read_issue() {
     assert_eq!(issue.downvotes, 0);
     assert_eq!(issue.due_date, None);
     assert_eq!(issue.has_tasks, Some(false));
-    assert_eq!(issue.confidential, false);
+    assert!(!issue.confidential);
     assert_eq!(issue.discussion_locked, None);
     assert_eq!(
         issue.web_url,
@@ -239,7 +239,7 @@ fn test_read_issue_reference() {
     assert_eq!(issue.upvotes, 0);
     assert_eq!(issue.downvotes, 0);
     assert_eq!(issue.due_date, None);
-    assert_eq!(issue.confidential, false);
+    assert!(!issue.confidential);
     assert_eq!(issue.discussion_locked, None);
     assert_eq!(
         issue.web_url,
@@ -310,12 +310,12 @@ fn check_merge_request_b(merge_request: &MergeRequest) {
         assert_eq!(oid.unwrap().value(), value);
     };
 
-    assert_eq!(merge_request.work_in_progress, false);
+    assert!(!merge_request.work_in_progress);
     assert_eq!(merge_request.allow_collaboration, None);
     assert_eq!(merge_request.allow_maintainer_to_push, None);
     assert!(merge_request.milestone.is_none());
-    assert_eq!(merge_request.squash, false);
-    assert_eq!(merge_request.merge_when_pipeline_succeeds, false);
+    assert!(!merge_request.squash);
+    assert!(!merge_request.merge_when_pipeline_succeeds);
     assert_eq!(merge_request.merge_status, MergeStatus::CanBeMerged);
     check_sha(
         merge_request.sha.as_ref(),
@@ -339,14 +339,14 @@ fn check_merge_request_b(merge_request: &MergeRequest) {
     assert_eq!(merge_request.merge_commit_sha, None);
     assert_eq!(merge_request.subscribed, Some(true));
     check_empty_time_stats(&merge_request.time_stats);
-    assert_eq!(merge_request.blocking_discussions_resolved, true);
+    assert!(merge_request.blocking_discussions_resolved);
     assert_eq!(merge_request.changes_count.as_ref().unwrap(), "3");
     assert_eq!(merge_request.user_notes_count, 10);
     assert_eq!(merge_request.discussion_locked, None);
     assert_eq!(merge_request.should_remove_source_branch, None);
     assert_eq!(merge_request.force_remove_source_branch, Some(true));
-    assert_eq!(merge_request.has_conflicts, false);
-    assert_eq!(merge_request.user.as_ref().unwrap().can_merge, true);
+    assert!(!merge_request.has_conflicts);
+    assert!(merge_request.user.as_ref().unwrap().can_merge);
     assert_eq!(
         merge_request.web_url,
         "https://gitlab.kitware.com/utils/rust-gitlab/-/merge_requests/35",
@@ -372,10 +372,10 @@ fn test_read_note() {
     check_user_brad_king(&note.author);
     assert_eq!(note.created_at, datetime((2019, 8, 29), (17, 31, 17, 886)));
     assert_eq!(note.updated_at, datetime((2019, 8, 29), (17, 31, 17, 889)));
-    assert_eq!(note.resolvable, false);
+    assert!(!note.resolvable);
     assert_eq!(note.resolved, None);
     assert!(note.resolved_by.is_none());
-    assert_eq!(note.system, true);
+    assert!(note.system);
     assert_eq!(
         note.noteable_id().unwrap(),
         NoteableId::MergeRequest(MergeRequestId::new(20215)),
@@ -460,8 +460,8 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(project.default_branch.as_ref().unwrap(), "master");
     assert!(project.tag_list.is_empty());
-    assert_eq!(project.archived, false);
-    assert_eq!(project.empty_repo, false);
+    assert!(!project.archived);
+    assert!(!project.empty_repo);
     assert_eq!(project.visibility, VisibilityLevel::Public);
     assert_eq!(
         project.ssh_url_to_repo,
@@ -497,8 +497,8 @@ fn check_project_a(project: &Project) {
 
 fn check_project_b(project: &Project) {
     assert_eq!(project.import_error, None);
-    assert_eq!(project.shared_runners_enabled, true);
-    assert_eq!(project.lfs_enabled, false);
+    assert!(project.shared_runners_enabled);
+    assert!(!project.lfs_enabled);
     assert_eq!(project.creator_id, UserId::new(13));
     check_namespace_utils(&project.namespace);
     assert!(project.forked_from_project.is_none());
@@ -507,7 +507,7 @@ fn check_project_b(project: &Project) {
     assert_eq!(project.star_count, 12);
     assert_eq!(project.forks_count, 39);
     assert_eq!(project.open_issues_count, Some(16));
-    assert_eq!(project.public_jobs, true);
+    assert!(project.public_jobs);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
     assert_eq!(
@@ -516,14 +516,14 @@ fn check_project_b(project: &Project) {
     );
     assert_eq!(project.remove_source_branch_after_merge, None);
     assert_eq!(project.printing_merge_request_link_enabled, Some(true));
-    assert_eq!(project.request_access_enabled, false);
+    assert!(!project.request_access_enabled);
     assert_eq!(project.resolve_outdated_diff_discussions, None);
 
-    assert_eq!(project.jobs_enabled, true);
-    assert_eq!(project.issues_enabled, true);
-    assert_eq!(project.merge_requests_enabled, true);
-    assert_eq!(project.snippets_enabled, false);
-    assert_eq!(project.wiki_enabled, true);
+    assert!(project.jobs_enabled);
+    assert!(project.issues_enabled);
+    assert!(project.merge_requests_enabled);
+    assert!(!project.snippets_enabled);
+    assert!(project.wiki_enabled);
 }
 
 fn check_project_c(project: &Project) {
@@ -572,19 +572,19 @@ fn test_read_project_hook() {
         project_hook.created_at,
         datetime((2016, 12, 16), (16, 37, 24, 589)),
     );
-    assert_eq!(project_hook.push_events, true);
+    assert!(project_hook.push_events);
     assert_eq!(project_hook.push_events_branch_filter, None);
-    assert_eq!(project_hook.tag_push_events, true);
-    assert_eq!(project_hook.issues_events, true);
+    assert!(project_hook.tag_push_events);
+    assert!(project_hook.issues_events);
     assert_eq!(project_hook.confidential_issues_events, Some(true));
-    assert_eq!(project_hook.merge_requests_events, true);
-    assert_eq!(project_hook.note_events, true);
+    assert!(project_hook.merge_requests_events);
+    assert!(project_hook.note_events);
     assert_eq!(project_hook.confidential_note_events, Some(true));
-    assert_eq!(project_hook.repository_update_events, false);
-    assert_eq!(project_hook.enable_ssl_verification, true);
-    assert_eq!(project_hook.job_events, true);
-    assert_eq!(project_hook.pipeline_events, true);
-    assert_eq!(project_hook.wiki_page_events, true);
+    assert!(!project_hook.repository_update_events);
+    assert!(project_hook.enable_ssl_verification);
+    assert!(project_hook.job_events);
+    assert!(project_hook.pipeline_events);
+    assert!(project_hook.wiki_page_events);
 }
 
 #[test]
@@ -754,10 +754,10 @@ fn test_read_user_public() {
         datetime((2021, 2, 16), (17, 15, 37, 844)),
     );
     assert!(user_public.identities.is_empty());
-    assert_eq!(user_public.can_create_group, true);
-    assert_eq!(user_public.can_create_project, true);
-    assert_eq!(user_public.two_factor_enabled, true);
-    assert_eq!(user_public.external, false);
+    assert!(user_public.can_create_group);
+    assert!(user_public.can_create_project);
+    assert!(user_public.two_factor_enabled);
+    assert!(!user_public.external);
 }
 
 #[test]
@@ -823,7 +823,7 @@ fn test_read_pipeline() {
         pipeline.before_sha,
         Some(ObjectId::new("0000000000000000000000000000000000000000"))
     );
-    assert_eq!(pipeline.tag, false);
+    assert!(!pipeline.tag);
     assert_eq!(pipeline.yaml_errors, None);
     assert_eq!(
         pipeline.created_at.unwrap(),
@@ -887,10 +887,10 @@ fn test_read_group() {
     assert_eq!(group.path, "utils");
     assert_eq!(group.description.as_ref().unwrap(), "");
     assert_eq!(group.visibility, VisibilityLevel::Public);
-    assert_eq!(group.lfs_enabled, true);
+    assert!(group.lfs_enabled);
     assert_eq!(group.avatar_url, None);
     assert_eq!(group.web_url, "https://gitlab.kitware.com/groups/utils");
-    assert_eq!(group.request_access_enabled, false);
+    assert!(!group.request_access_enabled);
     assert_eq!(group.full_name, "Utils");
     assert_eq!(group.full_path, "utils");
     assert_eq!(group.parent_id, None);
@@ -980,7 +980,7 @@ fn test_read_pending_job() {
     assert_eq!(job.stage, "test");
     assert_eq!(job.name, "test:cargo-nightly-no-default-features");
     assert_eq!(job.ref_.unwrap(), "master");
-    assert_eq!(job.tag, false);
+    assert!(!job.tag);
     assert_eq!(job.coverage, None);
     assert_eq!(job.created_at, datetime((2020, 4, 13), (4, 19, 46, 327)));
     assert_eq!(job.started_at, None);
@@ -1008,7 +1008,7 @@ fn test_read_pending_job() {
         job.pipeline.web_url,
         "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"
     );
-    assert_eq!(job.allow_failure, false);
+    assert!(!job.allow_failure);
     assert_eq!(job.duration, None);
     check_job_artifacts(&job.artifacts, &[]);
     assert_eq!(job.artifacts_expire_at, None);
@@ -1031,7 +1031,7 @@ fn test_read_success_job() {
     assert_eq!(job.stage, "test");
     assert_eq!(job.name, "test:cargo-tarpaulin");
     assert_eq!(job.ref_.unwrap(), "master");
-    assert_eq!(job.tag, false);
+    assert!(!job.tag);
     assert_eq!(job.coverage, Some(36.43));
     assert_eq!(job.created_at, datetime((2020, 4, 13), (4, 19, 46, 268)));
     assert_eq!(
@@ -1050,8 +1050,8 @@ fn test_read_success_job() {
     let runner = job.runner.unwrap();
     assert_eq!(runner.id, RunnerId::new(156));
     assert_eq!(runner.description.unwrap(), "minmus.priv-x11");
-    assert_eq!(runner.active, true);
-    assert_eq!(runner.is_shared, true);
+    assert!(runner.active);
+    assert!(runner.is_shared);
     assert_eq!(runner.name.unwrap(), "gitlab-runner");
     assert_eq!(job.pipeline.id, PipelineId::new(168_478));
     assert_eq!(job.pipeline.ref_.unwrap(), "master");
@@ -1072,7 +1072,7 @@ fn test_read_success_job() {
         job.pipeline.web_url,
         "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"
     );
-    assert_eq!(job.allow_failure, false);
+    assert!(!job.allow_failure);
     assert_eq!(job.duration, Some(61.019_904));
     check_job_artifacts(
         &job.artifacts,
@@ -1120,7 +1120,7 @@ fn test_read_running_job() {
     assert_eq!(job.stage, "test");
     assert_eq!(job.name, "test:cargo-nightly");
     assert_eq!(job.ref_.unwrap(), "master");
-    assert_eq!(job.tag, false);
+    assert!(!job.tag);
     assert_eq!(job.coverage, None);
     assert_eq!(job.created_at, datetime((2020, 4, 13), (4, 19, 46, 302)));
     assert_eq!(
@@ -1134,8 +1134,8 @@ fn test_read_running_job() {
     let runner = job.runner.unwrap();
     assert_eq!(runner.id, RunnerId::new(160));
     assert_eq!(runner.description.unwrap(), "abeth.cuda-rt.large");
-    assert_eq!(runner.active, true);
-    assert_eq!(runner.is_shared, true);
+    assert!(runner.active);
+    assert!(runner.is_shared);
     assert_eq!(runner.name.unwrap(), "gitlab-runner");
     assert_eq!(job.pipeline.id, PipelineId::new(168_478));
     assert_eq!(job.pipeline.project_id, ProjectId::new(855));
@@ -1157,7 +1157,7 @@ fn test_read_running_job() {
         job.pipeline.web_url,
         "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"
     );
-    assert_eq!(job.allow_failure, false);
+    assert!(!job.allow_failure);
     assert_eq!(job.duration, Some(49.516_176));
     check_job_artifacts(&job.artifacts, &[]);
     assert_eq!(job.artifacts_expire_at, None);
