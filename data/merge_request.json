@@ -40,6 +40,7 @@
   },
   "discussion_locked": null,
   "downvotes": 0,
+  "draft": false,
   "first_contribution": false,
   "first_deployed_to_production_at": null,
   "force_remove_source_branch": true,
