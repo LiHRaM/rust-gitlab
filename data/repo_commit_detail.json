@@ -31,5 +31,6 @@
   },
   "status": "success",
   "title": "Merge topic 'mr-awards'",
+  "trailers": {},
   "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/de4ac3cf96cb8a0893be22b03f5171d934f9d392"
 }
