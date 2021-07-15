@@ -1,3 +1,9 @@
+# v0.1400.1 (unreleased)
+
+## Breaking changes
+
+  * `types::MergeRequest::source_project_id` is now an `Option<ProjectId>`
+
 # v0.1400.0
 
 ## Changes

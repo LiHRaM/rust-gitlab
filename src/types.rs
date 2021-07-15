@@ -1610,7 +1610,7 @@ pub struct MergeRequest {
     /// The reviewers of the merge request.
     pub reviewers: Option<Vec<UserBasic>>,
     /// The ID of the project hosting the source branch.
-    pub source_project_id: ProjectId,
+    pub source_project_id: Option<ProjectId>,
     /// The ID of the project hosting the target branch.
     pub target_project_id: ProjectId,
     /// The labels attached to the merge request.
@@ -1718,7 +1718,7 @@ pub struct MergeRequestChanges {
     /// The reviewers of the merge request.
     pub reviewers: Option<Vec<UserBasic>>,
     /// The ID of the project hosting the source branch.
-    pub source_project_id: ProjectId,
+    pub source_project_id: Option<ProjectId>,
     /// The ID of the project hosting the target branch.
     pub target_project_id: ProjectId,
     /// The labels attached to the merge request.
