@@ -70,6 +70,7 @@ mod sudo;
 pub mod endpoint_prelude;
 
 pub mod common;
+pub mod deploy_keys;
 pub mod groups;
 pub mod issues;
 pub mod projects;
