@@ -15,6 +15,7 @@
     ],
     "short_id": "e59db4b1",
     "title": "cargo: prep for 0.1100.1",
+    "trailers": {},
     "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/commit/e59db4b129b29df220ecec6119ed2130207a0397"
   },
   "default": true,
