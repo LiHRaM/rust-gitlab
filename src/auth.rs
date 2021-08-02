@@ -44,7 +44,7 @@ impl Auth {
     ) -> AuthResult<&'a mut HeaderMap<HeaderValue>> {
         match self {
             Auth::Token(token) => {
-                let mut token_header_value = HeaderValue::from_str(&token)?;
+                let mut token_header_value = HeaderValue::from_str(token)?;
                 token_header_value.set_sensitive(true);
                 headers.insert("PRIVATE-TOKEN", token_header_value);
             },
