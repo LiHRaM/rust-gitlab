@@ -15,6 +15,10 @@ use std::iter;
 use std::thread;
 use std::time::Duration;
 
+use bytes::Bytes;
+use http::Response;
+use url::Url;
+
 use derive_builder::Builder;
 use thiserror::Error;
 
@@ -134,13 +138,86 @@ where
     }
 }
 
+/// A wrapper around a client to perform exponential backoff while retrying errors.
+///
+/// ## Notes
+///
+/// Currently, the wrapping is not 100% compatible, however the gaps should not be common. Of note
+/// is that the HTTP version is 1.1 since there is not a way to query the version from an existing
+/// builder. Also, all requested extensions are ignored since they cannot be cloned reliably. In
+/// the future, requests with extensions will be passed through, but without any backoff support.
+pub struct Client<C> {
+    client: C,
+    backoff: Backoff,
+}
+
+impl<C> Client<C> {
+    /// Create a client which retries in the face of service errors with an exponential backoff.
+    pub fn new(client: C, backoff: Backoff) -> Self {
+        Self {
+            client,
+            backoff,
+        }
+    }
+}
+
+impl<C> api::RestClient for Client<C>
+where
+    C: api::RestClient,
+{
+    type Error = Error<C::Error>;
+
+    fn rest_endpoint(&self, endpoint: &str) -> Result<Url, api::ApiError<Self::Error>> {
+        self.client
+            .rest_endpoint(endpoint)
+            .map_err(|e| e.map_client(Error::inner))
+    }
+}
+
+impl<C> api::Client for Client<C>
+where
+    C: api::Client,
+{
+    fn rest(
+        &self,
+        request: http::request::Builder,
+        body: Vec<u8>,
+    ) -> Result<Response<Bytes>, api::ApiError<Self::Error>> {
+        self.backoff.retry(|| {
+            let mut builder = http::request::Request::builder();
+            if let Some(method) = request.method_ref() {
+                builder = builder.method(method);
+            }
+            if let Some(uri) = request.uri_ref() {
+                builder = builder.uri(uri);
+            }
+            // https://github.com/hyperium/http/pull/495
+            // if let Some(version) = request.version_ref() {
+            //     builder = builder.version(version);
+            // }
+            if let Some(headers) = request.headers_ref() {
+                for (key, value) in headers.iter() {
+                    builder = builder.header(key, value);
+                }
+            }
+            // Ignore extensions for now. Can be handled once this is released:
+            // https://github.com/hyperium/http/pull/497
+
+            dbg!(self.client.rest(builder, body.clone()))
+        })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use http::{Response, StatusCode};
+    use serde::Deserialize;
+    use serde_json::json;
     use thiserror::Error;
 
-    use crate::api;
-    use crate::api::retry;
+    use crate::api::endpoint_prelude::*;
+    use crate::api::{self, retry, ApiError, Query};
+    use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[derive(Debug, Error)]
     #[error("bogus")]
@@ -257,6 +334,90 @@ mod test {
             source: retry::Error::Backoff {},
         } = err
         {
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    struct Dummy;
+
+    impl Endpoint for Dummy {
+        fn method(&self) -> Method {
+            Method::GET
+        }
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "dummy".into()
+        }
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct DummyResult {
+        value: u8,
+    }
+
+    #[test]
+    fn retry_client_ok() {
+        let endpoint = ExpectedUrl::builder().endpoint("dummy").build().unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "value": 0,
+            }),
+        );
+        let backoff = retry::Backoff::default();
+        let client = retry::Client::new(client, backoff);
+
+        let res: DummyResult = Dummy.query(&client).unwrap();
+        assert_eq!(res.value, 0);
+    }
+
+    #[test]
+    fn retry_client_err() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "message": "dummy error message",
+            }),
+        );
+        let backoff = retry::Backoff::default();
+        let client = retry::Client::new(client, backoff);
+
+        let res: Result<DummyResult, _> = Dummy.query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[test]
+    fn retry_client_retry_timeout() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("dummy")
+            .status(StatusCode::SERVICE_UNAVAILABLE)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+        let backoff = retry::Backoff::builder().limit(3).build().unwrap();
+        let client = retry::Client::new(client, backoff);
+
+        let res: Result<DummyResult, _> = Dummy.query(&client);
+        let err = res.unwrap_err();
+        if let ApiError::Client {
+            source: retry::Error::Backoff {},
+        } = err
+        {
+            // expected
         } else {
             panic!("unexpected error: {}", err);
         }
