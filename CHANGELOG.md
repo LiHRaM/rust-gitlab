@@ -1,3 +1,11 @@
+# v0.1401.1
+
+## New features
+
+  * Clients may be wrapped by `api::retry::Client` in order to perform
+    exponential backoff for service-side errors. Backoff parameters are
+    configurable via the `api::retry::Backoff` structure.
+
 # v0.1401.0
 
 ## Breaking changes

@@ -112,6 +112,86 @@ where
         }
     }
 
+    /// Wrap a client error in another wrapper.
+    pub fn map_client<F, W>(self, f: F) -> ApiError<W>
+    where
+        F: FnOnce(E) -> W,
+        W: Error + Send + Sync + 'static,
+    {
+        match self {
+            Self::Client {
+                source,
+            } => ApiError::client(f(source)),
+            Self::UrlParse {
+                source,
+            } => {
+                ApiError::UrlParse {
+                    source,
+                }
+            },
+            Self::Body {
+                source,
+            } => {
+                ApiError::Body {
+                    source,
+                }
+            },
+            Self::Json {
+                source,
+            } => {
+                ApiError::Json {
+                    source,
+                }
+            },
+            Self::Gitlab {
+                msg,
+            } => {
+                ApiError::Gitlab {
+                    msg,
+                }
+            },
+            Self::GitlabService {
+                status,
+                data,
+            } => {
+                ApiError::GitlabService {
+                    status,
+                    data,
+                }
+            },
+            Self::GitlabObject {
+                obj,
+            } => {
+                ApiError::GitlabObject {
+                    obj,
+                }
+            },
+            Self::GitlabUnrecognized {
+                obj,
+            } => {
+                ApiError::GitlabUnrecognized {
+                    obj,
+                }
+            },
+            Self::DataType {
+                source,
+                typename,
+            } => {
+                ApiError::DataType {
+                    source,
+                    typename,
+                }
+            },
+            Self::Pagination {
+                source,
+            } => {
+                ApiError::Pagination {
+                    source,
+                }
+            },
+        }
+    }
+
     pub(crate) fn server_error(status: http::StatusCode, body: &bytes::Bytes) -> Self {
         Self::GitlabService {
             status,
