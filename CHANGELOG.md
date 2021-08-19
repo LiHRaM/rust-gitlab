@@ -1,3 +1,10 @@
+# v0.1401.2 (unreleased)
+
+## Additions
+
+  * Added the `api::projects::merge_requests::approvals::MergeRequestApprovals`
+    endpoint to get approvals of a merge request.
+
 # v0.1401.1
 
 ## New features

@@ -74,6 +74,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/merge_requests/:merge_request/approve` `projects/merge_requests/approve.rs`
   * `POST   /projects/:project/merge_requests/:merge_request/unapprove` `projects/merge_requests/unapprove.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/approval_state` `projects/merge_requests/approval_state/approval_state.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/approvals` `projects/merge_requests/approvals/approvals.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/award_emoji` `projects/merge_requests/awards/awards.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/closes_issues` `projects/merge_requests/issues_closed_by.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/discussions` `projects/merge_requests/discussions/discussions.rs`
@@ -261,7 +262,6 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/members/:id` https://gitlab.kitware.com/help/api/members.md#remove-a-member-from-a-group-or-project
   * `DELETE /projects/:project/merge_requests/:merge_request` https://gitlab.kitware.com/help/api/merge_requests.md#delete-a-merge-request
   * `POST   /projects/:project/merge_requests/:merge_request/add_spent_time` https://gitlab.kitware.com/help/api/merge_requests.md#add-spent-time-for-a-merge-request
-  * `GET    /projects/:project/merge_requests/:merge_request/approvals` https://gitlab.kitware.com/help/api/merge_requests.md#merge-request-approvals
   * `POST   /projects/:project/merge_requests/:merge_request/approve` https://gitlab.kitware.com/help/api/merge_requests.md#approve-merge-request
   * `POST   /projects/:project/merge_requests/:merge_request/cancel_merge_when_pipeline_succeeds` https://gitlab.kitware.com/help/api/merge_requests.md#cancel-merge-when-pipeline-succeeds
   * `GET    /projects/:project/merge_requests/:merge_request/changes` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-changes
