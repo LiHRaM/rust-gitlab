@@ -9,6 +9,7 @@
 //! These endpoints are used for querying projects merge requests.
 
 pub mod approval_state;
+pub mod approvals;
 mod approve;
 pub mod awards;
 mod create;
