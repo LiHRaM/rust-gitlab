@@ -488,4 +488,45 @@ impl AsyncGitlab {
 
         Ok(api)
     }
+
+    /// Send a GraphQL query.
+    pub async fn graphql<Q>(&self, query: &QueryBody<Q::Variables>) -> GitlabResult<Q::ResponseData>
+    where
+        Q: GraphQLQuery,
+        Q::Variables: Debug,
+        for<'d> Q::ResponseData: Deserialize<'d>,
+    {
+        info!(
+            target: "gitlab",
+            "sending GraphQL query '{}' {:?}",
+            query.operation_name,
+            query.variables,
+        );
+        let req = self.client.post(self.graphql_url.clone()).json(query);
+        let rsp: Response<Q::ResponseData> = self.send(req).await?;
+
+        if let Some(errs) = rsp.errors {
+            return Err(GitlabError::graphql(errs));
+        }
+        rsp.data.ok_or_else(GitlabError::no_response)
+    }
+
+    /// Refactored code which talks to Gitlab and transforms error messages properly.
+    async fn send<T>(&self, req: reqwest::RequestBuilder) -> GitlabResult<T>
+    where
+        T: DeserializeOwned,
+    {
+        let auth_headers = {
+            let mut headers = HeaderMap::default();
+            self.auth.set_header(&mut headers)?;
+            headers
+        };
+        let rsp = req.headers(auth_headers).send().await?;
+        let status = rsp.status();
+        if status.is_server_error() {
+            return Err(GitlabError::http(status));
+        }
+
+        serde_json::from_slice::<T>(&rsp.bytes().await?).map_err(GitlabError::data_type::<T>)
+    }
 }

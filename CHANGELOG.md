@@ -4,6 +4,7 @@
 
   * Added the `api::projects::merge_requests::approvals::MergeRequestApprovals`
     endpoint to get approvals of a merge request.
+  * Added graphql requests to the async client.
 
 # v0.1401.1
 
