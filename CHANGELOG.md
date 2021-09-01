@@ -20,6 +20,10 @@
 
   * `types::MergeRequest::source_project_id` is now an `Option<ProjectId>`
 
+## Changes
+
+  * The `Gitlab` client now supports unauthenticated connections.
+
 # v0.1400.0
 
 ## Changes

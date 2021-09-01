@@ -21,10 +21,8 @@ use serde::Deserialize;
 use thiserror::Error;
 use url::Url;
 
-use crate::api::users::CurrentUser;
-use crate::api::{self, AsyncQuery, Query};
+use crate::api;
 use crate::auth::{Auth, AuthError};
-use crate::types::*;
 
 #[derive(Debug, Error)]
 #[non_exhaustive]
@@ -218,7 +216,7 @@ impl Gitlab {
         };
 
         // Ensure the API is working.
-        let _: UserPublic = CurrentUser::builder().build().unwrap().query(&api)?;
+        api.auth.check_connection(&api)?;
 
         Ok(api)
     }
@@ -346,6 +344,19 @@ impl GitlabBuilder {
             protocol: "https",
             host: host.into(),
             token: Auth::Token(token.into()),
+            cert_validation: CertPolicy::Default,
+        }
+    }
+
+    /// Create a new unauthenticated Gitlab API client builder.
+    pub fn new_unauthenticated<H>(host: H) -> Self
+    where
+        H: Into<String>,
+    {
+        Self {
+            protocol: "https",
+            host: host.into(),
+            token: Auth::None,
             cert_validation: CertPolicy::Default,
         }
     }
@@ -480,11 +491,7 @@ impl AsyncGitlab {
         };
 
         // Ensure the API is working.
-        let _: UserPublic = CurrentUser::builder()
-            .build()
-            .unwrap()
-            .query_async(&api)
-            .await?;
+        api.auth.check_connection_async(&api).await?;
 
         Ok(api)
     }

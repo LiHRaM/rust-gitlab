@@ -8,6 +8,10 @@ use http::{HeaderMap, HeaderValue};
 use log::error;
 use thiserror::Error;
 
+use crate::api::users::CurrentUser;
+use crate::api::{self, AsyncQuery, Query};
+use crate::types::UserPublic;
+
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum AuthError {
@@ -29,6 +33,8 @@ pub enum Auth {
     Token(String),
     /// An OAuth2 token, obtained through the OAuth2 flow
     OAuth2(String),
+    /// Unauthenticated access
+    None,
 }
 
 impl Auth {
@@ -54,8 +60,41 @@ impl Auth {
                 token_header_value.set_sensitive(true);
                 headers.insert(http::header::AUTHORIZATION, token_header_value);
             },
+            Auth::None => {},
         }
 
         Ok(headers)
+    }
+
+    pub fn check_connection<C>(&self, api: &C) -> Result<(), api::ApiError<C::Error>>
+    where
+        C: api::Client,
+    {
+        if let Self::None = self {
+            // There does not seem to be an unparameterized endpoint that can be used to reliably
+            // detect whether the connection will work or not.
+        } else {
+            let _: UserPublic = CurrentUser::builder().build().unwrap().query(api)?;
+        }
+
+        Ok(())
+    }
+
+    pub async fn check_connection_async<C>(&self, api: &C) -> Result<(), api::ApiError<C::Error>>
+    where
+        C: api::AsyncClient + Sync,
+    {
+        if let Self::None = self {
+            // There does not seem to be an unparameterized endpoint that can be used to reliably
+            // detect whether the connection will work or not.
+        } else {
+            let _: UserPublic = CurrentUser::builder()
+                .build()
+                .unwrap()
+                .query_async(api)
+                .await?;
+        }
+
+        Ok(())
     }
 }
