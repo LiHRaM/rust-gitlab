@@ -5,6 +5,7 @@
   * Added the `api::projects::merge_requests::approvals::MergeRequestApprovals`
     endpoint to get approvals of a merge request.
   * Added graphql requests to the async client.
+  * The `Gitlab` client now supports unauthenticated connections.
 
 # v0.1401.1
 
@@ -19,10 +20,6 @@
 ## Breaking changes
 
   * `types::MergeRequest::source_project_id` is now an `Option<ProjectId>`
-
-## Changes
-
-  * The `Gitlab` client now supports unauthenticated connections.
 
 # v0.1400.0
 
