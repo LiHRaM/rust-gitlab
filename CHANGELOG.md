@@ -1,4 +1,4 @@
-# v0.1401.2 (unreleased)
+# v0.1402.0
 
 ## Additions
 
@@ -6,8 +6,6 @@
     endpoint to get approvals of a merge request.
   * Added graphql requests to the async client.
   * The `Gitlab` client now supports unauthenticated connections.
-
-# v0.1401.1
 
 ## New features
 
