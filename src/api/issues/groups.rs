@@ -61,10 +61,12 @@ pub struct GroupIssues<'a> {
     /// Filter issues by the API caller's reactions.
     #[builder(setter(name = "_my_reaction_emoji"), default, private)]
     my_reaction_emoji: Option<ReactionEmoji<'a>>,
+    /// Return issues from non archived projects.
+    #[builder(default)]
+    non_archived: Option<bool>,
     /// Filter issues by weight.
     #[builder(default)]
     weight: Option<IssueWeight>,
-
     /// Filter issues with a search query.
     #[builder(setter(into), default)]
     search: Option<Cow<'a, str>>,
@@ -292,6 +294,7 @@ impl<'a> Endpoint for GroupIssues<'a> {
             .push_opt("milestone", self.milestone.as_ref())
             .push_opt("scope", self.scope)
             .push_opt("my_reaction_emoji", self.my_reaction_emoji.as_ref())
+            .push_opt("non_archived", self.non_archived)
             .push_opt("weight", self.weight)
             .push_opt("search", self.search.as_ref())
             .push_opt("in", self.search_in.as_ref())
