@@ -6,12 +6,19 @@
 
 use std::sync::RwLock;
 
-use http::{header, Request};
+use async_trait::async_trait;
+use bytes::Bytes;
+use futures_util::Stream;
+use http::request::Builder as RequestBuilder;
+use http::{header, Request, Response};
+use query::AsyncQuery;
 use serde::de::DeserializeOwned;
 use url::Url;
 
 use crate::api::paged::link_header;
-use crate::api::{query, ApiError, Client, Endpoint, Pageable, Paged, Query, RestClient};
+use crate::api::{
+    query, ApiError, AsyncClient, Client, Endpoint, Pageable, Paged, Query, RestClient,
+};
 
 impl<E> Paged<E>
 where
@@ -21,6 +28,26 @@ where
     /// Create an iterator over the results of paginated results for with a client.
     pub fn iter<'a, C, T>(&'a self, client: &'a C) -> LazilyPagedIter<'a, E, C, T> {
         LazilyPagedIter::new(self, client)
+    }
+}
+
+impl<E> Paged<E>
+where
+    E: Endpoint + Pageable + Sync,
+{
+    /// Create a stream over the results of paginated results for with a client.
+    pub fn iter_async<'a, C, T>(
+        &'a self,
+        client: &'a C,
+    ) -> impl Stream<Item = Result<T, ApiError<C::Error>>> + 'a
+    where
+        T: DeserializeOwned + 'static,
+        C: AsyncClient + Sync,
+    {
+        let iter = LazilyPagedIter::new(self, client);
+        futures_util::stream::unfold(iter, |mut iter| {
+            async move { iter.next_async().await.map(|item| (item, iter)) }
+        })
     }
 }
 
@@ -168,36 +195,30 @@ where
 
         Ok(Some(url))
     }
-}
 
-impl<'a, E, T, C> Query<Vec<T>, C> for LazilyPagedState<'a, E>
-where
-    E: Endpoint,
-    E: Pageable,
-    T: DeserializeOwned,
-    C: Client,
-{
-    fn query(&self, client: &C) -> Result<Vec<T>, ApiError<C::Error>> {
-        let url = if let Some(url) = self.page_url(client)? {
-            url
-        } else {
-            // Just return empty data.
-            // XXX: Return a new kind of PaginationError here?
-            return Ok(Vec::new());
-        };
-
+    fn build_request<C>(&self, url: Url) -> Result<(RequestBuilder, Vec<u8>), ApiError<C::Error>>
+    where
+        C: RestClient,
+    {
         let body = self.paged.endpoint.body()?;
 
         let req = Request::builder()
             .method(self.paged.endpoint.method())
             .uri(query::url_to_http_uri(url));
-        let (req, data) = if let Some((mime, data)) = body.as_ref() {
+        Ok(if let Some((mime, data)) = body.as_ref() {
             let req = req.header(header::CONTENT_TYPE, *mime);
             (req, data.clone())
         } else {
             (req, Vec::new())
-        };
-        let rsp = client.rest(req, data)?;
+        })
+    }
+
+    fn process_response<C, T>(&self, rsp: Response<Bytes>) -> Result<Vec<T>, ApiError<C::Error>>
+    where
+        E: Pageable,
+        T: DeserializeOwned,
+        C: RestClient,
+    {
         let status = rsp.status();
 
         let next_url = if self.paged.endpoint.use_keyset_pagination() {
@@ -219,6 +240,49 @@ where
         self.next_page(page.len(), next_url);
 
         Ok(page)
+    }
+}
+
+impl<'a, E, T, C> Query<Vec<T>, C> for LazilyPagedState<'a, E>
+where
+    E: Endpoint,
+    E: Pageable,
+    T: DeserializeOwned,
+    T: DeserializeOwned,
+    C: Client,
+{
+    fn query(&self, client: &C) -> Result<Vec<T>, ApiError<C::Error>> {
+        let url = if let Some(url) = self.page_url(client)? {
+            url
+        } else {
+            // Just return empty data.
+            // XXX: Return a new kind of PaginationError here?
+            return Ok(Vec::new());
+        };
+        let (req, data) = self.build_request::<C>(url)?;
+        let rsp = client.rest(req, data)?;
+        self.process_response::<C, _>(rsp)
+    }
+}
+
+#[async_trait]
+impl<'a, E, T, C> AsyncQuery<Vec<T>, C> for LazilyPagedState<'a, E>
+where
+    E: Endpoint + Pageable + Sync,
+    T: DeserializeOwned + 'static,
+    C: AsyncClient + Sync,
+{
+    async fn query_async(&self, client: &C) -> Result<Vec<T>, ApiError<C::Error>> {
+        let url = if let Some(url) = self.page_url(client)? {
+            url
+        } else {
+            // Just return empty data.
+            // XXX: Return a new kind of PaginationError here?
+            return Ok(Vec::new());
+        };
+        let (req, data) = self.build_request::<C>(url)?;
+        let rsp = client.rest_async(req, data).await?;
+        self.process_response::<C, _>(rsp)
     }
 }
 
@@ -272,8 +336,32 @@ where
     }
 }
 
+// Instead of implementing Stream directly, we implement this "async" next method and use it with
+// `stream::unfold` to return an anonymous Stream impl.
+impl<'a, E, C, T> LazilyPagedIter<'a, E, C, T>
+where
+    E: Endpoint + Pageable + Sync,
+    T: DeserializeOwned + 'static,
+    C: AsyncClient + Sync,
+{
+    async fn next_async(&mut self) -> Option<Result<T, ApiError<C::Error>>> {
+        if self.current_page.is_empty() {
+            self.current_page = match self.state.query_async(self.client).await {
+                Ok(data) => data,
+                Err(err) => return Some(Err(err)),
+            };
+
+            // Reverse the page order so that `.pop()` works.
+            self.current_page.reverse();
+        }
+
+        self.current_page.pop().map(Ok)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use futures_util::TryStreamExt;
     use http::StatusCode;
     use serde::{Deserialize, Serialize};
     use serde_json::json;
@@ -332,6 +420,31 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn test_gitlab_non_json_response_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "not json");
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All)
+            .iter_async(&client)
+            .try_collect()
+            .await;
+        let err = res.unwrap_err();
+        if let ApiError::GitlabService {
+            status, ..
+        } = err
+        {
+            assert_eq!(status, http::StatusCode::OK);
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
     #[test]
     fn test_gitlab_error_bad_json() {
         let endpoint = ExpectedUrl::builder()
@@ -346,6 +459,32 @@ mod tests {
         let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All)
             .iter(&client)
             .collect();
+        let err = res.unwrap_err();
+        if let ApiError::GitlabService {
+            status, ..
+        } = err
+        {
+            assert_eq!(status, http::StatusCode::NOT_FOUND);
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_gitlab_error_bad_json_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All)
+            .iter_async(&client)
+            .try_collect()
+            .await;
         let err = res.unwrap_err();
         if let ApiError::GitlabService {
             status, ..
@@ -387,6 +526,37 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn test_gitlab_error_detection_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "message": "dummy error message",
+            }),
+        );
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All)
+            .iter_async(&client)
+            .try_collect()
+            .await;
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
     #[test]
     fn test_gitlab_error_detection_legacy() {
         let endpoint = ExpectedUrl::builder()
@@ -417,6 +587,37 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn test_gitlab_error_detection_legacy_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_json(
+            endpoint,
+            &json!({
+                "error": "dummy error message",
+            }),
+        );
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All)
+            .iter_async(&client)
+            .try_collect()
+            .await;
+        let err = res.unwrap_err();
+        if let ApiError::Gitlab {
+            msg,
+        } = err
+        {
+            assert_eq!(msg, "dummy error message");
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
     #[test]
     fn test_gitlab_error_detection_unknown() {
         let endpoint = ExpectedUrl::builder()
@@ -434,6 +635,35 @@ mod tests {
         let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All)
             .iter(&client)
             .collect();
+        let err = res.unwrap_err();
+        if let ApiError::GitlabUnrecognized {
+            obj,
+        } = err
+        {
+            assert_eq!(obj, err_obj);
+        } else {
+            panic!("unexpected error: {}", err);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_gitlab_error_detection_unknown_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("page", "1"), ("per_page", "100")])
+            .status(StatusCode::NOT_FOUND)
+            .build()
+            .unwrap();
+        let err_obj = json!({
+            "bogus": "dummy error message",
+        });
+        let client = SingleTestClient::new_json(endpoint, &err_obj);
+        let endpoint = Dummy::default();
+
+        let res: Result<Vec<DummyResult>, _> = api::paged(endpoint, Pagination::All)
+            .iter_async(&client)
+            .try_collect()
+            .await;
         let err = res.unwrap_err();
         if let ApiError::GitlabUnrecognized {
             obj,
@@ -474,6 +704,36 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn test_pagination_limit_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: false,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(25))
+            .iter_async(&client)
+            .try_collect()
+            .await
+            .unwrap();
+        assert_eq!(res.len(), 25);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
     #[test]
     fn test_pagination_all() {
         let endpoint = ExpectedUrl::builder()
@@ -494,6 +754,34 @@ mod tests {
         let res: Vec<DummyResult> = api::paged(query, Pagination::All)
             .iter(&client)
             .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_pagination_all_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy::default();
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::All)
+            .iter_async(&client)
+            .try_collect()
+            .await
             .unwrap();
         assert_eq!(res.len(), 256);
         for (i, value) in res.iter().enumerate() {
@@ -530,6 +818,36 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn test_keyset_pagination_limit_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(25))
+            .iter_async(&client)
+            .try_collect()
+            .await
+            .unwrap();
+        assert_eq!(res.len(), 25);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
     #[test]
     fn test_keyset_pagination_all() {
         let endpoint = ExpectedUrl::builder()
@@ -559,6 +877,36 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn test_keyset_pagination_all_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .paginated(true)
+            .build()
+            .unwrap();
+        let client = PagedTestClient::new_raw(
+            endpoint,
+            (0..=255).map(|value| {
+                DummyResult {
+                    value,
+                }
+            }),
+        );
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::All)
+            .iter_async(&client)
+            .try_collect::<Vec<_>>()
+            .await
+            .unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
     #[test]
     fn test_keyset_pagination_missing_header() {
         let endpoint = ExpectedUrl::builder()
@@ -581,6 +929,36 @@ mod tests {
         let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(300))
             .iter(&client)
             .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+        assert_eq!(res.len(), 256);
+        for (i, value) in res.iter().enumerate() {
+            assert_eq!(value.value, i as u8);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_keyset_pagination_missing_header_async() {
+        let endpoint = ExpectedUrl::builder()
+            .endpoint("paged_dummy")
+            .add_query_params(&[("pagination", "keyset"), ("per_page", "100")])
+            .build()
+            .unwrap();
+        let data: Vec<_> = (0..=255)
+            .map(|value| {
+                DummyResult {
+                    value,
+                }
+            })
+            .collect();
+        let client = SingleTestClient::new_raw(endpoint, serde_json::to_vec(&data).unwrap());
+        let query = Dummy {
+            with_keyset: true,
+        };
+
+        let res: Vec<DummyResult> = api::paged(query, Pagination::Limit(300))
+            .iter_async(&client)
+            .try_collect()
+            .await
             .unwrap();
         assert_eq!(res.len(), 256);
         for (i, value) in res.iter().enumerate() {
