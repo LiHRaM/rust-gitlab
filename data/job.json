@@ -320,6 +320,7 @@
       "project_id": 855,
       "ref": "master",
       "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "source": "schedule",
       "status": "success",
       "updated_at": "2020-04-13T00:36:12.508-04:00",
       "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"
@@ -600,6 +601,7 @@
       "project_id": 855,
       "ref": "master",
       "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "source": "schedule",
       "status": "success",
       "updated_at": "2020-04-13T00:36:12.508-04:00",
       "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"
@@ -1354,6 +1356,7 @@
       "project_id": 855,
       "ref": "master",
       "sha": "0028f47612b928d94e5e1a4329f3e74d6fdd7032",
+      "source": "schedule",
       "status": "running",
       "updated_at": "2020-04-13T00:36:12.508-04:00",
       "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/168478"

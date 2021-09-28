@@ -68,6 +68,7 @@
     "queued_duration": null,
     "ref": "add_hook-api",
     "sha": "04e94ae667024a62a90179f395bfdc2b35f3efd2",
+    "source": "external",
     "started_at": null,
     "status": "success",
     "tag": false,

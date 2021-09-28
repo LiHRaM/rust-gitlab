@@ -13,6 +13,7 @@
     "project_id": 855,
     "ref": "master",
     "sha": "de4ac3cf96cb8a0893be22b03f5171d934f9d392",
+    "source": "external",
     "status": "success",
     "updated_at": "2016-11-08T09:35:32.670-05:00",
     "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/34289"
