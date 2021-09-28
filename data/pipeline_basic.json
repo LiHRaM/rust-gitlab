@@ -4,6 +4,7 @@
   "project_id": 855,
   "ref": "master",
   "sha": "767ea705c57ab41b68fa8bf69bb2e48172d3d6b1",
+  "source": "schedule",
   "status": "success",
   "updated_at": "2020-09-11T00:30:47.674-04:00",
   "web_url": "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/188623"
