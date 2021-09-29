@@ -71,6 +71,7 @@ pub mod endpoint_prelude;
 
 pub mod common;
 pub mod groups;
+pub mod issues;
 pub mod projects;
 pub mod retry;
 pub mod users;
