@@ -13,6 +13,7 @@
 mod create;
 mod group;
 mod groups;
+pub mod issues;
 pub mod members;
 pub mod milestones;
 pub mod projects;
