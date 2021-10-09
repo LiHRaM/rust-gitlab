@@ -1672,6 +1672,8 @@ pub struct MergeRequest {
     pub web_url: String,
     /// Basic pipeline information for the MR.
     pub pipeline: Option<PipelineBasic>,
+    /// Whether the user doesn't have any commits in the repo, denoting the first contribution.
+    pub first_contribution: Option<bool>,
 }
 
 /// A merge request with changes.
