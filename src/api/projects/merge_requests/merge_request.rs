@@ -13,7 +13,7 @@ use crate::api::endpoint_prelude::*;
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
 pub struct MergeRequest<'a> {
-    /// The project with the merge requset.
+    /// The project with the merge request.
     #[builder(setter(into))]
     project: NameOrId<'a>,
     /// The ID of the merge request.
