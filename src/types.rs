@@ -1832,6 +1832,7 @@ impl From<MergeRequestChanges> for MergeRequest {
             user: Some(mr.user),
             web_url: mr.web_url,
             pipeline: mr.pipeline,
+            first_contribution: None,
         }
     }
 }
