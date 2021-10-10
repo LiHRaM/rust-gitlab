@@ -1,3 +1,7 @@
+# v0.1403.1
+
+  * Added the `first_contributors` field to `api::projects::merge_requests::MergeRequest`
+
 # v0.1403.0
 
   * No changes needed for GitLab 14.3.
