@@ -85,6 +85,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` `projects/merge_requests/notes/awards/awards.rs`
   * `POST   /projects/:project/merge_requests/:merge_request/notes/:note/award_emoji` `projects/merge_requests/notes/awards/create.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` `projects/merge_requests/resource_label_events.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/pipelines` `projects/merge_requests/pipelines.rs`
   * `POST   /projects/:project/milestones` `projects/milestones/create.rs`
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
@@ -268,7 +269,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /projects/:project/merge_requests/:merge_request/commits` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-commits
   * `GET    /projects/:project/merge_requests/:merge_request/merge_ref` https://gitlab.kitware.com/help/api/merge_requests.md#merge-to-default-merge-ref-path
   * `GET    /projects/:project/merge_requests/:merge_request/participants` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-participants
-  * `GET    /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#list-mr-pipelines
   * `POST   /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#create-mr-pipeline
   * `POST   /projects/:project/merge_requests/:merge_request/reset_spent_time` https://gitlab.kitware.com/help/api/merge_requests.md#reset-spent-time-for-a-merge-request
   * `POST   /projects/:project/merge_requests/:merge_request/reset_time_estimate` https://gitlab.kitware.com/help/api/merge_requests.md#reset-the-time-estimate-for-a-merge-request
