@@ -20,6 +20,7 @@ mod merge;
 mod merge_request;
 mod merge_requests;
 pub mod notes;
+mod pipelines;
 mod rebase;
 mod resource_label_events;
 mod unapprove;
@@ -42,6 +43,9 @@ pub use self::merge::MergeMergeRequestBuilder;
 
 pub use self::merge_request::MergeRequest;
 pub use self::merge_request::MergeRequestBuilder;
+
+pub use self::pipelines::MergeRequestPipelines;
+pub use self::pipelines::MergeRequestPipelinesBuilder;
 
 pub use self::merge_requests::MergeRequestOrderBy;
 pub use self::merge_requests::MergeRequestScope;
