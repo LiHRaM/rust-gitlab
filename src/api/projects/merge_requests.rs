@@ -12,6 +12,7 @@ pub mod approval_state;
 pub mod approvals;
 mod approve;
 pub mod awards;
+mod changes;
 mod create;
 pub mod discussions;
 mod edit;
@@ -46,6 +47,9 @@ pub use self::merge_request::MergeRequestBuilder;
 
 pub use self::pipelines::MergeRequestPipelines;
 pub use self::pipelines::MergeRequestPipelinesBuilder;
+
+pub use self::changes::MergeRequestChanges;
+pub use self::changes::MergeRequestChangesBuilder;
 
 pub use self::merge_requests::MergeRequestOrderBy;
 pub use self::merge_requests::MergeRequestScope;

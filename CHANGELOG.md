@@ -3,6 +3,8 @@
   * Added the `first_contributors` field to `api::projects::merge_requests::MergeRequest`
   * Added the `api::projects::merge_requests::pipelines` endpoint to get
     the pipelines attached to a merge request
+  * Added the `api::projects::merge_requests::changes` endpoint to get
+    information about a merge request along with diffs
 
 # v0.1403.0
 
