@@ -879,7 +879,7 @@ pub struct ProtectedRepoBranch {
     pub name: String,
     pub push_access_levels: Vec<PRBAccessLevel>,
     pub merge_access_levels: Vec<PRBAccessLevel>,
-    pub code_owner_approval_required: bool,
+    pub code_owner_approval_required: Option<bool>,
 }
 
 /// The ID of a git object.
