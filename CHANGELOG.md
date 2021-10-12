@@ -5,6 +5,9 @@
     the pipelines attached to a merge request
   * Added the `api::projects::merge_requests::changes` endpoint to get
     information about a merge request along with diffs
+  * Made field `code_owner_approval_required` in `types::ProtectedRepoBranch`
+    an `Option<bool>` instead of `bool` as the field is only present in
+    Gitlab premium
 
 # v0.1403.0
 
