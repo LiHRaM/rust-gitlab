@@ -1,4 +1,6 @@
-# v0.1403.1
+# v0.1403.1 (unreleased)
+
+## Additions
 
   * Added the `first_contributors` field to `api::projects::merge_requests::MergeRequest`
   * Added the `api::projects::merge_requests::pipelines` endpoint to get
@@ -8,15 +10,12 @@
   * Made field `code_owner_approval_required` in `types::ProtectedRepoBranch`
     an `Option<bool>` instead of `bool` as the field is only present in
     Gitlab premium
+  * Added `Paged::iter_async` returning a paginated asynchronous stream
+    analogous to `Pages::iter`.
 
 # v0.1403.0
 
   * No changes needed for GitLab 14.3.
-
-## Additions
-
-  * Added `Paged::iter_async` returning a paginated asynchronous stream
-    analogous to `Pages::iter`.
 
 # v0.1402.0
 
