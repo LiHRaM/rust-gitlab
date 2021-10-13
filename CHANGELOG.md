@@ -13,6 +13,11 @@
 
   * No changes needed for GitLab 14.3.
 
+## Additions
+
+  * Added `Paged::iter_async` returning a paginated asynchronous stream
+    analogous to `Pages::iter`.
+
 # v0.1402.0
 
 ## Additions
