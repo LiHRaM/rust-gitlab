@@ -14,6 +14,7 @@
     analogous to `Pages::iter`.
   * Added the `api::groups::issues::Issues` endpoint to get issues associated
     with a group.
+  * Added support for TLS-authenticated clients to `GitlabBuilder`
 
 # v0.1403.0
 
