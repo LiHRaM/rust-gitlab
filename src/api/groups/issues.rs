@@ -4,6 +4,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Group issue API endpoint.
+//!
+//! This endpoint is used for querying groups issues.
+
 /// Filters for issue states.
 pub type IssueState = crate::api::issues::IssueState;
 
@@ -25,9 +29,9 @@ pub type IssueDueDateFilter = crate::api::issues::IssueDueDateFilter;
 /// Keys issue results may be ordered by.
 pub type IssueOrderBy = crate::api::issues::IssueOrderBy;
 
-/// Query for issues within a project.
+/// Query for issues within a group.
 ///
 /// TODO: Negation (not) filters are not yet supported.
-pub type Issues<'a> = crate::api::issues::ProjectIssues<'a>;
+pub type Issues<'a> = crate::api::issues::GroupIssues<'a>;
 /// Builder for [`Issues`].
-pub type IssuesBuilder<'a> = crate::api::issues::ProjectIssuesBuilder<'a>;
+pub type IssuesBuilder<'a> = crate::api::issues::GroupIssuesBuilder<'a>;

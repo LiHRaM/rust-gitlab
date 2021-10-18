@@ -12,6 +12,8 @@
     Gitlab premium
   * Added `Paged::iter_async` returning a paginated asynchronous stream
     analogous to `Pages::iter`.
+  * Added the `api::groups::issues::Issues` endpoint to get issues associated
+    with a group.
 
 # v0.1403.0
 
