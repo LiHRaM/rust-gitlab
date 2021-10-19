@@ -21,6 +21,9 @@ use serde::Deserialize;
 use thiserror::Error;
 use url::Url;
 
+#[cfg(any(feature = "client_der", feature = "client_pem"))]
+use reqwest::Identity as TlsIdentity;
+
 use crate::api;
 use crate::auth::{Auth, AuthError};
 
@@ -89,6 +92,18 @@ impl GitlabError {
 
 type GitlabResult<T> = Result<T, GitlabError>;
 
+// Private enum that enables the parsing of the cert bytes to be
+// delayed until the client is built rather than when they're passed
+// to a builder.
+#[derive(Clone)]
+enum ClientCert {
+    None,
+    #[cfg(feature = "client_der")]
+    Der(Vec<u8>, String),
+    #[cfg(feature = "client_pem")]
+    Pem(Vec<u8>),
+}
+
 /// A representation of the Gitlab API for a single user.
 ///
 /// Separate users should use separate instances of this.
@@ -136,6 +151,7 @@ impl Gitlab {
             host.as_ref(),
             Auth::Token(token.into()),
             CertPolicy::Default,
+            ClientCert::None,
         )
     }
 
@@ -152,6 +168,7 @@ impl Gitlab {
             host.as_ref(),
             Auth::Token(token.into()),
             CertPolicy::Insecure,
+            ClientCert::None,
         )
     }
 
@@ -169,6 +186,7 @@ impl Gitlab {
             host.as_ref(),
             Auth::OAuth2(token.into()),
             CertPolicy::Default,
+            ClientCert::None,
         )
     }
 
@@ -186,6 +204,7 @@ impl Gitlab {
             host.as_ref(),
             Auth::OAuth2(token.into()),
             CertPolicy::Default,
+            ClientCert::None,
         )
     }
 
@@ -195,6 +214,7 @@ impl Gitlab {
         host: &str,
         auth: Auth,
         cert_validation: CertPolicy,
+        identity: ClientCert,
     ) -> GitlabResult<Self> {
         let rest_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
         let graphql_url = Url::parse(&format!("{}://{}/api/graphql", protocol, host))?;
@@ -205,7 +225,21 @@ impl Gitlab {
                     .danger_accept_invalid_certs(true)
                     .build()?
             },
-            CertPolicy::Default => Client::new(),
+            CertPolicy::Default => {
+                match identity {
+                    ClientCert::None => Client::new(),
+                    #[cfg(feature = "client_der")]
+                    ClientCert::Der(der, password) => {
+                        let id = TlsIdentity::from_pkcs12_der(&der, &password)?;
+                        Client::builder().identity(id).build()?
+                    },
+                    #[cfg(feature = "client_pem")]
+                    ClientCert::Pem(pem) => {
+                        let id = TlsIdentity::from_pem(&pem)?;
+                        Client::builder().identity(id).build()?
+                    },
+                }
+            },
         };
 
         let api = Gitlab {
@@ -331,6 +365,7 @@ pub struct GitlabBuilder {
     host: String,
     token: Auth,
     cert_validation: CertPolicy,
+    identity: ClientCert,
 }
 
 impl GitlabBuilder {
@@ -345,6 +380,7 @@ impl GitlabBuilder {
             host: host.into(),
             token: Auth::Token(token.into()),
             cert_validation: CertPolicy::Default,
+            identity: ClientCert::None,
         }
     }
 
@@ -358,6 +394,7 @@ impl GitlabBuilder {
             host: host.into(),
             token: Auth::None,
             cert_validation: CertPolicy::Default,
+            identity: ClientCert::None,
         }
     }
 
@@ -380,12 +417,29 @@ impl GitlabBuilder {
         self
     }
 
+    /// [Authenticate to Gitlab](reqwest::Identity) with the provided
+    /// DER-formatted PKCS#12 archive.
+    #[cfg(any(doc, feature = "client_der"))]
+    pub fn client_identity_from_der(&mut self, der: &[u8], password: &str) -> &mut Self {
+        self.identity = ClientCert::Der(der.into(), password.into());
+        self
+    }
+
+    /// [Authenticate to Gitlab](reqwest::Identity) with the provided
+    /// PEM-encoded private key and certificate.
+    #[cfg(any(doc, feature = "client_pem"))]
+    pub fn client_identity_from_pem(&mut self, pem: &[u8]) -> &mut Self {
+        self.identity = ClientCert::Pem(pem.into());
+        self
+    }
+
     pub fn build(&self) -> GitlabResult<Gitlab> {
         Gitlab::new_impl(
             self.protocol,
             &self.host,
             self.token.clone(),
             self.cert_validation.clone(),
+            self.identity.clone(),
         )
     }
 
@@ -395,6 +449,7 @@ impl GitlabBuilder {
             &self.host,
             self.token.clone(),
             self.cert_validation.clone(),
+            self.identity.clone(),
         )
         .await
     }
@@ -470,6 +525,7 @@ impl AsyncGitlab {
         host: &str,
         auth: Auth,
         cert_validation: CertPolicy,
+        identity: ClientCert,
     ) -> GitlabResult<Self> {
         let rest_url = Url::parse(&format!("{}://{}/api/v4/", protocol, host))?;
         let graphql_url = Url::parse(&format!("{}://{}/api/graphql", protocol, host))?;
@@ -480,7 +536,21 @@ impl AsyncGitlab {
                     .danger_accept_invalid_certs(true)
                     .build()?
             },
-            CertPolicy::Default => AsyncClient::new(),
+            CertPolicy::Default => {
+                match identity {
+                    ClientCert::None => AsyncClient::new(),
+                    #[cfg(feature = "client_der")]
+                    ClientCert::Der(der, password) => {
+                        let id = TlsIdentity::from_pkcs12_der(&der, &password)?;
+                        AsyncClient::builder().identity(id).build()?
+                    },
+                    #[cfg(feature = "client_pem")]
+                    ClientCert::Pem(pem) => {
+                        let id = TlsIdentity::from_pem(&pem)?;
+                        AsyncClient::builder().identity(id).build()?
+                    },
+                }
+            },
         };
 
         let api = AsyncGitlab {

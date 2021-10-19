@@ -24,6 +24,8 @@ client_api = [
     "async-trait",
     "futures-util",
 ]
+client_der = ["reqwest/native-tls", "client_api"]
+client_pem = ["reqwest/rustls-tls", "client_api"]
 
 [dependencies]
 base64 = "~0.13"
