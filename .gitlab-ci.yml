@@ -83,6 +83,49 @@ clippy-features:build:
     needs:
         - cache-newest:prep
 
+.cargo_audit_ignore:
+    variables:
+        # Ignored advisories
+        #
+        # Potential segfault in localtime_r invocations
+        # https://rustsec.org/advisories/RUSTSEC-2020-0159
+        # https://github.com/chronotope/chrono/issues/499
+        #
+        # failure is unmaintained
+        # https://rustsec.org/advisories/RUSTSEC-2020-0036
+        # https://github.com/graphql-rust/graphql-client/pull/396
+        #
+        # failure: Type confusion if __private_get_type_id__ is overridden
+        # https://rustsec.org/advisories/RUSTSEC-2019-0036
+        # https://github.com/graphql-rust/graphql-client/pull/396
+        CARGO_AUDIT_ARGS: --ignore RUSTSEC-2020-0159 --ignore RUSTSEC-2020-0036 --ignore RUSTSEC-2019-0036
+
+# audit-mindeps:build:
+#     extends:
+#         - .rust_minimum
+#         - .cargo_audit_job
+#         - .cargo_build_tags
+#         - .run_automatically
+#         - .cargo_audit_ignore
+#     dependencies:
+#         - cache-mindeps:prep
+#     needs:
+#         - cache-mindeps:prep
+#     variables:
+#         CARGO_UPDATE_POLICY: mindeps
+
+audit-newest:build:
+    extends:
+        - .rust_stable
+        - .cargo_audit_job
+        - .cargo_build_tags
+        - .run_automatically
+        - .cargo_audit_ignore
+    dependencies:
+        - cache-newest:prep
+    needs:
+        - cache-newest:prep
+
 minimum:build:
     extends:
         - .rust_minimum
