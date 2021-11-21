@@ -46,8 +46,12 @@ cache-newest:prep:
         - .cargo_fetch_artifacts
         - .run_automatically
 
-# The `mindeps` builds are not working due, at the root, `syntex` -> `ctest` ->
-# `flate2` -> `reqwest`.
+# The `mindeps` builds are not working due, `void` needing an update from
+# `unreachable`. Once released, other crates in the dependency chain will needs
+# updates to propagate the support.
+#
+# https://github.com/reem/rust-unreachable/pull/15
+#
 # cache-mindeps:prep:
 #     extends:
 #         - .rust_nightly
