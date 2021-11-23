@@ -1,3 +1,9 @@
+# v0.1404.1 (unreleased)
+
+## Additions
+
+  * Missing `Builder` type exports have been added.
+
 # v0.1404.0
 
 ## Additions

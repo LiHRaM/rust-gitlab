@@ -23,6 +23,7 @@ pub use self::cancel::CancelPipelineBuilder;
 pub use self::create::CreatePipeline;
 pub use self::create::CreatePipelineBuilder;
 pub use self::create::PipelineVariable;
+pub use self::create::PipelineVariableBuilder;
 pub use self::create::PipelineVariableType;
 
 pub use self::delete::DeletePipeline;

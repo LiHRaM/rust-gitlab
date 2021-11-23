@@ -16,6 +16,7 @@ pub use self::create::CreateMergeRequestDiscussionBuilder;
 pub use self::create::ImagePosition;
 pub use self::create::ImagePositionBuilder;
 pub use self::create::LineCode;
+pub use self::create::LineCodeBuilder;
 pub use self::create::LineRange;
 pub use self::create::LineRangeBuilder;
 pub use self::create::LineType;
