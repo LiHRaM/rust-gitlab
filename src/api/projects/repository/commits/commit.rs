@@ -57,26 +57,26 @@ impl<'a> Endpoint for Commit<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::repository::commits::Commit;
+    use crate::api::projects::repository::commits::{Commit, CommitBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_commit_are_necessary() {
         let err = Commit::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommitBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = Commit::builder().commit("master").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommitBuilderError, "project");
     }
 
     #[test]
     fn commit_is_necessary() {
         let err = Commit::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`commit` must be initialized");
+        crate::test::assert_missing_field!(err, CommitBuilderError, "commit");
     }
 
     #[test]

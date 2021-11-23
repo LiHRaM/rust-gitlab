@@ -54,26 +54,26 @@ impl<'a> Endpoint for Label<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::labels::Label;
+    use crate::api::projects::labels::{Label, LabelBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_label_are_needed() {
         let err = Label::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, LabelBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = Label::builder().label(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, LabelBuilderError, "project");
     }
 
     #[test]
     fn label_is_needed() {
         let err = Label::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`label` must be initialized");
+        crate::test::assert_missing_field!(err, LabelBuilderError, "label");
     }
 
     #[test]

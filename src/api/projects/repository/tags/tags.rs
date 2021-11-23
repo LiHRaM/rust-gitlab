@@ -91,7 +91,7 @@ impl<'a> Endpoint for Tags<'a> {
 #[cfg(test)]
 mod tests {
     use crate::api::common::SortOrder;
-    use crate::api::projects::repository::tags::tags::{Tags, TagsOrderBy};
+    use crate::api::projects::repository::tags::tags::{Tags, TagsBuilderError, TagsOrderBy};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -115,7 +115,7 @@ mod tests {
     #[test]
     fn project_is_necessary() {
         let err = Tags::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, TagsBuilderError, "project");
     }
 
     #[test]

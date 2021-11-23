@@ -77,14 +77,14 @@ impl<'a> Pageable for GroupMembers<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::groups::members::GroupMembers;
+    use crate::api::groups::members::{GroupMembers, GroupMembersBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_is_needed() {
         let err = GroupMembers::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, GroupMembersBuilderError, "group");
     }
 
     #[test]

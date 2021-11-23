@@ -38,26 +38,26 @@ impl<'a> Endpoint for Issue<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::issues::Issue;
+    use crate::api::projects::issues::{Issue, IssueBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_issue_are_needed() {
         let err = Issue::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, IssueBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = Issue::builder().issue(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, IssueBuilderError, "project");
     }
 
     #[test]
     fn issue_is_needed() {
         let err = Issue::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`issue` must be initialized");
+        crate::test::assert_missing_field!(err, IssueBuilderError, "issue");
     }
 
     #[test]

@@ -12,3 +12,4 @@ mod releases;
 
 pub use self::releases::ProjectReleases;
 pub use self::releases::ProjectReleasesBuilder;
+pub use self::releases::ProjectReleasesBuilderError;

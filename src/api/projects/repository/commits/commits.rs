@@ -116,7 +116,7 @@ impl<'a> Pageable for Commits<'a> {}
 mod tests {
     use chrono::{TimeZone, Utc};
 
-    use crate::api::projects::repository::commits::{Commits, CommitsOrder};
+    use crate::api::projects::repository::commits::{Commits, CommitsBuilderError, CommitsOrder};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn project_is_necessary() {
         let err = Commits::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommitsBuilderError, "project");
     }
 
     #[test]

@@ -178,7 +178,7 @@ impl<'a> Endpoint for CreateFile<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::repository::files::{CreateFile, Encoding};
+    use crate::api::projects::repository::files::{CreateFile, CreateFileBuilderError, Encoding};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -227,7 +227,7 @@ mod tests {
     #[test]
     fn all_parameters_are_needed() {
         let err = CreateFile::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateFileBuilderError, "project");
     }
 
     #[test]
@@ -239,7 +239,7 @@ mod tests {
             .content(&b"contents"[..])
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateFileBuilderError, "project");
     }
 
     #[test]
@@ -251,7 +251,7 @@ mod tests {
             .content(&b"contents"[..])
             .build()
             .unwrap_err();
-        assert_eq!(err, "`file_path` must be initialized");
+        crate::test::assert_missing_field!(err, CreateFileBuilderError, "file_path");
     }
 
     #[test]
@@ -263,7 +263,7 @@ mod tests {
             .content(&b"contents"[..])
             .build()
             .unwrap_err();
-        assert_eq!(err, "`branch` must be initialized");
+        crate::test::assert_missing_field!(err, CreateFileBuilderError, "branch");
     }
 
     #[test]
@@ -275,7 +275,7 @@ mod tests {
             .content(&b"contents"[..])
             .build()
             .unwrap_err();
-        assert_eq!(err, "`commit_message` must be initialized");
+        crate::test::assert_missing_field!(err, CreateFileBuilderError, "commit_message");
     }
 
     #[test]
@@ -287,7 +287,7 @@ mod tests {
             .commit_message("commit message")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`content` must be initialized");
+        crate::test::assert_missing_field!(err, CreateFileBuilderError, "content");
     }
 
     #[test]

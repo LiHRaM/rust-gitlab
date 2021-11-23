@@ -122,20 +122,20 @@ impl<'a> Endpoint for CreateHook<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::hooks::CreateHook;
+    use crate::api::projects::hooks::{CreateHook, CreateHookBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_url_are_necessary() {
         let err = CreateHook::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateHookBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = CreateHook::builder().url("url").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateHookBuilderError, "project");
     }
 
     #[test]
@@ -144,7 +144,7 @@ mod tests {
             .project("project")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`url` must be initialized");
+        crate::test::assert_missing_field!(err, CreateHookBuilderError, "url");
     }
 
     #[test]

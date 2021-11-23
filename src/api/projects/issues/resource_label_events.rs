@@ -44,14 +44,16 @@ impl<'a> Pageable for IssueResourceLabelEvents<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::issues::IssueResourceLabelEvents;
+    use crate::api::projects::issues::{
+        IssueResourceLabelEvents, IssueResourceLabelEventsBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_issue_are_needed() {
         let err = IssueResourceLabelEvents::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, IssueResourceLabelEventsBuilderError, "project");
     }
 
     #[test]
@@ -60,7 +62,7 @@ mod tests {
             .issue(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, IssueResourceLabelEventsBuilderError, "project");
     }
 
     #[test]
@@ -69,7 +71,7 @@ mod tests {
             .project(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`issue` must be initialized");
+        crate::test::assert_missing_field!(err, IssueResourceLabelEventsBuilderError, "issue");
     }
 
     #[test]

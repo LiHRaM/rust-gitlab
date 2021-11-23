@@ -49,14 +49,14 @@ impl<'a> Endpoint for ProtectedBranch<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::protected_branches::ProtectedBranch;
+    use crate::api::projects::protected_branches::{ProtectedBranch, ProtectedBranchBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
         let err = ProtectedBranch::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectedBranchBuilderError, "project");
     }
 
     #[test]
@@ -65,7 +65,7 @@ mod tests {
             .project("project_name")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectedBranchBuilderError, "name");
     }
 
     #[test]

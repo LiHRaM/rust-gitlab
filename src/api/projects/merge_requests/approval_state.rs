@@ -69,3 +69,4 @@ mod approval_state;
 
 pub use self::approval_state::MergeRequestApprovalState;
 pub use self::approval_state::MergeRequestApprovalStateBuilder;
+pub use self::approval_state::MergeRequestApprovalStateBuilderError;

@@ -46,14 +46,14 @@ impl<'a> Pageable for CommitComments<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::repository::commits::CommitComments;
+    use crate::api::projects::repository::commits::{CommitComments, CommitCommentsBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_commit_are_necessary() {
         let err = CommitComments::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommitCommentsBuilderError, "project");
     }
 
     #[test]
@@ -62,13 +62,13 @@ mod tests {
             .commit("master")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommitCommentsBuilderError, "project");
     }
 
     #[test]
     fn commit_is_necessary() {
         let err = CommitComments::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`commit` must be initialized");
+        crate::test::assert_missing_field!(err, CommitCommentsBuilderError, "commit");
     }
 
     #[test]

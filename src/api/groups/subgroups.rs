@@ -12,4 +12,5 @@ mod subgroups;
 
 pub use self::subgroups::GroupSubgroups;
 pub use self::subgroups::GroupSubgroupsBuilder;
+pub use self::subgroups::GroupSubgroupsBuilderError;
 pub use self::subgroups::GroupSubgroupsOrderBy;

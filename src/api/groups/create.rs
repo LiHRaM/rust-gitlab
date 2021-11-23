@@ -251,8 +251,8 @@ mod tests {
 
     use crate::api::common::VisibilityLevel;
     use crate::api::groups::{
-        BranchProtection, CreateGroup, GroupProjectCreationAccessLevel, SharedRunnersMinutesLimit,
-        SubgroupCreationAccessLevel,
+        BranchProtection, CreateGroup, CreateGroupBuilderError, GroupProjectCreationAccessLevel,
+        SharedRunnersMinutesLimit, SubgroupCreationAccessLevel,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -313,19 +313,19 @@ mod tests {
     #[test]
     fn name_and_path_are_necessary() {
         let err = CreateGroup::builder().build().unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, CreateGroupBuilderError, "name");
     }
 
     #[test]
     fn name_is_necessary() {
         let err = CreateGroup::builder().path("path").build().unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, CreateGroupBuilderError, "name");
     }
 
     #[test]
     fn path_is_necessary() {
         let err = CreateGroup::builder().name("name").build().unwrap_err();
-        assert_eq!(err, "`path` must be initialized");
+        crate::test::assert_missing_field!(err, CreateGroupBuilderError, "path");
     }
 
     #[test]

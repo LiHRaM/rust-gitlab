@@ -12,3 +12,4 @@ mod create;
 
 pub use self::create::CreateGroupMilestone;
 pub use self::create::CreateGroupMilestoneBuilder;
+pub use self::create::CreateGroupMilestoneBuilderError;

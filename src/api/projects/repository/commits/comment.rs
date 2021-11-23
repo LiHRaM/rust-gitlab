@@ -99,7 +99,9 @@ impl<'a> Endpoint for CommentOnCommit<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::repository::commits::{CommentOnCommit, LineType};
+    use crate::api::projects::repository::commits::{
+        CommentOnCommit, CommentOnCommitBuilderError, LineType,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -115,7 +117,7 @@ mod tests {
     #[test]
     fn project_commit_and_note_are_necessary() {
         let err = CommentOnCommit::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommentOnCommitBuilderError, "project");
     }
 
     #[test]
@@ -125,7 +127,7 @@ mod tests {
             .note("note")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommentOnCommitBuilderError, "project");
     }
 
     #[test]
@@ -135,7 +137,7 @@ mod tests {
             .note("note")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`commit` must be initialized");
+        crate::test::assert_missing_field!(err, CommentOnCommitBuilderError, "commit");
     }
 
     #[test]
@@ -145,7 +147,7 @@ mod tests {
             .commit("master")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`note` must be initialized");
+        crate::test::assert_missing_field!(err, CommentOnCommitBuilderError, "note");
     }
 
     #[test]

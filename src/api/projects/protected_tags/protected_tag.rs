@@ -44,14 +44,14 @@ impl<'a> Endpoint for ProtectedTag<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::protected_tags::ProtectedTag;
+    use crate::api::projects::protected_tags::{ProtectedTag, ProtectedTagBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
         let err = ProtectedTag::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectedTagBuilderError, "project");
     }
 
     #[test]
@@ -60,7 +60,7 @@ mod tests {
             .project("project_name")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectedTagBuilderError, "name");
     }
 
     #[test]

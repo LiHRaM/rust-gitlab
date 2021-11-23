@@ -15,14 +15,18 @@ mod unprotect;
 
 pub use self::protect::ProtectBranch;
 pub use self::protect::ProtectBranchBuilder;
+pub use self::protect::ProtectBranchBuilderError;
 pub use self::protect::ProtectedAccess;
 pub use self::protect::ProtectedAccessLevel;
 
 pub use self::unprotect::UnprotectBranch;
 pub use self::unprotect::UnprotectBranchBuilder;
+pub use self::unprotect::UnprotectBranchBuilderError;
 
 pub use self::protected_branch::ProtectedBranch;
 pub use self::protected_branch::ProtectedBranchBuilder;
+pub use self::protected_branch::ProtectedBranchBuilderError;
 
 pub use self::protected_branches::ProtectedBranches;
 pub use self::protected_branches::ProtectedBranchesBuilder;
+pub use self::protected_branches::ProtectedBranchesBuilderError;

@@ -62,14 +62,14 @@ impl<'a> Endpoint for FileRaw<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::repository::files::FileRaw;
+    use crate::api::projects::repository::files::{FileRaw, FileRawBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn all_parameters_are_needed() {
         let err = FileRaw::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, FileRawBuilderError, "project");
     }
 
     #[test]
@@ -79,7 +79,7 @@ mod tests {
             .ref_("master")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, FileRawBuilderError, "project");
     }
 
     #[test]
@@ -89,7 +89,7 @@ mod tests {
             .ref_("master")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`file_path` must be initialized");
+        crate::test::assert_missing_field!(err, FileRawBuilderError, "file_path");
     }
 
     #[test]
@@ -99,7 +99,7 @@ mod tests {
             .file_path("new/file")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`ref_` must be initialized");
+        crate::test::assert_missing_field!(err, FileRawBuilderError, "ref_");
     }
 
     #[test]

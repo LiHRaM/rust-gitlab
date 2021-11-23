@@ -22,13 +22,16 @@ pub mod subgroups;
 pub use create::BranchProtection;
 pub use create::CreateGroup;
 pub use create::CreateGroupBuilder;
+pub use create::CreateGroupBuilderError;
 pub use create::GroupProjectCreationAccessLevel;
 pub use create::SharedRunnersMinutesLimit;
 pub use create::SubgroupCreationAccessLevel;
 
 pub use group::Group;
 pub use group::GroupBuilder;
+pub use group::GroupBuilderError;
 
 pub use groups::GroupOrderBy;
 pub use groups::Groups;
 pub use groups::GroupsBuilder;
+pub use groups::GroupsBuilderError;

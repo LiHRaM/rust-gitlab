@@ -113,7 +113,7 @@ impl<'a> Pageable for Jobs<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::jobs::{JobScope, Jobs};
+    use crate::api::projects::jobs::{JobScope, Jobs, JobsBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn project_is_needed() {
         let err = Jobs::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, JobsBuilderError, "project");
     }
 
     #[test]

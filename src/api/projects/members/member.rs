@@ -56,35 +56,35 @@ impl<'a> Endpoint for ProjectMember<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::members::ProjectMember;
+    use crate::api::projects::members::{ProjectMember, ProjectMemberBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_user_are_needed() {
         let err = ProjectMember::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectMemberBuilderError, "project");
 
         let err = ProjectMember::all_builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectMemberBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = ProjectMember::builder().user(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectMemberBuilderError, "project");
 
         let err = ProjectMember::all_builder().user(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectMemberBuilderError, "project");
     }
 
     #[test]
     fn user_is_needed() {
         let err = ProjectMember::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`user` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectMemberBuilderError, "user");
 
         let err = ProjectMember::all_builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`user` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectMemberBuilderError, "user");
     }
 
     #[test]

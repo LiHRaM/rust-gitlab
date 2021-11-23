@@ -177,7 +177,9 @@ mod tests {
     use http::Method;
 
     use crate::api::common::ProtectedAccessLevel;
-    use crate::api::projects::protected_branches::{ProtectBranch, ProtectedAccess};
+    use crate::api::projects::protected_branches::{
+        ProtectBranch, ProtectBranchBuilderError, ProtectedAccess,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -234,19 +236,19 @@ mod tests {
     #[test]
     fn project_and_name_are_needed() {
         let err = ProtectBranch::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectBranchBuilderError, "project");
     }
 
     #[test]
     fn project_is_required() {
         let err = ProtectBranch::builder().name("master").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectBranchBuilderError, "project");
     }
 
     #[test]
     fn name_is_required() {
         let err = ProtectBranch::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectBranchBuilderError, "name");
     }
 
     #[test]

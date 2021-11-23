@@ -72,14 +72,14 @@ impl<'a> Pageable for CommitStatuses<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::repository::commits::CommitStatuses;
+    use crate::api::projects::repository::commits::{CommitStatuses, CommitStatusesBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_commit_are_necessary() {
         let err = CommitStatuses::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommitStatusesBuilderError, "project");
     }
 
     #[test]
@@ -88,13 +88,13 @@ mod tests {
             .commit("master")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CommitStatusesBuilderError, "project");
     }
 
     #[test]
     fn commit_is_necessary() {
         let err = CommitStatuses::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`commit` must be initialized");
+        crate::test::assert_missing_field!(err, CommitStatusesBuilderError, "commit");
     }
 
     #[test]

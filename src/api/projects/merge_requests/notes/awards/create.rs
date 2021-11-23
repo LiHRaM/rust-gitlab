@@ -57,14 +57,16 @@ impl<'a> Endpoint for CreateMergeRequestNoteAward<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::merge_requests::notes::awards::CreateMergeRequestNoteAward;
+    use crate::api::projects::merge_requests::notes::awards::{
+        CreateMergeRequestNoteAward, CreateMergeRequestNoteAwardBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_merge_request_note_and_name_are_necessary() {
         let err = CreateMergeRequestNoteAward::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestNoteAwardBuilderError, "project");
     }
 
     #[test]
@@ -75,7 +77,7 @@ mod tests {
             .name("award")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestNoteAwardBuilderError, "project");
     }
 
     #[test]
@@ -86,7 +88,11 @@ mod tests {
             .name("award")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`merge_request` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            CreateMergeRequestNoteAwardBuilderError,
+            "merge_request",
+        );
     }
 
     #[test]
@@ -97,7 +103,7 @@ mod tests {
             .name("award")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`note` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestNoteAwardBuilderError, "note");
     }
 
     #[test]
@@ -108,7 +114,7 @@ mod tests {
             .note(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestNoteAwardBuilderError, "name");
     }
 
     #[test]

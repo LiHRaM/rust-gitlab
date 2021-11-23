@@ -15,12 +15,16 @@ mod hooks;
 
 pub use self::create::CreateHook;
 pub use self::create::CreateHookBuilder;
+pub use self::create::CreateHookBuilderError;
 
 pub use self::edit::EditHook;
 pub use self::edit::EditHookBuilder;
+pub use self::edit::EditHookBuilderError;
 
 pub use self::hook::Hook;
 pub use self::hook::HookBuilder;
+pub use self::hook::HookBuilderError;
 
 pub use self::hooks::Hooks;
 pub use self::hooks::HooksBuilder;
+pub use self::hooks::HooksBuilderError;

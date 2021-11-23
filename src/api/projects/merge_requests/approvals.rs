@@ -60,3 +60,4 @@ mod approvals;
 
 pub use self::approvals::MergeRequestApprovals;
 pub use self::approvals::MergeRequestApprovalsBuilder;
+pub use self::approvals::MergeRequestApprovalsBuilderError;

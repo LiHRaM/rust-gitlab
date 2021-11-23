@@ -41,26 +41,26 @@ impl<'a> Endpoint for PromoteLabel<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::labels::PromoteLabel;
+    use crate::api::projects::labels::{PromoteLabel, PromoteLabelBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_label_are_necessary() {
         let err = PromoteLabel::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, PromoteLabelBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = PromoteLabel::builder().label("label").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, PromoteLabelBuilderError, "project");
     }
 
     #[test]
     fn label_is_necessary() {
         let err = PromoteLabel::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`label` must be initialized");
+        crate::test::assert_missing_field!(err, PromoteLabelBuilderError, "label");
     }
 
     #[test]

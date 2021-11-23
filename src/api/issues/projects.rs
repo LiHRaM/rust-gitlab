@@ -333,8 +333,8 @@ mod tests {
 
     use crate::api::common::SortOrder;
     use crate::api::issues::{
-        projects::ProjectIssues, IssueDueDateFilter, IssueIteration, IssueOrderBy, IssueScope,
-        IssueSearchScope, IssueState, IssueWeight,
+        projects::ProjectIssues, projects::ProjectIssuesBuilderError, IssueDueDateFilter,
+        IssueIteration, IssueOrderBy, IssueScope, IssueSearchScope, IssueState, IssueWeight,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -342,7 +342,7 @@ mod tests {
     #[test]
     fn project_is_needed() {
         let err = ProjectIssues::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectIssuesBuilderError, "project");
     }
 
     #[test]

@@ -40,26 +40,26 @@ impl<'a> Endpoint for RetryJob<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::jobs::RetryJob;
+    use crate::api::projects::jobs::{RetryJob, RetryJobBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_job_are_needed() {
         let err = RetryJob::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, RetryJobBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = RetryJob::builder().job(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, RetryJobBuilderError, "project");
     }
 
     #[test]
     fn job_is_needed() {
         let err = RetryJob::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`job` must be initialized");
+        crate::test::assert_missing_field!(err, RetryJobBuilderError, "job");
     }
 
     #[test]

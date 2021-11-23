@@ -16,15 +16,20 @@ mod remove;
 
 pub use self::add::AddGroupMember;
 pub use self::add::AddGroupMemberBuilder;
+pub use self::add::AddGroupMemberBuilderError;
 
 pub use self::edit::EditGroupMember;
 pub use self::edit::EditGroupMemberBuilder;
+pub use self::edit::EditGroupMemberBuilderError;
 
 pub use self::member::GroupMember;
 pub use self::member::GroupMemberBuilder;
+pub use self::member::GroupMemberBuilderError;
 
 pub use self::members::GroupMembers;
 pub use self::members::GroupMembersBuilder;
+pub use self::members::GroupMembersBuilderError;
 
 pub use self::remove::RemoveGroupMember;
 pub use self::remove::RemoveGroupMemberBuilder;
+pub use self::remove::RemoveGroupMemberBuilderError;

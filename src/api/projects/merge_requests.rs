@@ -28,28 +28,36 @@ mod unapprove;
 
 pub use self::approve::ApproveMergeRequest;
 pub use self::approve::ApproveMergeRequestBuilder;
+pub use self::approve::ApproveMergeRequestBuilderError;
 
 pub use self::create::CreateMergeRequest;
 pub use self::create::CreateMergeRequestBuilder;
+pub use self::create::CreateMergeRequestBuilderError;
 
 pub use self::edit::EditMergeRequest;
 pub use self::edit::EditMergeRequestBuilder;
+pub use self::edit::EditMergeRequestBuilderError;
 pub use self::edit::MergeRequestStateEvent;
 
 pub use self::issues_closed_by::IssuesClosedBy;
 pub use self::issues_closed_by::IssuesClosedByBuilder;
+pub use self::issues_closed_by::IssuesClosedByBuilderError;
 
 pub use self::merge::MergeMergeRequest;
 pub use self::merge::MergeMergeRequestBuilder;
+pub use self::merge::MergeMergeRequestBuilderError;
 
 pub use self::merge_request::MergeRequest;
 pub use self::merge_request::MergeRequestBuilder;
+pub use self::merge_request::MergeRequestBuilderError;
 
 pub use self::pipelines::MergeRequestPipelines;
 pub use self::pipelines::MergeRequestPipelinesBuilder;
+pub use self::pipelines::MergeRequestPipelinesBuilderError;
 
 pub use self::changes::MergeRequestChanges;
 pub use self::changes::MergeRequestChangesBuilder;
+pub use self::changes::MergeRequestChangesBuilderError;
 
 pub use self::merge_requests::MergeRequestOrderBy;
 pub use self::merge_requests::MergeRequestScope;
@@ -58,12 +66,16 @@ pub use self::merge_requests::MergeRequestState;
 pub use self::merge_requests::MergeRequestView;
 pub use self::merge_requests::MergeRequests;
 pub use self::merge_requests::MergeRequestsBuilder;
+pub use self::merge_requests::MergeRequestsBuilderError;
 
 pub use self::rebase::RebaseMergeRequest;
 pub use self::rebase::RebaseMergeRequestBuilder;
+pub use self::rebase::RebaseMergeRequestBuilderError;
 
 pub use self::resource_label_events::MergeRequestResourceLabelEvents;
 pub use self::resource_label_events::MergeRequestResourceLabelEventsBuilder;
+pub use self::resource_label_events::MergeRequestResourceLabelEventsBuilderError;
 
 pub use self::unapprove::UnapproveMergeRequest;
 pub use self::unapprove::UnapproveMergeRequestBuilder;
+pub use self::unapprove::UnapproveMergeRequestBuilderError;

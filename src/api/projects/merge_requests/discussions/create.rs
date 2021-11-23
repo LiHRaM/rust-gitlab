@@ -299,8 +299,9 @@ mod tests {
     use http::Method;
 
     use crate::api::projects::merge_requests::discussions::{
-        CreateMergeRequestDiscussion, ImagePosition, LineCode, LineRange, LineType, Position,
-        TextPosition,
+        CreateMergeRequestDiscussion, CreateMergeRequestDiscussionBuilderError, ImagePosition,
+        LineCode, LineCodeBuilderError, LineRange, LineRangeBuilderError, LineType, Position,
+        PositionBuilderError, TextPosition,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -319,7 +320,7 @@ mod tests {
     #[test]
     fn line_code_line_code_and_type_are_necessary() {
         let err = LineCode::builder().build().unwrap_err();
-        assert_eq!(err, "`line_code` must be initialized");
+        crate::test::assert_missing_field!(err, LineCodeBuilderError, "line_code");
     }
 
     #[test]
@@ -328,13 +329,13 @@ mod tests {
             .type_(LineType::Old)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`line_code` must be initialized");
+        crate::test::assert_missing_field!(err, LineCodeBuilderError, "line_code");
     }
 
     #[test]
     fn line_code_type_is_necessary() {
         let err = LineCode::builder().line_code("code").build().unwrap_err();
-        assert_eq!(err, "`type_` must be initialized");
+        crate::test::assert_missing_field!(err, LineCodeBuilderError, "type_");
     }
 
     #[test]
@@ -349,7 +350,7 @@ mod tests {
     #[test]
     fn line_range_start_and_end_are_necessary() {
         let err = LineRange::builder().build().unwrap_err();
-        assert_eq!(err, "`start` must be initialized");
+        crate::test::assert_missing_field!(err, LineRangeBuilderError, "start");
     }
 
     #[test]
@@ -364,7 +365,7 @@ mod tests {
             )
             .build()
             .unwrap_err();
-        assert_eq!(err, "`start` must be initialized");
+        crate::test::assert_missing_field!(err, LineRangeBuilderError, "start");
     }
 
     #[test]
@@ -379,7 +380,7 @@ mod tests {
             )
             .build()
             .unwrap_err();
-        assert_eq!(err, "`end` must be initialized");
+        crate::test::assert_missing_field!(err, LineRangeBuilderError, "end");
     }
 
     #[test]
@@ -434,7 +435,7 @@ mod tests {
     #[test]
     fn position_base_start_head_and_position_are_necessary() {
         let err = Position::builder().build().unwrap_err();
-        assert_eq!(err, "`base_sha` must be initialized");
+        crate::test::assert_missing_field!(err, PositionBuilderError, "base_sha");
     }
 
     #[test]
@@ -445,7 +446,7 @@ mod tests {
             .text_position(TextPosition::builder().build().unwrap())
             .build()
             .unwrap_err();
-        assert_eq!(err, "`base_sha` must be initialized");
+        crate::test::assert_missing_field!(err, PositionBuilderError, "base_sha");
     }
 
     #[test]
@@ -456,7 +457,7 @@ mod tests {
             .text_position(TextPosition::builder().build().unwrap())
             .build()
             .unwrap_err();
-        assert_eq!(err, "`start_sha` must be initialized");
+        crate::test::assert_missing_field!(err, PositionBuilderError, "start_sha");
     }
 
     #[test]
@@ -467,7 +468,7 @@ mod tests {
             .text_position(TextPosition::builder().build().unwrap())
             .build()
             .unwrap_err();
-        assert_eq!(err, "`head_sha` must be initialized");
+        crate::test::assert_missing_field!(err, PositionBuilderError, "head_sha");
     }
 
     #[test]
@@ -478,7 +479,7 @@ mod tests {
             .head_sha("cafebabecafebabecafebabecafebabecafebabe")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`position` must be initialized");
+        crate::test::assert_missing_field!(err, PositionBuilderError, "position");
     }
 
     #[test]
@@ -495,7 +496,11 @@ mod tests {
     #[test]
     fn project_merge_request_and_body_are_necessary() {
         let err = CreateMergeRequestDiscussion::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            CreateMergeRequestDiscussionBuilderError,
+            "project",
+        );
     }
 
     #[test]
@@ -505,7 +510,11 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            CreateMergeRequestDiscussionBuilderError,
+            "project",
+        );
     }
 
     #[test]
@@ -515,7 +524,11 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`merge_request` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            CreateMergeRequestDiscussionBuilderError,
+            "merge_request",
+        );
     }
 
     #[test]
@@ -525,7 +538,7 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`body` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestDiscussionBuilderError, "body");
     }
 
     #[test]

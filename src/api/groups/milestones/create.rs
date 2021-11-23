@@ -67,14 +67,14 @@ mod tests {
     use chrono::NaiveDate;
     use http::Method;
 
-    use crate::api::groups::milestones::CreateGroupMilestone;
+    use crate::api::groups::milestones::{CreateGroupMilestone, CreateGroupMilestoneBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_and_title_are_necessary() {
         let err = CreateGroupMilestone::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, CreateGroupMilestoneBuilderError, "group");
     }
 
     #[test]
@@ -83,7 +83,7 @@ mod tests {
             .title("title")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, CreateGroupMilestoneBuilderError, "group");
     }
 
     #[test]
@@ -92,7 +92,7 @@ mod tests {
             .group("group")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`title` must be initialized");
+        crate::test::assert_missing_field!(err, CreateGroupMilestoneBuilderError, "title");
     }
 
     #[test]

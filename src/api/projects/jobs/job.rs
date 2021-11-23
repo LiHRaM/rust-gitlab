@@ -38,26 +38,26 @@ impl<'a> Endpoint for Job<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::jobs::Job;
+    use crate::api::projects::jobs::{Job, JobBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_job_are_needed() {
         let err = Job::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, JobBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = Job::builder().job(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, JobBuilderError, "project");
     }
 
     #[test]
     fn job_is_needed() {
         let err = Job::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`job` must be initialized");
+        crate::test::assert_missing_field!(err, JobBuilderError, "job");
     }
 
     #[test]

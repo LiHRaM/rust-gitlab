@@ -46,26 +46,26 @@ impl<'a> Endpoint for RetryPipeline<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::pipelines::RetryPipeline;
+    use crate::api::projects::pipelines::{RetryPipeline, RetryPipelineBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_pipeline_are_needed() {
         let err = RetryPipeline::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, RetryPipelineBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = RetryPipeline::builder().pipeline(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, RetryPipelineBuilderError, "project");
     }
 
     #[test]
     fn pipeline_is_needed() {
         let err = RetryPipeline::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`pipeline` must be initialized");
+        crate::test::assert_missing_field!(err, RetryPipelineBuilderError, "pipeline");
     }
 
     #[test]

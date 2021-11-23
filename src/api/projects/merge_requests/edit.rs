@@ -318,7 +318,9 @@ impl<'a> Endpoint for EditMergeRequest<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::merge_requests::{EditMergeRequest, MergeRequestStateEvent};
+    use crate::api::projects::merge_requests::{
+        EditMergeRequest, EditMergeRequestBuilderError, MergeRequestStateEvent,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -337,7 +339,7 @@ mod tests {
     #[test]
     fn project_and_merge_request_are_necessary() {
         let err = EditMergeRequest::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditMergeRequestBuilderError, "project");
     }
 
     #[test]
@@ -346,13 +348,13 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditMergeRequestBuilderError, "project");
     }
 
     #[test]
     fn merge_request_is_necessary() {
         let err = EditMergeRequest::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`merge_request` must be initialized");
+        crate::test::assert_missing_field!(err, EditMergeRequestBuilderError, "merge_request");
     }
 
     #[test]

@@ -615,7 +615,7 @@ mod tests {
     use crate::api::common::{SortOrder, YesNo};
     use crate::api::projects::merge_requests::{
         MergeRequestOrderBy, MergeRequestScope, MergeRequestSearchScope, MergeRequestState,
-        MergeRequestView, MergeRequests,
+        MergeRequestView, MergeRequests, MergeRequestsBuilderError,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -679,7 +679,7 @@ mod tests {
     #[test]
     fn project_is_needed() {
         let err = MergeRequests::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, MergeRequestsBuilderError, "project");
     }
 
     #[test]

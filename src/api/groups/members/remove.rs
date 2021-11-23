@@ -52,26 +52,26 @@ impl<'a> Endpoint for RemoveGroupMember<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::groups::members::RemoveGroupMember;
+    use crate::api::groups::members::{RemoveGroupMember, RemoveGroupMemberBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn all_parameters_are_needed() {
         let err = RemoveGroupMember::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, RemoveGroupMemberBuilderError, "group");
     }
 
     #[test]
     fn group_is_necessary() {
         let err = RemoveGroupMember::builder().user(1).build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, RemoveGroupMemberBuilderError, "group");
     }
 
     #[test]
     fn user_is_necessary() {
         let err = RemoveGroupMember::builder().group(1).build().unwrap_err();
-        assert_eq!(err, "`user` must be initialized");
+        crate::test::assert_missing_field!(err, RemoveGroupMemberBuilderError, "user");
     }
 
     #[test]

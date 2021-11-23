@@ -38,26 +38,26 @@ impl<'a> Endpoint for GroupMember<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::groups::members::GroupMember;
+    use crate::api::groups::members::{GroupMember, GroupMemberBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_and_user_are_needed() {
         let err = GroupMember::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, GroupMemberBuilderError, "group");
     }
 
     #[test]
     fn group_is_needed() {
         let err = GroupMember::builder().user(1).build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, GroupMemberBuilderError, "group");
     }
 
     #[test]
     fn user_is_needed() {
         let err = GroupMember::builder().group(1).build().unwrap_err();
-        assert_eq!(err, "`user` must be initialized");
+        crate::test::assert_missing_field!(err, GroupMemberBuilderError, "user");
     }
 
     #[test]

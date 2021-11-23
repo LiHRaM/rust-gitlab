@@ -13,6 +13,8 @@ mod create;
 
 pub use self::awards::MergeRequestNoteAwards;
 pub use self::awards::MergeRequestNoteAwardsBuilder;
+pub use self::awards::MergeRequestNoteAwardsBuilderError;
 
 pub use self::create::CreateMergeRequestNoteAward;
 pub use self::create::CreateMergeRequestNoteAwardBuilder;
+pub use self::create::CreateMergeRequestNoteAwardBuilderError;

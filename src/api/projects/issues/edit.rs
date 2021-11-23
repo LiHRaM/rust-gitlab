@@ -306,7 +306,7 @@ mod tests {
     use chrono::{NaiveDate, TimeZone, Utc};
     use http::Method;
 
-    use crate::api::projects::issues::{EditIssue, IssueStateEvent};
+    use crate::api::projects::issues::{EditIssue, EditIssueBuilderError, IssueStateEvent};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -325,19 +325,19 @@ mod tests {
     #[test]
     fn project_and_issue_are_necessary() {
         let err = EditIssue::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditIssueBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = EditIssue::builder().issue(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditIssueBuilderError, "project");
     }
 
     #[test]
     fn issue_is_necessary() {
         let err = EditIssue::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`issue` must be initialized");
+        crate::test::assert_missing_field!(err, EditIssueBuilderError, "issue");
     }
 
     #[test]

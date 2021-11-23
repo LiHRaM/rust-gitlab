@@ -38,14 +38,14 @@ impl<'a> Pageable for ProjectReleases<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::releases::ProjectReleases;
+    use crate::api::projects::releases::{ProjectReleases, ProjectReleasesBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
         let err = ProjectReleases::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectReleasesBuilderError, "project");
     }
 
     #[test]

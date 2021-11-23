@@ -93,17 +93,17 @@ impl<'a> Pageable for ProjectMembers<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::members::ProjectMembers;
+    use crate::api::projects::members::{ProjectMembers, ProjectMembersBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
         let err = ProjectMembers::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectMembersBuilderError, "project");
 
         let err = ProjectMembers::all_builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProjectMembersBuilderError, "project");
     }
 
     #[test]

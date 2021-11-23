@@ -34,14 +34,14 @@ impl Endpoint for User {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::users::User;
+    use crate::api::users::{User, UserBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn user_is_needed() {
         let err = User::builder().build().unwrap_err();
-        assert_eq!(err, "`user` must be initialized");
+        crate::test::assert_missing_field!(err, UserBuilderError, "user");
     }
 
     #[test]

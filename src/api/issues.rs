@@ -13,8 +13,8 @@ use std::collections::BTreeSet;
 use crate::api::endpoint_prelude::*;
 use crate::api::ParamValue;
 
-pub use groups::{GroupIssues, GroupIssuesBuilder};
-pub use projects::{ProjectIssues, ProjectIssuesBuilder};
+pub use groups::{GroupIssues, GroupIssuesBuilder, GroupIssuesBuilderError};
+pub use projects::{ProjectIssues, ProjectIssuesBuilder, ProjectIssuesBuilderError};
 
 mod groups;
 mod projects;

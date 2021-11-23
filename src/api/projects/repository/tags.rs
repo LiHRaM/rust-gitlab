@@ -14,10 +14,13 @@ mod tags;
 
 pub use self::create::CreateTag;
 pub use self::create::CreateTagBuilder;
+pub use self::create::CreateTagBuilderError;
 
 pub use self::tag::Tag;
 pub use self::tag::TagBuilder;
+pub use self::tag::TagBuilderError;
 
 pub use self::tags::Tags;
 pub use self::tags::TagsBuilder;
+pub use self::tags::TagsBuilderError;
 pub use self::tags::TagsOrderBy;

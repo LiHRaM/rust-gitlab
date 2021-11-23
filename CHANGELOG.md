@@ -4,6 +4,10 @@
 
   * Missing `Builder` type exports have been added.
 
+## Breaking changes
+
+  * The error types from `Builder` instances are now distinct per builder type.
+
 # v0.1404.0
 
 ## Additions

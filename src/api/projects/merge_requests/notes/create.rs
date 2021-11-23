@@ -66,14 +66,16 @@ mod tests {
     use chrono::{TimeZone, Utc};
     use http::Method;
 
-    use crate::api::projects::merge_requests::notes::CreateMergeRequestNote;
+    use crate::api::projects::merge_requests::notes::{
+        CreateMergeRequestNote, CreateMergeRequestNoteBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_merge_request_and_body_are_necessary() {
         let err = CreateMergeRequestNote::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestNoteBuilderError, "project");
     }
 
     #[test]
@@ -83,7 +85,7 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestNoteBuilderError, "project");
     }
 
     #[test]
@@ -93,7 +95,11 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`merge_request` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            CreateMergeRequestNoteBuilderError,
+            "merge_request",
+        );
     }
 
     #[test]
@@ -103,7 +109,7 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`body` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestNoteBuilderError, "body");
     }
 
     #[test]
