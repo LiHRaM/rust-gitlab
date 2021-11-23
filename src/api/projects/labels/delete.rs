@@ -41,26 +41,26 @@ impl<'a> Endpoint for DeleteLabel<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::labels::DeleteLabel;
+    use crate::api::projects::labels::{DeleteLabel, DeleteLabelBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_label_are_necessary() {
         let err = DeleteLabel::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, DeleteLabelBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = DeleteLabel::builder().label("label").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, DeleteLabelBuilderError, "project");
     }
 
     #[test]
     fn label_is_necessary() {
         let err = DeleteLabel::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`label` must be initialized");
+        crate::test::assert_missing_field!(err, DeleteLabelBuilderError, "label");
     }
 
     #[test]

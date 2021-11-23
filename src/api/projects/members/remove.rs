@@ -52,20 +52,20 @@ impl<'a> Endpoint for RemoveProjectMember<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::members::RemoveProjectMember;
+    use crate::api::projects::members::{RemoveProjectMember, RemoveProjectMemberBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn all_parameters_are_needed() {
         let err = RemoveProjectMember::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, RemoveProjectMemberBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = RemoveProjectMember::builder().user(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, RemoveProjectMemberBuilderError, "project");
     }
 
     #[test]
@@ -74,7 +74,7 @@ mod tests {
             .project(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`user` must be initialized");
+        crate::test::assert_missing_field!(err, RemoveProjectMemberBuilderError, "user");
     }
 
     #[test]

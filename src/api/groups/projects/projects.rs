@@ -166,7 +166,9 @@ impl<'a> Pageable for GroupProjects<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::common::{AccessLevel, SortOrder, VisibilityLevel};
-    use crate::api::groups::projects::{GroupProjects, GroupProjectsOrderBy};
+    use crate::api::groups::projects::{
+        GroupProjects, GroupProjectsBuilderError, GroupProjectsOrderBy,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -198,7 +200,7 @@ mod tests {
     #[test]
     fn group_is_needed() {
         let err = GroupProjects::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, GroupProjectsBuilderError, "group");
     }
 
     #[test]

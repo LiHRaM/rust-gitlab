@@ -44,26 +44,26 @@ impl<'a> Endpoint for CancelPipeline<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::pipelines::CancelPipeline;
+    use crate::api::projects::pipelines::{CancelPipeline, CancelPipelineBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_pipeline_are_needed() {
         let err = CancelPipeline::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CancelPipelineBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = CancelPipeline::builder().pipeline(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CancelPipelineBuilderError, "project");
     }
 
     #[test]
     fn pipeline_is_needed() {
         let err = CancelPipeline::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`pipeline` must be initialized");
+        crate::test::assert_missing_field!(err, CancelPipelineBuilderError, "pipeline");
     }
 
     #[test]

@@ -42,14 +42,16 @@ impl<'a> Endpoint for MergeRequestApprovalState<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::merge_requests::approval_state::MergeRequestApprovalState;
+    use crate::api::projects::merge_requests::approval_state::{
+        MergeRequestApprovalState, MergeRequestApprovalStateBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_merge_request_are_needed() {
         let err = MergeRequestApprovalState::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, MergeRequestApprovalStateBuilderError, "project");
     }
 
     #[test]
@@ -58,7 +60,7 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, MergeRequestApprovalStateBuilderError, "project");
     }
 
     #[test]
@@ -67,7 +69,11 @@ mod tests {
             .project(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`merge_request` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            MergeRequestApprovalStateBuilderError,
+            "merge_request",
+        );
     }
 
     #[test]

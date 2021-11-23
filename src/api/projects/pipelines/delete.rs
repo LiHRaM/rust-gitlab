@@ -40,26 +40,26 @@ impl<'a> Endpoint for DeletePipeline<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::pipelines::DeletePipeline;
+    use crate::api::projects::pipelines::{DeletePipeline, DeletePipelineBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_pipeline_are_needed() {
         let err = DeletePipeline::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, DeletePipelineBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = DeletePipeline::builder().pipeline(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, DeletePipelineBuilderError, "project");
     }
 
     #[test]
     fn pipeline_is_needed() {
         let err = DeletePipeline::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`pipeline` must be initialized");
+        crate::test::assert_missing_field!(err, DeletePipelineBuilderError, "pipeline");
     }
 
     #[test]

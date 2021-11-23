@@ -42,26 +42,26 @@ impl<'a> Endpoint for Environment<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::environments::Environment;
+    use crate::api::projects::environments::{Environment, EnvironmentBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_environment_are_needed() {
         let err = Environment::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EnvironmentBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = Environment::builder().environment(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EnvironmentBuilderError, "project");
     }
 
     #[test]
     fn environment_is_needed() {
         let err = Environment::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`environment` must be initialized");
+        crate::test::assert_missing_field!(err, EnvironmentBuilderError, "environment");
     }
 
     #[test]

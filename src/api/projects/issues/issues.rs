@@ -31,3 +31,5 @@ pub type IssueOrderBy = crate::api::issues::IssueOrderBy;
 pub type Issues<'a> = crate::api::issues::ProjectIssues<'a>;
 /// Builder for [`Issues`].
 pub type IssuesBuilder<'a> = crate::api::issues::ProjectIssuesBuilder<'a>;
+/// Errors for issue builders.
+pub type IssuesBuilderError = crate::api::issues::ProjectIssuesBuilderError;

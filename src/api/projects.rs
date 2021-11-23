@@ -35,18 +35,23 @@ pub use self::create::ContainerExpirationKeepN;
 pub use self::create::ContainerExpirationOlderThan;
 pub use self::create::ContainerExpirationPolicy;
 pub use self::create::ContainerExpirationPolicyBuilder;
+pub use self::create::ContainerExpirationPolicyBuilderError;
 pub use self::create::CreateProject;
 pub use self::create::CreateProjectBuilder;
+pub use self::create::CreateProjectBuilderError;
 pub use self::create::FeatureAccessLevel;
 pub use self::create::FeatureAccessLevelPublic;
 pub use self::create::MergeMethod;
 
 pub use self::edit::EditProject;
 pub use self::edit::EditProjectBuilder;
+pub use self::edit::EditProjectBuilderError;
 
 pub use self::project::Project;
 pub use self::project::ProjectBuilder;
+pub use self::project::ProjectBuilderError;
 
 pub use self::projects::ProjectOrderBy;
 pub use self::projects::Projects;
 pub use self::projects::ProjectsBuilder;
+pub use self::projects::ProjectsBuilderError;

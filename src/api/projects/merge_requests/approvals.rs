@@ -7,7 +7,7 @@
 //! Project merge request approvals API endpoint.
 //!
 //! This endpoint is used for querying project merge request approvals.
-//! See https://docs.gitlab.com/ee/api/merge_request_approvals.html#merge-request-level-mr-approvals
+//! See <https://docs.gitlab.com/ee/api/merge_request_approvals.html#merge-request-level-mr-approvals>
 //!
 //! # Example
 //! ```rust,no_run
@@ -60,3 +60,4 @@ mod approvals;
 
 pub use self::approvals::MergeRequestApprovals;
 pub use self::approvals::MergeRequestApprovalsBuilder;
+pub use self::approvals::MergeRequestApprovalsBuilderError;

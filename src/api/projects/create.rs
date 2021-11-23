@@ -889,7 +889,8 @@ mod tests {
     use crate::api::projects::{
         AutoDevOpsDeployStrategy, BuildGitStrategy, ContainerExpirationCadence,
         ContainerExpirationKeepN, ContainerExpirationOlderThan, ContainerExpirationPolicy,
-        CreateProject, FeatureAccessLevel, FeatureAccessLevelPublic, MergeMethod,
+        CreateProject, CreateProjectBuilderError, FeatureAccessLevel, FeatureAccessLevelPublic,
+        MergeMethod,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -1063,7 +1064,7 @@ mod tests {
     #[test]
     fn name_and_path_is_needed() {
         let err = CreateProject::builder().build().unwrap_err();
-        assert_eq!(err, "`name_and_path` must be initialized");
+        crate::test::assert_missing_field!(err, CreateProjectBuilderError, "name_and_path");
     }
 
     #[test]

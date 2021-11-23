@@ -157,7 +157,9 @@ impl<'a> Pageable for GroupSubgroups<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::common::{AccessLevel, SortOrder};
-    use crate::api::groups::subgroups::{GroupSubgroups, GroupSubgroupsOrderBy};
+    use crate::api::groups::subgroups::{
+        GroupSubgroups, GroupSubgroupsBuilderError, GroupSubgroupsOrderBy,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -185,7 +187,7 @@ mod tests {
     #[test]
     fn group_is_needed() {
         let err = GroupSubgroups::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, GroupSubgroupsBuilderError, "group");
     }
 
     #[test]

@@ -59,7 +59,7 @@ impl<'a> Endpoint for CreateTag<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::repository::tags::CreateTag;
+    use crate::api::projects::repository::tags::{CreateTag, CreateTagBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -70,7 +70,7 @@ mod tests {
             .ref_("ref")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateTagBuilderError, "project");
     }
 
     #[test]
@@ -80,7 +80,7 @@ mod tests {
             .ref_("ref")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`tag_name` must be initialized");
+        crate::test::assert_missing_field!(err, CreateTagBuilderError, "tag_name");
     }
 
     #[test]
@@ -90,7 +90,7 @@ mod tests {
             .tag_name("a-tag-name")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`ref_` must be initialized");
+        crate::test::assert_missing_field!(err, CreateTagBuilderError, "ref_");
     }
 
     #[test]

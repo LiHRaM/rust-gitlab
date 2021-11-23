@@ -61,14 +61,14 @@ mod tests {
     use http::Method;
 
     use crate::api::common::AccessLevel;
-    use crate::api::projects::members::EditProjectMember;
+    use crate::api::projects::members::{EditProjectMember, EditProjectMemberBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn all_parameters_are_needed() {
         let err = EditProjectMember::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditProjectMemberBuilderError, "project");
     }
 
     #[test]
@@ -78,7 +78,7 @@ mod tests {
             .access_level(AccessLevel::Developer)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditProjectMemberBuilderError, "project");
     }
 
     #[test]
@@ -88,7 +88,7 @@ mod tests {
             .access_level(AccessLevel::Developer)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`user` must be initialized");
+        crate::test::assert_missing_field!(err, EditProjectMemberBuilderError, "user");
     }
 
     #[test]
@@ -98,7 +98,7 @@ mod tests {
             .user(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`access_level` must be initialized");
+        crate::test::assert_missing_field!(err, EditProjectMemberBuilderError, "access_level");
     }
 
     #[test]

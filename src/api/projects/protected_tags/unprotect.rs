@@ -46,26 +46,26 @@ impl<'a> Endpoint for UnprotectTag<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::protected_tags::UnprotectTag;
+    use crate::api::projects::protected_tags::{UnprotectTag, UnprotectTagBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_name_are_needed() {
         let err = UnprotectTag::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, UnprotectTagBuilderError, "project");
     }
 
     #[test]
     fn project_is_required() {
         let err = UnprotectTag::builder().name("master").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, UnprotectTagBuilderError, "project");
     }
 
     #[test]
     fn name_is_required() {
         let err = UnprotectTag::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, UnprotectTagBuilderError, "name");
     }
 
     #[test]

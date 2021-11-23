@@ -62,14 +62,14 @@ impl<'a> Pageable for Labels<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::labels::Labels;
+    use crate::api::projects::labels::{Labels, LabelsBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_is_needed() {
         let err = Labels::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, LabelsBuilderError, "project");
     }
 
     #[test]

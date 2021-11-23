@@ -56,26 +56,26 @@ mod tests {
     use http::Method;
 
     use crate::api::common::ProtectedAccessLevel;
-    use crate::api::projects::protected_tags::ProtectTag;
+    use crate::api::projects::protected_tags::{ProtectTag, ProtectTagBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_name_are_needed() {
         let err = ProtectTag::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectTagBuilderError, "project");
     }
 
     #[test]
     fn project_is_required() {
         let err = ProtectTag::builder().name("1.0").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectTagBuilderError, "project");
     }
 
     #[test]
     fn name_is_required() {
         let err = ProtectTag::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, ProtectTagBuilderError, "name");
     }
 
     #[test]

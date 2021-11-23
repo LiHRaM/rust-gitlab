@@ -60,26 +60,26 @@ impl<'a> Pageable for IssueNotes<'a> {}
 #[cfg(test)]
 mod tests {
     use crate::api::common::SortOrder;
-    use crate::api::projects::issues::notes::{IssueNotes, NoteOrderBy};
+    use crate::api::projects::issues::notes::{IssueNotes, IssueNotesBuilderError, NoteOrderBy};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_issue_are_necessary() {
         let err = IssueNotes::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, IssueNotesBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = IssueNotes::builder().issue(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, IssueNotesBuilderError, "project");
     }
 
     #[test]
     fn issue_is_necessary() {
         let err = IssueNotes::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`issue` must be initialized");
+        crate::test::assert_missing_field!(err, IssueNotesBuilderError, "issue");
     }
 
     #[test]

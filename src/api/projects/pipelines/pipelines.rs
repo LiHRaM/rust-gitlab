@@ -220,7 +220,7 @@ mod tests {
 
     use crate::api::common::SortOrder;
     use crate::api::projects::pipelines::{
-        PipelineOrderBy, PipelineScope, PipelineStatus, Pipelines,
+        PipelineOrderBy, PipelineScope, PipelineStatus, Pipelines, PipelinesBuilderError,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -282,7 +282,7 @@ mod tests {
     #[test]
     fn project_is_needed() {
         let err = Pipelines::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, PipelinesBuilderError, "project");
     }
 
     #[test]

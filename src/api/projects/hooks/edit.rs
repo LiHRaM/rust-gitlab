@@ -124,26 +124,26 @@ impl<'a> Endpoint for EditHook<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::hooks::EditHook;
+    use crate::api::projects::hooks::{EditHook, EditHookBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_hook_id_are_necessary() {
         let err = EditHook::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditHookBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = EditHook::builder().hook_id(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditHookBuilderError, "project");
     }
 
     #[test]
     fn hook_id_is_necessary() {
         let err = EditHook::builder().project("project").build().unwrap_err();
-        assert_eq!(err, "`hook_id` must be initialized");
+        crate::test::assert_missing_field!(err, EditHookBuilderError, "hook_id");
     }
 
     #[test]

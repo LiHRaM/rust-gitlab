@@ -44,14 +44,16 @@ impl<'a> Pageable for MergeRequestDiscussions<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::merge_requests::discussions::MergeRequestDiscussions;
+    use crate::api::projects::merge_requests::discussions::{
+        MergeRequestDiscussions, MergeRequestDiscussionsBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_merge_request_are_necessary() {
         let err = MergeRequestDiscussions::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, MergeRequestDiscussionsBuilderError, "project");
     }
 
     #[test]
@@ -60,7 +62,7 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, MergeRequestDiscussionsBuilderError, "project");
     }
 
     #[test]
@@ -69,7 +71,11 @@ mod tests {
             .project(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`merge_request` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            MergeRequestDiscussionsBuilderError,
+            "merge_request",
+        );
     }
 
     #[test]

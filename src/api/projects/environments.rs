@@ -15,6 +15,8 @@ pub use self::environments::EnvironmentState;
 
 pub use self::environment::Environment;
 pub use self::environment::EnvironmentBuilder;
+pub use self::environment::EnvironmentBuilderError;
 
 pub use self::environments::Environments;
 pub use self::environments::EnvironmentsBuilder;
+pub use self::environments::EnvironmentsBuilderError;

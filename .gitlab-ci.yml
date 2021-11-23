@@ -182,31 +182,6 @@ stable:test:
     needs:
         - stable:build
 
-tarpaulin:build:
-    extends:
-        - .rust_stable
-        - .cargo_no_features
-        - .cargo_tarpaulin_build_job
-        - .cargo_build_tags
-        - .cargo_build_artifacts
-        - .run_automatically
-    dependencies:
-        - cache-newest:prep
-    needs:
-        - cache-newest:prep
-
-tarpaulin:test:
-    extends:
-        - .rust_stable
-        - .cargo_no_features
-        - .cargo_tarpaulin_test_job
-        - .cargo_privileged_tags
-        - .run_automatically
-    dependencies:
-        - tarpaulin:build
-    needs:
-        - tarpaulin:build
-
 nightly:build:
     extends:
         - .rust_nightly
@@ -310,6 +285,31 @@ stable-features:test:
         - stable-features:build
     needs:
         - stable-features:build
+
+tarpaulin-features:build:
+    extends:
+        - .rust_stable
+        - .cargo_all_features
+        - .cargo_tarpaulin_build_job
+        - .cargo_build_tags
+        - .cargo_build_artifacts
+        - .run_automatically
+    dependencies:
+        - cache-newest:prep
+    needs:
+        - cache-newest:prep
+
+tarpaulin-features:test:
+    extends:
+        - .rust_stable
+        - .cargo_all_features
+        - .cargo_tarpaulin_test_job
+        - .cargo_privileged_tags
+        - .run_automatically
+    dependencies:
+        - tarpaulin-features:build
+    needs:
+        - tarpaulin-features:build
 
 nightly-features:build:
     extends:

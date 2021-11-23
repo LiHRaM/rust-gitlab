@@ -12,3 +12,4 @@ mod awards;
 
 pub use self::awards::MergeRequestAwards;
 pub use self::awards::MergeRequestAwardsBuilder;
+pub use self::awards::MergeRequestAwardsBuilderError;

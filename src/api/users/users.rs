@@ -226,7 +226,7 @@ mod tests {
     use chrono::{TimeZone, Utc};
 
     use crate::api::common::{EnableState, SortOrder};
-    use crate::api::users::{ExternalProvider, UserOrderBy, Users};
+    use crate::api::users::{ExternalProvider, ExternalProviderBuilderError, UserOrderBy, Users};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -253,7 +253,7 @@ mod tests {
     #[test]
     fn external_provider_uid_and_name_are_necessary() {
         let err = ExternalProvider::builder().build().unwrap_err();
-        assert_eq!(err, "`uid` must be initialized");
+        crate::test::assert_missing_field!(err, ExternalProviderBuilderError, "uid");
     }
 
     #[test]
@@ -262,13 +262,13 @@ mod tests {
             .name("name")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`uid` must be initialized");
+        crate::test::assert_missing_field!(err, ExternalProviderBuilderError, "uid");
     }
 
     #[test]
     fn external_provider_name_is_necessary() {
         let err = ExternalProvider::builder().uid("1").build().unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, ExternalProviderBuilderError, "name");
     }
 
     #[test]

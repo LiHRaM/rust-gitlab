@@ -16,15 +16,20 @@ mod remove;
 
 pub use self::add::AddProjectMember;
 pub use self::add::AddProjectMemberBuilder;
+pub use self::add::AddProjectMemberBuilderError;
 
 pub use self::edit::EditProjectMember;
 pub use self::edit::EditProjectMemberBuilder;
+pub use self::edit::EditProjectMemberBuilderError;
 
 pub use self::member::ProjectMember;
 pub use self::member::ProjectMemberBuilder;
+pub use self::member::ProjectMemberBuilderError;
 
 pub use self::members::ProjectMembers;
 pub use self::members::ProjectMembersBuilder;
+pub use self::members::ProjectMembersBuilderError;
 
 pub use self::remove::RemoveProjectMember;
 pub use self::remove::RemoveProjectMemberBuilder;
+pub use self::remove::RemoveProjectMemberBuilderError;

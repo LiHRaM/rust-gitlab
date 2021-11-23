@@ -15,10 +15,13 @@ mod notes;
 
 pub use self::create::CreateMergeRequestNote;
 pub use self::create::CreateMergeRequestNoteBuilder;
+pub use self::create::CreateMergeRequestNoteBuilderError;
 
 pub use self::edit::EditMergeRequestNote;
 pub use self::edit::EditMergeRequestNoteBuilder;
+pub use self::edit::EditMergeRequestNoteBuilderError;
 
 pub use self::notes::MergeRequestNotes;
 pub use self::notes::MergeRequestNotesBuilder;
+pub use self::notes::MergeRequestNotesBuilderError;
 pub use crate::api::helpers::NoteOrderBy;

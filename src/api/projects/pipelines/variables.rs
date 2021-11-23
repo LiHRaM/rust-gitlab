@@ -44,14 +44,14 @@ impl<'a> Pageable for PipelineVariables<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::pipelines::PipelineVariables;
+    use crate::api::projects::pipelines::{PipelineVariables, PipelineVariablesBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_pipeline_are_needed() {
         let err = PipelineVariables::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, PipelineVariablesBuilderError, "project");
     }
 
     #[test]
@@ -60,13 +60,13 @@ mod tests {
             .pipeline(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, PipelineVariablesBuilderError, "project");
     }
 
     #[test]
     fn pipeline_is_needed() {
         let err = PipelineVariables::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`pipeline` must be initialized");
+        crate::test::assert_missing_field!(err, PipelineVariablesBuilderError, "pipeline");
     }
 
     #[test]

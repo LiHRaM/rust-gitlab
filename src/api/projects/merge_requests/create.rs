@@ -269,14 +269,16 @@ impl<'a> Endpoint for CreateMergeRequest<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::merge_requests::CreateMergeRequest;
+    use crate::api::projects::merge_requests::{
+        CreateMergeRequest, CreateMergeRequestBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_source_branch_target_branch_and_title_are_necessary() {
         let err = CreateMergeRequest::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestBuilderError, "project");
     }
 
     #[test]
@@ -287,7 +289,7 @@ mod tests {
             .title("title")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestBuilderError, "project");
     }
 
     #[test]
@@ -298,7 +300,7 @@ mod tests {
             .title("title")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`source_branch` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestBuilderError, "source_branch");
     }
 
     #[test]
@@ -309,7 +311,7 @@ mod tests {
             .title("title")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`target_branch` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestBuilderError, "target_branch");
     }
 
     #[test]
@@ -320,7 +322,7 @@ mod tests {
             .target_branch("target")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`title` must be initialized");
+        crate::test::assert_missing_field!(err, CreateMergeRequestBuilderError, "title");
     }
 
     #[test]

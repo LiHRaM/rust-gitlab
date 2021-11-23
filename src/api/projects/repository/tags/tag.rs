@@ -44,26 +44,26 @@ impl<'a> Endpoint for Tag<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::repository::tags::tag::Tag;
+    use crate::api::projects::repository::tags::tag::{Tag, TagBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_tag_are_necessary() {
         let err = Tag::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, TagBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = Tag::builder().tag_name("master").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, TagBuilderError, "project");
     }
 
     #[test]
     fn tag_is_necessary() {
         let err = Tag::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`tag_name` must be initialized");
+        crate::test::assert_missing_field!(err, TagBuilderError, "tag_name");
     }
 
     #[test]

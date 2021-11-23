@@ -44,7 +44,9 @@ impl<'a> Pageable for MergeRequestResourceLabelEvents<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::merge_requests::MergeRequestResourceLabelEvents;
+    use crate::api::projects::merge_requests::{
+        MergeRequestResourceLabelEvents, MergeRequestResourceLabelEventsBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -53,7 +55,11 @@ mod tests {
         let err = MergeRequestResourceLabelEvents::builder()
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            MergeRequestResourceLabelEventsBuilderError,
+            "project",
+        );
     }
 
     #[test]
@@ -62,7 +68,11 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            MergeRequestResourceLabelEventsBuilderError,
+            "project",
+        );
     }
 
     #[test]
@@ -71,7 +81,11 @@ mod tests {
             .project(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`merge_request` must be initialized");
+        crate::test::assert_missing_field!(
+            err,
+            MergeRequestResourceLabelEventsBuilderError,
+            "merge_request",
+        );
     }
 
     #[test]

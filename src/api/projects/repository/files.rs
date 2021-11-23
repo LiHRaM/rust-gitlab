@@ -13,7 +13,9 @@ mod file_raw;
 
 pub use self::create::CreateFile;
 pub use self::create::CreateFileBuilder;
+pub use self::create::CreateFileBuilderError;
 pub use self::create::Encoding;
 
 pub use self::file_raw::FileRaw;
 pub use self::file_raw::FileRawBuilder;
+pub use self::file_raw::FileRawBuilderError;

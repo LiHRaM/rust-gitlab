@@ -121,7 +121,9 @@ impl<'a> Endpoint for CreateCommitStatus<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::repository::commits::{CommitStatusState, CreateCommitStatus};
+    use crate::api::projects::repository::commits::{
+        CommitStatusState, CreateCommitStatus, CreateCommitStatusBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -143,7 +145,7 @@ mod tests {
     #[test]
     fn project_commit_and_state_are_necessary() {
         let err = CreateCommitStatus::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateCommitStatusBuilderError, "project");
     }
 
     #[test]
@@ -153,7 +155,7 @@ mod tests {
             .state(CommitStatusState::Pending)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateCommitStatusBuilderError, "project");
     }
 
     #[test]
@@ -163,7 +165,7 @@ mod tests {
             .state(CommitStatusState::Pending)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`commit` must be initialized");
+        crate::test::assert_missing_field!(err, CreateCommitStatusBuilderError, "commit");
     }
 
     #[test]
@@ -173,7 +175,7 @@ mod tests {
             .commit("master")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`state` must be initialized");
+        crate::test::assert_missing_field!(err, CreateCommitStatusBuilderError, "state");
     }
 
     #[test]

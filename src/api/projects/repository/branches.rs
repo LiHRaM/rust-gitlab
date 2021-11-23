@@ -14,9 +14,12 @@ mod create;
 
 pub use self::branch::Branch;
 pub use self::branch::BranchBuilder;
+pub use self::branch::BranchBuilderError;
 
 pub use self::branches::Branches;
 pub use self::branches::BranchesBuilder;
+pub use self::branches::BranchesBuilderError;
 
 pub use self::create::CreateBranch;
 pub use self::create::CreateBranchBuilder;
+pub use self::create::CreateBranchBuilderError;

@@ -64,14 +64,14 @@ impl<'a> Endpoint for EditIssueNote<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::issues::notes::EditIssueNote;
+    use crate::api::projects::issues::notes::{EditIssueNote, EditIssueNoteBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_issue_note_and_body_are_necessary() {
         let err = EditIssueNote::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditIssueNoteBuilderError, "project");
     }
 
     #[test]
@@ -82,7 +82,7 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EditIssueNoteBuilderError, "project");
     }
 
     #[test]
@@ -93,7 +93,7 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`issue` must be initialized");
+        crate::test::assert_missing_field!(err, EditIssueNoteBuilderError, "issue");
     }
 
     #[test]
@@ -104,7 +104,7 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`note` must be initialized");
+        crate::test::assert_missing_field!(err, EditIssueNoteBuilderError, "note");
     }
 
     #[test]
@@ -115,7 +115,7 @@ mod tests {
             .note(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`body` must be initialized");
+        crate::test::assert_missing_field!(err, EditIssueNoteBuilderError, "body");
     }
 
     #[test]

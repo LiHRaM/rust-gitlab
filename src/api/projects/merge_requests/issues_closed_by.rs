@@ -45,14 +45,14 @@ impl<'a> Pageable for IssuesClosedBy<'a> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::merge_requests::IssuesClosedBy;
+    use crate::api::projects::merge_requests::{IssuesClosedBy, IssuesClosedByBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_merge_request_are_needed() {
         let err = IssuesClosedBy::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, IssuesClosedByBuilderError, "project");
     }
 
     #[test]
@@ -61,13 +61,13 @@ mod tests {
             .merge_request(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, IssuesClosedByBuilderError, "project");
     }
 
     #[test]
     fn merge_request_is_needed() {
         let err = IssuesClosedBy::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`merge_request` must be initialized");
+        crate::test::assert_missing_field!(err, IssuesClosedByBuilderError, "merge_request");
     }
 
     #[test]

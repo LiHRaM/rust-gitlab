@@ -12,4 +12,5 @@ mod projects;
 
 pub use self::projects::GroupProjects;
 pub use self::projects::GroupProjectsBuilder;
+pub use self::projects::GroupProjectsBuilderError;
 pub use self::projects::GroupProjectsOrderBy;

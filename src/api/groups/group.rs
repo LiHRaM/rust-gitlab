@@ -58,14 +58,14 @@ impl<'a> Endpoint for Group<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::groups::Group;
+    use crate::api::groups::{Group, GroupBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn group_is_necessary() {
         let err = Group::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, GroupBuilderError, "group");
     }
 
     #[test]

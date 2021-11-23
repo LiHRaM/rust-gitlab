@@ -140,7 +140,10 @@ impl<'a> Endpoint for CreatePipeline<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::pipelines::{CreatePipeline, PipelineVariable, PipelineVariableType};
+    use crate::api::projects::pipelines::{
+        CreatePipeline, CreatePipelineBuilderError, PipelineVariable, PipelineVariableBuilderError,
+        PipelineVariableType,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
@@ -167,7 +170,7 @@ mod tests {
     #[test]
     fn pipeline_variable_key_and_value_are_necessary() {
         let err = PipelineVariable::builder().build().unwrap_err();
-        assert_eq!(err, "`key` must be initialized");
+        crate::test::assert_missing_field!(err, PipelineVariableBuilderError, "key");
     }
 
     #[test]
@@ -176,13 +179,13 @@ mod tests {
             .value("value")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`key` must be initialized");
+        crate::test::assert_missing_field!(err, PipelineVariableBuilderError, "key");
     }
 
     #[test]
     fn pipeline_variable_value_is_necessary() {
         let err = PipelineVariable::builder().key("key").build().unwrap_err();
-        assert_eq!(err, "`value` must be initialized");
+        crate::test::assert_missing_field!(err, PipelineVariableBuilderError, "value");
     }
 
     #[test]
@@ -197,7 +200,7 @@ mod tests {
     #[test]
     fn project_and_ref_are_needed() {
         let err = CreatePipeline::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreatePipelineBuilderError, "project");
     }
 
     #[test]
@@ -206,13 +209,13 @@ mod tests {
             .ref_("testref")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreatePipelineBuilderError, "project");
     }
 
     #[test]
     fn ref_is_needed() {
         let err = CreatePipeline::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`ref_` must be initialized");
+        crate::test::assert_missing_field!(err, CreatePipelineBuilderError, "ref_");
     }
 
     #[test]

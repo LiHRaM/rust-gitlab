@@ -15,12 +15,16 @@ mod unprotect;
 
 pub use self::protect::ProtectTag;
 pub use self::protect::ProtectTagBuilder;
+pub use self::protect::ProtectTagBuilderError;
 
 pub use self::unprotect::UnprotectTag;
 pub use self::unprotect::UnprotectTagBuilder;
+pub use self::unprotect::UnprotectTagBuilderError;
 
 pub use self::protected_tag::ProtectedTag;
 pub use self::protected_tag::ProtectedTagBuilder;
+pub use self::protected_tag::ProtectedTagBuilderError;
 
 pub use self::protected_tags::ProtectedTags;
 pub use self::protected_tags::ProtectedTagsBuilder;
+pub use self::protected_tags::ProtectedTagsBuilderError;

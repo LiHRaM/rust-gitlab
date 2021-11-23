@@ -336,8 +336,8 @@ mod tests {
 
     use crate::api::common::SortOrder;
     use crate::api::issues::{
-        groups::GroupIssues, IssueDueDateFilter, IssueIteration, IssueOrderBy, IssueScope,
-        IssueSearchScope, IssueState, IssueWeight,
+        groups::GroupIssues, groups::GroupIssuesBuilderError, IssueDueDateFilter, IssueIteration,
+        IssueOrderBy, IssueScope, IssueSearchScope, IssueState, IssueWeight,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -345,7 +345,7 @@ mod tests {
     #[test]
     fn group_is_needed() {
         let err = GroupIssues::builder().build().unwrap_err();
-        assert_eq!(err, "`group` must be initialized");
+        crate::test::assert_missing_field!(err, GroupIssuesBuilderError, "group");
     }
 
     #[test]

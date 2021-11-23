@@ -66,14 +66,14 @@ mod tests {
     use chrono::{TimeZone, Utc};
     use http::Method;
 
-    use crate::api::projects::issues::notes::CreateIssueNote;
+    use crate::api::projects::issues::notes::{CreateIssueNote, CreateIssueNoteBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_issue_and_body_are_necessary() {
         let err = CreateIssueNote::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateIssueNoteBuilderError, "project");
     }
 
     #[test]
@@ -83,7 +83,7 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateIssueNoteBuilderError, "project");
     }
 
     #[test]
@@ -93,7 +93,7 @@ mod tests {
             .body("body")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`issue` must be initialized");
+        crate::test::assert_missing_field!(err, CreateIssueNoteBuilderError, "issue");
     }
 
     #[test]
@@ -103,7 +103,7 @@ mod tests {
             .issue(1)
             .build()
             .unwrap_err();
-        assert_eq!(err, "`body` must be initialized");
+        crate::test::assert_missing_field!(err, CreateIssueNoteBuilderError, "body");
     }
 
     #[test]

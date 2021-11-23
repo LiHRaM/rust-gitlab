@@ -68,14 +68,14 @@ impl<'a> Endpoint for CreateLabel<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::labels::CreateLabel;
+    use crate::api::projects::labels::{CreateLabel, CreateLabelBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_name_and_color_are_necessary() {
         let err = CreateLabel::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateLabelBuilderError, "project");
     }
 
     #[test]
@@ -85,7 +85,7 @@ mod tests {
             .color("#f100fe")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateLabelBuilderError, "project");
     }
 
     #[test]
@@ -95,7 +95,7 @@ mod tests {
             .color("#f100fe")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`name` must be initialized");
+        crate::test::assert_missing_field!(err, CreateLabelBuilderError, "name");
     }
 
     #[test]
@@ -105,7 +105,7 @@ mod tests {
             .name("label")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`color` must be initialized");
+        crate::test::assert_missing_field!(err, CreateLabelBuilderError, "color");
     }
 
     #[test]

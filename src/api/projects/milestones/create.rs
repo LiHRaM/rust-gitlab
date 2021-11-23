@@ -67,14 +67,16 @@ mod tests {
     use chrono::NaiveDate;
     use http::Method;
 
-    use crate::api::projects::milestones::CreateProjectMilestone;
+    use crate::api::projects::milestones::{
+        CreateProjectMilestone, CreateProjectMilestoneBuilderError,
+    };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_title_are_necessary() {
         let err = CreateProjectMilestone::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateProjectMilestoneBuilderError, "project");
     }
 
     #[test]
@@ -83,7 +85,7 @@ mod tests {
             .title("title")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, CreateProjectMilestoneBuilderError, "project");
     }
 
     #[test]
@@ -92,7 +94,7 @@ mod tests {
             .project("project")
             .build()
             .unwrap_err();
-        assert_eq!(err, "`title` must be initialized");
+        crate::test::assert_missing_field!(err, CreateProjectMilestoneBuilderError, "title");
     }
 
     #[test]

@@ -40,26 +40,26 @@ impl<'a> Endpoint for EraseJob<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::jobs::EraseJob;
+    use crate::api::projects::jobs::{EraseJob, EraseJobBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_job_are_needed() {
         let err = EraseJob::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EraseJobBuilderError, "project");
     }
 
     #[test]
     fn project_is_needed() {
         let err = EraseJob::builder().job(1).build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, EraseJobBuilderError, "project");
     }
 
     #[test]
     fn job_is_needed() {
         let err = EraseJob::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`job` must be initialized");
+        crate::test::assert_missing_field!(err, EraseJobBuilderError, "job");
     }
 
     #[test]

@@ -44,26 +44,26 @@ impl<'a> Endpoint for Branch<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::projects::repository::branches::Branch;
+    use crate::api::projects::repository::branches::{Branch, BranchBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
     fn project_and_branch_are_necessary() {
         let err = Branch::builder().build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, BranchBuilderError, "project");
     }
 
     #[test]
     fn project_is_necessary() {
         let err = Branch::builder().branch("master").build().unwrap_err();
-        assert_eq!(err, "`project` must be initialized");
+        crate::test::assert_missing_field!(err, BranchBuilderError, "project");
     }
 
     #[test]
     fn branch_is_necessary() {
         let err = Branch::builder().project(1).build().unwrap_err();
-        assert_eq!(err, "`branch` must be initialized");
+        crate::test::assert_missing_field!(err, BranchBuilderError, "branch");
     }
 
     #[test]
