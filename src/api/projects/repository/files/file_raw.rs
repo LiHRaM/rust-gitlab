@@ -11,8 +11,8 @@ use crate::api::endpoint_prelude::*;
 
 /// Get raw file from repository.
 ///
-/// Note: This endpoint returns raw data, so [`api::raw`] is recommended to avoid the normal JSON
-/// parsing present in the typical endpoint handling.
+/// Note: This endpoint returns raw data, so [`crate::api::raw`] is recommended to avoid the normal
+/// JSON parsing present in the typical endpoint handling.
 #[derive(Debug, Builder)]
 pub struct FileRaw<'a> {
     /// The project to get a file within.
