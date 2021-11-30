@@ -1,3 +1,7 @@
+# v0.1405.1
+
+  * No functional changes.  Only documentation and tests were updated.
+
 # v0.1405.0
 
 ## Additions
