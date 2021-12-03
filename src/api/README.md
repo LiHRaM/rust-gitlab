@@ -10,6 +10,7 @@ These API endpoints have been implemented.
 
   * `GET    /groups` `groups/groups.rs`
   * `POST   /groups` `groups/create.rs`
+  * `PUT    /groups/:group` `groups/edit.rs`
   * `GET    /groups/:group` `groups/group.rs`
   * `GET    /groups/:group/members` `groups/members/members.rs`
   * `POST   /groups/:group/members` `groups/members/add.rs`
@@ -139,7 +140,6 @@ instead of having to search the page for missing endpoints.
   * `GET    /issues` https://gitlab.kitware.com/help/api/issues.md#list-issues
   * `GET    /issues/:id` https://gitlab.kitware.com/help/api/issues.md#single-issue
   * `GET    /merge_requests` https://gitlab.kitware.com/help/api/merge_requests.md#list-merge-requests
-  * `PUT    /groups/:group` https://gitlab.kitware.com/help/api/groups.md#update-group
   * `DELETE /groups/:group` https://gitlab.kitware.com/help/api/groups.md#remove-group
   * `GET    /groups/:group/billable_members` https://gitlab.kitware.com/help/api/groups.md#list-all-billable-members-of-a-group
   * `GET    /groups/:group/descendant_groups` https://gitlab.kitware.com/help/api/groups.md#list-a-groups-descendant-groups

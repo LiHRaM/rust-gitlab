@@ -1,5 +1,9 @@
 # v0.1406.1 (unreleased)
 
+## Additions
+
+  * Groups can now be edited via `EditGroup`.
+
 ## Changes
 
   * Use explicit type for referencing associated items for rustc 1.57
