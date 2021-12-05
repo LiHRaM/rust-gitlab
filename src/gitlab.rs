@@ -495,7 +495,7 @@ impl api::AsyncClient for AsyncGitlab {
         &self,
         mut request: http::request::Builder,
         body: Vec<u8>,
-    ) -> Result<HttpResponse<Bytes>, api::ApiError<Self::Error>> {
+    ) -> Result<HttpResponse<Bytes>, api::ApiError<<Self as api::RestClient>::Error>> {
         use futures_util::TryFutureExt;
         let call = || {
             async {

@@ -210,7 +210,7 @@ impl AsyncClient for SingleTestClient {
         &self,
         request: RequestBuilder,
         body: Vec<u8>,
-    ) -> Result<Response<Bytes>, ApiError<Self::Error>> {
+    ) -> Result<Response<Bytes>, ApiError<<Self as RestClient>::Error>> {
         <Self as Client>::rest(self, request, body)
     }
 }
@@ -388,7 +388,7 @@ where
         &self,
         request: RequestBuilder,
         body: Vec<u8>,
-    ) -> Result<Response<Bytes>, ApiError<Self::Error>> {
+    ) -> Result<Response<Bytes>, ApiError<<Self as RestClient>::Error>> {
         <Self as Client>::rest(self, request, body)
     }
 }
