@@ -110,6 +110,7 @@ mod tests {
 
     #[derive(Debug)]
     struct DummyResult {
+        #[allow(dead_code)]
         value: u8,
     }
 
