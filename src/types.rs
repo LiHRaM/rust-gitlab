@@ -869,8 +869,8 @@ pub struct RepoBranch {
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Deserialize, Debug, Clone)]
 pub struct PRBAccessLevel {
-    access_level: u64,
-    access_level_description: String,
+    pub access_level: u64,
+    pub access_level_description: String,
 }
 
 /// A protected branch on a repository
