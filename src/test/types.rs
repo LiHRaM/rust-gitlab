@@ -353,6 +353,30 @@ fn check_merge_request_b(merge_request: &MergeRequest) {
     );
 }
 
+fn check_merge_request_basic(merge_request: &MergeRequestBasic) {
+    assert_eq!(merge_request.id, MergeRequestId::new(200));
+    assert_eq!(merge_request.iid, MergeRequestInternalId::new(5));
+    assert_eq!(merge_request.project_id, ProjectId::new(15402121));
+    assert_eq!(merge_request.title, "MR title");
+    assert_eq!(
+        merge_request.description,
+        Some("The description of the MR".to_string()),
+    );
+    assert_eq!(merge_request.state, MergeRequestState::Merged);
+    assert_eq!(
+        merge_request.created_at,
+        datetime((2021, 12, 14), (3, 23, 55, 176))
+    );
+    assert_eq!(
+        merge_request.updated_at,
+        datetime((2021, 12, 15), (19, 26, 45, 484))
+    );
+    assert_eq!(
+        merge_request.web_url,
+        "https://gitlab.com/organization/group/project/-/merge_requests/5",
+    );
+}
+
 #[test]
 fn test_read_merge_request() {
     let merge_request: MergeRequest = read_test_file("merge_request");
@@ -360,6 +384,36 @@ fn test_read_merge_request() {
     // Split for clippy's complexity checks.
     check_merge_request_a(&merge_request);
     check_merge_request_b(&merge_request);
+}
+
+#[test]
+fn test_read_merge_request_basic() {
+    let merge_request: MergeRequestBasic = read_test_file("merge_request_basic");
+
+    check_merge_request_basic(&merge_request);
+}
+
+#[test]
+fn test_read_merge_train() {
+    let merge_train: MergeTrain = read_test_file("merge_train");
+
+    check_merge_request_basic(&merge_train.merge_request);
+    check_user_kwrobot(&merge_train.user);
+
+    assert_eq!(merge_train.target_branch, "main");
+    assert_eq!(merge_train.status, MergeTrainState::Merged);
+    assert_eq!(
+        merge_train.merged_at,
+        Some(datetime((2021, 12, 15), (19, 26, 46, 991)))
+    );
+    assert_eq!(
+        merge_train.created_at,
+        datetime((2021, 12, 14), (3, 23, 55, 176))
+    );
+    assert_eq!(
+        merge_train.updated_at,
+        datetime((2021, 12, 15), (19, 26, 45, 484))
+    );
 }
 
 #[test]

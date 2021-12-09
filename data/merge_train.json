@@ -1,0 +1,40 @@
+{
+    "id": 198051,
+    "merge_request": {
+        "id": 200,
+        "iid": 5,
+        "project_id": 15402121,
+        "title": "MR title",
+        "description": "The description of the MR",
+        "state": "merged",
+        "created_at": "2021-12-14T03:23:55.176Z",
+        "updated_at": "2021-12-15T19:26:45.484Z",
+        "web_url": "https://gitlab.com/organization/group/project/-/merge_requests/5"
+    },
+    "user": {
+        "id": 11,
+        "username": "kwrobot",
+        "name": "Kitware Robot",
+        "state": "active",
+        "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/11/avatar.png",
+        "web_url": "https://gitlab.kitware.com/kwrobot"
+    },
+    "pipeline": {
+        "id": 230475735,
+        "iid": 4369,
+        "project_id": 15402121,
+        "sha": "2732d954af0187281025a94685b6cd59e525abcd",
+        "ref": "refs/merge-requests/533/train",
+        "status": "success",
+        "source": "merge_request_event",
+        "created_at": "2021-12-15T18:43:02.029Z",
+        "updated_at": "2021-12-15T19:32:14.446Z",
+        "web_url": "https://gitlab.com/organization/group/project/-/pipelines/230475735"
+    },
+    "created_at": "2021-12-14T03:23:55.176Z",
+    "updated_at": "2021-12-15T19:26:45.484Z",
+    "target_branch": "main",
+    "status": "merged",
+    "merged_at": "2021-12-15T19:26:46.991Z",
+    "duration": 2626
+}

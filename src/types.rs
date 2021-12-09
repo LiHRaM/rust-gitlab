@@ -1645,6 +1645,29 @@ pub struct MergeRequestUser {
 
 /// A merge request.
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MergeRequestBasic {
+    /// The ID of the merge request.
+    pub id: MergeRequestId,
+    /// The user-visible ID of the merge request.
+    pub iid: MergeRequestInternalId,
+    /// The ID of the project.
+    pub project_id: ProjectId,
+    /// The title of the merge request.
+    pub title: String,
+    /// The description of the merge request.
+    pub description: Option<String>,
+    /// The state of the merge request.
+    pub state: MergeRequestState,
+    /// When the merge request was created.
+    pub created_at: DateTime<Utc>,
+    /// When the merge request was last updated.
+    pub updated_at: DateTime<Utc>,
+    /// The URL of the merge request.
+    pub web_url: String,
+}
+
+/// A merge request.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MergeRequest {
     /// The ID of the merge request.
     pub id: MergeRequestId,
@@ -1912,6 +1935,53 @@ impl From<MergeRequestChanges> for MergeRequest {
             first_contribution: None,
         }
     }
+}
+
+impl_id!(MergeTrainId, "Type-safe merge train ID.");
+
+/// The states a merge train may be in.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MergeTrainState {
+    /// TODO: Figure out when this is used.
+    #[serde(rename = "idle")]
+    Idle,
+    /// This merge train has been marked as stale.
+    /// E.g. The MR is dropped from the merge train.
+    #[serde(rename = "stale")]
+    Stale,
+    /// The merge train has just started.
+    #[serde(rename = "fresh")]
+    Fresh,
+    /// The merge train finished and is in the process of merging.
+    #[serde(rename = "merging")]
+    Merging,
+    /// The merge train succeded.
+    #[serde(rename = "merged")]
+    Merged,
+}
+
+/// A single MergeTrain entry
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MergeTrain {
+    /// The ID of this merge train.
+    pub id: MergeTrainId,
+    /// The associated merge request.
+    pub merge_request: MergeRequestBasic,
+    /// The Pipeline for this merge.
+    pub pipeline: PipelineBasic,
+    /// The user that triggered this merge.
+    pub user: UserBasic,
+    /// When this entry has been added to the train.
+    pub created_at: DateTime<Utc>,
+    /// When this entry has been last updated.
+    pub updated_at: DateTime<Utc>,
+    /// The name of the target branch for this merge request.
+    pub target_branch: String,
+    /// The current status of this merge train.
+    pub status: MergeTrainState,
+    /// When this train has been merged.
+    pub merged_at: Option<DateTime<Utc>>,
+    pub duration: Option<u64>,
 }
 
 impl_id!(SshKeyId, "Type-safe SSH key ID.");
