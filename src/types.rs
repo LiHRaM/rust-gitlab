@@ -2142,6 +2142,12 @@ pub enum StatusState {
     /// The check was created.
     #[serde(rename = "created")]
     Created,
+    /// The check is waiting for some other resource.
+    #[serde(rename = "waiting_for_resource")]
+    WaitingForResource,
+    /// The check is currently being prepared.
+    #[serde(rename = "preparing")]
+    Preparing,
     /// The check is queued.
     #[serde(rename = "pending")]
     Pending,
@@ -2163,6 +2169,9 @@ pub enum StatusState {
     /// The check is waiting for manual action.
     #[serde(rename = "manual")]
     Manual,
+    /// The check is scheduled to run at some point in time.
+    #[serde(rename = "scheduled")]
+    Scheduled,
 }
 
 /// A status of a commit.
