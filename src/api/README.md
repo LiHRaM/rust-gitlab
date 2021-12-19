@@ -120,6 +120,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/repository/tags` `projects/repository/tags/tags.rs`
   * `GET    /projects/:project/repository/tags/:tag` `projects/repository/tags/tag.rs`
   * `POST   /projects/:project/repository/tags` `projects/repository/tags/create.rs`
+  * `GET    /projects/:project/repository/tree` `projects/repository/tree.rs`
   * `GET    /projects/:project/statuses/:sha` `projects/repository/commits/create_status.rs`
     Arguably, this should be `POST /projects/:project/repository/commits/:sha/statuses`.
     https://gitlab.com/gitlab-org/gitlab/-/issues/217412
@@ -335,6 +336,14 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/repository/tags/:tag` https://gitlab.kitware.com/help/api/tags.md#delete-a-tag
   * `POST   /projects/:project/repository/tags/:tag/release` https://gitlab.kitware.com/help/api/tags.md#create-a-new-release
   * `PUT    /projects/:project/repository/tags/:tag/release` https://gitlab.kitware.com/help/api/tags.md#update-a-release
+  * `GET    /projects/:project/repository/archive[.format]` https://gitlab.kitware.com/help/api/repositories.md#get-file-archive
+  * `GET    /projects/:project/repository/blobs/:sha` https://gitlab.kitware.com/help/api/repositories.md#get-a-blob-from-repository
+  * `GET    /projects/:project/repository/blobs/:sha/raw` https://gitlab.kitware.com/help/api/repositories.md#raw-blob-content
+  * `GET    /projects/:project/repository/changelog` https://gitlab.kitware.com/help/api/repositories.md#generate-changelog-data
+  * `POST   /projects/:project/repository/changelog` https://gitlab.kitware.com/help/api/repositories.md#add-changelog-data-to-a-changelog-file
+  * `GET    /projects/:project/repository/compare` https://gitlab.kitware.com/help/api/repositories.md#compare-branches-tags-or-commits
+  * `GET    /projects/:project/repository/contributors` https://gitlab.kitware.com/help/api/repositories.md#contributors
+  * `GET    /projects/:project/repository/merge_base` https://gitlab.kitware.com/help/api/repositories.md#merge-base
   * `POST   /projects/:project/restore` https://gitlab.kitware.com/help/api/projects.md#restore-project-marked-for-deletion-premium
   * `POST   /projects/:project/share` https://gitlab.kitware.com/help/api/projects.md#share-project-with-group
   * `DELETE /projects/:project/share/:group` https://gitlab.kitware.com/help/api/projects.md#delete-a-shared-project-link-within-a-group
@@ -492,7 +501,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/protected_environments.md
   * https://gitlab.kitware.com/help/api/releases/links.md
   * https://gitlab.kitware.com/help/api/remote_mirrors.md
-  * https://gitlab.kitware.com/help/api/repositories.md
   * https://gitlab.kitware.com/help/api/repository_files.md
   * https://gitlab.kitware.com/help/api/repository_submodules.md
   * https://gitlab.kitware.com/help/api/resource_access_tokens.md

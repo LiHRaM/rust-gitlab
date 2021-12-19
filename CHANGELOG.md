@@ -17,6 +17,7 @@
   * New endpoints for:
     - Creating, updating, and inspecting project-level pipeline variables.
     - Deleting project hooks.
+    - Getting tree object from projects.
   * New parameters for creating projects:
     - `container_registry_access_level`
     - `merge_pipelines_enabled`
