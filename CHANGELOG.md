@@ -18,6 +18,7 @@
     - Creating, updating, and inspecting project-level pipeline variables.
     - Deleting project hooks.
     - Getting tree object from projects.
+    - Updating a file in a project.
   * New parameters for creating projects:
     - `container_registry_access_level`
     - `merge_pipelines_enabled`

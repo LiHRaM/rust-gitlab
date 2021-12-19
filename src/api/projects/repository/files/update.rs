@@ -11,67 +11,13 @@ use log::warn;
 
 use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
-use crate::api::ParamValue;
+use crate::api::projects::repository::files::Encoding;
 
-/// Encodings for uploading file contents through an HTTP request.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Encoding {
-    /// No special encoding.
-    ///
-    /// Only supports UTF-8 content.
-    Text,
-    /// Base64-encoding.
-    ///
-    /// Supports representing binary content.
-    Base64,
-}
-
-impl Default for Encoding {
-    fn default() -> Self {
-        Encoding::Text
-    }
-}
-
-impl Encoding {
-    pub(crate) fn is_binary_safe(self) -> bool {
-        match self {
-            Encoding::Text => false,
-            Encoding::Base64 => true,
-        }
-    }
-
-    pub(crate) fn encode<'a>(self, as_string: Option<&'a str>, content: &'a [u8]) -> Cow<'a, str> {
-        match self {
-            Encoding::Text => {
-                if let Some(string) = as_string {
-                    string.into()
-                } else {
-                    panic!("attempting to encode non-utf8 content using text!");
-                }
-            },
-            Encoding::Base64 => base64::encode(content).into(),
-        }
-    }
-
-    pub(crate) fn as_str(self) -> &'static str {
-        match self {
-            Encoding::Text => "text",
-            Encoding::Base64 => "base64",
-        }
-    }
-}
-
-impl ParamValue<'static> for Encoding {
-    fn as_value(&self) -> Cow<'static, str> {
-        self.as_str().into()
-    }
-}
-
-/// Create a new file in a project.
+/// Update a file in a project.
 #[derive(Debug, Builder)]
 #[builder(setter(strip_option))]
-pub struct CreateFile<'a> {
-    /// The project to create a file within.
+pub struct UpdateFile<'a> {
+    /// The project to update a file within.
     #[builder(setter(into))]
     project: NameOrId<'a>,
     /// The path to the file in the repository.
@@ -98,7 +44,7 @@ pub struct CreateFile<'a> {
     ///
     /// Note that if `text` is requested and `content` contains non-UTF-8 content, a warning will
     /// be generated and a binary-safe encoding used instead.
-    #[builder(setter(into), default)]
+    #[builder(default)]
     encoding: Option<Encoding>,
     /// The email of the author for the new commit.
     #[builder(setter(into), default)]
@@ -108,18 +54,18 @@ pub struct CreateFile<'a> {
     author_name: Option<Cow<'a, str>>,
 }
 
-impl<'a> CreateFile<'a> {
+impl<'a> UpdateFile<'a> {
     /// Create a builder for the endpoint.
-    pub fn builder() -> CreateFileBuilder<'a> {
-        CreateFileBuilder::default()
+    pub fn builder() -> UpdateFileBuilder<'a> {
+        UpdateFileBuilder::default()
     }
 }
 
 const SAFE_ENCODING: Encoding = Encoding::Base64;
 
-impl<'a> Endpoint for CreateFile<'a> {
+impl<'a> Endpoint for UpdateFile<'a> {
     fn method(&self) -> Method {
-        Method::POST
+        Method::PUT
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
@@ -157,7 +103,9 @@ impl<'a> Endpoint for CreateFile<'a> {
             "content",
             actual_encoding.encode(content.ok(), &self.content),
         );
-        self.encoding
+
+        if let Some(value) = self
+            .encoding
             // Use the actual encoding.
             .map(|_| actual_encoding)
             // Force the encoding if we're not using the default.
@@ -168,7 +116,9 @@ impl<'a> Endpoint for CreateFile<'a> {
                     None
                 }
             })
-            .map(|value| params.push("encoding", value));
+        {
+            params.push("encoding", value);
+        }
 
         params.into_body()
     }
@@ -178,121 +128,79 @@ impl<'a> Endpoint for CreateFile<'a> {
 mod tests {
     use http::Method;
 
-    use crate::api::projects::repository::files::{CreateFile, CreateFileBuilderError, Encoding};
+    use crate::api::projects::repository::files::{Encoding, UpdateFile, UpdateFileBuilderError};
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
 
     #[test]
-    fn encoding_default() {
-        assert_eq!(Encoding::default(), Encoding::Text);
-    }
-
-    #[test]
-    fn encoding_is_binary_safe() {
-        let items = &[(Encoding::Text, false), (Encoding::Base64, true)];
-
-        for (i, s) in items {
-            assert_eq!(i.is_binary_safe(), *s);
-        }
-    }
-
-    #[test]
-    fn encoding_encode_text() {
-        let encoding = Encoding::Text;
-        assert_eq!(encoding.encode(Some("foo"), b"foo"), "foo");
-    }
-
-    #[test]
-    #[should_panic = "attempting to encode non-utf8 content using text!"]
-    fn encoding_encode_text_bad() {
-        let encoding = Encoding::Text;
-        encoding.encode(None, b"\xff");
-    }
-
-    #[test]
-    fn encoding_encode_base64() {
-        let encoding = Encoding::Base64;
-        assert_eq!(encoding.encode(None, b"foo"), "Zm9v");
-    }
-
-    #[test]
-    fn encoding_as_str() {
-        let items = &[(Encoding::Text, "text"), (Encoding::Base64, "base64")];
-
-        for (i, s) in items {
-            assert_eq!(i.as_str(), *s);
-        }
-    }
-
-    #[test]
     fn all_parameters_are_needed() {
-        let err = CreateFile::builder().build().unwrap_err();
-        crate::test::assert_missing_field!(err, CreateFileBuilderError, "project");
+        let err = UpdateFile::builder().build().unwrap_err();
+        crate::test::assert_missing_field!(err, UpdateFileBuilderError, "project");
     }
 
     #[test]
     fn project_is_required() {
-        let err = CreateFile::builder()
+        let err = UpdateFile::builder()
             .file_path("new/file")
             .branch("master")
             .commit_message("commit message")
             .content(&b"contents"[..])
             .build()
             .unwrap_err();
-        crate::test::assert_missing_field!(err, CreateFileBuilderError, "project");
+        crate::test::assert_missing_field!(err, UpdateFileBuilderError, "project");
     }
 
     #[test]
     fn file_path_is_required() {
-        let err = CreateFile::builder()
+        let err = UpdateFile::builder()
             .project(1)
             .branch("master")
             .commit_message("commit message")
             .content(&b"contents"[..])
             .build()
             .unwrap_err();
-        crate::test::assert_missing_field!(err, CreateFileBuilderError, "file_path");
+        crate::test::assert_missing_field!(err, UpdateFileBuilderError, "file_path");
     }
 
     #[test]
     fn branch_is_required() {
-        let err = CreateFile::builder()
+        let err = UpdateFile::builder()
             .project(1)
             .file_path("new/file")
             .commit_message("commit message")
             .content(&b"contents"[..])
             .build()
             .unwrap_err();
-        crate::test::assert_missing_field!(err, CreateFileBuilderError, "branch");
+        crate::test::assert_missing_field!(err, UpdateFileBuilderError, "branch");
     }
 
     #[test]
     fn commit_message_is_required() {
-        let err = CreateFile::builder()
+        let err = UpdateFile::builder()
             .project(1)
             .file_path("new/file")
             .branch("master")
             .content(&b"contents"[..])
             .build()
             .unwrap_err();
-        crate::test::assert_missing_field!(err, CreateFileBuilderError, "commit_message");
+        crate::test::assert_missing_field!(err, UpdateFileBuilderError, "commit_message");
     }
 
     #[test]
     fn content_is_required() {
-        let err = CreateFile::builder()
+        let err = UpdateFile::builder()
             .project(1)
             .file_path("new/file")
             .branch("master")
             .commit_message("commit message")
             .build()
             .unwrap_err();
-        crate::test::assert_missing_field!(err, CreateFileBuilderError, "content");
+        crate::test::assert_missing_field!(err, UpdateFileBuilderError, "content");
     }
 
     #[test]
     fn sufficient_parameters() {
-        CreateFile::builder()
+        UpdateFile::builder()
             .project(1)
             .file_path("new/file")
             .branch("master")
@@ -305,7 +213,7 @@ mod tests {
     #[test]
     fn endpoint() {
         let endpoint = ExpectedUrl::builder()
-            .method(Method::POST)
+            .method(Method::PUT)
             .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
             .content_type("application/x-www-form-urlencoded")
             .body_str(concat!(
@@ -317,7 +225,7 @@ mod tests {
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = CreateFile::builder()
+        let endpoint = UpdateFile::builder()
             .project("simple/project")
             .file_path("path/to/file")
             .branch("branch")
@@ -331,7 +239,7 @@ mod tests {
     #[test]
     fn endpoint_start_branch() {
         let endpoint = ExpectedUrl::builder()
-            .method(Method::POST)
+            .method(Method::PUT)
             .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
             .content_type("application/x-www-form-urlencoded")
             .body_str(concat!(
@@ -344,7 +252,7 @@ mod tests {
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = CreateFile::builder()
+        let endpoint = UpdateFile::builder()
             .project("simple/project")
             .file_path("path/to/file")
             .branch("branch")
@@ -359,7 +267,7 @@ mod tests {
     #[test]
     fn endpoint_encoding() {
         let endpoint = ExpectedUrl::builder()
-            .method(Method::POST)
+            .method(Method::PUT)
             .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
             .content_type("application/x-www-form-urlencoded")
             .body_str(concat!(
@@ -372,7 +280,7 @@ mod tests {
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = CreateFile::builder()
+        let endpoint = UpdateFile::builder()
             .project("simple/project")
             .file_path("path/to/file")
             .branch("branch")
@@ -387,7 +295,7 @@ mod tests {
     #[test]
     fn endpoint_encoding_upgrade() {
         let endpoint = ExpectedUrl::builder()
-            .method(Method::POST)
+            .method(Method::PUT)
             .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
             .content_type("application/x-www-form-urlencoded")
             .body_str(concat!(
@@ -400,7 +308,7 @@ mod tests {
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = CreateFile::builder()
+        let endpoint = UpdateFile::builder()
             .project("simple/project")
             .file_path("path/to/file")
             .branch("branch")
@@ -414,7 +322,7 @@ mod tests {
     #[test]
     fn endpoint_author_email() {
         let endpoint = ExpectedUrl::builder()
-            .method(Method::POST)
+            .method(Method::PUT)
             .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
             .content_type("application/x-www-form-urlencoded")
             .body_str(concat!(
@@ -427,7 +335,7 @@ mod tests {
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = CreateFile::builder()
+        let endpoint = UpdateFile::builder()
             .project("simple/project")
             .file_path("path/to/file")
             .branch("branch")
@@ -442,7 +350,7 @@ mod tests {
     #[test]
     fn endpoint_author_name() {
         let endpoint = ExpectedUrl::builder()
-            .method(Method::POST)
+            .method(Method::PUT)
             .endpoint("projects/simple%2Fproject/repository/files/path%2Fto%2Ffile")
             .content_type("application/x-www-form-urlencoded")
             .body_str(concat!(
@@ -455,7 +363,7 @@ mod tests {
             .unwrap();
         let client = SingleTestClient::new_raw(endpoint, "");
 
-        let endpoint = CreateFile::builder()
+        let endpoint = UpdateFile::builder()
             .project("simple/project")
             .file_path("path/to/file")
             .branch("branch")
