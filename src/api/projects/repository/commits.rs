@@ -13,6 +13,7 @@ mod comments;
 mod commit;
 mod commits;
 mod create_status;
+mod merge_requests;
 mod statuses;
 
 pub use self::comment::CommentOnCommit;
@@ -41,3 +42,7 @@ pub use self::create_status::CreateCommitStatusBuilderError;
 pub use self::statuses::CommitStatuses;
 pub use self::statuses::CommitStatusesBuilder;
 pub use self::statuses::CommitStatusesBuilderError;
+
+pub use self::merge_requests::MergeRequests;
+pub use self::merge_requests::MergeRequestsBuilder;
+pub use self::merge_requests::MergeRequestsBuilderError;

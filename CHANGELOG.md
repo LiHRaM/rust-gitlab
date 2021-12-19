@@ -24,6 +24,7 @@
     - Deleting project hooks.
     - Getting tree object from projects.
     - Updating a file in a project.
+    - Getting merge requests associated with a commit.
   * New parameters for creating projects:
     - `container_registry_access_level`
     - `merge_pipelines_enabled`

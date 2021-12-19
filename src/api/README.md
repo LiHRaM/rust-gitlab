@@ -114,6 +114,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/repository/commits/:sha` `projects/repository/commits/commit.rs`
   * `GET    /projects/:project/repository/commits/:sha/comments` `projects/repository/commits/comments.rs`
   * `POST   /projects/:project/repository/commits/:sha/comments` `projects/repository/commits/comment.rs`
+  * `GET    /projects/:project/repository/commits/:sha/merge_requests` `projects/repository/commits/merge_requests.rs`
   * `GET    /projects/:project/repository/commits/:sha/statuses` `projects/repository/commits/statuses.rs`
   * `POST   /projects/:project/repository/files/*file_path` `projects/repository/files/create.rs`
   * `PUT    /projects/:project/repository/files/*file_path` `projects/repository/files/update.rs`
@@ -324,7 +325,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/repository/commits/:sha/cherry_pick` https://gitlab.kitware.com/help/api/commits.md#cherry-pick-a-commit
   * `GET    /projects/:project/repository/commits/:sha/diffs` https://gitlab.kitware.com/help/api/commits.md#get-the-diff-of-a-commit
   * `GET    /projects/:project/repository/commits/:sha/discussions` https://gitlab.kitware.com/help/api/commits.md#get-the-discussions-of-a-commit
-  * `GET    /projects/:project/repository/commits/:sha/merge_requests` https://gitlab.kitware.com/help/api/commits.md#list-merge-requests-associated-with-a-commit
   * `GET    /projects/:project/repository/commits/:sha/refs` https://gitlab.kitware.com/help/api/commits.md#get-references-a-commit-is-pushed-to
   * `POST   /projects/:project/repository/commits/:sha/revert` https://gitlab.kitware.com/help/api/commits.md#revert-a-commit
   * `GET    /projects/:project/repository/commits/:sha/signature` https://gitlab.kitware.com/help/api/commits.md#get-gpg-signature-of-a-commit
