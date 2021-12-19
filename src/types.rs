@@ -338,6 +338,64 @@ impl From<ProjectHook> for Hook {
     }
 }
 
+/// Reponse of a project variable
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ProjectVariable {
+    /// The key
+    pub key: String,
+    // The variable type
+    pub variable_type: String,
+    /// The value
+    pub value: String,
+    /// Flag if its protected
+    pub protected: bool,
+    /// Flag if its masked
+    pub masked: bool,
+    /// Environment scope
+    pub environment_scope: String,
+}
+
+/// Reponse of a project variable
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ProtectedTagAccessLevel {
+    /// The access level id
+    pub access_level: u64,
+    // The access level
+    pub access_level_description: String,
+}
+
+/// Reponse of a project variable
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ProtectedTag {
+    /// The name or wildcard
+    pub name: String,
+    // The access level
+    pub create_access_levels: Vec<ProtectedTagAccessLevel>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ReleaseTag {
+    // The release tag name
+    pub tag_name: String,
+    // The release tag description
+    pub description: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Tag {
+    // Commit message
+    pub commit: RepoCommit,
+    // Release tag
+    pub release: Option<ReleaseTag>,
+    // Tag name
+    pub name: String,
+    // Target sha
+    pub target: String,
+    pub message: Option<String>,
+    // Is tag protected
+    pub protected: bool,
+}
+
 impl_id!(ProjectId, "Type-safe project ID.");
 
 /// Basic project information.
@@ -948,6 +1006,24 @@ pub struct RepoCommit {
     pub committer_email: String,
     /// The commit's commit date.
     pub committed_date: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
+    /// The full commit message.
+    pub message: String,
+}
+
+/// A commit in a project.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MergeRequestCommit {
+    /// The ID of the commit.
+    pub id: ObjectId,
+    /// The short ID of the commit.
+    pub short_id: ObjectId,
+    /// The summary of the commit.
+    pub title: String,
+    /// The commit author's name.
+    pub author_name: String,
+    /// The commit author's email address.
+    pub author_email: String,
     pub created_at: DateTime<Utc>,
     /// The full commit message.
     pub message: String,

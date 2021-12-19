@@ -3,6 +3,13 @@
 ## Additions
 
   * Groups can now be edited via `EditGroup`.
+  * New type definitions for:
+    - `MergeRequestCommit`
+    - `ProjectVariable`
+    - `ProtectedTagAccessLevel`
+    - `ProtectedTag`
+    - `ReleaseTag`
+    - `Tag`
 
 ## Changes
 
