@@ -4,6 +4,11 @@
 
   * `types::RepoCommit::parent_ids` is now an `Option`.
 
+## Fixes
+
+  * Protected tags with special URL characters (namely `/`) are now handled
+    properly with `api::projects::protected_tags::ProtectedTag`.
+
 ## Additions
 
   * Groups can now be edited via `EditGroup`.

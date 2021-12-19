@@ -6,7 +6,7 @@
 
 use derive_builder::Builder;
 
-use crate::api::common::NameOrId;
+use crate::api::common::{self, NameOrId};
 use crate::api::endpoint_prelude::*;
 
 /// Query a protected tag of a project.
@@ -34,7 +34,12 @@ impl<'a> Endpoint for ProtectedTag<'a> {
     }
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("projects/{}/protected_tags/{}", self.project, self.name).into()
+        format!(
+            "projects/{}/protected_tags/{}",
+            self.project,
+            common::path_escaped(self.name.as_ref()),
+        )
+        .into()
     }
 
     fn parameters(&self) -> QueryParams {
