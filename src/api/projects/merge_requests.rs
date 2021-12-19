@@ -13,6 +13,7 @@ pub mod approvals;
 mod approve;
 pub mod awards;
 mod changes;
+mod commits;
 mod create;
 pub mod discussions;
 mod edit;
@@ -50,6 +51,10 @@ pub use self::merge::MergeMergeRequestBuilderError;
 pub use self::merge_request::MergeRequest;
 pub use self::merge_request::MergeRequestBuilder;
 pub use self::merge_request::MergeRequestBuilderError;
+
+pub use self::commits::MergeRequestCommits;
+pub use self::commits::MergeRequestCommitsBuilder;
+pub use self::commits::MergeRequestCommitsBuilderError;
 
 pub use self::pipelines::MergeRequestPipelines;
 pub use self::pipelines::MergeRequestPipelinesBuilder;

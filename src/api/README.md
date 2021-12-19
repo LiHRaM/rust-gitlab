@@ -67,6 +67,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/merge_requests` `projects/merge_requests/create.rs`
   * `GET    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/merge_request.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/edit.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/commits` `projects/merge_requests/commits.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request/merge` `projects/merge_requests/merge.rs`
     This should be a `POST` action.
     https://gitlab.com/gitlab-org/gitlab/-/issues/219324
@@ -272,7 +273,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/merge_requests/:merge_request/add_spent_time` https://gitlab.kitware.com/help/api/merge_requests.md#add-spent-time-for-a-merge-request
   * `POST   /projects/:project/merge_requests/:merge_request/approve` https://gitlab.kitware.com/help/api/merge_requests.md#approve-merge-request
   * `POST   /projects/:project/merge_requests/:merge_request/cancel_merge_when_pipeline_succeeds` https://gitlab.kitware.com/help/api/merge_requests.md#cancel-merge-when-pipeline-succeeds
-  * `GET    /projects/:project/merge_requests/:merge_request/commits` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-commits
   * `GET    /projects/:project/merge_requests/:merge_request/merge_ref` https://gitlab.kitware.com/help/api/merge_requests.md#merge-to-default-merge-ref-path
   * `GET    /projects/:project/merge_requests/:merge_request/participants` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-participants
   * `POST   /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#create-mr-pipeline
