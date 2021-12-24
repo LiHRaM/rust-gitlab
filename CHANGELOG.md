@@ -12,6 +12,7 @@
 ## Additions
 
   * Groups can now be edited via `EditGroup`.
+  * New `rustls` feature to support static linking (no OpenSSL).
   * New type definitions for:
     - `MergeRequestCommit`
     - `ProjectVariable`

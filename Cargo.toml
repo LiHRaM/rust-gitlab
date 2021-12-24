@@ -23,6 +23,7 @@ client_api = [
     "graphql_client",
     "async-trait",
     "futures-util",
+    "reqwest/rustls-tls",
 ]
 client_der = ["reqwest/native-tls", "client_api"]
 client_pem = ["reqwest/rustls-tls", "client_api"]
@@ -33,7 +34,7 @@ derive_builder = "~0.10"
 itertools = { version = "~0.10", optional = true }
 log = "~0.4.4"
 percent-encoding = { version = "^2.0", optional = true }
-reqwest = { version = "~0.11.0", features = ["blocking", "json"], optional = true }
+reqwest = { version = "~0.11.0", features = ["blocking", "json"], default-features = false, optional = true }
 thiserror = { version = "^1.0.2", optional = true }
 async-trait = { version = "~0.1", optional = true }
 futures-util = { version = "0.3.14", default-features = false, optional = true }
