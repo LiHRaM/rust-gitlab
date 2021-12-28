@@ -27,6 +27,7 @@
     - Updating a file in a project.
     - Getting merge requests associated with a commit.
     - Getting commits of a merge request.
+    - Deleting a file from the repository.
   * New parameters for creating projects:
     - `container_registry_access_level`
     - `merge_pipelines_enabled`
