@@ -49,6 +49,7 @@
     - `printing_merge_requests_link_enabled`
     - `topics`
     - `keep_latest_artifact`
+  * Repository branches are now pageable
 
 ## Changes
 

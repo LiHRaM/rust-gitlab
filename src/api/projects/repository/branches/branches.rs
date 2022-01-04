@@ -46,6 +46,8 @@ impl<'a> Endpoint for Branches<'a> {
     }
 }
 
+impl<'a> Pageable for Branches<'a> {}
+
 #[cfg(test)]
 mod tests {
     use crate::api::projects::repository::branches::{Branches, BranchesBuilderError};
