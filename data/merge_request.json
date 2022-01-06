@@ -64,6 +64,7 @@
     "duration": null,
     "finished_at": "2016-10-04T15:56:53.868-04:00",
     "id": 29191,
+    "iid": null,
     "project_id": 856,
     "queued_duration": null,
     "ref": "add_hook-api",
@@ -74,7 +75,7 @@
     "tag": false,
     "updated_at": "2016-10-04T15:56:53.869-04:00",
     "user": {
-      "avatar_url": "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
+      "avatar_url": "https://gitlab.kitware.com/uploads/-/system/user/avatar/11/avatar.png",
       "id": 11,
       "name": "Kitware Robot",
       "state": "active",
