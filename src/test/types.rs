@@ -43,7 +43,7 @@ fn check_user_kwrobot(user: &UserBasic) {
     assert_eq!(user.state, UserState::Active);
     assert_eq!(
         user.avatar_url.as_ref().unwrap(),
-        "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
+        "https://gitlab.kitware.com/uploads/-/system/user/avatar/11/avatar.png",
     );
     assert_eq!(user.id, UserId::new(11));
 }
@@ -251,15 +251,15 @@ fn test_read_issue_reference() {
 fn test_read_member() {
     let member: Member = read_test_file("member");
 
-    assert_eq!(member.username, "kwrobot");
-    assert_eq!(member.name, "Kitware Robot");
-    assert_eq!(member.id, UserId::new(11));
+    assert_eq!(member.username, "brad.king");
+    assert_eq!(member.name, "Brad King");
+    assert_eq!(member.id, UserId::new(10));
     assert_eq!(member.state, UserState::Active);
     assert_eq!(
         member.avatar_url.as_ref().unwrap(),
-        "https://secure.gravatar.com/avatar/9ddcd45fcb89d966aab95b1f1002f84c?s=80&d=identicon",
+        "https://secure.gravatar.com/avatar/0617392a2f9fd505720d0c42cefc1a10?s=80&d=identicon",
     );
-    assert_eq!(member.web_url, "https://gitlab.kitware.com/kwrobot");
+    assert_eq!(member.web_url, "https://gitlab.kitware.com/brad.king");
     assert_eq!(member.access_level, 50);
     assert_eq!(member.expires_at, None);
 }
@@ -491,7 +491,7 @@ fn check_project_a(project: &Project) {
     );
     assert_eq!(
         project.last_activity_at,
-        datetime((2021, 11, 29), (23, 9, 54, 713)),
+        datetime((2021, 12, 29), (12, 47, 16, 699)),
     );
 }
 
@@ -505,8 +505,8 @@ fn check_project_b(project: &Project) {
     assert_eq!(project.avatar_url, None);
     assert_eq!(project.ci_config_path, None);
     assert_eq!(project.star_count, 14);
-    assert_eq!(project.forks_count, 49);
-    assert_eq!(project.open_issues_count, Some(21));
+    assert_eq!(project.forks_count, 52);
+    assert_eq!(project.open_issues_count, Some(22));
     assert!(project.public_jobs);
     assert!(project.shared_with_groups.is_empty());
     assert_eq!(project.only_allow_merge_if_pipeline_succeeds, Some(false));
@@ -705,13 +705,13 @@ fn test_read_user() {
     assert_eq!(user.highest_role, Some(AccessLevel::Owner));
     assert_eq!(user.bio, Some(String::new()));
     assert_eq!(user.private_profile, Some(false));
-    assert_eq!(user.location, None);
+    assert_eq!(user.location, Some(String::new()));
     assert_eq!(user.public_email, Some(String::new()));
     assert_eq!(user.skype, "");
     assert_eq!(user.linkedin, "");
     assert_eq!(user.twitter, "");
     assert_eq!(user.website_url, "");
-    assert_eq!(user.organization, None);
+    assert_eq!(user.organization, Some(String::new()));
 }
 
 #[test]
@@ -726,20 +726,20 @@ fn test_read_user_public() {
     assert_eq!(user_public.is_admin, Some(true));
     assert_eq!(user_public.bio, Some(String::new()));
     assert_eq!(user_public.private_profile, Some(false));
-    assert_eq!(user_public.location, None);
+    assert_eq!(user_public.location, Some(String::new()));
     assert_eq!(user_public.public_email, Some(String::new()));
     assert_eq!(user_public.skype, "");
     assert_eq!(user_public.linkedin, "");
     assert_eq!(user_public.twitter, "");
     assert_eq!(user_public.website_url, "");
-    assert_eq!(user_public.organization, None);
+    assert_eq!(user_public.organization, Some(String::new()));
     assert_eq!(
         user_public.last_sign_in_at.unwrap(),
-        datetime((2021, 2, 15), (15, 59, 14, 546)),
+        datetime((2021, 12, 21), (13, 22, 1, 657)),
     );
     assert_eq!(
         user_public.last_activity_on.unwrap(),
-        NaiveDate::from_ymd(2021, 2, 24),
+        NaiveDate::from_ymd(2022, 1, 6),
     );
     assert_eq!(
         user_public.confirmed_at.unwrap(),
@@ -751,7 +751,7 @@ fn test_read_user_public() {
     assert_eq!(user_public.projects_limit, 50);
     assert_eq!(
         user_public.current_sign_in_at.unwrap(),
-        datetime((2021, 2, 16), (17, 15, 37, 844)),
+        datetime((2022, 1, 5), (15, 45, 8, 402)),
     );
     assert!(user_public.identities.is_empty());
     assert!(user_public.can_create_group);
@@ -785,25 +785,25 @@ fn test_read_resource_label_events() {
 fn test_read_pipelines() {
     let pipeline_basic: PipelineBasic = read_test_file("pipeline_basic");
 
-    assert_eq!(pipeline_basic.id, PipelineId::new(188_623));
+    assert_eq!(pipeline_basic.id, PipelineId::new(262_233));
     assert_eq!(pipeline_basic.project_id, ProjectId::new(855));
     assert_eq!(pipeline_basic.status, StatusState::Success);
     assert_eq!(pipeline_basic.ref_.as_ref().unwrap(), "master");
     assert_eq!(
         pipeline_basic.sha,
-        ObjectId::new("767ea705c57ab41b68fa8bf69bb2e48172d3d6b1"),
+        ObjectId::new("f08c301293bf8267cd01f0892a89db8dba4f8cf6"),
     );
     assert_eq!(
         pipeline_basic.created_at.unwrap(),
-        datetime((2020, 9, 11), (4, 19, 13, 15)),
+        datetime((2022, 1, 6), (4, 3, 38, 142)),
     );
     assert_eq!(
         pipeline_basic.updated_at.unwrap(),
-        datetime((2020, 9, 11), (4, 30, 47, 674)),
+        datetime((2022, 1, 6), (4, 29, 7, 763)),
     );
     assert_eq!(
         pipeline_basic.web_url,
-        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/188623",
+        "https://gitlab.kitware.com/utils/rust-gitlab/-/pipelines/262233",
     );
 }
 
