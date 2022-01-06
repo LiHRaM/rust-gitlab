@@ -1,3 +1,7 @@
+# v0.1406.0
+
+  * No changes needed for GitLab 14.6.
+
 # v0.1405.1
 
   * No functional changes.  Only documentation and tests were updated.
