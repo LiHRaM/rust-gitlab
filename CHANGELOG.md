@@ -16,6 +16,7 @@
     - `Tag`
   * New endpoints for:
     - Creating, updating, and inspecting project-level pipeline variables.
+    - Deleting project hooks.
 
 ## Changes
 
