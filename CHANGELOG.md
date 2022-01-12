@@ -1,5 +1,9 @@
 # v0.1406.1 (unreleased)
 
+## Breaking changes
+
+  * `types::RepoCommit::parent_ids` is now an `Option`.
+
 ## Additions
 
   * Groups can now be edited via `EditGroup`.

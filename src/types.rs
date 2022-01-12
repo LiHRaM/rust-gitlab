@@ -993,7 +993,8 @@ pub struct RepoCommit {
     /// The summary of the commit.
     pub title: String,
     /// The commit ID of the parents of the commit.
-    pub parent_ids: Vec<ObjectId>,
+    /// Can be null on projects/:id/repository/branches call
+    pub parent_ids: Option<Vec<ObjectId>>,
     /// The commit author's name.
     pub author_name: String,
     /// The commit author's email address.

@@ -614,7 +614,7 @@ fn test_read_repo_branch() {
     assert_eq!(commit.title, "cargo: prep for 0.1100.1");
     assert_eq!(commit.message, "cargo: prep for 0.1100.1\n");
     itertools::assert_equal(
-        &commit.parent_ids,
+        commit.parent_ids.as_ref().unwrap(),
         &[ObjectId::new("5c81cc05661dcbb5fd923cca093920816c21ef7e")],
     );
     assert_eq!(repo_branch.merged, Some(false));
@@ -905,7 +905,7 @@ fn check_commit_add_job_commands(commit: &RepoCommit) {
     assert_eq!(commit.short_id, ObjectId::new("0028f476"));
     assert_eq!(commit.title, "Merge topic \'add-job-commands\'");
     itertools::assert_equal(
-        &commit.parent_ids,
+        commit.parent_ids.as_ref().unwrap(),
         &[
             ObjectId::new("ddb2c675b0b28bdb792b94d6ab0dc0c98a912374"),
             ObjectId::new("31fb1336aeaaaa0b22edda1a0938cb933ee575e4"),
