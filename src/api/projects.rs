@@ -27,6 +27,7 @@ pub mod protected_branches;
 pub mod protected_tags;
 pub mod releases;
 pub mod repository;
+pub mod variables;
 
 pub use self::create::AutoDevOpsDeployStrategy;
 pub use self::create::BuildGitStrategy;

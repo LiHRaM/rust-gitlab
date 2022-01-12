@@ -122,6 +122,9 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/statuses/:sha` `projects/repository/commits/create_status.rs`
     Arguably, this should be `POST /projects/:project/repository/commits/:sha/statuses`.
     https://gitlab.com/gitlab-org/gitlab/-/issues/217412
+  * `POST   /projects/:project/variables` `projects/variables/variables.rs`
+  * `GET    /projects/:project/variables/:key` `projects/variables/variable.rs`
+  * `PUT    /projects/:project/variables/:key` `projects/variables/update.rs`
   * `GET    /user` `users/current_user.rs`
   * `GET    /users` `users/users.rs`
   * `GET    /users/:user` `users/user.rs`
@@ -362,6 +365,8 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/unstar` https://gitlab.kitware.com/help/api/projects.md#unstar-a-project
   * `POST   /projects/:project/upload` https://gitlab.kitware.com/help/api/projects.md#upload-a-file
   * `GET    /projects/:project/users` https://gitlab.kitware.com/help/api/projects.md#get-project-users
+  * `GET    /projects/:project/variables` `https://gitlab.kitware.com/help/api/project_level_variables.md#list-project-variables`
+  * `DELETE /projects/:project/variables/:key` `https://gitlab.kitware.com/help/api/project_level_variables.md#remove-variable
   * `POST   /projects/user/:user` https://gitlab.kitware.com/help/api/projects.md#create-project-for-user
   * `GET    /user/activities` https://gitlab.kitware.com/help/api/users.md#get-user-activities-admin-only
   * `GET    /user/emails` https://gitlab.kitware.com/help/api/users.md#list-emails
@@ -479,7 +484,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/project_badges.md
   * https://gitlab.kitware.com/help/api/project_clusters.md
   * https://gitlab.kitware.com/help/api/project_import_export.md
-  * https://gitlab.kitware.com/help/api/project_level_variables.md
   * https://gitlab.kitware.com/help/api/project_repository_storage_moves.md
   * https://gitlab.kitware.com/help/api/project_snippets.md
   * https://gitlab.kitware.com/help/api/project_statistics.md
