@@ -1553,6 +1553,25 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_service_desk_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("service_desk_enabled=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .service_desk_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     #[allow(deprecated)]
     fn endpoint_issues_enabled() {
         let endpoint = ExpectedUrl::builder()
