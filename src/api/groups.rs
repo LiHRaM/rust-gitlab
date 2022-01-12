@@ -11,6 +11,7 @@
 //! These endpoints are used for querying and modifying groups and their resources.
 
 mod create;
+mod edit;
 mod group;
 mod groups;
 pub mod issues;
@@ -26,6 +27,10 @@ pub use create::CreateGroupBuilderError;
 pub use create::GroupProjectCreationAccessLevel;
 pub use create::SharedRunnersMinutesLimit;
 pub use create::SubgroupCreationAccessLevel;
+
+pub use edit::EditGroup;
+pub use edit::EditGroupBuilder;
+pub use edit::EditGroupBuilderError;
 
 pub use group::Group;
 pub use group::GroupBuilder;
