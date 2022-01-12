@@ -17,6 +17,24 @@
   * New endpoints for:
     - Creating, updating, and inspecting project-level pipeline variables.
     - Deleting project hooks.
+  * New parameters for creating projects:
+    - `container_registry_access_level`
+    - `merge_pipelines_enabled`
+    - `merge_trains_enabled`
+    - `squash_option`
+    - `topics`
+  * New parameters for editing projects:
+    - `container_registry_access_level`
+    - `merge_commit_template`
+    - `squash_commit_template`
+    - `issues_template`
+    - `merge_requests_template`
+    - `squash_option`
+    - `merge_pipelines_enabled`
+    - `merge_trains_enabled`
+    - `printing_merge_requests_link_enabled`
+    - `topics`
+    - `keep_latest_artifact`
 
 ## Changes
 

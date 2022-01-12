@@ -357,6 +357,37 @@ impl ParamValue<'static> for MergeMethod {
     }
 }
 
+/// How squashing should be presented in the project.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SquashOption {
+    /// Never allow squashing.
+    Never,
+    /// Always squash.
+    Always,
+    /// Default to squashing.
+    DefaultOn,
+    /// Default to not squashing.
+    DefaultOff,
+}
+
+impl SquashOption {
+    /// The variable type query parameter.
+    pub(crate) fn as_str(self) -> &'static str {
+        match self {
+            SquashOption::Never => "never",
+            SquashOption::Always => "always",
+            SquashOption::DefaultOn => "default_on",
+            SquashOption::DefaultOff => "default_off",
+        }
+    }
+}
+
+impl ParamValue<'static> for SquashOption {
+    fn as_value(&self) -> Cow<'static, str> {
+        self.as_str().into()
+    }
+}
+
 /// The default Git strategy for CI jobs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BuildGitStrategy {
@@ -484,6 +515,9 @@ pub struct CreateProject<'a> {
     /// Set the access level for repository access.
     #[builder(default)]
     repository_access_level: Option<FeatureAccessLevel>,
+    /// Set the access level for container registry access.
+    #[builder(default)]
+    container_registry_access_level: Option<FeatureAccessLevel>,
     /// Set the access level for merge requests.
     #[builder(default)]
     merge_requests_access_level: Option<FeatureAccessLevel>,
@@ -554,6 +588,15 @@ pub struct CreateProject<'a> {
     /// The merge method to use for the project.
     #[builder(default)]
     merge_method: Option<MergeMethod>,
+    /// Whether merge pipelines are enabled.
+    #[builder(default)]
+    merge_pipelines_enabled: Option<bool>,
+    /// Whether merge trains are enabled.
+    #[builder(default)]
+    merge_trains_enabled: Option<bool>,
+    /// The squash option for the project.
+    #[builder(default)]
+    squash_option: Option<SquashOption>,
     /// Whether issues referenced on the default branch should be closed or not.
     #[builder(default)]
     autoclose_referenced_issues: Option<bool>,
@@ -572,6 +615,9 @@ pub struct CreateProject<'a> {
     /// A list of tags to apply to the repository.
     #[builder(setter(name = "_tag_list"), default, private)]
     tag_list: BTreeSet<Cow<'a, str>>,
+    /// A list of topics to apply to the repository.
+    #[builder(setter(name = "_topics"), default, private)]
+    topics: BTreeSet<Cow<'a, str>>,
     // TODO: Figure out how to actually use this.
     // avatar   mixed   no  Image file for avatar of the project
     // avatar: ???,
@@ -727,6 +773,29 @@ impl<'a> CreateProjectBuilder<'a> {
         self
     }
 
+    /// Add a optic.
+    pub fn topic<T>(&mut self, topic: T) -> &mut Self
+    where
+        T: Into<Cow<'a, str>>,
+    {
+        self.topics
+            .get_or_insert_with(BTreeSet::new)
+            .insert(topic.into());
+        self
+    }
+
+    /// Add multiple topics.
+    pub fn topics<I, T>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = T>,
+        T: Into<Cow<'a, str>>,
+    {
+        self.topics
+            .get_or_insert_with(BTreeSet::new)
+            .extend(iter.map(Into::into));
+        self
+    }
+
     /// Whether the template project should come from the group or the instance.
     ///
     /// Note that setting this also sets `use_custom_template` to `true` automatically.
@@ -775,6 +844,10 @@ impl<'a> Endpoint for CreateProject<'a> {
             .push_opt("issues_access_level", self.issues_access_level)
             .push_opt("repository_access_level", self.repository_access_level)
             .push_opt(
+                "container_registry_access_level",
+                self.container_registry_access_level,
+            )
+            .push_opt(
                 "merge_requests_access_level",
                 self.merge_requests_access_level,
             )
@@ -817,6 +890,9 @@ impl<'a> Endpoint for CreateProject<'a> {
                 self.only_allow_merge_if_all_discussions_are_resolved,
             )
             .push_opt("merge_method", self.merge_method)
+            .push_opt("merge_pipelines_enabled", self.merge_pipelines_enabled)
+            .push_opt("merge_trains_enabled", self.merge_trains_enabled)
+            .push_opt("squash_option", self.squash_option)
             .push_opt(
                 "autoclose_referenced_issues",
                 self.autoclose_referenced_issues,
@@ -828,6 +904,7 @@ impl<'a> Endpoint for CreateProject<'a> {
             .push_opt("lfs_enabled", self.lfs_enabled)
             .push_opt("request_access_enabled", self.request_access_enabled)
             .extend(self.tag_list.iter().map(|value| ("tag_list[]", value)))
+            .extend(self.topics.iter().map(|value| ("topics[]", value)))
             .push_opt(
                 "printing_merge_request_link_enabled",
                 self.printing_merge_request_link_enabled,
@@ -890,7 +967,7 @@ mod tests {
         AutoDevOpsDeployStrategy, BuildGitStrategy, ContainerExpirationCadence,
         ContainerExpirationKeepN, ContainerExpirationOlderThan, ContainerExpirationPolicy,
         CreateProject, CreateProjectBuilderError, FeatureAccessLevel, FeatureAccessLevelPublic,
-        MergeMethod,
+        MergeMethod, SquashOption,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -1036,6 +1113,20 @@ mod tests {
             (MergeMethod::Merge, "merge"),
             (MergeMethod::RebaseMerge, "rebase_merge"),
             (MergeMethod::FastForward, "ff"),
+        ];
+
+        for (i, s) in items {
+            assert_eq!(i.as_str(), *s);
+        }
+    }
+
+    #[test]
+    fn squash_option_as_str() {
+        let items = &[
+            (SquashOption::Never, "never"),
+            (SquashOption::Always, "always"),
+            (SquashOption::DefaultOn, "default_on"),
+            (SquashOption::DefaultOff, "default_off"),
         ];
 
         for (i, s) in items {
@@ -1235,6 +1326,28 @@ mod tests {
         let endpoint = CreateProject::builder()
             .name("name")
             .repository_access_level(FeatureAccessLevel::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_registry_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&container_registry_access_level=disabled",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .container_registry_access_level(FeatureAccessLevel::Disabled)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
@@ -1901,6 +2014,63 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_merge_pipelines_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&merge_pipelines_enabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .merge_pipelines_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_trains_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&merge_trains_enabled=true"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .merge_trains_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_squash_option() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("name=name", "&squash_option=never"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .squash_option(SquashOption::Never)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_autoclose_referenced_issues() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::POST)
@@ -1998,6 +2168,30 @@ mod tests {
             .name("name")
             .tag("tag1")
             .tags(["tag1", "tag2"].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_topics() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::POST)
+            .endpoint("projects")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!(
+                "name=name",
+                "&topics%5B%5D=topic1",
+                "&topics%5B%5D=topic2",
+            ))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = CreateProject::builder()
+            .name("name")
+            .topic("topic1")
+            .topics(["topic1", "topic2"].iter().copied())
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
