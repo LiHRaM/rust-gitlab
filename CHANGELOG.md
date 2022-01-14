@@ -1,8 +1,53 @@
 # v0.1406.1 (unreleased)
 
+## Breaking changes
+
+  * `types::RepoCommit::parent_ids` is now an `Option`.
+
+## Fixes
+
+  * Protected tags with special URL characters (namely `/`) are now handled
+    properly with `api::projects::protected_tags::ProtectedTag`.
+  * Tags on a repository are now pageable.
+  * The `types::DiscussionNoteType::Note` variant has been added.
+
 ## Additions
 
   * Groups can now be edited via `EditGroup`.
+  * New `rustls` feature to support static linking (no OpenSSL).
+  * New type definitions for:
+    - `MergeRequestCommit`
+    - `ProjectVariable`
+    - `ProtectedTagAccessLevel`
+    - `ProtectedTag`
+    - `ReleaseTag`
+    - `Tag`
+  * New endpoints for:
+    - Creating, updating, and inspecting project-level pipeline variables.
+    - Deleting project hooks.
+    - Getting tree object from projects.
+    - Updating a file in a project.
+    - Getting merge requests associated with a commit.
+    - Getting commits of a merge request.
+    - Deleting a file from the repository.
+  * New parameters for creating projects:
+    - `container_registry_access_level`
+    - `merge_pipelines_enabled`
+    - `merge_trains_enabled`
+    - `squash_option`
+    - `topics`
+  * New parameters for editing projects:
+    - `container_registry_access_level`
+    - `merge_commit_template`
+    - `squash_commit_template`
+    - `issues_template`
+    - `merge_requests_template`
+    - `squash_option`
+    - `merge_pipelines_enabled`
+    - `merge_trains_enabled`
+    - `printing_merge_requests_link_enabled`
+    - `topics`
+    - `keep_latest_artifact`
 
 ## Changes
 

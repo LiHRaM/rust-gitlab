@@ -27,6 +27,7 @@ pub mod protected_branches;
 pub mod protected_tags;
 pub mod releases;
 pub mod repository;
+pub mod variables;
 
 pub use self::create::AutoDevOpsDeployStrategy;
 pub use self::create::BuildGitStrategy;
@@ -42,6 +43,7 @@ pub use self::create::CreateProjectBuilderError;
 pub use self::create::FeatureAccessLevel;
 pub use self::create::FeatureAccessLevelPublic;
 pub use self::create::MergeMethod;
+pub use self::create::SquashOption;
 
 pub use self::edit::EditProject;
 pub use self::edit::EditProjectBuilder;

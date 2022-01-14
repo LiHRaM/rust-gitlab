@@ -12,7 +12,7 @@ use crate::api::common::{EnableState, NameOrId, VisibilityLevel};
 use crate::api::endpoint_prelude::*;
 use crate::api::projects::{
     AutoDevOpsDeployStrategy, BuildGitStrategy, ContainerExpirationPolicy, FeatureAccessLevel,
-    FeatureAccessLevelPublic, MergeMethod,
+    FeatureAccessLevelPublic, MergeMethod, SquashOption,
 };
 
 /// Edit an existing project.
@@ -43,6 +43,9 @@ pub struct EditProject<'a> {
     /// Set the access level for repository access.
     #[builder(default)]
     repository_access_level: Option<FeatureAccessLevel>,
+    /// Set the access level for container registry access.
+    #[builder(default)]
+    container_registry_access_level: Option<FeatureAccessLevel>,
     /// Set the access level for merge requests.
     #[builder(default)]
     merge_requests_access_level: Option<FeatureAccessLevel>,
@@ -110,9 +113,30 @@ pub struct EditProject<'a> {
     /// Whether all discussions must be resolved before merges are allowed.
     #[builder(default)]
     only_allow_merge_if_all_discussions_are_resolved: Option<bool>,
+    /// The merge commit template.
+    #[builder(setter(into), default)]
+    merge_commit_template: Option<Cow<'a, str>>,
+    /// The squash merge commit template.
+    #[builder(setter(into), default)]
+    squash_commit_template: Option<Cow<'a, str>>,
+    /// The default description for issues.
+    #[builder(setter(into), default)]
+    issues_template: Option<Cow<'a, str>>,
+    /// The default description for issues.
+    #[builder(setter(into), default)]
+    merge_requests_template: Option<Cow<'a, str>>,
     /// The merge method to use for the project.
     #[builder(default)]
     merge_method: Option<MergeMethod>,
+    /// The squash option for the project.
+    #[builder(default)]
+    squash_option: Option<SquashOption>,
+    /// Whether merge pipelines are enabled.
+    #[builder(default)]
+    merge_pipelines_enabled: Option<bool>,
+    /// Whether merge trains are enabled.
+    #[builder(default)]
+    merge_trains_enabled: Option<bool>,
     /// Whether issues referenced on the default branch should be closed or not.
     #[builder(default)]
     autoclose_referenced_issues: Option<bool>,
@@ -123,6 +147,9 @@ pub struct EditProject<'a> {
     /// not.
     #[builder(default)]
     remove_source_branch_after_merge: Option<bool>,
+    /// Whether to enable print merge request links if branch/commits are pushed by console
+    #[builder(default)]
+    printing_merge_requests_link_enabled: Option<bool>,
     /// Whether `git-lfs` support should be enabled or not.
     ///
     /// See the [git-lfs](https://git-lfs.github.com/) website for more information.
@@ -134,6 +161,9 @@ pub struct EditProject<'a> {
     /// A list of tags to apply to the repository.
     #[builder(setter(name = "_tag_list"), default, private)]
     tag_list: BTreeSet<Cow<'a, str>>,
+    /// A list of topics to apply to the repository.
+    #[builder(setter(name = "_topics"), default, private)]
+    topics: BTreeSet<Cow<'a, str>>,
     // TODO: Figure out how to actually use this.
     // avatar   mixed   no  Image file for avatar of the project
     // avatar: ???,
@@ -197,6 +227,9 @@ pub struct EditProject<'a> {
     /// Whether the service desk is enabled or not.
     #[builder(default)]
     service_desk_enabled: Option<bool>,
+    /// Whether to keep the latest artifact for pipelines or not.
+    #[builder(default)]
+    keep_latest_artifact: Option<bool>,
 
     /// Whether to enable issues or not.
     #[deprecated(note = "use `issues_access_level` instead")]
@@ -250,6 +283,29 @@ impl<'a> EditProjectBuilder<'a> {
             .extend(iter.map(Into::into));
         self
     }
+
+    /// Add a topic.
+    pub fn topic<T>(&mut self, topic: T) -> &mut Self
+    where
+        T: Into<Cow<'a, str>>,
+    {
+        self.topics
+            .get_or_insert_with(BTreeSet::new)
+            .insert(topic.into());
+        self
+    }
+
+    /// Add multiple topics.
+    pub fn topics<I, T>(&mut self, iter: I) -> &mut Self
+    where
+        I: Iterator<Item = T>,
+        T: Into<Cow<'a, str>>,
+    {
+        self.topics
+            .get_or_insert_with(BTreeSet::new)
+            .extend(iter.map(Into::into));
+        self
+    }
 }
 
 impl<'a> Endpoint for EditProject<'a> {
@@ -271,6 +327,10 @@ impl<'a> Endpoint for EditProject<'a> {
             .push_opt("description", self.description.as_ref())
             .push_opt("issues_access_level", self.issues_access_level)
             .push_opt("repository_access_level", self.repository_access_level)
+            .push_opt(
+                "container_registry_access_level",
+                self.container_registry_access_level,
+            )
             .push_opt(
                 "merge_requests_access_level",
                 self.merge_requests_access_level,
@@ -313,7 +373,20 @@ impl<'a> Endpoint for EditProject<'a> {
                 "only_allow_merge_if_all_discussions_are_resolved",
                 self.only_allow_merge_if_all_discussions_are_resolved,
             )
+            .push_opt("merge_commit_template", self.merge_commit_template.as_ref())
+            .push_opt(
+                "squash_commit_template",
+                self.squash_commit_template.as_ref(),
+            )
+            .push_opt("issues_template", self.issues_template.as_ref())
+            .push_opt(
+                "merge_requests_template",
+                self.merge_requests_template.as_ref(),
+            )
             .push_opt("merge_method", self.merge_method)
+            .push_opt("squash_option", self.squash_option)
+            .push_opt("merge_pipelines_enabled", self.merge_pipelines_enabled)
+            .push_opt("merge_trains_enabled", self.merge_trains_enabled)
             .push_opt(
                 "autoclose_referenced_issues",
                 self.autoclose_referenced_issues,
@@ -326,9 +399,14 @@ impl<'a> Endpoint for EditProject<'a> {
                 "remove_source_branch_after_merge",
                 self.remove_source_branch_after_merge,
             )
+            .push_opt(
+                "printing_merge_requests_link_enabled",
+                self.printing_merge_requests_link_enabled,
+            )
             .push_opt("lfs_enabled", self.lfs_enabled)
             .push_opt("request_access_enabled", self.request_access_enabled)
             .extend(self.tag_list.iter().map(|value| ("tag_list[]", value)))
+            .extend(self.topics.iter().map(|value| ("topics[]", value)))
             .push_opt("build_git_strategy", self.build_git_strategy)
             .push_opt("build_timeout", self.build_timeout)
             .push_opt(
@@ -365,7 +443,8 @@ impl<'a> Endpoint for EditProject<'a> {
                 self.mirror_overwrites_diverged_branches,
             )
             .push_opt("packages_enabled", self.packages_enabled)
-            .push_opt("service_desk_enabled", self.service_desk_enabled);
+            .push_opt("service_desk_enabled", self.service_desk_enabled)
+            .push_opt("keep_latest_artifact", self.keep_latest_artifact);
 
         if let Some(policy) = self.container_expiration_policy_attributes.as_ref() {
             policy.add_query(&mut params);
@@ -394,7 +473,7 @@ mod tests {
         AutoDevOpsDeployStrategy, BuildGitStrategy, ContainerExpirationCadence,
         ContainerExpirationKeepN, ContainerExpirationOlderThan, ContainerExpirationPolicy,
         EditProject, EditProjectBuilderError, FeatureAccessLevel, FeatureAccessLevelPublic,
-        MergeMethod,
+        MergeMethod, SquashOption,
     };
     use crate::api::{self, Query};
     use crate::test::client::{ExpectedUrl, SingleTestClient};
@@ -537,6 +616,25 @@ mod tests {
         let endpoint = EditProject::builder()
             .project("simple/project")
             .repository_access_level(FeatureAccessLevel::Disabled)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_container_registry_access_level() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("container_registry_access_level=disabled")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .container_registry_access_level(FeatureAccessLevel::Disabled)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
@@ -1096,6 +1194,82 @@ mod tests {
     }
 
     #[test]
+    fn endpoint_merge_commit_template() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("merge_commit_template=template")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .merge_commit_template("template")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_squash_commit_template() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("squash_commit_template=template")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .squash_commit_template("template")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_issues_template() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("issues_template=template")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .issues_template("template")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_requests_template() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("merge_requests_template=template")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .merge_requests_template("template")
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
     fn endpoint_merge_method() {
         let endpoint = ExpectedUrl::builder()
             .method(Method::PUT)
@@ -1109,6 +1283,63 @@ mod tests {
         let endpoint = EditProject::builder()
             .project("simple/project")
             .merge_method(MergeMethod::FastForward)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_squash_option() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("squash_option=never")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .squash_option(SquashOption::Never)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_pipelines_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("merge_pipelines_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .merge_pipelines_enabled(true)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_merge_trains_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("merge_trains_enabled=true")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .merge_trains_enabled(true)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
@@ -1224,6 +1455,26 @@ mod tests {
             .project("simple/project")
             .tag("tag1")
             .tags(["tag1", "tag2"].iter().copied())
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_topics() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str(concat!("topics%5B%5D=topic1", "&topics%5B%5D=topic2"))
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .topic("topic1")
+            .topics(["topic1", "topic2"].iter().copied())
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();
@@ -1547,6 +1798,44 @@ mod tests {
         let endpoint = EditProject::builder()
             .project("simple/project")
             .packages_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_service_desk_enabled() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("service_desk_enabled=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .service_desk_enabled(false)
+            .build()
+            .unwrap();
+        api::ignore(endpoint).query(&client).unwrap();
+    }
+
+    #[test]
+    fn endpoint_keep_latest_artifact() {
+        let endpoint = ExpectedUrl::builder()
+            .method(Method::PUT)
+            .endpoint("projects/simple%2Fproject")
+            .content_type("application/x-www-form-urlencoded")
+            .body_str("keep_latest_artifact=false")
+            .build()
+            .unwrap();
+        let client = SingleTestClient::new_raw(endpoint, "");
+
+        let endpoint = EditProject::builder()
+            .project("simple/project")
+            .keep_latest_artifact(false)
             .build()
             .unwrap();
         api::ignore(endpoint).query(&client).unwrap();

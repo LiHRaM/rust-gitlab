@@ -88,6 +88,8 @@ impl<'a> Endpoint for Tags<'a> {
     }
 }
 
+impl<'a> Pageable for Tags<'a> {}
+
 #[cfg(test)]
 mod tests {
     use crate::api::common::SortOrder;

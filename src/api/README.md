@@ -30,6 +30,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/hooks` `projects/hooks/create.rs`
   * `GET    /projects/:project/hooks/:id` `projects/hooks/hook.rs`
   * `PUT    /projects/:project/hooks/:id` `projects/hooks/edit.rs`
+  * `DELETE /projects/:project/hooks/:id` `projects/hooks/delete.rs`
   * `GET    /projects/:project/issues` `projects/issues/issues.rs`
     - Missing support for `not`.
   * `POST   /projects/:project/issues` `projects/issues/create.rs`
@@ -66,6 +67,7 @@ These API endpoints have been implemented.
   * `POST   /projects/:project/merge_requests` `projects/merge_requests/create.rs`
   * `GET    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/merge_request.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request` `projects/merge_requests/edit.rs`
+  * `GET    /projects/:project/merge_requests/:merge_request/commits` `projects/merge_requests/commits.rs`
   * `PUT    /projects/:project/merge_requests/:merge_request/merge` `projects/merge_requests/merge.rs`
     This should be a `POST` action.
     https://gitlab.com/gitlab-org/gitlab/-/issues/219324
@@ -113,15 +115,22 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/repository/commits/:sha` `projects/repository/commits/commit.rs`
   * `GET    /projects/:project/repository/commits/:sha/comments` `projects/repository/commits/comments.rs`
   * `POST   /projects/:project/repository/commits/:sha/comments` `projects/repository/commits/comment.rs`
+  * `GET    /projects/:project/repository/commits/:sha/merge_requests` `projects/repository/commits/merge_requests.rs`
   * `GET    /projects/:project/repository/commits/:sha/statuses` `projects/repository/commits/statuses.rs`
   * `POST   /projects/:project/repository/files/*file_path` `projects/repository/files/create.rs`
+  * `PUT    /projects/:project/repository/files/*file_path` `projects/repository/files/update.rs`
+  * `DELETE /projects/:project/repository/files/*file_path` `projects/repository/files/delete.rs`
   * `GET    /projects/:project/repository/files/*file_path/raw` `projects/repository/files/file_raw.rs`
   * `GET    /projects/:project/repository/tags` `projects/repository/tags/tags.rs`
   * `GET    /projects/:project/repository/tags/:tag` `projects/repository/tags/tag.rs`
   * `POST   /projects/:project/repository/tags` `projects/repository/tags/create.rs`
+  * `GET    /projects/:project/repository/tree` `projects/repository/tree.rs`
   * `GET    /projects/:project/statuses/:sha` `projects/repository/commits/create_status.rs`
     Arguably, this should be `POST /projects/:project/repository/commits/:sha/statuses`.
     https://gitlab.com/gitlab-org/gitlab/-/issues/217412
+  * `POST   /projects/:project/variables` `projects/variables/variables.rs`
+  * `GET    /projects/:project/variables/:key` `projects/variables/variable.rs`
+  * `PUT    /projects/:project/variables/:key` `projects/variables/update.rs`
   * `GET    /user` `users/current_user.rs`
   * `GET    /users` `users/users.rs`
   * `GET    /users/:user` `users/user.rs`
@@ -214,7 +223,6 @@ instead of having to search the page for missing endpoints.
   * `DELETE /projects/:project/fork` https://gitlab.kitware.com/help/api/projects.md#delete-an-existing-forked-from-relationship
   * `POST   /projects/:project/fork/:from` https://gitlab.kitware.com/help/api/projects.md#create-a-forked-fromto-relation-between-existing-projects
   * `GET    /projects/:project/forks` https://gitlab.kitware.com/help/api/projects.md#list-forks-of-a-project
-  * `DELETE /projects/:project/hooks/:id` https://gitlab.kitware.com/help/api/projects.md#delete-project-hook
   * `POST   /projects/:project/housekeeping` https://gitlab.kitware.com/help/api/projects.md#start-the-housekeeping-task-for-a-project
   * `DELETE /projects/:project/issues/:issue` https://gitlab.kitware.com/help/api/issues.md#delete-an-issue
   * `POST   /projects/:project/issues/:issue/add_spent_time` https://gitlab.kitware.com/help/api/issues.md#add-spent-time-for-an-issue
@@ -266,7 +274,6 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/merge_requests/:merge_request/add_spent_time` https://gitlab.kitware.com/help/api/merge_requests.md#add-spent-time-for-a-merge-request
   * `POST   /projects/:project/merge_requests/:merge_request/approve` https://gitlab.kitware.com/help/api/merge_requests.md#approve-merge-request
   * `POST   /projects/:project/merge_requests/:merge_request/cancel_merge_when_pipeline_succeeds` https://gitlab.kitware.com/help/api/merge_requests.md#cancel-merge-when-pipeline-succeeds
-  * `GET    /projects/:project/merge_requests/:merge_request/commits` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-commits
   * `GET    /projects/:project/merge_requests/:merge_request/merge_ref` https://gitlab.kitware.com/help/api/merge_requests.md#merge-to-default-merge-ref-path
   * `GET    /projects/:project/merge_requests/:merge_request/participants` https://gitlab.kitware.com/help/api/merge_requests.md#get-single-mr-participants
   * `POST   /projects/:project/merge_requests/:merge_request/pipelines` https://gitlab.kitware.com/help/api/merge_requests.md#create-mr-pipeline
@@ -319,19 +326,24 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/repository/commits/:sha/cherry_pick` https://gitlab.kitware.com/help/api/commits.md#cherry-pick-a-commit
   * `GET    /projects/:project/repository/commits/:sha/diffs` https://gitlab.kitware.com/help/api/commits.md#get-the-diff-of-a-commit
   * `GET    /projects/:project/repository/commits/:sha/discussions` https://gitlab.kitware.com/help/api/commits.md#get-the-discussions-of-a-commit
-  * `GET    /projects/:project/repository/commits/:sha/merge_requests` https://gitlab.kitware.com/help/api/commits.md#list-merge-requests-associated-with-a-commit
   * `GET    /projects/:project/repository/commits/:sha/refs` https://gitlab.kitware.com/help/api/commits.md#get-references-a-commit-is-pushed-to
   * `POST   /projects/:project/repository/commits/:sha/revert` https://gitlab.kitware.com/help/api/commits.md#revert-a-commit
   * `GET    /projects/:project/repository/commits/:sha/signature` https://gitlab.kitware.com/help/api/commits.md#get-gpg-signature-of-a-commit
   * `GET    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
   * `HEAD   /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#get-file-from-repository
   * `GET    /projects/:project/repository/files/*file_path/blame` https://gitlab.kitware.com/help/api/repository_files.md#get-file-blame-from-repository
-  * `PUT    /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#update-existing-file-in-repository
-  * `DELETE /projects/:project/repository/files/*file_path` https://gitlab.kitware.com/help/api/repository_files.md#delete-existing-file-in-repository
   * `DELETE /projects/:project/repository/merged_branches` https://gitlab.kitware.com/help/api/branches.md#delete-merged-branches
   * `DELETE /projects/:project/repository/tags/:tag` https://gitlab.kitware.com/help/api/tags.md#delete-a-tag
   * `POST   /projects/:project/repository/tags/:tag/release` https://gitlab.kitware.com/help/api/tags.md#create-a-new-release
   * `PUT    /projects/:project/repository/tags/:tag/release` https://gitlab.kitware.com/help/api/tags.md#update-a-release
+  * `GET    /projects/:project/repository/archive[.format]` https://gitlab.kitware.com/help/api/repositories.md#get-file-archive
+  * `GET    /projects/:project/repository/blobs/:sha` https://gitlab.kitware.com/help/api/repositories.md#get-a-blob-from-repository
+  * `GET    /projects/:project/repository/blobs/:sha/raw` https://gitlab.kitware.com/help/api/repositories.md#raw-blob-content
+  * `GET    /projects/:project/repository/changelog` https://gitlab.kitware.com/help/api/repositories.md#generate-changelog-data
+  * `POST   /projects/:project/repository/changelog` https://gitlab.kitware.com/help/api/repositories.md#add-changelog-data-to-a-changelog-file
+  * `GET    /projects/:project/repository/compare` https://gitlab.kitware.com/help/api/repositories.md#compare-branches-tags-or-commits
+  * `GET    /projects/:project/repository/contributors` https://gitlab.kitware.com/help/api/repositories.md#contributors
+  * `GET    /projects/:project/repository/merge_base` https://gitlab.kitware.com/help/api/repositories.md#merge-base
   * `POST   /projects/:project/restore` https://gitlab.kitware.com/help/api/projects.md#restore-project-marked-for-deletion-premium
   * `POST   /projects/:project/share` https://gitlab.kitware.com/help/api/projects.md#share-project-with-group
   * `DELETE /projects/:project/share/:group` https://gitlab.kitware.com/help/api/projects.md#delete-a-shared-project-link-within-a-group
@@ -362,6 +374,8 @@ instead of having to search the page for missing endpoints.
   * `POST   /projects/:project/unstar` https://gitlab.kitware.com/help/api/projects.md#unstar-a-project
   * `POST   /projects/:project/upload` https://gitlab.kitware.com/help/api/projects.md#upload-a-file
   * `GET    /projects/:project/users` https://gitlab.kitware.com/help/api/projects.md#get-project-users
+  * `GET    /projects/:project/variables` `https://gitlab.kitware.com/help/api/project_level_variables.md#list-project-variables`
+  * `DELETE /projects/:project/variables/:key` `https://gitlab.kitware.com/help/api/project_level_variables.md#remove-variable
   * `POST   /projects/user/:user` https://gitlab.kitware.com/help/api/projects.md#create-project-for-user
   * `GET    /user/activities` https://gitlab.kitware.com/help/api/users.md#get-user-activities-admin-only
   * `GET    /user/emails` https://gitlab.kitware.com/help/api/users.md#list-emails
@@ -479,7 +493,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/project_badges.md
   * https://gitlab.kitware.com/help/api/project_clusters.md
   * https://gitlab.kitware.com/help/api/project_import_export.md
-  * https://gitlab.kitware.com/help/api/project_level_variables.md
   * https://gitlab.kitware.com/help/api/project_repository_storage_moves.md
   * https://gitlab.kitware.com/help/api/project_snippets.md
   * https://gitlab.kitware.com/help/api/project_statistics.md
@@ -488,7 +501,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/protected_environments.md
   * https://gitlab.kitware.com/help/api/releases/links.md
   * https://gitlab.kitware.com/help/api/remote_mirrors.md
-  * https://gitlab.kitware.com/help/api/repositories.md
   * https://gitlab.kitware.com/help/api/repository_files.md
   * https://gitlab.kitware.com/help/api/repository_submodules.md
   * https://gitlab.kitware.com/help/api/resource_access_tokens.md

@@ -12,3 +12,8 @@ pub mod branches;
 pub mod commits;
 pub mod files;
 pub mod tags;
+mod tree;
+
+pub use tree::Tree;
+pub use tree::TreeBuilder;
+pub use tree::TreeBuilderError;

@@ -9,6 +9,7 @@
 //! These endpoints are used for querying webhooks for a project.
 
 mod create;
+mod delete;
 mod edit;
 mod hook;
 mod hooks;
@@ -20,6 +21,10 @@ pub use self::create::CreateHookBuilderError;
 pub use self::edit::EditHook;
 pub use self::edit::EditHookBuilder;
 pub use self::edit::EditHookBuilderError;
+
+pub use self::delete::DeleteHook;
+pub use self::delete::DeleteHookBuilder;
+pub use self::delete::DeleteHookBuilderError;
 
 pub use self::hook::Hook;
 pub use self::hook::HookBuilder;
