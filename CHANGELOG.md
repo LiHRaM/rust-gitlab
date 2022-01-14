@@ -9,6 +9,7 @@
   * Protected tags with special URL characters (namely `/`) are now handled
     properly with `api::projects::protected_tags::ProtectedTag`.
   * Tags on a repository are now pageable.
+  * The `types::DiscussionNoteType::Note` variant has been added.
 
 ## Additions
 

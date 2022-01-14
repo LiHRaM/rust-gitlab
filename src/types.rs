@@ -1962,6 +1962,8 @@ pub enum NoteType {
 /// The various types a note can have
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiscussionNoteType {
+    /// A note in a discussion
+    Note,
     /// A note in a standard discussion
     DiscussionNote,
     /// A note attached to a diff
