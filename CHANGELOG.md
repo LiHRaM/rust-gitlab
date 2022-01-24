@@ -30,6 +30,7 @@
     - Getting merge requests associated with a commit.
     - Getting commits of a merge request.
     - Deleting a file from the repository.
+    - Deploy keys
   * New parameters for creating projects:
     - `container_registry_access_level`
     - `merge_pipelines_enabled`

@@ -134,6 +134,13 @@ These API endpoints have been implemented.
   * `GET    /user` `users/current_user.rs`
   * `GET    /users` `users/users.rs`
   * `GET    /users/:user` `users/user.rs`
+  * `GET    /deploy_keys` `deploy_keys/deploy_keys.rs`
+  * `GET    /projects/:project/deploy_keys` `projects/deploy_keys/deploy_keys.rs`
+  * `GET    /projects/:project/deploy_keys/:id` `projects/deploy_keys/deploy_key.rs`
+  * `POST   /projects/:project/deploy_keys` `projects/deploy_keys/add.rs`
+  * `PUT    /projects/:project/deploy_keys/:id` `projects/deploy_keys/edit.rs`
+  * `DELETE /projects/:project/deploy_keys/:id` `projects/deploy_keys/delete.rs`
+  * `POST   /projects/:project/deploy_keys/:id/enable` `projects/deploy_keys/enable.rs`
 
 # Todo
 
@@ -438,7 +445,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/custom_attributes.md
   * https://gitlab.kitware.com/help/api/dependencies.md
   * https://gitlab.kitware.com/help/api/dependency_proxy.md
-  * https://gitlab.kitware.com/help/api/deploy_keys.md
   * https://gitlab.kitware.com/help/api/deploy_tokens.md
   * https://gitlab.kitware.com/help/api/deployments.md
   * https://gitlab.kitware.com/help/api/epic_issues.md

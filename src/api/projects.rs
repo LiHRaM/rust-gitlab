@@ -11,6 +11,7 @@
 //! These endpoints are used for querying and modifying projects and their resources.
 
 mod create;
+pub mod deploy_keys;
 mod edit;
 pub mod environments;
 pub mod hooks;
