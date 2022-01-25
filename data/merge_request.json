@@ -93,6 +93,7 @@
   "merge_commit_sha": null,
   "merge_error": null,
   "merge_status": "can_be_merged",
+  "merge_user": null,
   "merge_when_pipeline_succeeds": false,
   "merged_at": "2016-10-04T16:18:57.914-04:00",
   "merged_by": null,
