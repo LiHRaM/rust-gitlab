@@ -1,3 +1,10 @@
+# v0.1407.1 (unreleased)
+
+## Additions
+
+  * Added the `api::projects::merge_trains` endpoint to get merge trains
+    for a specific project.
+
 # v0.1407.0
 
 ## Breaking changes

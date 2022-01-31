@@ -90,6 +90,7 @@ These API endpoints have been implemented.
   * `GET    /projects/:project/merge_requests/:merge_request/resource_label_events` `projects/merge_requests/resource_label_events.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/pipelines` `projects/merge_requests/pipelines.rs`
   * `GET    /projects/:project/merge_requests/:merge_request/changes` `projects/merge_requests/changes.rs`
+  * `GET    /projects/:project/merge_trains` `projects/merge_trains.rs`
   * `POST   /projects/:project/milestones` `projects/milestones/create.rs`
   * `GET    /projects/:project/pipeline` `projects/pipelines/create.rs`
   * `GET    /projects/:project/pipelines` `projects/pipelines/pipelines.rs`
@@ -482,7 +483,6 @@ These pages document other endpoints not mentioned above:
   * https://gitlab.kitware.com/help/api/markdown.md
   * https://gitlab.kitware.com/help/api/merge_request_approvals.md
   * https://gitlab.kitware.com/help/api/merge_request_context_commits.md
-  * https://gitlab.kitware.com/help/api/merge_trains.md
   * https://gitlab.kitware.com/help/api/metrics_dashboard_annotations.md
   * https://gitlab.kitware.com/help/api/metrics_user_starred_dashboards.md
   * https://gitlab.kitware.com/help/api/namespaces.md
