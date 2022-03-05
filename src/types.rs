@@ -619,6 +619,10 @@ pub struct Project {
 
     /// The merge method used when merging merge request.
     pub merge_method: Option<String>,
+    /// Whether squashing is allowed, permitted or required when merging merge request.
+    pub squash_option: Option<String>,
+    /// How many approvals are required before merging a merge request.
+    pub approvals_before_merge: Option<u32>,
     /// Statistics about the project.
     pub statistics: Option<ProjectStatistics>,
 
